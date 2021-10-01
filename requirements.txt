@@ -1,0 +1,2 @@
+loguru==0.5.3
+pybrat @ git+https://github.com/Yevgnen/pybrat
