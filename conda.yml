@@ -1,0 +1,10 @@
+name: bigscience-biomedical
+dependencies:
+  - python>=3.8
+  - pip>=19.1,<20.3
+  - pip:
+    - -r file:requirements.txt
+    # development
+    - -r file:dev_requirements.txt 
+    # analysis
+    - jupyter==1.0.0
