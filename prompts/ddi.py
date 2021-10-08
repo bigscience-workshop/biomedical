@@ -15,7 +15,7 @@ from pathlib import Path
 from loguru import logger
 from functools import partial
 from typing import List, Callable
-from pybrat.parser import BratParser, Example
+from pybrat.parser import BratParser, Example, Relation
 from utils import download, uncompress
 from prompts import DatasetPrompts
 
@@ -79,7 +79,7 @@ def list_entity_template(
     example: Example,
     entity_type: str,
     join_string: str = ", ",
-    mention_fn: Callable[str, str] = lambda mention: mention,
+    mention_fn: Callable[[str], str] = lambda mention: mention,
 ) -> str:
     """Entity listing prompt generation.
 
@@ -140,6 +140,74 @@ def bulleted_list_entity_mentions(example: Example, entity_type: str) -> str:
     )
 
 
+# TODO: complete
+def list_relation_template(
+    example: Example,
+    relation_type: str,
+    join_string: str = ", ",
+    relation_process_fn: Callable[
+        [Relation], str
+    ] = lambda relation: f"{relation.arg1.mention} to {relation.arg2.mention}",
+) -> str:
+    """Entity listing prompt generation.
+
+    Args:
+        example: an example from BRAT.
+        relation_type: relation type.
+        join_string: string used for joining. Defaults to ", ".
+        relation_process_fn: function to process the mention. Defaults to identity.
+
+    Returns:
+        the prompt.
+    """
+    template = "List of all relations of type {relation_type} mentioned in the following text. "
+    template += 'If there are no relation of type {relation_type}, print None.{line_separator}"{text}"{line_separator}|||{target}'
+    target = join_string.join(
+        [
+            relation_process_fn(relation)
+            for relation in example.relations
+            if relation.type == relation_type and relation.arg1 and relation.arg2
+        ]
+    )
+    return template.format(
+        relation_type=relation_type,
+        text=example.text,
+        target=target if target else "None",
+        line_separator=os.linesep,
+    )
+
+
+def list_comma_separated_relations(example: Example, relation_type: str) -> str:
+    """List comma-separated relations.
+
+    Args:
+        example: an example from BRAT.
+        relation_type: relation type.
+
+    Returns:
+        the prompt.
+    """
+    return list_relation_template(example=example, relation_type=relation_type)
+
+
+def bulleted_list_relations(example: Example, relation_type: str) -> str:
+    """List comma-separated relations.
+
+    Args:
+        example: an example from BRAT.
+        relation_type: relation type.
+
+    Returns:
+        the prompt.
+    """
+    return list_relation_template(
+        example=example,
+        relation_type=relation_type,
+        join_string=" -",
+        relation_process_fn=lambda relation: f"{relation.arg1.mention} to {relation.arg2.mention}{os.linesep}",
+    )
+
+
 def main(args):
 
     outpath = Path(args.outdir)
@@ -181,7 +249,43 @@ def main(args):
             metrics=["f1", "accuracy"],
         )
 
-    # TODO: # relation types: {'ADVISE', 'EFFECT', 'INT', 'MECHANISM'}
+    # relation types: {'ADVISE', 'EFFECT', 'INT', 'MECHANISM'}
+    prompts = {
+        "list_relations_advise": partial(
+            list_comma_separated_relations, relation_type="ADVISE"
+        ),
+        "list_relations_effect": partial(
+            list_comma_separated_relations, relation_type="EFFECT"
+        ),
+        "list_relations_int": partial(
+            list_comma_separated_relations, relation_type="INT"
+        ),
+        "list_relations_mechanism": partial(
+            list_comma_separated_relations, relation_type="MECHANISM"
+        ),
+        "bulleted_list_relations_advise": partial(
+            bulleted_list_relations, relation_type="ADVISE"
+        ),
+        "bulleted_list_relations_effect": partial(
+            bulleted_list_relations, relation_type="EFFECT"
+        ),
+        "bulleted_list_relations_int": partial(
+            bulleted_list_relations, relation_type="INT"
+        ),
+        "bulleted_list_relations_mechanism": partial(
+            bulleted_list_relations, relation_type="MECHANISM"
+        ),
+    }
+    for name in prompts:
+        dataset.add_prompt(
+            prompts[name],
+            name,
+            answer_keys=None,
+            original_task=True,
+            answers_in_prompt=True,
+            metrics=["accuracy"],
+        )
+
     df = dataset.get_prompts()
     df.to_csv(outpath / "ddi_corpus_prompts.tsv", sep="\t", index=False)
 
