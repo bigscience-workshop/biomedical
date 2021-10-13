@@ -17,6 +17,10 @@ The relations should be explicitly the "Gold" standard, as this was explicitly m
 
 This script is largely based on John Giogri's version found here:
 https://github.com/JohnGiorgi/ChemProt-to-Standoff/blob/master/chemprot_to_standoff.py
+
+Usage:
+
+python utils_chemprot -i /dir/to/chemprot/corpus/datasplit -o output_dir
 """
 import re
 from glob import glob
