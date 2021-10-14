@@ -33,6 +33,14 @@ Some notes:
 i) The ChemProt dataset is a zipped folder of zipped folders. The individual train/test/sample/dev folders must be also unzipped
 
 ii) The ChemProt dataset needs to be first compiled into standoff format, thus utils_chemprot handles the TSV -> standoff conversion.
+
+Call this script from the head of the biomedical directory
+
+Usage:
+
+python chemprot.py --outdir your/output/dir
+python chemprot.py --outdir your/output/dir --datadir your/chemprot/corpus
+
 """
 
 import os
@@ -76,6 +84,9 @@ def load_chemprot(data_root: str, split: str) -> List[Example]:
     """
     Load the data split (ex: train/test/dev) for ChemProt.
     If BRAT annotation not provided, will create it and process it.
+
+    :param data_root: Location of the ChemProt data directory
+    :param split: Name of the data split (train/test/dev/sample)
     """
     data_dir = os.path.join(data_root, split)
     brat_path = os.path.join(data_root, split, "brat")
@@ -146,6 +157,15 @@ class ChemProtPrompts(DatasetPrompts):
         """Initialize prompts."""
         self._prompts = {}
         self._metadata = {}
+
+    def _get_pmid(self):
+        """
+        To analyze ChemProt, the PMIDs are saved in the "BRAT" folder.
+        This is useful to keep track of which text files match the inputs, as this may differ from the row order of the original dataset.
+
+        :returns: Dictionary with PMID in order of the data
+        """
+        return {key: [i.id for i in value] for key, value in self.splits.items()}
 
 
 def main(args):
@@ -244,13 +264,13 @@ def main(args):
             answer_keys=None,
             original_task=True,
             answers_in_prompt=True,
-            metrics=["f1", "accuracy"],
+            metrics=["accuracy"],
         )
 
     df = dataset.get_prompts()
 
     # Save the dataset
-    df.to_csv(outpath / "chemprot_corpus_prompts.tsv", sep="\t", index=False)
+    df.to_csv(outpath / "chemprot_prompts.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
