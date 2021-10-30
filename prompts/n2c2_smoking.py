@@ -52,7 +52,7 @@ class SmokingCorpusPrompts(DatasetPrompts):
     def _init_dataset(self):
         """
         Prepare smoking status data.
-        Download data manually from https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/", which requires requires user registration and DUA.
+        Download data manually from https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/", which requires user registration and DUA.
         """
         self.splits = {
             split:load_smoking_corpus(self.data_root / fname)
@@ -95,8 +95,8 @@ def classify_question_first(x):
     tmpl += '"{}"\n|||{}'
     return tmpl.format(x[1], x[2])
 
-def classify_with_choices_v1(x):
-    """Classification prompt with answer choices provided (v1).
+def classify_with_choices_question_first_v1(x):
+    """Classification prompt with answer choices provided (v1); question followed by x.
     Args:
         x: a note from the smoking status corpus.
     Returns:
@@ -107,8 +107,8 @@ def classify_with_choices_v1(x):
     tmpl += '"{}"\n|||{}'
     return tmpl.format(x[1], x[2])
 
-def classify_with_choices_question_first_v1(x):
-    """Classification prompt with answer choices provided (v1); question followed by x.
+def classify_with_choices_v1(x):
+    """Classification prompt with answer choices provided (v1).
     Args:
         x: a note from the smoking status corpus.
     Returns:
@@ -120,8 +120,8 @@ def classify_with_choices_question_first_v1(x):
     tmpl += '|||{}'
     return tmpl.format(x[1], x[2])
 
-def classify_with_choices_v2(x):
-    """Classification prompt with answer choices provided (v2).
+def classify_with_choices_question_first_v2(x):
+    """Classification prompt with answer choices provided (v2); question followed by x.
     Args:
         x: a note from the smoking status corpus.
     Returns:
@@ -132,8 +132,8 @@ def classify_with_choices_v2(x):
     tmpl += '"{}"\n|||{}'
     return tmpl.format(x[1], x[2])
 
-def classify_with_choices_question_first_v2(x):
-    """Classification prompt with answer choices provided (v2); question followed by x.
+def classify_with_choices_v2(x):
+    """Classification prompt with answer choices provided (v2).
     Args:
         x: a note from the smoking status corpus.
     Returns:
