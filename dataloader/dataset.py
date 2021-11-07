@@ -104,7 +104,7 @@ class Dataset:
 
     def _init_parser(self, parser: Optional[BratParser]) -> None:
         """Initializes a parser if None is provided"""
-        if parser is None:
+        if parser is None and self.format == "brat":
             logger.info(f"No parser provided, using default")
             self.parser = parser_lookup[self.format]
         else:
