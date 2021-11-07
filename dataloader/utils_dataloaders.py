@@ -1,11 +1,10 @@
+"""
+"""
+import os
 from pathlib import Path
 
 from flair.datasets import biomedical as hunflair
 from pybrat.parser import BratParser
-
-
-DATA_PATH = Path(__file__).parent / "data"
-CACHE_PATH = DATA_PATH / "tmp"
 
 
 def _write_hunflair_internal_to_brat(
@@ -33,26 +32,30 @@ class JNLPBA:
       https://www.aclweb.org/anthology/W04-1213.pdf
     """
 
-    train_dir = DATA_PATH / "JNLPBA" / "train"
-    test_dir = DATA_PATH / "JNLPBA" / "test"
+    def __init__(self, data_root: str, parser):
 
-    def __init__(self):
+        # Directory paths
+        self.train_dir = Path(data_root) / "JNLPBA" / "train"
+        self.test_dir = Path(data_root) / "JNLPBA" / "test"
+        cache_path = Path(data_root) / "tmp"
+
+        # Download data if not available
         if not list(self.train_dir.glob("*")) or not list(self.test_dir.glob("*")):
-            self._download()
-        parser = BratParser(error="ignore")
-        self.train_documents = parser.parse(self.train_dir)
-        self.test_documents = parser.parse(self.test_dir)
+            self._download(cache_path, self.train_dir, self.test_dir)
 
-    @classmethod
-    def _download(cls):
+        self.train = parser.parse(self.train_dir)
+        self.test = parser.parse(self.test_dir)
+
+    @staticmethod
+    def _download(cache_path, train_dir, test_dir):
         train_dataset = hunflair.HunerJNLPBA.download_and_prepare_train(
-            data_folder=CACHE_PATH / "JNLPBA", sentence_tag=" "
+            data_folder=cache_path / "JNLPBA", sentence_tag=" "
         )
         test_dataset = hunflair.HunerJNLPBA.download_and_prepare_test(
-            data_folder=CACHE_PATH / "JNLPBA", sentence_tag=" "
+            data_folder=cache_path / "JNLPBA", sentence_tag=" "
         )
-        _write_hunflair_internal_to_brat(train_dataset, cls.train_dir)
-        _write_hunflair_internal_to_brat(test_dataset, cls.test_dir)
+        _write_hunflair_internal_to_brat(train_dataset, train_dir)
+        _write_hunflair_internal_to_brat(test_dataset, test_dir)
 
 
 class CellFinder:
@@ -63,20 +66,22 @@ class CellFinder:
         https://pdfs.semanticscholar.org/38e3/75aeeeb1937d03c3c80128a70d8e7a74441f.pdf
     """
 
-    train_dir = DATA_PATH / "cellfinder" / "train"
+    def __init__(self, data_root, parser):
+        # Directory paths
+        self.train_dir = Path(data_root) / "cellfinder" / "train"
+        cache_path = Path(data_root) / "tmp"
 
-    def __init__(self):
+        # Download data if not available
         if not list(self.train_dir.glob("*")):
-            self._download()
-        parser = BratParser(error="ignore")
-        self.train_documents = parser.parse(self.train_dir)
+            self._download(cache_path, self.train_dir)
+        self.train = parser.parse(self.train_dir)
 
-    @classmethod
-    def _download(cls):
+    @staticmethod
+    def _download(cache_path, train_dir):
         train_dataset = hunflair.CELL_FINDER.download_and_prepare(
-            data_folder=CACHE_PATH / "cellfinder"
+            data_folder=cache_path / "cellfinder"
         )
-        _write_hunflair_internal_to_brat(train_dataset, cls.train_dir)
+        _write_hunflair_internal_to_brat(train_dataset, train_dir)
 
 
 class Linneaus:
@@ -87,17 +92,19 @@ class Linneaus:
          https://www.ncbi.nlm.nih.gov/pubmed/20149233
     """
 
-    train_dir = DATA_PATH / "linneaus" / "train"
+    def __init__(self, data_root, parser):
+        # Directory paths
+        self.train_dir = Path(data_root) / "linneaus" / "train"
+        cache_path = Path(data_root) / "tmp"
 
-    def __init__(self):
+        # Download data if not available
         if not list(self.train_dir.glob("*")):
-            self._download()
-        parser = BratParser(error="ignore")
-        self.train_documents = parser.parse(self.train_dir)
+            self._download(cache_path, self.train_dir)
+        self.train = parser.parse(self.train_dir)
 
-    @classmethod
-    def _download(cls):
+    @staticmethod
+    def _download(cache_path, train_dir):
         train_dataset = hunflair.LINNEAUS.download_and_parse_dataset(
-            data_dir=CACHE_PATH / "linneaus"
+            data_dir=cache_path / "linneaus"
         )
-        _write_hunflair_internal_to_brat(train_dataset, cls.train_dir)
+        _write_hunflair_internal_to_brat(train_dataset, train_dir)
