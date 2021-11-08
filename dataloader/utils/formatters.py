@@ -10,39 +10,6 @@ import bioc
 from bioc.bioc import BioCDocument, BioCPassage
 
 
-class CustomDataset:
-    """
-    Enables parsing for a custom dataset that is not already included in the dataloaders.
-    """
-
-    def create_processed_data():
-        """
-        Given the named data splits (ex: train/test), provided processed parsed data in form of `Examples` with lists of `Entity`s and `Relation`s.
-        """
-        logger.info(f"Number of datasplits= {len(self.split_names)}")
-        self.data = {split: None for split in self.split_names.keys()}
-
-        # For each data split, get the path where brat files live
-        for split, fname in self.split_names.items():
-            dtype_path = os.path.join(self.data_root, fname)
-
-        self.data[split] = self.parse(dtype_path, self.format)
-
-    def parse(self, fname: str, fmt: str) -> List[Example]:
-        """
-        Calls the brat parser on brat dataset
-
-        :param fname: path/datafile to parse
-        :param fmt: data type format
-
-        """
-        logger.info(f"Parsing file {fname}")
-
-        if self.parser is not None:
-            return self.parser.parse(fname)
-        else:
-            return None
-
 # -------------------------- #
 # BioC -> BRAT
 # -------------------------- #
@@ -50,7 +17,7 @@ def biocxml2brat(fname: str, kb_key_name: str = "MESH") -> List[Example]:
     """
     Converts BioC_XML file to BRAT
 
-    Document <=> Example
+    Documents are represented as `Example`
 
     :param fname: name of the file to convert to brat
 

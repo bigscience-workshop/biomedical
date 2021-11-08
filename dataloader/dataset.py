@@ -41,8 +41,8 @@ from loguru import logger
 from pybrat.parser import Example, Relation, Entity, BratParser
 
 from typing import Dict, Callable, List, Optional
-from utils.formatters import biocxml2brat
-from utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt
+from .utils.formatters import biocxml2brat
+from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt
 
 parser_lookup = {
     "bioc_xml": biocxml2brat,
