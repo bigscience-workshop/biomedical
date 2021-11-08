@@ -5,7 +5,7 @@ Update - chemprot + ddi working
 """
 import os
 import unittest
-from dataset import Dataset
+from .dataset import Dataset
 
 # Place your biomedical dataset path here if it doesn't correspond
 dataset_path = "../datasets/"
