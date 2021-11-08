@@ -7,6 +7,7 @@ from flair.datasets import biomedical as hunflair
 from pybrat.parser import BratParser
 from .downloaders import download_data, uncompress_data, chemprot_2_standoff
 
+from typing import List, Optional, Dict
 
 def _write_hunflair_internal_to_brat(
     dataset: hunflair.InternalBioNerDataset, brat_dir: Path
@@ -208,3 +209,29 @@ class Linneaus:
             data_dir=cache_path / "linneaus"
         )
         _write_hunflair_internal_to_brat(train_dataset, train_dir)
+
+
+class CustomDataset:
+    """
+    Enables parsing for a custom dataset that is not already included in the dataloaders.
+    """
+
+    def __init__(self, data_root: str, parser, splits: Optional[Dict[str, str]]):
+        """
+        Given downloaded and unzipped data of a particular data format,
+        parse and prepare in pybrat style for use.
+
+        To access the data, the name of each split provided in the dictionary is instantiated with a List[Examples]; thus if your `splits` kwarg keys are "train", "dev", "test", then the customdataset will have `train`, `dev`, `test` attributes. 
+
+        Ensure that the split names match expectations for downstream applications.
+
+        :param data_root: Head directory of your data files
+        :param parser: The function/parser that can process your data type and provide in the pybrat internal structure
+        :param splits: Name of each data split (keys) and folder names
+        """
+
+        logger.info(f"Number of datasplits= {len(self.split_names)}")
+
+        for split, fname in self.split_names.items():
+            dtype_path = os.path.join(self.data_root, fname)
+            setattr(self, split, parser.parse(dtype_path))
