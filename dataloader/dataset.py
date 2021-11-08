@@ -7,7 +7,9 @@ Creates a pybrat parser object from an input dataset. The following occurs:
 
 If your data is in brat format, ensure the splits refer to the folder that contains the ".ann" and ".txt" indications.
 
-If your data is in any other form, you will need an extension (i.e. .xml)
+If you specify a dataset that has an existing DataLoader, then the format is assumed 'brat' even if the original source is not. This is because the data is downloaded and processed in the brat form automatically.
+
+If your data is in any other form, you will need to specify the extension via fmt; if a parser exists, this data will be processed.
 
 Example:
     Example.text = <input text data>
@@ -28,18 +30,33 @@ Example:
             relations[i].id = <corresponding entity id>
     
     Example.events = List[Events] (TODO)
+
+TODOs:
+    - in dataloaders, probably want to remove the tmp/ directory created
+    - make uncompress function more modular (gzip/tar)
+    - currently doesn't handle if data is partially downloaded; these are small files though
 """
 import os
 from loguru import logger
 from pybrat.parser import Example, Relation, Entity, BratParser
 
 from typing import Dict, Callable, List, Optional
-from utils import biocxml2brat
+from utils.formatters import biocxml2brat
+from utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt
 
 parser_lookup = {
     "bioc_xml": biocxml2brat,
     "bioc_json": None,
     "brat": BratParser(error="ignore"),
+}
+
+dataloader_lookup = {
+    "jnlpba": JNLPBA,
+    "cellfinder": CellFinder,
+    "linneaus": Linneaus,
+    "chemprot": ChemProt,
+    "ddi": DDI,  # DDI,
+    "bc5cdr": None,  # BC5CDR,
 }
 
 
@@ -54,59 +71,55 @@ class Dataset:
 
     def __init__(
         self,
-        data_root: str,
-        split_names: Dict[str, str],
-        fmt: str,
+        dataset: str,
+        data_root: str = ".",
+        fmt: str = "brat",
+        split_names: Optional[Dict[str, str]] = None,
         parser: Optional[BratParser] = None,
-        kb_key_name: Optional[str] = None,
+        # kb_key_name: Optional[str] = None,
     ):
         """
         Creates a dataset in the pybrat parser form
 
-        :param data_root: Location of the brat (ann + text) files
-        :param splits: Data split + filename of split
+        :param dataset: Name of the dataset; if supported, downloads and prepares data in pre-made format
+        :param data_root: Path to the dataset
         :param fmt: Type of data file
+        :param splits: Data split + filename of split
         :param parser: Type of parser (BratParser)
         """
 
+        self.dataset = dataset.lower()
         self.data_root = data_root
-        self.split_names = split_names
         self.format = fmt.lower()
-        self.kb_key_name = kb_key_name # Only for BioC-XML
+
+        # self.kb_key_name = kb_key_name # Only for BioC-XML
+        self.split_names = split_names
 
         # Initialize the parser
         self._init_parser(parser)
 
-        logger.info(f"Number of datasplits= {len(self.split_names)}")
-        self.data = {split: None for split in self.split_names.keys()}
-
-        # For each data split, get the path where brat files live
-        for split, fname in self.split_names.items():
-            dtype_path = os.path.join(self.data_root, fname)
-
-            self.data[split] = self.parse(dtype_path, self.format)
-
-    def parse(self, fname: str, fmt: str) -> List[Example]:
-        """
-        Calls the brat parser on brat dataset
-
-        :param fname: path/datafile to parse
-        :param fmt: data type format
-
-        """
-        logger.info(f"Parsing file {fname}")
-
-        if self.parser is not None:
-            return self.parser.parse(fname)
+        # Lookup dataset
+        if self.dataset in dataloader_lookup.keys():
+            logger.info("Dataset=" + self.dataset + ".")
+            self.load_and_parse()
         else:
-            return None
-         
+            logger.info("Custom dataset specified named=" + self.dataset)
+            raise NotImplementedError(f"NOT IMPLEMENTED YET")
 
-    def _init_parser(self, parser: Optional[BratParser]) -> None:
+    def load_and_parse(self):
+        """
+        For a dataset with a reserved dataloader class, download and process the files for use.
+
+        Each dataset's splits can be accessed as such: `self.data.train`.
+        For more details for each dataloader, see `utils_dataloaders`
+        """
+        self.data = dataloader_lookup[self.dataset](self.data_root, self.parser)
+
+    def _init_parser(self, parser: Optional[BratParser]):
         """Initializes a parser if None is provided"""
-        if parser is None and self.format == "brat":
-            logger.info(f"No parser provided, using default")
+        if parser is None:
+            logger.info(f"No parser provided, using default for file format")
             self.parser = parser_lookup[self.format]
         else:
+            logger.info("User provided parser.")
             self.parser = parser
-
