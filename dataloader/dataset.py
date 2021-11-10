@@ -55,8 +55,8 @@ dataloader_lookup = {
     "cellfinder": CellFinder,
     "linneaus": Linneaus,
     "chemprot": ChemProt,
-    "ddi": DDI,  # DDI,
-    "bc5cdr": None,  # BC5CDR,
+    "ddi": DDI, 
+    "bc5cdr": BC5CDR,
 }
 
 
@@ -86,6 +86,8 @@ class Dataset:
         :param fmt: Type of data file
         :param splits: Data split + filename of split
         :param parser: Type of parser (BratParser)
+
+        Further kwargs are for the parser instantiation
         """
 
         self.dataset = dataset.lower()
@@ -115,11 +117,14 @@ class Dataset:
         """
         self.data = dataloader_lookup[self.dataset](self.data_root, self.parser)
 
-    def _init_parser(self, parser: Optional[BratParser]):
-        """Initializes a parser if None is provided"""
+    def _init_parser(self, parser: Optional[BratParser], **kwargs):
+        """
+        Initializes a pybrat parser if None is provided
+        Subsequent kwargs are passed to instantiat the parser
+        """
         if parser is None:
             logger.info(f"No parser provided, using default for file format")
             self.parser = parser_lookup[self.format]
         else:
             logger.info("User provided parser.")
-            self.parser = parser
+            self.parser = parser(**kwargs)
