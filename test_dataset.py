@@ -8,7 +8,7 @@ import unittest
 from dataloader import BioDataset
 
 # Place your biomedical dataset path here if it doesn't correspond
-dataset_path = "../datasets/"
+dataset_path = "datasets/"
 
 
 class TestDataset(unittest.TestCase):
