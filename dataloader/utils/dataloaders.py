@@ -1,4 +1,5 @@
 """
+TODO: Ask Leon about cache_path in Linneaus
 """
 import os
 from pathlib import Path
@@ -255,6 +256,10 @@ class Linneaus:
 
     @staticmethod
     def _download(cache_path, train_dir):
+        # Linneaus appears sensitive to the cache_path being defined
+        if not os.path.exists(cache_path):
+            os.makedirs(str(cache_path))
+
         train_dataset = hunflair.LINNEAUS.download_and_parse_dataset(
             data_dir=cache_path / "linneaus"
         )
