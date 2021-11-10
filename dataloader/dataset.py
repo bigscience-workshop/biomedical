@@ -66,7 +66,7 @@ parser_overrides = {
     "bc5cdr": BioCXML(kb_key_name="MESH"),
 }
 
-class Dataset:
+class BioDataset:
     """
     Given a Biomedical NLP dataset, converts a series of documents (entities, events, relations) in the pybrat parser format
 

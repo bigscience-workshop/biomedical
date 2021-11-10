@@ -1,3 +1,3 @@
-from .dataset import Dataset
+from .dataset import BioDataset
 
-__all__ = ["Dataset"]
+__all__ = ["BioDataset"]
