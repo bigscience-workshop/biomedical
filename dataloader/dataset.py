@@ -41,13 +41,14 @@ from loguru import logger
 from pybrat.parser import Example, Relation, Entity, BratParser
 
 from typing import Dict, Callable, List, Optional
-from .utils.formatters import biocxml2brat
-from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt
+from .utils.formatters import BioCXML
+from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, BC5CDR
 
 parser_lookup = {
-    "bioc_xml": biocxml2brat,
+    "bioc_xml": BioCXML,
     "bioc_json": None,
     "brat": BratParser(error="ignore"),
+    "conll": None,
 }
 
 dataloader_lookup = {
@@ -55,10 +56,13 @@ dataloader_lookup = {
     "cellfinder": CellFinder,
     "linneaus": Linneaus,
     "chemprot": ChemProt,
-    "ddi": DDI, 
+    "ddi": DDI,
     "bc5cdr": BC5CDR,
 }
 
+parser_overrides = {
+    "bc5cdr": BioCXML(kb_key_name="MESH"),
+}
 
 class Dataset:
     """
@@ -121,10 +125,15 @@ class Dataset:
         """
         Initializes a pybrat parser if None is provided
         Subsequent kwargs are passed to instantiat the parser
+
+        TODO: This isn't great :/
         """
         if parser is None:
-            logger.info(f"No parser provided, using default for file format")
-            self.parser = parser_lookup[self.format]
+            logger.info(f"No parser provided, using default for file/data type")
+            if self.dataset not in parser_overrides.keys():
+                self.parser = parser_lookup[self.format]
+            else:
+                self.parser = parser_overrides[self.dataset]
         else:
             logger.info("User provided parser.")
             self.parser = parser(**kwargs)

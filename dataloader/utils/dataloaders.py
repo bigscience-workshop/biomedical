@@ -2,12 +2,13 @@
 """
 import os
 from pathlib import Path
+from typing import List, Optional, Dict
 
 from flair.datasets import biomedical as hunflair
 from pybrat.parser import BratParser
-from .downloaders import download_data, uncompress_data, chemprot_2_standoff
 
-from typing import List, Optional, Dict
+from .downloaders import download_data, uncompress_data, chemprot_2_standoff
+from .formatters import BioCXML
 
 
 def _write_hunflair_internal_to_brat(
@@ -19,9 +20,7 @@ def _write_hunflair_internal_to_brat(
             for i, entity in enumerate(
                 dataset.entities_per_document[document], start=1
             ):
-                mention = text[
-                    entity.char_span.start : entity.char_span.stop
-                ]
+                mention = text[entity.char_span.start : entity.char_span.stop]
                 f.write(
                     f"T{i}\t{entity.type} {entity.char_span.start} {entity.char_span.stop}\t{mention}\n"
                 )
@@ -47,16 +46,11 @@ class BC5CDR:
             / "CDR_DevelopmentSet.BioC.xml"
         )
         self.test_file = (
-            Path(data_root)
-            / "CDR_Data"
-            / "CDR.Corpus.v010516"
-            / "CDR_TestSet.BioC.xml"
+            Path(data_root) / "CDR_Data" / "CDR.Corpus.v010516" / "CDR_TestSet.BioC.xml"
         )
 
         # Download data if not available
-        if not list(
-            (Path(data_root) / "CDR_Data" / "CDR.Corpus.v010516").glob("*")
-        ):
+        if not list((Path(data_root) / "CDR_Data" / "CDR.Corpus.v010516").glob("*")):
             self._download(
                 Path(data_root),
                 self.train_file,
@@ -71,9 +65,7 @@ class BC5CDR:
     @staticmethod
     def _download(data_root, train_file, dev_file, test_file):
         """Download the BC5CDR Dataset"""
-        _URL = (
-            "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip"
-        )
+        _URL = "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip"
 
         # Make data root, if not present
         if not os.path.exists(data_root):
@@ -82,15 +74,6 @@ class BC5CDR:
         outpath = data_root / _URL.split("/")[-1]
         download_data(_URL, outpath)
         uncompress_data(outpath, data_root.resolve())
-
-
-class N2C2Smoking:
-    """
-    n2c2 Smoking Status Identification Challenge
-    Özlem Uzuner, PhD, Ira Goldstein, MBA, Yuan Luo, MS, Isaac Kohane, MD, PhD, Identifying Patient Smoking Status from Medical Discharge Records, Journal of the American Medical Informatics Association, Volume 15, Issue 1, January 2008, Pages 14–24, https://doi.org/10.1197/jamia.M2408
-    """
-
-    raise NotImplementedError
 
 
 class ChemProt:
@@ -102,18 +85,10 @@ class ChemProt:
     def __init__(self, data_root: str, parser):
 
         # Directory paths
-        self.train_dir = (
-            Path(data_root) / "ChemProt_Corpus" / "chemprot_training"
-        )
-        self.test_dir = (
-            Path(data_root) / "ChemProt_Corpus" / "chemprot_test_gs"
-        )
-        self.dev_dir = (
-            Path(data_root) / "ChemProt_Corpus" / "chemprot_development"
-        )
-        self.sample_dir = (
-            Path(data_root) / "ChemProt_Corpus" / "chemprot_sample"
-        )
+        self.train_dir = Path(data_root) / "ChemProt_Corpus" / "chemprot_training"
+        self.test_dir = Path(data_root) / "ChemProt_Corpus" / "chemprot_test_gs"
+        self.dev_dir = Path(data_root) / "ChemProt_Corpus" / "chemprot_development"
+        self.sample_dir = Path(data_root) / "ChemProt_Corpus" / "chemprot_sample"
 
         # Download data if not available
         if (
@@ -153,9 +128,7 @@ class ChemProt:
         for split in [train_dir, test_dir, dev_dir, sample_dir]:
 
             # Unzip datasplit
-            uncompress_data(
-                str(split) + ".zip", data_root / "ChemProt_Corpus"
-            )
+            uncompress_data(str(split) + ".zip", data_root / "ChemProt_Corpus")
 
             # Convert to brat
             brat_path = str(split / "brat")
@@ -180,9 +153,7 @@ class DDI:
         self.test_dir = Path(data_root) / "DDICorpusBrat" / "Test"
 
         # Download data if not available
-        if not list(self.train_dir.glob("*")) or not list(
-            self.test_dir.glob("*")
-        ):
+        if not list(self.train_dir.glob("*")) or not list(self.test_dir.glob("*")):
             self._download(Path(data_root), self.train_dir, self.test_dir)
 
         self.train = parser.parse(self.train_dir)
@@ -190,7 +161,9 @@ class DDI:
 
     @staticmethod
     def _download(data_root, train_dir, test_dir):
-        _URL = "https://github.com/isegura/DDICorpus/raw/master/DDICorpus-2013(BRAT).zip"
+        _URL = (
+            "https://github.com/isegura/DDICorpus/raw/master/DDICorpus-2013(BRAT).zip"
+        )
 
         # Make data root, if not present
         if not os.path.exists(data_root):
@@ -218,9 +191,7 @@ class JNLPBA:
         cache_path = Path(data_root) / "tmp"
 
         # Download data if not available
-        if not list(self.train_dir.glob("*")) or not list(
-            self.test_dir.glob("*")
-        ):
+        if not list(self.train_dir.glob("*")) or not list(self.test_dir.glob("*")):
             self._download(cache_path, self.train_dir, self.test_dir)
 
         self.train = parser.parse(self.train_dir)
@@ -295,9 +266,7 @@ class CustomDataset:
     Enables parsing for a custom dataset that is not already included in the dataloaders.
     """
 
-    def __init__(
-        self, data_root: str, parser, splits: Optional[Dict[str, str]]
-    ):
+    def __init__(self, data_root: str, parser, splits: Optional[Dict[str, str]]):
         """
         Given downloaded and unzipped data of a particular data format,
         parse and prepare in pybrat style for use.
