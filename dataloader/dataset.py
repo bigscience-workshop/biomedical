@@ -112,7 +112,7 @@ class BioDataset:
             self.load_and_parse()
         else:
             logger.info("Custom dataset specified named=" + self.dataset)
-            raise NotImplementedError(f"NOT IMPLEMENTED YET")
+            raise NotImplementedError(f"No custom support yet!")
 
     def load_and_parse(self):
         """
