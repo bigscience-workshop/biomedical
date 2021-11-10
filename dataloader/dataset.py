@@ -1,4 +1,6 @@
 """
+Note-BioC may have overlaps in start/end positions
+
 Creates a pybrat parser object from an input dataset. The following occurs:
 
 - Given a dataset, if it's not in brat form, converts it to brat
