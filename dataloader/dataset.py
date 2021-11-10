@@ -99,9 +99,7 @@ class BioDataset:
         self.dataset = dataset.lower()
         self.data_root = data_root
         self.format = fmt.lower()
-
-        # self.kb_key_name = kb_key_name # Only for BioC-XML
-        self.split_names = split_names
+        self.split_names = split_names # Train/Dev/Test custom datasets
 
         # Initialize the parser
         self._init_parser(parser)
