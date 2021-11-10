@@ -14,22 +14,24 @@ from typing import Dict
 # Generic downloading functions
 # -------------------------- #
 
+
 def download_data(url: str, fpath):
     opener = urllib.request.build_opener()
     opener.addheaders = [("User-agent", "Mozilla/5.0")]
     urllib.request.install_opener(opener)
     urllib.request.urlretrieve(url, fpath)
 
+
 def uncompress_data(fpath, outfpath):
     ext = os.path.os.path.splitext(fpath)
     if ext[-1] == ".zip":
-        with zipfile.ZipFile(fpath, 'r') as zip_ref:
+        with zipfile.ZipFile(fpath, "r") as zip_ref:
             # HACK for files containing MacOS garbage files
             for zobj in zip_ref.namelist():
-                if '__MACOSX' in zobj:
+                if "__MACOSX" in zobj:
                     continue
                 zip_ref.extract(zobj, path=outfpath)
-            #zip_ref.extractall(outfpath)
+            # zip_ref.extractall(outfpath)
 
 
 # -------------------------- #
@@ -59,6 +61,8 @@ Usage:
 
 python utils_chemprot -i /dir/to/chemprot/corpus/datasplit -o output_dir
 """
+
+
 def chemprot_2_standoff(data_dir: str, output_dir: str):
     """
     Convert the ChemProt dataset into a BRAT-Standoff format.
@@ -166,7 +170,7 @@ def get_entities(ents_filename: str) -> Dict[str, str]:
 
 def get_relations(rel_filename: str) -> Dict[str, str]:
     """
-    For each document in the ChemProt corpus, create an annotation for the gold-standard relationships. 
+    For each document in the ChemProt corpus, create an annotation for the gold-standard relationships.
 
     The columns include:
     (1) PMID
@@ -200,7 +204,7 @@ def get_relations(rel_filename: str) -> Dict[str, str]:
     return {pmid: "\n".join(ann) for pmid, ann in relations.items()}
 
 
-#Borrowed from:
+# Borrowed from:
 # https://stackoverflow.com/questions/273192/how-can-i-create-a-directory-if-it-does-not-exist#273227
 def make_dir(directory):
     """
@@ -211,6 +215,7 @@ def make_dir(directory):
     except OSError as err:
         if err.errno != errno.EEXIST:
             raise
+
 
 # Note in the ChemProt dataset, the gold standard is generally equal to the relations with manual annotation as a group labeled as "Y"
 

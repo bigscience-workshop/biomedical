@@ -13,25 +13,36 @@ from bioc.bioc import BioCDocument, BioCPassage
 # -------------------------- #
 # BioC -> BRAT
 # -------------------------- #
-def biocxml2brat(fname: str, kb_key_name: str = "MESH") -> List[Example]:
+
+
+class BioCXML:
     """
-    Converts BioC_XML file to BRAT
-
-    Documents are represented as `Example`
-
-    :param fname: name of the file to convert to brat
-
-    :returns brat_path: Location of the brat files
+    Creates a
     """
 
-    # Read the dataset
-    reader = bioc.BioCXMLDocumentReader(fname)
-    data = []
+    def __init__(self, kb_key_name: str):
+        """
+        Instantiates a Parser to translate BioC -> PyBrat style
 
-    for doc in reader:
-        data.append(_get_document_biocxml(doc, kb_key_name))
+        :param kb_key_name: Entity <-> Relation identifier for BioC
+        """
+        self.kb_key_name = kb_key_name
 
-    return data
+    def parse(self, fname: str) -> List[Example]:
+        """
+        Construct a pybrat style object from BioC-XML file types
+
+        :param fname: Name of the XML BioC file
+        """
+
+        # Read the dataset
+        reader = bioc.BioCXMLDocumentReader(fname)
+        data = []
+
+        for doc in reader:
+            data.append(_get_document_biocxml(doc, self.kb_key_name))
+
+        return data
 
 
 def _get_document_biocxml(
@@ -42,7 +53,7 @@ def _get_document_biocxml(
     Makes an analog to PyBrat parser "Example"
 
     Something to note, bioxml can have multiple locations
-    for larger words
+    for larger words. Seems like Entities have an overall knowledge base identifier
 
     TODO: Do we need events etc??
     """
@@ -66,7 +77,7 @@ def _get_text_entities_biocxml(
     For a bioC Document, get the entities.
     TODO - issue with span kb_key_name
 
-    How to handle multiple mentions?
+    Some entities get 2 identifiers as: <KEY 1>|<KEY 2>; I split this by a bar
 
     :param doc: Document with passages/annotations
     :param kb_key_name: Name of the knowledge base concept mapping
@@ -88,17 +99,18 @@ def _get_text_entities_biocxml(
                 char_start = char_start[0]
                 char_end = char_end[0]
 
-            ent = Entity(
-                mention=span.text,
-                type=span.infons["type"],
-                start=char_start,
-                end=char_end,
-                id=span.id,
-            )
+            for span_key in span.infons[kb_key_name].split("|"):
+                ent = Entity(
+                    mention=span.text,
+                    type=span_key,
+                    start=char_start,
+                    end=char_end,
+                    id=span.id,
+                )
 
-            ent_list.append(ent)
+                ent_list.append(ent)
 
-            ents.update({span.infons[kb_key_name]: ent})
+                ents.update({span_key: ent})
 
     return "\n".join(text), ents, ent_list
 
