@@ -1,6 +1,7 @@
 import json
 import os
 import argparse
+import random
 from pathlib import Path
 from loguru import logger
 from functools import partial
@@ -124,12 +125,61 @@ def list_pico_elements(x, pico_type: str):
     Returns:
         the prompt.
     """
-    tmpl = "Create a space-separated list of all {pico_type} tokens mentioned in the following sentence. "
+    tmpl = (
+        "Create a list of all {pico_type} tokens mentioned in the following sentence. "
+    )
     tmpl += (
         'If there are no {pico_type} mentions, print None.\n"{sentence}"\n|||{target}'
     )
 
     return tmpl.format(pico_type=pico_type, sentence=x["sentence"], target=x[pico_type])
+
+
+def classify_pico_type(x, pico_type: str):
+    """Classification prompt, x, followed by a pico type question.
+    Args:
+        x: a sentence with annotations from the PICO corpus.
+        pico_type: one of the (interventions, outcomes, participants).
+    Returns:
+        the prompt.
+    """
+    if x[pico_type] != "None":
+        tmpl = "{sentence}\n"
+        tmpl += 'In the sentence above, is "{extracted_span}" an "interventions", "outcomes" or "participants"?. '
+        tmpl += "|||{pico_type}"
+
+        return tmpl.format(
+            pico_type=pico_type, sentence=x["sentence"], extracted_span=x[pico_type]
+        )
+
+
+def is_correct_pico_type(x, pico_type: str):
+    """Classification prompt, x, followed by a pico type hypothesis.
+    Args:
+        x: a sentence with annotations from the PICO corpus.
+        pico_type: one of the (interventions, outcomes, participants).
+    Returns:
+        the prompt.
+    """
+    if x[pico_type] != "None":
+        tmpl = "{sentence}\n"
+        tmpl += 'In the sentence above, is "{extracted_span}" a {pico_type_hypothesis} ( Yes | No )?. '
+        tmpl += "|||{answer}"
+
+        pico_type_hypothesis = random.choice(
+            ["interventions", "outcomes", "participants"]
+        )
+        if pico_type_hypothesis == pico_type:
+            answer = "Yes"
+        else:
+            answer = "No"
+
+        return tmpl.format(
+            pico_type_hypothesis=pico_type_hypothesis,
+            sentence=x["sentence"],
+            extracted_span=x[pico_type],
+            answer=answer,
+        )
 
 
 def main(args):
@@ -144,6 +194,18 @@ def main(args):
         "list_interventions": partial(list_pico_elements, pico_type="interventions"),
         "list_outcomes": partial(list_pico_elements, pico_type="outcomes"),
         "list_participants": partial(list_pico_elements, pico_type="participants"),
+        "classify_interventions": partial(
+            classify_pico_type, pico_type="interventions"
+        ),
+        "classify_outcomes": partial(classify_pico_type, pico_type="outcomes"),
+        "classify_participants": partial(classify_pico_type, pico_type="participants"),
+        "is_correct_interventions": partial(
+            is_correct_pico_type, pico_type="interventions"
+        ),
+        "is_correct_outcomes": partial(is_correct_pico_type, pico_type="outcomes"),
+        "is_correct_participants": partial(
+            is_correct_pico_type, pico_type="participants"
+        ),
     }
     for name in prompts:
         dataset.add_prompt(
@@ -151,11 +213,12 @@ def main(args):
             name,
             answer_keys=None,
             original_task=True,
-            answers_in_prompt=True,
+            answers_in_prompt=False,
             metrics=["f1", "accuracy"],
         )
 
     df = dataset.get_prompts()
+    df = df.dropna(subset=["prompted_x"])
     df.to_csv(f"{outpath}/pico_extraction.tsv", sep="\t", index=False)
     logger.info(f"Prompts created and saved to {outpath}/pico_extraction.tsv")
 
