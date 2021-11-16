@@ -1,13 +1,15 @@
+import argparse
 import json
 import os
-import argparse
 import random
-from pathlib import Path
-from loguru import logger
 from functools import partial
-from utils import download
-from prompts import DatasetPrompts
+from pathlib import Path
+
 import numpy as np
+from loguru import logger
+
+from prompts import DatasetPrompts
+from utils import download
 
 _HOMEPAGE = "https://github.com/Markus-Zlabinger/pico-annotation"
 _DATA_PATH = (
@@ -25,9 +27,9 @@ class PICOExtractionPrompts(DatasetPrompts):
         """
         self.sentence_file = "sentences.json"
         self.annotation_files = {
-            "interventions": "annotations/interventions_expert.json",
-            "outcomes": "annotations/outcomes_expert.json",
-            "participants": "annotations/participants_expert.json",
+            "intervention": "annotations/interventions_expert.json",
+            "outcome": "annotations/outcomes_expert.json",
+            "participant": "annotations/participants_expert.json",
         }
         self.data_root = Path(data_root).resolve()
         self._init_dataset()
@@ -105,11 +107,12 @@ def extract_pico(x, pico_type: str):
     """Extraction prompt, x followed by the task.
     Args:
         x: a sentence with annotations from the PICO corpus.
-        pico_type: one of the (interventions, outcomes, participants).
+        pico_type: one of the (intervention, outcome, participant).
     Returns:
         the prompt.
     """
-    tmpl = "{sentence}\nExtract all {pico_type} spans from the sentence above.\n|||{target}"
+    tmpl = "{sentence}\nExtract all {pico_type} spans from the sentence above.\n"
+    tmpl += "If there are no {pico_type} mentions, print None.\n|||{target}"
     prompts = {}
     p = tmpl.format(sentence=x["sentence"], pico_type=pico_type, target=x[pico_type])
     prompts[p.lower()] = p
@@ -121,7 +124,7 @@ def list_pico_elements(x, pico_type: str):
     """Extraction prompt, task followed by x.
     Args:
         x: a sentence with annotations from the PICO corpus.
-        pico_type: one of the (interventions, outcomes, participants).
+        pico_type: one of the (intervention, outcome, participant).
     Returns:
         the prompt.
     """
@@ -139,14 +142,14 @@ def classify_pico_type(x, pico_type: str):
     """Classification prompt, x, followed by a pico type question.
     Args:
         x: a sentence with annotations from the PICO corpus.
-        pico_type: one of the (interventions, outcomes, participants).
+        pico_type: one of the (intervention, outcome, participant).
     Returns:
         the prompt.
     """
     if x[pico_type] != "None":
         tmpl = "{sentence}\n"
-        tmpl += 'In the sentence above, is "{extracted_span}" an "interventions", "outcomes" or "participants"?. '
-        tmpl += "|||{pico_type}"
+        tmpl += 'In the sentence above, is "{extracted_span}" an "intervention", "outcome" or "participant"?'
+        tmpl += "\n|||{pico_type}"
 
         return tmpl.format(
             pico_type=pico_type, sentence=x["sentence"], extracted_span=x[pico_type]
@@ -157,18 +160,16 @@ def is_correct_pico_type(x, pico_type: str):
     """Classification prompt, x, followed by a pico type hypothesis.
     Args:
         x: a sentence with annotations from the PICO corpus.
-        pico_type: one of the (interventions, outcomes, participants).
+        pico_type: one of the (intervention, outcome, participant).
     Returns:
         the prompt.
     """
     if x[pico_type] != "None":
         tmpl = "{sentence}\n"
-        tmpl += 'In the sentence above, is "{extracted_span}" a {pico_type_hypothesis} ( Yes | No )?. '
-        tmpl += "|||{answer}"
+        tmpl += 'In the sentence above, is "{extracted_span}" an {pico_type_hypothesis} Yes or No?'
+        tmpl += "\n|||{answer}"
 
-        pico_type_hypothesis = random.choice(
-            ["interventions", "outcomes", "participants"]
-        )
+        pico_type_hypothesis = random.choice(["intervention", "outcome", "participant"])
         if pico_type_hypothesis == pico_type:
             answer = "Yes"
         else:
@@ -188,23 +189,21 @@ def main(args):
     dataset = PICOExtractionPrompts("/tmp/pico-extraction-corpus/")
 
     prompts = {
-        "extract_interventions": partial(extract_pico, pico_type="interventions"),
-        "extract_outcomes": partial(extract_pico, pico_type="outcomes"),
-        "extract_participants": partial(extract_pico, pico_type="participants"),
-        "list_interventions": partial(list_pico_elements, pico_type="interventions"),
-        "list_outcomes": partial(list_pico_elements, pico_type="outcomes"),
-        "list_participants": partial(list_pico_elements, pico_type="participants"),
-        "classify_interventions": partial(
-            classify_pico_type, pico_type="interventions"
+        "extract_intervention": partial(extract_pico, pico_type="intervention"),
+        "extract_outcome": partial(extract_pico, pico_type="outcome"),
+        "extract_participant": partial(extract_pico, pico_type="participant"),
+        "list_intervention": partial(list_pico_elements, pico_type="intervention"),
+        "list_outcome": partial(list_pico_elements, pico_type="outcome"),
+        "list_participant": partial(list_pico_elements, pico_type="participant"),
+        "classify_intervention": partial(classify_pico_type, pico_type="intervention"),
+        "classify_outcome": partial(classify_pico_type, pico_type="outcome"),
+        "classify_participant": partial(classify_pico_type, pico_type="participant"),
+        "is_correct_intervention": partial(
+            is_correct_pico_type, pico_type="intervention"
         ),
-        "classify_outcomes": partial(classify_pico_type, pico_type="outcomes"),
-        "classify_participants": partial(classify_pico_type, pico_type="participants"),
-        "is_correct_interventions": partial(
-            is_correct_pico_type, pico_type="interventions"
-        ),
-        "is_correct_outcomes": partial(is_correct_pico_type, pico_type="outcomes"),
-        "is_correct_participants": partial(
-            is_correct_pico_type, pico_type="participants"
+        "is_correct_outcome": partial(is_correct_pico_type, pico_type="outcome"),
+        "is_correct_participant": partial(
+            is_correct_pico_type, pico_type="participant"
         ),
     }
     for name in prompts:
