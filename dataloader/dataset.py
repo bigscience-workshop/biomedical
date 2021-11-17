@@ -41,7 +41,9 @@ TODOs:
 import os
 from loguru import logger
 from pybrat.parser import Example, Relation, Entity, BratParser
+from flair.data import Sentence
 
+import copy
 from typing import Dict, Callable, List, Optional
 from .utils.formatters import BioCXML
 from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, BC5CDR
@@ -111,6 +113,25 @@ class BioDataset:
         else:
             logger.info("Custom dataset specified named=" + self.dataset)
             raise NotImplementedError(f"No custom support yet!")
+        
+
+        # load entities and relations type
+        self.natural_entity_types = dict()
+        self.natural_relation_types = dict()
+        for instance in self.data.train:
+            entities = instance.entities
+            relations = instance.relations
+            
+            for entity in entities:
+                self.natural_entity_types[entity.type] = entity.type.lower()
+            
+            for relation in relations: 
+                self.natural_relation_types[relation.type] = relation.type.lower()
+
+        # convert character idx to token idx
+        self.data.train = self.convert_for_tanl(self.data.train)
+        self.data.test = self.convert_for_tanl(self.data.test)
+
 
     def load_and_parse(self):
         """
@@ -137,3 +158,92 @@ class BioDataset:
         else:
             logger.info("User provided parser.")
             self.parser = parser(**kwargs)
+
+    def convert_for_tanl(self, data):
+        """
+        Convert data into TANL-compatible format.
+        - use tokens instead of text.
+        - entities: include tanl_start and tanl_end, both of which points to the token index instead of character index.
+        - relations: include tanl_head and tanl_tail, both of which points to the entity index. 
+            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity 
+            for the first relation
+        """
+        for instance in data:
+            sentence = Sentence(instance.text)
+            instance.tokens = [token.text for token in sentence]
+        
+        data = self.convert_entities(data)
+        data = self.convert_relations(data)
+        return data
+
+    def convert_entities(self, data):
+        """
+        include tanl_start and tanl_end, both of which points to the token index instead of character index.
+        """
+        new_instances = list()
+        for j, instance in enumerate(data):
+            new_entities = copy.deepcopy(instance.entities)
+            if not new_entities:
+                new_instances.append(instance)
+                continue
+
+            sentence = Sentence(instance.text)
+            for ptr in range(len(new_entities)):
+                start_idx = -1
+                flag = False
+                for token_idx, token in enumerate(sentence):
+                    if new_entities[ptr].start <= token.end_pos and token.start_pos < new_entities[ptr].end:
+                        if start_idx == -1:
+                            start_idx = token_idx
+
+                    if start_idx != -1 and token.start_pos >= new_entities[ptr].end:
+                        new_entities[ptr].tanl_start = start_idx
+                        new_entities[ptr].tanl_end = token_idx
+                        break
+                else:
+                    if start_idx != -1 and sentence[-1].end_pos == new_entities[ptr].end:
+                        new_entities[ptr].tanl_start = start_idx
+                        new_entities[ptr].tanl_end = len(sentence)
+                    else:
+                        flag = True
+
+            if not flag:
+                instance.entities = new_entities
+                new_instances.append(instance)
+            else:
+                print("instance malformed:", instance)
+        return new_instances
+
+    def convert_relations(self, data):
+        """
+        include tanl_head and tanl_tail, both of which points to the entity index. 
+            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity 
+            for the first relation
+        """
+        new_instances = list()
+        for j, instance in enumerate(data):
+            new_relations = copy.deepcopy(instance.relations)
+            if not new_relations:
+                new_instances.append(instance)
+                continue
+
+            map_idx_to_entity = dict()
+            for entity_idx, entity in enumerate(instance.entities):
+                map_idx_to_entity[(entity.start, entity.end)] = entity_idx
+
+            sentence = Sentence(instance.text)
+            for ptr in range(len(new_relations)):
+                flag = False
+                if new_relations[ptr].arg1 is None or new_relations[ptr].arg2 is None:
+                    print("arg1 or arg2 is None:", instance)
+                    flag = True
+                    break
+
+                # head and tail points to the index of entity in the list instance.entities
+                new_relations[ptr].tanl_head = map_idx_to_entity[(new_relations[ptr].arg1.start, new_relations[ptr].arg1.end)]
+                new_relations[ptr].tanl_tail = map_idx_to_entity[(new_relations[ptr].arg2.start, new_relations[ptr].arg2.end)]
+
+            if not flag:
+                instance.relations = new_relations
+                new_instances.append(instance)
+        return new_instances
