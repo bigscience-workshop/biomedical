@@ -129,8 +129,10 @@ class BioDataset:
                 self.natural_relation_types[relation.type] = relation.type.lower()
 
         # convert character idx to token idx
-        self.data.train = self.convert_for_tanl(self.data.train)
-        self.data.test = self.convert_for_tanl(self.data.test)
+        if self.dataset not in ["linneaus", "bc5cdr", "cellfinder"]:
+            logger.info("Dataset processing for TANL")
+            self.data.train = self.convert_for_tanl(self.data.train)
+            self.data.test = self.convert_for_tanl(self.data.test)
 
 
     def load_and_parse(self):
