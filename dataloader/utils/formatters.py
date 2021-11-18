@@ -102,7 +102,7 @@ def _get_text_entities_biocxml(
             for span_key in span.infons[kb_key_name].split("|"):
                 ent = Entity(
                     mention=span.text,
-                    type=span_key,
+                    type=span.infons["type"], # NL type as opposed to DB key
                     start=char_start,
                     end=char_end,
                     id=span.id,
