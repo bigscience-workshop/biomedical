@@ -15,7 +15,7 @@ If your data is in any other form, you will need to specify the extension via fm
 
 Example:
     Example.text = <input text data>
-    
+
     Example.entities = List[Entities]
         for a given "i":
         entities[i].type = <label/type of the entity>
@@ -30,7 +30,7 @@ Example:
             relations[i].arg1 = Entity <first entity in reln>
             relations[i].arg2 = Entity <second entity in reln>
             relations[i].id = <corresponding entity id>
-    
+
     Example.events = List[Events] (TODO)
 
 TODOs:
@@ -39,14 +39,17 @@ TODOs:
     - currently doesn't handle if data is partially downloaded; these are small files though
 """
 import os
+from functools import partial
+
 from loguru import logger
 from pybrat.parser import Example, Relation, Entity, BratParser
 from flair.data import Sentence
 
 import copy
 from typing import Dict, Callable, List, Optional
-from .utils.formatters import BioCXML
-from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, BC5CDR
+from dataloader.utils.formatters import BioCXML
+from dataloader.utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, \
+    BC5CDR, HunFlairDataset
 
 parser_lookup = {
     "bioc_xml": BioCXML,
@@ -62,11 +65,67 @@ dataloader_lookup = {
     "chemprot": ChemProt,
     "ddi": DDI,
     "bc5cdr": BC5CDR,
+    # CELLLINE
+    "hunflair_cellline_cll": partial(HunFlairDataset, name="hunflair_cellline_cll"),
+    "hunflair_cellline_cellfinder": partial(HunFlairDataset,
+                                            name="hunflair_cellline_cellfinder"),
+    "hunflair_cellline_gellus": partial(HunFlairDataset,
+                                        name="hunflair_cellline_gellus"),
+    "hunflair_cellline_jnlpba": partial(HunFlairDataset,
+                                        name="hunflair_cellline_jnlpba"),
+    # CHEMICAL
+    "hunflair_chemical_chebi": partial(HunFlairDataset, name="hunflair_chemical_chebi"),
+    "hunflair_chemical_cdr": partial(HunFlairDataset, name="hunflair_chemical_cdr"),
+    "hunflair_chemical_cemp": partial(HunFlairDataset, name="hunflair_chemical_cemp"),
+    "hunflair_chemical_scai": partial(HunFlairDataset, name="hunflair_chemical_scai"),
+    # OFFLINE "hunflair_chemical_bionlp2013_cg": partial(HunFlairDataset, name=# OFFLINE "hunflair_chemical_bionlp2013_cg"),
+    # DISEASE
+    "hunflair_disease_cdr": partial(HunFlairDataset, name="hunflair_disease_cdr"),
+    "hunflair_disease_pdr": partial(HunFlairDataset, name="hunflair_disease_pdr"),
+    "hunflair_disease_ncbi": partial(HunFlairDataset, name="hunflair_disease_ncbi"),
+    "hunflair_disease_scai": partial(HunFlairDataset, name="hunflair_disease_scai"),
+    "hunflair_disease_mirna": partial(HunFlairDataset, name="hunflair_disease_mirna"),
+    # OFFLINE "hunflair_disease_bionlp2013_cg" : partial(HunFlairDataset, name=#OFFLINE "hunflair_disease_bionlp2013_cg" ),
+    "hunflair_disease_variome": partial(HunFlairDataset,
+                                        name="hunflair_disease_variome"),
+    # GENE/PROTEIN
+    "hunflair_gene_variome": partial(HunFlairDataset, name="hunflair_gene_variome"),
+    "hunflair_gene_fsu": partial(HunFlairDataset, name="hunflair_gene_fsu"),
+    "hunflair_gene_gpro": partial(HunFlairDataset, name="hunflair_gene_gpro"),
+    "hunflair_gene_deca": partial(HunFlairDataset, name="hunflair_gene_deca"),
+    "hunflair_gene_iepa": partial(HunFlairDataset, name="hunflair_gene_iepa"),
+    "hunflair_gene_bc2gm": partial(HunFlairDataset, name="hunflair_gene_bc2gm"),
+    "hunflair_gene_bio_infer": partial(HunFlairDataset, name="hunflair_gene_bio_infer"),
+    # OFFLINE "hunflair_gene_bionlp2013_cg": partial(HunFlairDataset, name=#OFFLINE "hunflair_gene_bionlp2013_cg"),
+    "hunflair_gene_cellfinder": partial(HunFlairDataset,
+                                        name="hunflair_gene_cellfinder"),
+    "hunflair_gene_chebi": partial(HunFlairDataset, name="hunflair_gene_chebi"),
+    "hunflair_gene_craftv4": partial(HunFlairDataset, name="hunflair_gene_craftv4"),
+    "hunflair_gene_jnlpba": partial(HunFlairDataset, name="hunflair_gene_jnlpba"),
+    "hunflair_gene_loctext": partial(HunFlairDataset, name="hunflair_gene_loctext"),
+    "hunflair_gene_mirna": partial(HunFlairDataset, name="hunflair_gene_mirna"),
+    "hunflair_gene_osiris": partial(HunFlairDataset, name="hunflair_gene_osiris"),
+    # SPECIES
+    "hunflair_species_cellfinder": partial(HunFlairDataset,
+                                           name="hunflair_species_cellfinder"),
+    "hunflair_species_s800": partial(HunFlairDataset, name="hunflair_species_s800"),
+    "hunflair_species_chebi": partial(HunFlairDataset, name="hunflair_species_chebi"),
+    "hunflair_species_mirna": partial(HunFlairDataset, name="hunflair_species_mirna"),
+    "hunflair_species_loctext": partial(HunFlairDataset,
+                                        name="hunflair_species_loctext"),
+    # OFFLINE "hunflair_species_bionlp2013_cg": partial(HunFlairDataset, name=# OFFLINE "hunflair_species_bionlp2013_cg"),
+    "hunflair_species_craftv4": partial(HunFlairDataset,
+                                        name="hunflair_species_craftv4"),
+    "hunflair_species_linneaus": partial(HunFlairDataset,
+                                         name="hunflair_species_linneaus"),
+    "hunflair_species_variome": partial(HunFlairDataset,
+                                        name="hunflair_species_variome"),
 }
 
 parser_overrides = {
     "bc5cdr": BioCXML(kb_key_name="MESH"),
 }
+
 
 class BioDataset:
     """
@@ -78,13 +137,13 @@ class BioDataset:
     """
 
     def __init__(
-        self,
-        dataset: str,
-        data_root: str = ".",
-        fmt: str = "brat",
-        split_names: Optional[Dict[str, str]] = None,
-        parser: Optional[BratParser] = None,
-        # kb_key_name: Optional[str] = None,
+            self,
+            dataset: str,
+            data_root: str = ".",
+            fmt: str = "brat",
+            split_names: Optional[Dict[str, str]] = None,
+            parser: Optional[BratParser] = None,
+            # kb_key_name: Optional[str] = None,
     ):
         """
         Creates a dataset in the pybrat parser form
@@ -101,7 +160,7 @@ class BioDataset:
         self.dataset = dataset.lower()
         self.data_root = data_root
         self.format = fmt.lower()
-        self.split_names = split_names # Train/Dev/Test custom datasets
+        self.split_names = split_names  # Train/Dev/Test custom datasets
 
         # Initialize the parser
         self._init_parser(parser)
@@ -113,7 +172,6 @@ class BioDataset:
         else:
             logger.info("Custom dataset specified named=" + self.dataset)
             raise NotImplementedError(f"No custom support yet!")
-        
 
         # load entities and relations type
         self.natural_entity_types = dict()
@@ -121,11 +179,11 @@ class BioDataset:
         for instance in self.data.train:
             entities = instance.entities
             relations = instance.relations
-            
+
             for entity in entities:
                 self.natural_entity_types[entity.type] = entity.type.lower()
-            
-            for relation in relations: 
+
+            for relation in relations:
                 self.natural_relation_types[relation.type] = relation.type.lower()
 
         # convert character idx to token idx
@@ -133,7 +191,6 @@ class BioDataset:
             logger.info("Dataset processing for TANL")
             self.data.train = self.convert_for_tanl(self.data.train)
             self.data.test = self.convert_for_tanl(self.data.test)
-
 
     def load_and_parse(self):
         """
@@ -166,14 +223,14 @@ class BioDataset:
         Convert data into TANL-compatible format.
         - use tokens instead of text.
         - entities: include tanl_start and tanl_end, both of which points to the token index instead of character index.
-        - relations: include tanl_head and tanl_tail, both of which points to the entity index. 
-            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity 
+        - relations: include tanl_head and tanl_tail, both of which points to the entity index.
+            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity
             for the first relation
         """
         for instance in data:
             sentence = Sentence(instance.text)
             instance.tokens = [token.text for token in sentence]
-        
+
         data = self.convert_entities(data)
         data = self.convert_relations(data)
         return data
@@ -194,7 +251,8 @@ class BioDataset:
                 start_idx = -1
                 flag = False
                 for token_idx, token in enumerate(sentence):
-                    if new_entities[ptr].start <= token.end_pos and token.start_pos < new_entities[ptr].end:
+                    if new_entities[ptr].start <= token.end_pos and token.start_pos < \
+                            new_entities[ptr].end:
                         if start_idx == -1:
                             start_idx = token_idx
 
@@ -218,8 +276,8 @@ class BioDataset:
 
     def convert_relations(self, data):
         """
-        include tanl_head and tanl_tail, both of which points to the entity index. 
-            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity 
+        include tanl_head and tanl_tail, both of which points to the entity index.
+            For instance, instance.entities[instance.relations[0].tanl_head] would give the head entity
             for the first relation
         """
         new_instances = list()
@@ -242,8 +300,10 @@ class BioDataset:
                     break
 
                 # head and tail points to the index of entity in the list instance.entities
-                new_relations[ptr].tanl_head = map_idx_to_entity[(new_relations[ptr].arg1.start, new_relations[ptr].arg1.end)]
-                new_relations[ptr].tanl_tail = map_idx_to_entity[(new_relations[ptr].arg2.start, new_relations[ptr].arg2.end)]
+                new_relations[ptr].tanl_head = map_idx_to_entity[
+                    (new_relations[ptr].arg1.start, new_relations[ptr].arg1.end)]
+                new_relations[ptr].tanl_tail = map_idx_to_entity[
+                    (new_relations[ptr].arg2.start, new_relations[ptr].arg2.end)]
 
             if not flag:
                 instance.relations = new_relations

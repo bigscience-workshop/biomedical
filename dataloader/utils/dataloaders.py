@@ -5,11 +5,12 @@ import os
 from pathlib import Path
 from typing import List, Optional, Dict
 
+import flair.tokenization
+import pybrat.parser
 from flair.datasets import biomedical as hunflair
 from pybrat.parser import BratParser
 
-from .downloaders import download_data, uncompress_data, chemprot_2_standoff
-from .formatters import BioCXML
+from dataloader.utils.downloaders import download_data, uncompress_data, chemprot_2_standoff
 
 
 def _write_hunflair_internal_to_brat(
@@ -26,7 +27,7 @@ def _write_hunflair_internal_to_brat(
                     f"T{i}\t{entity.type} {entity.char_span.start} {entity.char_span.stop}\t{mention}\n"
                 )
         with (brat_dir / document).with_suffix(".txt").open("w") as f:
-            f.write(text)
+            f.write(text.replace(hunflair.SENTENCE_TAG, " "))
 
 
 class BC5CDR:
@@ -264,6 +265,86 @@ class Linneaus:
             data_dir=cache_path / "linneaus"
         )
         _write_hunflair_internal_to_brat(train_dataset, train_dir)
+
+
+class HunFlairDataset:
+
+    name_to_class = {
+        # CELLLINE
+        "hunflair_cellline_cll": hunflair.HUNER_CELL_LINE_CLL,
+        "hunflair_cellline_cellfinder": hunflair.HUNER_CELL_LINE_CELL_FINDER,
+        "hunflair_cellline_gellus": hunflair.HUNER_CELL_LINE_GELLUS,
+        "hunflair_cellline_jnlpba": hunflair.HUNER_CELL_LINE_JNLPBA,
+        # CHEMICAL
+        "hunflair_chemical_chebi": hunflair.HUNER_CHEMICAL_CHEBI,
+        "hunflair_chemical_cdr": hunflair.HUNER_CHEMICAL_CDR,
+        "hunflair_chemical_cemp": hunflair.HUNER_CHEMICAL_CEMP,
+        "hunflair_chemical_scai": hunflair.HUNER_CHEMICAL_SCAI,
+        # OFFLINE "hunflair_chemical_bionlp2013_cg": hunflair.HUNER_CHEMICAL_BIONLP2013_CG,
+        # DISEASE
+        "hunflair_disease_cdr": hunflair.HUNER_DISEASE_CDR,
+        "hunflair_disease_pdr": hunflair.HUNER_DISEASE_PDR,
+        "hunflair_disease_ncbi": hunflair.HUNER_DISEASE_NCBI,
+        "hunflair_disease_scai": hunflair.HUNER_DISEASE_SCAI,
+        "hunflair_disease_mirna": hunflair.HUNER_DISEASE_MIRNA,
+        #OFFLINE "hunflair_disease_bionlp2013_cg" : hunflair.HUNER_DISEASE_BIONLP2013_CG,
+        "hunflair_disease_variome": hunflair.HUNER_DISEASE_VARIOME,
+        # GENE/PROTEIN
+        "hunflair_gene_variome": hunflair.HUNER_GENE_VARIOME,
+        "hunflair_gene_fsu": hunflair.HUNER_GENE_FSU,
+        "hunflair_gene_gpro": hunflair.HUNER_GENE_GPRO,
+        "hunflair_gene_deca": hunflair.HUNER_GENE_DECA,
+        "hunflair_gene_iepa": hunflair.HUNER_GENE_IEPA,
+        "hunflair_gene_bc2gm": hunflair.HUNER_GENE_BC2GM,
+        "hunflair_gene_bio_infer": hunflair.HUNER_GENE_BIO_INFER,
+        #OFFLINE "hunflair_gene_bionlp2013_cg": hunflair.HUNER_GENE_BIONLP2013_CG,
+        "hunflair_gene_cellfinder": hunflair.HUNER_GENE_CELL_FINDER,
+        "hunflair_gene_chebi": hunflair.HUNER_GENE_CHEBI,
+        "hunflair_gene_craftv4": hunflair.HUNER_GENE_CRAFT_V4,
+        "hunflair_gene_jnlpba": hunflair.HUNER_GENE_JNLPBA,
+        "hunflair_gene_loctext": hunflair.HUNER_GENE_LOCTEXT,
+        "hunflair_gene_mirna": hunflair.HUNER_GENE_MIRNA,
+        "hunflair_gene_osiris": hunflair.HUNER_GENE_OSIRIS,
+        # SPECIES
+        "hunflair_species_cellfinder": hunflair.HUNER_SPECIES_CELL_FINDER,
+        "hunflair_species_s800": hunflair.HUNER_SPECIES_S800,
+        "hunflair_species_chebi": hunflair.HUNER_SPECIES_CHEBI,
+        "hunflair_species_mirna": hunflair.HUNER_SPECIES_MIRNA,
+        "hunflair_species_loctext": hunflair.HUNER_SPECIES_LOCTEXT,
+        # OFFLINE "hunflair_species_bionlp2013_cg": hunflair.HUNER_SPECIES_BIONLP2013_CG,
+        "hunflair_species_craftv4": hunflair.HUNER_SPECIES_CRAFT_V4,
+        "hunflair_species_linneaus": hunflair.HUNER_SPECIES_LINNEAUS,
+        "hunflair_species_variome": hunflair.HUNER_SPECIES_VARIOME,
+
+    }
+
+    def __init__(self, data_root: Path, parser, name: str):
+        if name not in self.name_to_class:
+            raise ValueError(f"`name' has to be one of {', '.join(self.name_to_class.keys())}")
+
+        self.train_dir = Path(data_root) / name / "train"
+        self.dev_dir = Path(data_root) / name / "dev"
+        self.test_dir = Path(data_root) / name / "test"
+
+        if not list(self.train_dir.glob("*")) or not list(self.dev_dir.glob("*")) or not list(self.test_dir.glob("*")):
+            self._download(name, data_root=Path(data_root))
+
+        self.train = parser.parse(self.train_dir)
+        self.dev = parser.parse(self.dev_dir)
+        self.test = parser.parse(self.test_dir)
+
+    def _download(self, name: str, data_root: Path):
+        hunflair_dataset: hunflair.HunerDataset = self.name_to_class[name](base_path=data_root/"flair")
+        hunflair_dataset_name = hunflair_dataset.__class__.__name__.lower()
+
+        internal_dataset = hunflair_dataset.to_internal(data_root / "flair" / hunflair_dataset_name)
+        train_data = hunflair_dataset.get_subset(internal_dataset, "train", split_dir=data_root / "flair" / hunflair_dataset_name / "splits")
+        dev_data = hunflair_dataset.get_subset(internal_dataset, "dev", split_dir=data_root / "flair" / hunflair_dataset_name / "splits")
+        test_data = hunflair_dataset.get_subset(internal_dataset, "test", split_dir=data_root / "flair" / hunflair_dataset_name / "splits")
+
+        _write_hunflair_internal_to_brat(train_data, self.train_dir)
+        _write_hunflair_internal_to_brat(dev_data, self.dev_dir)
+        _write_hunflair_internal_to_brat(test_data, self.test_dir)
 
 
 class CustomDataset:

@@ -5,7 +5,7 @@ Update - chemprot + ddi working
 """
 import os
 import unittest
-from dataloader import BioDataset
+from dataloader.dataset import BioDataset, dataloader_lookup
 
 # Place your biomedical dataset path here if it doesn't correspond
 dataset_path = "datasets/"
@@ -54,6 +54,13 @@ class TestDataset(unittest.TestCase):
         """Test ChemProt (deprecated; newest version is DrugProt)"""
         dataset = BioDataset("chemprot", dataset_path)
 
+    def test_hunflair(self):
+        for dataset_name in dataloader_lookup:
+            if dataset_name.startswith("hunflair_"):
+                dataset = BioDataset(dataset_name, dataset_path)
+                assert len(dataset.data.train) > 0
+                assert len(dataset.data.dev) > 0
+                assert len(dataset.data.test) > 0
 
 if __name__ == "__main__":
     unittest.main()
