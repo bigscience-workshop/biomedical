@@ -2,6 +2,9 @@
 
 Tools for curating biomedical training data for large-scale language modeling. 
 
+## Contributing
+We are always on the lookout for more biomedical data sets. Check out [the guide on how to using data sets and adding new ones](/dataloader/README.md).
+
 ## Setup
 
 Using `conda`:
