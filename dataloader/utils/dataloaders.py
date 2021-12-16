@@ -77,6 +77,64 @@ class BC5CDR:
         uncompress_data(outpath, data_root.resolve())
 
 
+class PICO:
+    """ """
+
+    def __init__(self, data_root: str, parser):
+        """Constructor for PICO extraction dataset. Sets data_root, downloads data if
+        needed and parses them to load into BioDataset format."""
+
+        self.sentence_file = "sentences.json"
+        self.annotation_files = {
+            "intervention": "annotations/interventions_expert.json",
+            "outcome": "annotations/outcomes_expert.json",
+            "participant": "annotations/participants_expert.json",
+        }
+        self.dataset_folder = "PICO"
+        data_root = Path(data_root) / self.dataset_folder
+
+        # Download data if not available
+        if not list((Path(data_root)).glob("*")):
+            self._download(
+                Path(data_root),
+                self.sentence_file,
+                self.annotation_files,
+            )
+
+        self.train = parser.parse(
+            data_root=data_root,
+            sentence_file=self.sentence_file,
+            annotation_files=self.annotation_files,
+        )
+
+    @staticmethod
+    def _download(
+        data_root,
+        sentence_file,
+        annotation_files,
+    ):
+        """Download the PICO Dataset"""
+        _DATA_PATH = "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
+
+        if not os.path.exists(data_root):
+            os.makedirs(data_root)
+            # logger.info(f"Directory {data_root} successfully created")
+
+        # download dataset files
+        url = f"{_DATA_PATH}/{sentence_file}"
+        _path = data_root / sentence_file
+        if not os.path.exists(_path):
+            download_data(url, _path)
+            # logger.info(f"{sentence_file} successfully downloaded")
+
+        for _file in annotation_files.values():
+            url = f"{_DATA_PATH}/{_file}"
+            _path = data_root / _file.split("/")[-1]
+            if not os.path.exists(_path):
+                download_data(url, _path)
+                # logger.info(f"{_file} successfully downloaded")
+
+
 class ChemProt:
     """
     ChemProt Corpus (deprecated, the newest version is now DrugProt)

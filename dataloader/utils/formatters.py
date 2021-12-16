@@ -2,7 +2,10 @@
 Ensure your data files are in the proper format.
 I.e: https://github.com/lfurrer/bconv
 """
+import json
 from typing import List, Optional, Dict
+
+import numpy as np
 from pybrat.parser import Example, Relation, Entity, BratParser
 
 # import bconv # ??
@@ -142,3 +145,92 @@ def _get_relations_biocxml(
         )
 
     return relns
+
+
+class PICOParser:
+    def __init__(self):
+        """
+        Instantiates a Parser to load PICO data
+
+        """
+
+    def parse(
+        self, data_root: str, sentence_file: str, annotation_files: Dict[str, str]
+    ) -> List[Example]:
+        """"""
+        # load sentences
+        _path = data_root / sentence_file
+        with open(_path) as fp:
+            sentences = json.load(fp)
+            # logger.info("Sentences successfully loaded")
+
+        # load annotations
+        annotation_dict = {}
+        for annotation_type, _file in annotation_files.items():
+            _path = data_root / _file.split("/")[-1]
+            with open(_path) as fp:
+                annotations = json.load(fp)
+                annotation_dict[annotation_type] = annotations
+        # logger.info("Annotations successfully loaded")
+
+        train = []
+        for sentence_id, sentence in sentences.items():
+
+            ents = self._get_entities_pico(annotation_dict, sentence, sentence_id)
+
+            Document = Example(
+                text=sentence,
+                entities=ents,
+                relations=[],
+                id=sentence_id,
+            )
+
+            train.append(Document)
+
+        return train
+
+    def _get_entities_pico(
+        self, annotation_dict: Dict[str, str], sentence: str, sentence_id: int
+    ):
+        """"""
+
+        def _partition(alist, indices):
+            return [alist[i:j] for i, j in zip([0] + indices, indices + [None])]
+
+        ents = []
+
+        for annotation_type, annotations in annotation_dict.items():
+            # get indices from three annotators by majority voting
+            indices = np.where(
+                np.round(np.mean(annotations[sentence_id]["annotations"], axis=0)) == 1
+            )[0]
+
+            if len(indices) > 0:  # if annotations exist for this sentence
+                split_indices = []
+                # if there are two annotations of one type in one sentence
+                for item_index, item in enumerate(indices):
+                    if item_index + 1 == len(indices):
+                        break
+                    if indices[item_index] + 1 != indices[item_index + 1]:
+                        split_indices.append(item_index + 1)
+                multiple_indices = _partition(indices, split_indices)
+
+                for _indices in multiple_indices:
+
+                    annotation_text = " ".join(
+                        [sentence.split()[ind] for ind in _indices]
+                    )
+
+                    char_start = sentence.find(annotation_text)
+                    char_end = char_start + len(annotation_text)
+
+                    ent = Entity(
+                        mention=annotation_text,
+                        type=annotation_type,
+                        start=char_start,
+                        end=char_end,
+                        id=None,
+                    )
+
+                    ents.append(ent)
+        return ents
