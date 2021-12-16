@@ -54,6 +54,15 @@ class TestDataset(unittest.TestCase):
         """Test ChemProt (deprecated; newest version is DrugProt)"""
         dataset = BioDataset("chemprot", dataset_path)
 
+    def test_pico(self):
+        """
+        Test PICO extraction dataset.
+        """
+        dataset = "pico"
+        data_root = dataset_path
+
+        dataset = BioDataset(dataset, dataset_path)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -45,8 +45,8 @@ from flair.data import Sentence
 
 import copy
 from typing import Dict, Callable, List, Optional
-from .utils.formatters import BioCXML
-from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, BC5CDR
+from .utils.formatters import BioCXML, PICOParser
+from .utils.dataloaders import JNLPBA, CellFinder, Linneaus, DDI, ChemProt, BC5CDR, PICO
 
 parser_lookup = {
     "bioc_xml": BioCXML,
@@ -62,11 +62,14 @@ dataloader_lookup = {
     "chemprot": ChemProt,
     "ddi": DDI,
     "bc5cdr": BC5CDR,
+    "pico": PICO,
 }
 
 parser_overrides = {
     "bc5cdr": BioCXML(kb_key_name="MESH"),
+    "pico": PICOParser(),
 }
+
 
 class BioDataset:
     """
