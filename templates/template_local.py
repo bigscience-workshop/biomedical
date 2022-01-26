@@ -34,11 +34,13 @@ There are 3 key elements to implementing a dataset:
 ----------------------
 Step 1: Declare imports
 Your imports go here; the only mandatory one is `datasets`, as methods and attributes from this library will be used throughout the script.
+
+We have provided some import statements that we strongly recommend. Feel free to adapt; so long as the style-guide requirements are satisfied (Step 5), then you should be able to push your code.
 """
 import datasets
-#  < Your imports here >
 import os  # useful for paths
-from typing import Iterable, Dict
+from typing import Iterable, Dict, List
+import logging
 
 
 """
@@ -51,7 +53,6 @@ The following variables are used to populate the dataset entry. Common ones incl
 - `_DESCRIPTION`: Explanation of the dataset
 - `_HOMEPAGE`: Where to find the dataset's hosted location
 - `_LICENSE`: License to use the dataset
-- `_URLs`: How to download the dataset(s), by name; make this in the form of a dictionary where <dataset_name> is the key and <url_of_dataset> is the balue
 - `_VERSION`: Version of the dataset
 """
 
@@ -79,19 +80,20 @@ _HOMEPAGE = "Homepage of the dataset"
 
 _LICENSE = "License"
 
-_URLs = {
-    'your_dataset_name': "your_dataset_URL"
-}
+_URLs = {'your_dataset_name': "your_dataset_URL"}
 
 _VERSION = "1.0.0"
 
 """
-Step 3: Change the class name to correspond to your <Your_Dataset_Name> ex: "ChemProtDataset".
+Step 3: Change the class name to correspond to your <Your_Dataset_Name> 
+ex: "CellFinderDataset".
 
 Then, fill all relevant information to `BuilderConfig` which populates information about the class. You may have multiple builder configs (ex: a large dataset separated into multiple partitions) if you populate for different dataset names + descriptions. The following is setup for just 1 dataset, but can be adjusted.
 
 NOTE - train/test/dev splits can be handled in `_split_generators`.
 """
+
+
 class YourDatasetName(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
@@ -118,7 +120,9 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
     datasets.Sequence - for information that must be in a continuous sequence (ex: spans in the text, offsets)
 
-    An example is as follows for an ENTITY + RELATION dataset
+    An example is as follows for an ENTITY + RELATION dataset.
+
+    Your format may differ depending on what the dataset is. Please try to keep the extraction as close to the original dataset as possible. If you're having trouble adapting your dataset, please contact the community channels and an organizer will reach out!
     """
 
     def _info(self):
@@ -130,7 +134,9 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "spans": datasets.Sequence(datasets.Value("int32")),
+                            "spans": datasets.Sequence(
+                                datasets.Value("int32")
+                            ),
                             "text": datasets.Value("string"),
                             "entity_type": datasets.Value("string"),
                         }
@@ -148,7 +154,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            features=features,  
+            features=features,
             # If there's a common (input, target) tuple from the features,
             # specify them here. They'll be used if as_supervised=True in
             # builder.as_dataset.
@@ -161,31 +167,26 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """
-        Step 5: Download and extract the dataset.
-        
-        For each config name, run `download_and_extract` from the dl_manager; this will download and unzip any files within a cache directory, specified by `data_dir`. 
+        Step 5: Access the dataset
 
-        `download_and_extract` can accept an iterable object and return the same structure with the url replaced with the path to local files:
+        No explicit downloading is required for this version of a dataloder; the expectation is that the `load_dataset` command of the `datasets` library is called within the folder that contains the files of interest.
 
-        ex:
-        output = dl_manager.download_and_extract({"data1:" "url1", "data2": "url2"})
+        If the user has the dataset properly downloaded, they may simply use `os.getcwd()` to get the string-formatted path of the current working directory. This can be used to reference the dataset subsequently.
 
-        output
-        >> {"data1": "path1", "data2": "path2"}
+        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`. 
 
-        Nested zip files can be cached also, but make sure to save their path.
-
-        Populate "SplitGenerator" with `name` and `gen_kwargs`. Note:
+        Note:
 
         - `name` can be: datasets.Split.<TRAIN/TEST/VALIDATION> or a string
         - all keys in `gen_kwargs` can be passed to `_generate_examples()`. If your dataset has multiple files, you can make a separate key for each file, as shown below:
 
         """
 
-        my_urls = _URLs[self.config.name]
-        data_dir = dl_manager.download_and_extract(my_urls)
+        data_dir = os.getcwd()
 
         return [
             datasets.SplitGenerator(
@@ -198,16 +199,17 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
                     "split": "Name_of_Split",
                 },
             ),
-
         ]
 
-    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
+    def _generate_examples(
+        self, filepath, abstract_file, entity_file, relation_file, split
+    ):
         """
         Step 6: Create a generator that yields (key, example) of the dataset of interest.
 
         The arguments to this function come from `gen_kwargs` returned in `_split_generators()`
 
-        The goal of this function is to perform operations on any of the keys of `gen_kwargs` that allow you to extract and process the data. 
+        The goal of this function is to perform operations on any of the keys of `gen_kwargs` that allow you to extract and process the data.
 
         The following skeleton does the following:
 
@@ -225,7 +227,6 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
             relations = self._get_relations(relation_file)
 
-
             for id_, key in enumerate(abstracts.keys()):
                 yield id_, {
                     "article_id": pmid,
@@ -234,7 +235,12 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
                     "relations": relations[key],
                 }
 
+    """
+    These methods are optional helper functions. You may make any number of helper functions to assist in extracting and working with the data.
 
+    It may be helpful to use static methods (via the decorator "@staticmethod") for these functions.
+    """
+    @staticmethod
     def _get_abstract(abstract_file: str) -> Dict[int, str]:
         """
         Create a function that can:
@@ -242,9 +248,9 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
         - Read the abstract file.
         - Return {key: abstract_text} output.
         """
-        raise NotImplementedError
+        pass
 
-
+    @staticmethod
     def _get_entity(entity_file: str) -> Dict[int, Iterable]:
         """
         Create a function that can:
@@ -256,8 +262,9 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
         {"spans": [start, end], "text": entity_reference, "entity_type": entity_id}
         """
-        raise NotImplementedError
+        pass
 
+    @staticmethod
     def _get_relation(relation_file: str) -> Dict[int, Iterable]:
         """
         Create a function that can:
@@ -269,4 +276,4 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
         {"relation_type": relation_id, "arg1": relation1, "arg2": relation2}
         """
-        raise NotImplementedError
+        pass

@@ -1,0 +1,449 @@
+T1	GeneProtein 17363 17387	DNA methyltransferase 3B
+T2	CellLine 26318 26321	PA6
+T3	GeneProtein 17571 17587	forkhead box O1A
+T4	CellLine 26144 26147	PA6
+T5	GeneProtein 17589 17595	Foxo1a
+T6	GeneProtein 30518 30523	Nanog
+T7	CellType 24467 24473	feeder
+T8	GeneProtein 29839 29859	Tyrosine hydroxylase
+T9	GeneProtein 29835 29837	Th
+T10	GeneProtein 30682 30687	Nanog
+T11	GeneProtein 30689 30693	Sdha
+T12	GeneProtein 21659 21663	Sdha
+T13	CellType 7089 7093	NSCs
+T14	CellComponent 7998 8002	axon
+T15	Anatomy 7849 7855	neuron
+T16	Anatomy 7110 7119	embryonic
+T17	GeneProtein 21652 21657	Gapdh
+T18	Anatomy 7120 7124	germ
+T19	GeneProtein 17439 17444	Dppa4
+T20	GeneProtein 17553 17569	KIAA1573 protein
+T21	GeneProtein 26095 26099	SDIA
+T22	CellType 17228 17238	stem cells
+T23	GeneProtein 30513 30516	En1
+T24	CellType 5665 5682	pluripotent hESCs
+T25	GeneProtein 17389 17395	Dnmt3b
+T26	Anatomy 3869 3876	embryos
+T27	CellType 3146 3153	neurons
+T28	Anatomy 11563 11575	dopaminergic
+T29	GeneProtein 8497 8530	vesicular monoamine transporter 2
+T30	Species 24482 24483	h
+T31	GeneProtein 17598 17623	high-mobility group box 1
+T32	CellType 8409 8429	dopaminergic neurons
+T33	CellLine 24319 24332	Sahlgrenska 2
+T34	CellType 17786 17796	stem cells
+T35	CellLine 24313 24317	SA02
+T36	CellType 12370 12388	TH-positive neuron
+T37	Species 24460 24465	human
+T38	CellType 24304 24309	hESCs
+T39	Anatomy 3461 3474	mesencephalic
+T40	CellComponent 2413 2416	RNA
+T41	CellType 3445 3495	human embryonic mesencephalic dopaminergic neurons
+T42	CellType 5677 5682	hESCs
+T43	CellType 3488 3495	neurons
+T44	CellLine 5694 5698	SA02
+T45	GeneProtein 30553 30555	Th
+T46	Anatomy 9822 9835	hematopoietic
+T47	GeneProtein 30525 30532	Aldh1a1
+T48	Anatomy 9840 9850	pancreatic
+T49	GeneProtein 30568 30572	Tubb
+T50	GeneProtein 17625 17630	Hmgb1
+T51	GeneProtein 9423 9427	Bcl2
+T52	GeneProtein 30545 30551	Nestin
+T53	CellType 7074 7078	HSCs
+T54	CellType 9539 9549	stem cells
+T55	CellType 25745 25749	hFCs
+T56	GeneProtein 31640 31647	DNase I
+T57	Anatomy 10915 10927	dopaminergic
+T58	GeneProtein 29139 29144	Nanog
+T59	GeneProtein 30710 30714	Tubb
+T60	GeneProtein 17633 17661	C-terminal binding protein 2
+T61	GeneProtein 24981 24987	hrbFGF
+T62	CellType 8422 8429	neurons
+T63	CellType 7120 7124	germ
+T64	GeneProtein 20288 20290	TH
+T65	Anatomy 20072 20080	neuronal
+T66	GeneProtein 30695 30701	Nestin
+T67	Anatomy 9873 9879	cancer
+T68	Anatomy 3881 3888	fetuses
+T69	GeneProtein 19635 19639	Lhx1
+T70	Anatomy 3904 3913	embryonic
+T71	GeneProtein 6238 6243	Nanog
+T72	CellType 3914 3924	stem cells
+T73	CellType 7139 7153	carcinoma cell
+T74	GeneProtein 19625 19629	Ptx3
+T75	GeneProtein 19631 19633	Th
+T76	GeneProtein 20453 20482	homeobox transcription factor
+T77	GeneProtein 9404 9421	B cell leukemia 2
+T78	Species 21869 21874	human
+T79	GeneProtein 9393 9397	CREB
+T80	GeneProtein 26060 26093	stromal-derived inducing activity
+T81	GeneProtein 30557 30561	Msx1
+T82	GeneProtein 30574 30579	Pitx2
+T83	CellType 10102 10112	stem cells
+T84	Anatomy 5032 5040	neuronal
+T85	CellType 26276 26281	hESCs
+T86	CellType 25765 25770	hESCs
+T87	CellLine 26465 26468	PA6
+T88	GeneProtein 17356 17360	Utf1
+T89	CellType 26465 26474	PA6 cells
+T90	GeneProtein 17398 17437	developmental pluripotency associated 4
+T91	GeneProtein 16930 16934	FGF2
+T92	GeneProtein 30657 30660	En1
+T93	CellComponent 31696 31699	RNA
+T94	GeneProtein 16556 16560	Gja1
+T95	CellComponent 15335 15338	RNA
+T96	GeneProtein 29037 29040	En1
+T97	CellType 31241 31250	PA6 cells
+T98	CellLine 24532 24542	CCD-1112Sk
+T99	CellType 26025 26029	ESCs
+T100	CellType 336 343	neurons
+T101	CellComponent 2322 2325	DNA
+T102	GeneProtein 26492 26507	Type I collagen
+T103	CellType 3233 3240	neurons
+T104	CellType 645 652	neurons
+T105	CellType 14022 14027	hESCs
+T106	CellType 613 617	hSCs
+T107	CellType 14123 14128	hESCs
+T108	CellType 2296 2304	neuronal
+T109	CellType 14407 14412	hESCs
+T110	CellType 226 236	stem cells
+T111	CellType 740 747	neurons
+T112	CellType 27499 27508	PA6 cells
+T113	GeneProtein 28445 28447	TH
+T114	CellType 714 724	stem cells
+T115	Anatomy 10906 10914	neuronal
+T116	Species 26018 26024	monkey
+T117	Species 26008 26013	mouse
+T118	CellType 31049 31054	hESCs
+T119	CellType 5880 5900	dopaminergic neurons
+T120	CellType 24488 24514	human foreskin fibroblasts
+T121	Anatomy 21077 21089	dopaminergic
+T122	CellType 24467 24479	feeder cells
+T123	Species 24488 24493	human
+T124	CellType 24482 24486	hFCs
+T125	CellLine 31241 31244	PA6
+T126	CellType 62 69	neurons
+T127	Species 220 225	human
+T128	CellLine 27499 27502	PA6
+T129	CellType 207 214	neurons
+T130	GeneProtein 30597 30601	Actb
+T131	CellType 238 242	hSCs
+T132	GeneProtein 16743 16747	FGF2
+T133	GeneProtein 1520 1540	tyrosine hydroxylase
+T134	CellType 16494 16504	stem cells
+T135	CellType 1469 1486	PA6 stromal cells
+T136	Species 28433 28439	rabbit
+T137	Anatomy 7066 7072	neural
+T138	GeneProtein 30586 30590	Sdha
+T139	Anatomy 7035 7048	hematopoietic
+T140	CellType 7080 7084	MSCs
+T141	CellType 27429 27434	hESCs
+T142	Anatomy 7050 7061	mesenchymal
+T143	GeneProtein 16749 16753	bFGF
+T144	Species 32223 32228	Human
+T145	Anatomy 1402 1410	neuronal
+T146	GeneProtein 26970 26974	bFGF
+T147	CellLine 27133 27136	PA6
+T148	Species 28390 28396	rabbit
+T149	CellType 1473 1486	stromal cells
+T150	GeneProtein 29042 29053	Engrailed 1
+T151	CellComponent 5141 5144	DNA
+T152	CellLine 11359 11362	PA6
+T153	Species 3898 3903	Human
+T154	GeneProtein 18237 18246	Calumenin
+T155	CellType 11405 11412	neurons
+T156	GeneProtein 5850 5870	tyrosine hydroxylase
+T157	CellType 4552 4574	pluripotent stem cells
+T158	CellType 26144 26153	PA6 cells
+T159	CellType 4564 4574	stem cells
+T160	Anatomy 3610 3616	neural
+T161	CellComponent 2587 2591	cDNA
+T162	GeneProtein 17300 17354	undifferentiated embryonic cell transcription factor 1
+T163	Anatomy 3203 3219	substantia nigra
+T164	CellComponent 30177 30181	cDNA
+T165	GeneProtein 11498 11502	SDIA
+T166	Anatomy 11554 11562	neuronal
+T167	CellType 11418 11422	ESCs
+T168	CellType 11392 11412	dopaminergic neurons
+T169	GeneProtein 11741 11754	β-III-tubulin
+T170	CellType 11327 11347	murine stromal cells
+T171	CellComponent 31959 31962	RNA
+T172	Anatomy 11334 11341	stromal
+T173	CellType 4308 4313	hESCs
+T174	CellLine 25846 25849	PA6
+T175	GeneProtein 11733 11739	nestin
+T176	CellLine 26673 26676	PA6
+T177	GeneProtein 31274 31280	papain
+T178	GeneProtein 18248 18252	Calu
+T179	GeneProtein 18258 18284	soluble thymidine kinase 1
+T180	GeneProtein 18286 18289	Tk1
+T181	CellType 8702 8709	neurons
+T182	GeneProtein 15896 15901	Hesx1
+T183	Anatomy 25779 25787	neuronal
+T184	CellType 25992 26001	DA neuron
+T185	GeneProtein 18181 18196	Nanos homolog 1
+T186	CellType 15955 15962	ES cell
+T187	GeneProtein 18230 18234	Mdfi
+T188	GeneProtein 18198 18204	Nanos1
+T189	GeneProtein 18207 18228	MyoD family inhibitor
+T190	GeneProtein 15861 15894	homeo box expressed in ES cells 1
+T191	GeneProtein 11458 11496	stromal cell-derived inducing activity
+T192	CellType 16091 16110	embryonic stem cell
+T193	GeneProtein 16051 16056	Hesx1
+T194	CellType 11537 11542	hESCs
+T195	CellComponent 32249 32252	RNA
+T196	CellType 765 772	neurons
+T197	CellType 11621 11630	PA6 cells
+T198	Species 1191 1196	human
+T199	GeneProtein 9347 9350	VIP
+T200	Species 1814 1819	human
+T201	GeneProtein 9294 9345	galanin-, melatonin-, vasoactive intestinal peptide
+T202	CellType 3203 3240	substantia nigra dopaminergic neurons
+T203	CellType 25779 25787	neuronal
+T204	CellType 1550 1570	dopaminergic neurons
+T205	CellType 16045 16049	ESCs
+T206	CellComponent 32356 32360	cRNA
+T207	CellLine 11621 11624	PA6
+T208	Anatomy 1197 1206	embryonic
+T209	CellComponent 31983 31986	RNA
+T210	CellType 16033 16049	pluripotent ESCs
+T211	CellType 3220 3240	dopaminergic neurons
+T212	CellType 24545 24551	Feeder
+T213	CellType 16968 16980	feeder cells
+T214	GeneProtein 16566 16598	Zic family member 3 heterotaxy 1
+T215	Species 25943 25948	mouse
+T216	CellType 3475 3495	dopaminergic neurons
+T217	Anatomy 2296 2304	neuronal
+T218	CellType 24822 24826	hFCs
+T219	Anatomy 8567 8579	dopaminergic
+T220	GeneProtein 30747 30752	Gapdh
+T221	CellType 4217 4237	dopaminergic neurons
+T222	CellType 5831 5838	neurons
+T223	GeneProtein 17709 17715	Lefty1
+T224	CellType 5850 5900	tyrosine hydroxylase-positive dopaminergic neurons
+T225	GeneProtein 30734 30736	Th
+T226	GeneProtein 6217 6222	Tdgf1
+T227	GeneProtein 17674 17707	left-right determination factor 1
+T228	CellType 220 236	human stem cells
+T229	CellLine 1469 1472	PA6
+T230	CellType 4193 4205	neural cells
+T231	CellType 3898 3924	Human embryonic stem cells
+T232	CellType 4230 4237	neurons
+T233	Anatomy 4193 4199	neural
+T234	GeneProtein 30760 30764	Msx1
+T235	GeneProtein 17663 17668	Ctbp2
+T236	GeneProtein 6178 6215	teratocarcinoma-derived growth factor
+T237	CellComponent 31012 31015	RNA
+T238	GeneProtein 30754 30758	Actb
+T239	CellType 31100 31104	hFCs
+T240	Anatomy 4337 4343	neural
+T241	GeneProtein 28332 28349	mouse anti-Oct3/4
+T242	Anatomy 3451 3460	embryonic
+T243	Anatomy 7139 7148	carcinoma
+T244	CellType 4337 4349	neural cells
+T245	GeneProtein 28343 28349	Oct3/4
+T246	Species 3445 3450	human
+T247	CellType 7156 7160	EGCs
+T248	GeneProtein 6118 6168	signal transducer and activator of transcription 3
+T249	GeneProtein 16220 16269	Gremlin 1 homolog, cysteine knot superfamily gene
+T250	GeneProtein 6109 6115	Oct3/4
+T251	GeneProtein 6225 6236	Enk-pending
+T252	Species 27952 27958	donkey
+T253	Species 27964 27970	rabbit
+T254	GeneProtein 6170 6175	Stat3
+T255	Anatomy 7977 7985	neuronal
+T256	GeneProtein 16271 16276	Grem1
+T257	GeneProtein 21519 21523	Sdha
+T258	GeneProtein 21576 21580	Msx1
+T259	GeneProtein 21585 21590	Pitx2
+T260	GeneProtein 21566 21570	Actb
+T261	GeneProtein 29471 29475	Sdha
+T262	GeneProtein 21572 21574	Th
+T263	CellType 7015 7025	stem cells
+T264	Species 24246 24251	Human
+T265	GeneProtein 21510 21517	Aldh1a1
+T266	GeneProtein 21534 21540	Nestin
+T267	GeneProtein 24970 24979	basic FGF
+T268	GeneProtein 21525 21529	Tubb
+T269	Species 22602 22607	Human
+T270	GeneProtein 29665 29671	Nestin
+T271	GeneProtein 29477 29500	succinate dehydrogenase
+T272	Species 24952 24957	human
+T273	GeneProtein 30725 30732	Aldh1a1
+T274	GeneProtein 24952 24979	human recombinant basic FGF
+T275	Anatomy 22843 22848	eural
+T276	Anatomy 8023 8031	neuronal
+T277	GeneProtein 6312 6336	DNA methyltransferase 3B
+T278	GeneProtein 6338 6344	Dnmt3b
+T279	GeneProtein 6246 6300	undifferentiated embryonic cell transcription factor 1
+T280	GeneProtein 6302 6306	Utf1
+T281	CellType 6465 6491	undifferentiated stem cell
+T282	GeneProtein 19475 19479	Dlk1
+T283	GeneProtein 29752 29759	β-actin
+T284	GeneProtein 19383 19388	Nanog
+T285	CellLine 18311 18315	SA02
+T286	GeneProtein 19374 19378	Utf1
+T287	CellLine 1236 1240	SA02
+T288	GeneProtein 8532 8537	VMAT2
+T289	Anatomy 19145 19157	dopaminergic
+T290	GeneProtein 9272 9280	Dickkopf
+T291	CellType 1219 1224	hESCs
+T292	CellType 8592 8599	neurons
+T293	GeneProtein 29354 29396	aldehyde dehydrogenase 1 family, member A1
+T294	GeneProtein 29345 29352	Aldh1A1
+T295	GeneProtein 29584 29593	β-tubulin
+T296	GeneProtein 29578 29582	Tubb
+T297	CellType 1191 1217	human embryonic stem cells
+T298	GeneProtein 29746 29750	Actb
+T299	CellType 1207 1217	stem cells
+T300	Species 10 15	Human
+T301	CellType 10 26	Human stem cells
+T302	CellType 16 26	stem cells
+T303	GeneProtein 9316 9345	vasoactive intestinal peptide
+T304	GeneProtein 6895 6901	Oct3/4
+T305	GeneProtein 19468 19473	Pitx2
+T306	GeneProtein 29927 29931	Msx1
+T307	GeneProtein 29933 29979	homolog of Drosophila muscle segment homolog 1
+T308	GeneProtein 27971 27974	IgG
+T309	GeneProtein 8491 8494	DAT
+T310	GeneProtein 8469 8489	dopamine transporter
+T311	GeneProtein 21503 21508	Gadph
+T312	Anatomy 8016 8022	neural
+T313	CellType 8108 8115	neurons
+T314	Anatomy 7849 7857	neuronal
+T315	CellType 7165 7169	ECCs
+T316	Anatomy 7998 8004	axonal
+T317	GeneProtein 11242 11248	OCT3/4
+T318	GeneProtein 16531 16554	Gap junction protein α1
+T319	CellType 16365 16369	ESCs
+T320	GeneProtein 27952 27974	donkey anti-rabbit IgG
+T321	GeneProtein 8386 8388	TH
+T322	Species 28004 28009	mouse
+T323	GeneProtein 8364 8384	tyrosine hydroxylase
+T324	Species 28332 28337	mouse
+T325	CellType 8282 8302	dopaminergic neurons
+T326	GeneProtein 18115 18140	high-mobility group box 2
+T327	GeneProtein 8436 8460	amino acid decarboxylase
+T328	GeneProtein 8462 8466	AADC
+T329	CellType 8295 8302	neurons
+T330	GeneProtein 6913 6918	Nanog
+T331	GeneProtein 6903 6908	Stat3
+T332	CellComponent 22227 22230	DNA
+T333	GeneProtein 19484 19488	Msx1
+T334	Species 11327 11333	murine
+T335	GeneProtein 11209 11213	Ki67
+T336	CellType 11317 11321	ESCs
+T337	Anatomy 22842 22848	neural
+T338	CellType 4593 4600	neurons
+T339	CellType 3926 3931	hESCs
+T340	CellType 4580 4600	post-mitotic neurons
+T341	Anatomy 10114 10120	neural
+T342	GeneProtein 30539 30543	Sox2
+T343	GeneProtein 9354 9391	cAMP response element-binding protein
+T344	CellType 26673 26682	PA6 cells
+T345	GeneProtein 28953 28957	Sox2
+T346	GeneProtein 18003 18009	Dnmt3a
+T347	CellType 7129 7154	embryonic carcinoma cells
+T348	CellType 27661 27670	PA6 cells
+T349	Species 27778 27784	donkey
+T350	GeneProtein 28433 28447	rabbit anti-TH
+T351	CellType 18307 18310	hES
+T352	CellComponent 22291 22294	DNA
+T353	Species 23461 23466	human
+T354	Anatomy 24252 24261	embryonic
+T355	CellComponent 22356 22359	DNA
+T356	CellType 22163 22183	dopaminergic neurons
+T357	CellType 22176 22183	neurons
+T358	Anatomy 7862 7874	dopaminergic
+T359	GeneProtein 21665 21669	Tubb
+T360	GeneProtein 21844 21849	Gapdh
+T361	GeneProtein 21671 21675	Actb
+T362	GeneProtein 28390 28406	rabbit anti-Ki67
+T363	GeneProtein 17956 17961	Nanog
+T364	GeneProtein 28959 28968	SRY-box 2
+T365	GeneProtein 18012 18071	MutS homolog 2, colon cancer, nonpolyposis type 1 (E. coli)
+T366	CellLine 27661 27664	PA6
+T367	GeneProtein 18142 18147	Hmgb2
+T368	GeneProtein 18073 18077	Msh2
+T369	GeneProtein 28402 28406	Ki67
+T370	GeneProtein 17963 18001	DNA (cytosine-5-)-methyltransferase 3α
+T371	GeneProtein 18108 18112	Thy1
+T372	Anatomy 23848 23861	intracerebral
+T373	Anatomy 23753 23761	neuronal
+T374	Anatomy 7129 7138	embryonic
+T375	Anatomy 24217 24234	neurodegenerative
+T376	Anatomy 24204 24216	neurological
+T377	GeneProtein 30676 30680	Sox2
+T378	Species 23872 23877	human
+T379	GeneProtein 30662 30667	Pitx2
+T380	Anatomy 23935 23942	animals
+T381	GeneProtein 30056 30102	paired-like homeodomain transcription factor 2
+T382	GeneProtein 30049 30054	Pitx2
+T383	CellComponent 30217 30220	RNA
+T384	GeneProtein 18080 18106	Thy-1 cell surface antigen
+T385	GeneProtein 19203 19207	SDIA
+T386	CellType 18675 18686	testis cell
+T387	CellType 11977 11982	hESCs
+T388	CellType 18802 18807	hESCs
+T389	Anatomy 18675 18681	testis
+T390	CellType 20967 20972	hESCs
+T391	GeneProtein 11760 11762	TH
+T392	CellType 11803 11810	neurons
+T393	CellType 11790 11810	dopaminergic neurons
+T394	CellType 18785 18807	undifferentiated hESCs
+T395	Anatomy 20081 20093	dopaminergic
+T396	CellType 18909 18912	hES
+T397	Anatomy 19582 19601	dopaminergic system
+T398	CellType 19099 19104	hESCs
+T399	CellType 18996 19006	stem cells
+T400	Anatomy 20922 20934	dopaminergic
+T401	CellType 11988 11993	hESCs
+T402	CellType 12033 12041	neuronal
+T403	GeneProtein 18174 18178	Tcf3
+T404	Anatomy 10175 10183	neuronal
+T405	CellType 18771 18781	stem cells
+T406	Anatomy 18666 18670	skin
+T407	GeneProtein 18150 18172	transcription factor 3
+T408	CellLine 18913 18917	SA02
+T409	GeneProtein 29221 29226	Gapdh
+T410	GeneProtein 29228 29269	glyceraldehydes-3-phosphate dehydrogenase
+T411	CellType 24545 24557	Feeder cells
+T412	CellType 12382 12389	neurons
+T413	GeneProtein 12370 12372	TH
+T414	CellType 12287 12292	hESCs
+T415	Anatomy 10121 10129	neuronal
+T416	GeneProtein 30610 30615	Gapdh
+T417	Species 10147 10152	human
+T418	CellType 27345 27350	hESCs
+T419	Anatomy 25949 25957	calvaria
+T420	GeneProtein 16600 16604	Zic3
+T421	GeneProtein 6064 6107	POU domain, class 5, transcription factor 1
+T422	CellType 5902 5912	Stem cells
+T423	CellLine 10808 10812	SA02
+T424	CellLine 10814 10827	Sahlgrenska 2
+T425	GeneProtein 16292 16300	Cktsf1b1
+T426	GeneProtein 19352 19357	Hesx1
+T427	GeneProtein 16305 16310	Dand2
+T428	CellType 27480 27485	hESCs
+T429	CellType 8898 8918	dopaminergic neurons
+T430	GeneProtein 16711 16741	Basic fibroblast growth factor
+T431	GeneProtein 16677 16682	Fgfr2
+T432	GeneProtein 16640 16675	fibroblast growth factor receptor 2
+T433	CellType 27446 27450	hFCs
+T434	CellType 16968 16974	feeder
+T435	Anatomy 24494 24502	foreskin
+T436	GeneProtein 19366 19372	Dnmt3b
+T437	GeneProtein 19359 19364	Grem1
+T438	CellType 8911 8918	neurons
+T439	CellType 8942 8953	progenitors
+T440	CellType 8689 8709	dopaminergic neurons
+T441	CellType 25995 26002	neurons
+T442	CellType 24503 24514	fibroblasts
+T443	GeneProtein 20483 20488	Nanog
+T444	GeneProtein 21392 21397	Nanog
+T445	GeneProtein 21384 21387	En1
+T446	GeneProtein 21378 21382	Sox2
+T447	Anatomy 21068 21076	neuronal
+T448	Anatomy 11875 11881	neural
+T449	Anatomy 11705 11713	neuronal

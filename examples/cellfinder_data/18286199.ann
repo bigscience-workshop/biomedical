@@ -1,0 +1,552 @@
+T1	Species 24042 24047	human
+T2	Anatomy 18639 18644	derma
+T3	CellType 194 199	hESCs
+T4	Species 309 314	human
+T5	Anatomy 315 321	neural
+T6	CellType 1270 1277	neurons
+T7	Species 23876 23882	monkey
+T8	CellType 322 332	stem cells
+T9	CellType 23883 23887	ESCs
+T10	CellType 309 332	human neural stem cells
+T11	GeneProtein 7855 7859	Oct4
+T12	Anatomy 28781 28787	female
+T13	Anatomy 20350 20366	brain parenchyma
+T14	CellLine 21739 21743	SD56
+T15	GeneProtein 28397 28404	trypsin
+T16	CellType 20570 20577	progeny
+T17	CellType 968 979	radial glia
+T18	CellType 19861 19866	hNSCs
+T19	GeneProtein 28650 28657	trypsin
+T20	CellLine 17747 17751	SD56
+T21	Anatomy 16043 16048	blood
+T22	CellType 1294 1310	oligodendrocytes
+T23	CellComponent 28633 28644	chromosomes
+T24	Anatomy 1729 1745	brain parenchyma
+T25	CellType 1882 1898	neural stem cell
+T26	CellLine 19769 19773	SD56
+T27	CellType 11504 11509	hNSCs
+T28	CellType 315 330	neural stem cel
+T29	GeneProtein 12018 12023	MAP-2
+T30	GeneProtein 12025 12029	NCAM
+T31	CellLine 9605 9609	SD56
+T32	GeneProtein 11997 12016	β-tubulin class III
+T33	Anatomy 2628 2638	cord blood
+T34	CellType 12126 12131	hNSCs
+T35	GeneProtein 12158 12161	GAD
+T36	GeneProtein 12034 12059	medium-size neurofilament
+T37	Anatomy 13307 13313	tumors
+T38	Anatomy 20356 20366	parenchyma
+T39	GeneProtein 19973 19977	Oct4
+T40	GeneProtein 12175 12177	TH
+T41	CellLine 19656 19660	SD56
+T42	Anatomy 13397 13411	subcutaneously
+T43	Anatomy 2633 2638	blood
+T44	Anatomy 8095 8101	female
+T45	GeneProtein 16954 16960	CNPase
+T46	Species 13435 13439	rats
+T47	GeneProtein 7864 7869	Nanog
+T48	Species 28852 28856	rats
+T49	CellType 16799 16803	NSCs
+T50	GeneProtein 19981 19986	Nanog
+T51	Species 12735 12739	rats
+T52	CellType 12909 12914	hNSCs
+T53	CellType 7768 7773	hNSCs
+T54	CellType 16836 16846	astrocytes
+T55	CellLine 13291 13295	SD56
+T56	GeneProtein 19877 19883	nestin
+T57	GeneProtein 19885 19893	vimentin
+T58	CellType 19902 19914	radial glial
+T59	CellType 12789 12794	hESCs
+T60	CellLine 12984 12988	SD56
+T61	GeneProtein 19922 19926	3CB2
+T62	CellType 23415 23427	neural cells
+T63	Anatomy 23550 23574	rostral migratory stream
+T64	CellType 20021 20026	hNSCs
+T65	CellLine 20298 20302	SD56
+T66	Anatomy 20260 20266	flanks
+T67	CellType 20298 20308	SD56 hNSCs
+T68	CellType 20303 20308	hNSCs
+T69	Species 20218 20224	brains
+T70	Anatomy 20249 20255	brains
+T71	CellType 2633 2638	blood
+T72	CellType 3623 3627	ESCs
+T73	Anatomy 25849 25858	embryonic
+T74	Anatomy 3557 3571	neural lineage
+T75	CellComponent 35298 35304	nuclei
+T76	CellType 21695 21699	NSCs
+T77	CellType 3541 3546	hESCs
+T78	CellType 8175 8196	neural precursor cell
+T79	CellType 22803 22819	oligodendrocytes
+T80	Species 29924 29928	rats
+T81	Anatomy 8175 8181	neural
+T82	CellType 13296 13301	hNSCs
+T83	GeneProtein 13124 13129	Nanog
+T84	Anatomy 6981 6987	neural
+T85	Species 6882 6887	mouse
+T86	Anatomy 6914 6926	neurospheres
+T87	CellType 6981 6993	neural cells
+T88	GeneProtein 35823 35836	Transcriptase
+T89	CellType 22788 22798	astrocytes
+T90	CellType 6835 6840	hNSCs
+T91	CellType 8948 8955	progeny
+T92	CellType 17747 17757	SD56 hNSCs
+T93	GeneProtein 13114 13119	Oct-4
+T94	CellType 11318 11334	oligodendrocytes
+T95	GeneProtein 11413 11417	GFAP
+T96	Species 17877 17881	rats
+T97	CellType 13291 13301	SD56 hNSCs
+T98	CellType 15661 15666	hNSCs
+T99	GeneProtein 16830 16834	GFAP
+T100	Anatomy 17902 17911	forelimbs
+T101	Anatomy 15749 15757	striatum
+T102	Anatomy 13383 13392	forebrain
+T103	GeneProtein 8263 8267	3CB2
+T104	GeneProtein 8217 8225	Vimentin
+T105	GeneProtein 8205 8211	nestin
+T106	CellType 12249 12259	astrocytes
+T107	GeneProtein 11349 11367	galactocerebrocide
+T108	CellType 15489 15506	GABAergic neurons
+T109	CellType 11419 11429	astrocytes
+T110	Anatomy 12527 12533	neural
+T111	CellType 8238 8255	radial glial cell
+T112	CellLine 23040 23044	SD56
+T113	Anatomy 3765 3773	rosettes
+T114	CellType 23006 23010	NSCs
+T115	CellType 2802 2812	stem cells
+T116	CellType 4005 4019	neural progeny
+T117	GeneProtein 4985 4988	EGF
+T118	GeneProtein 12116 12119	MBP
+T119	Species 37324 37328	Rats
+T120	Anatomy 3951 3957	neural
+T121	Anatomy 37442 37451	forelimbs
+T122	CellType 13834 13839	hNSCs
+T123	Species 13858 13863	human
+T124	CellType 7357 7362	hNSCs
+T125	CellLine 13829 13833	SD56
+T126	Anatomy 13756 13759	SVZ
+T127	GeneProtein 11942 11948	nestin
+T128	CellComponent 13873 13880	nuclear
+T129	GeneProtein 17014 17022	GAD65/67
+T130	CellType 12098 12114	oligodendrocytes
+T131	Anatomy 3829 3840	neural tube
+T132	CellLine 22687 22691	SD56
+T133	CellType 22692 22697	hNSCs
+T134	Anatomy 7031 7043	neurospheres
+T135	CellLine 25765 25767	H9
+T136	CellType 6860 6865	hESCs
+T137	CellType 22687 22697	SD56 hNSCs
+T138	Species 25843 25848	mouse
+T139	CellType 6850 6855	hESCs
+T140	CellType 22779 22786	neurons
+T141	Anatomy 22650 22660	mesodermal
+T142	GeneProtein 26075 26079	bFGF
+T143	GeneProtein 12304 12308	TuJ1
+T144	GeneProtein 12265 12267	GC
+T145	GeneProtein 12427 12433	nestin
+T146	GeneProtein 12410 12414	TuJ1
+T147	CellType 4934 4939	hESCs
+T148	CellType 12072 12082	astrocytes
+T149	CellType 4790 4795	hESCs
+T150	GeneProtein 37141 37146	Nanog
+T151	CellType 24152 24156	ESCs
+T152	CellType 19774 19779	hNSCs
+T153	CellType 24048 24052	ESCs
+T154	Anatomy 17096 17104	striatum
+T155	Anatomy 17083 17089	cortex
+T156	CellType 18018 18028	SD56 hNSCs
+T157	CellLine 14504 14508	SD56
+T158	CellType 17271 17281	SD56 hNSCs
+T159	GeneProtein 14532 14536	hNuc
+T160	Species 17593 17597	rats
+T161	CellType 11894 11899	hNSCs
+T162	Anatomy 14902 14907	blood
+T163	GeneProtein 15544 15553	glutamate
+T164	CellType 17276 17281	hNSCs
+T165	Anatomy 14302 14310	striatum
+T166	GeneProtein 16016 16021	GluT1
+T167	CellType 14504 14514	SD56 hNSCs
+T168	Anatomy 14434 14440	brains
+T169	Anatomy 2628 2632	cord
+T170	GeneProtein 26857 26864	trypsin
+T171	GeneProtein 30940 30947	trypsin
+T172	GeneProtein 11248 11252	TuJ1
+T173	Anatomy 19491 19500	forelimbs
+T174	CellType 2628 2638	cord blood
+T175	GeneProtein 11295 11299	GFAP
+T176	GeneProtein 26055 26062	heparin
+T177	CellType 2780 2812	human-derived somatic stem cells
+T178	GeneProtein 26586 26589	EGF
+T179	GeneProtein 24289 24295	nestin
+T180	CellType 27712 27717	hNSCs
+T181	CellType 161 173	Neural cells
+T182	CellType 22591 22601	SD56 cells
+T183	Anatomy 22636 22646	endodermal
+T184	Species 24038 24047	non-human
+T185	Anatomy 2893 2899	neural
+T186	CellLine 17271 17275	SD56
+T187	CellType 28135 28140	hNSCs
+T188	CellType 19769 19779	SD56 hNSCs
+T189	GeneProtein 37161 37166	FOXa2
+T190	CellType 14509 14514	hNSCs
+T191	GeneProtein 16312 16316	Ki67
+T192	Anatomy 33869 33876	rostral
+T193	CellType 11037 11057	dopaminergic neurons
+T194	Anatomy 6695 6703	mesoderm
+T195	GeneProtein 33198 33209	Anti-Nestin
+T196	GeneProtein 16378 16382	hNuc
+T197	Anatomy 4135 4147	rat striatum
+T198	GeneProtein 11019 11021	TH
+T199	Anatomy 4139 4147	striatum
+T200	Anatomy 30542 30546	MCAO
+T201	GeneProtein 15211 15214	DCX
+T202	GeneProtein 15120 15124	Ki67
+T203	Anatomy 30525 30533	cerebral
+T204	GeneProtein 15158 15164	nestin
+T205	CellType 23045 23050	hNSCs
+T206	Anatomy 2640 2644	bone
+T207	Species 31520 31524	rats
+T208	Anatomy 23415 23421	neural
+T209	Anatomy 4005 4011	neural
+T210	GeneProtein 955 963	vimentin
+T211	CellType 1889 1899	stem cells
+T212	GeneProtein 724 754	basic fibroblast growth factor
+T213	CellType 2112 2124	neural cells
+T214	Species 4106 4110	mice
+T215	GeneProtein 693 716	epidermal growth factor
+T216	CellType 8238 8250	radial glial
+T217	GeneProtein 718 721	EGF
+T218	CellType 975 980	glial
+T219	CellType 11179 11191	nestin+ cell
+T220	CellType 23040 23050	SD56 hNSCs
+T221	Anatomy 2112 2118	neural
+T222	GeneProtein 947 953	nestin
+T223	GeneProtein 21648 21651	EGF
+T224	GeneProtein 21656 21660	FGF2
+T225	CellType 12310 12317	neurons
+T226	GeneProtein 12243 12247	GFAP
+T227	CellLine 21523 21526	LC1
+T228	CellType 15037 15042	hNSCs
+T229	Anatomy 15013 15020	vessels
+T230	Anatomy 18469 18482	contralateral
+T231	GeneProtein 11443 11449	nestin
+T232	Anatomy 15921 15929	striatum
+T233	Species 15953 15958	human
+T234	CellType 18023 18028	hNSCs
+T235	Anatomy 12713 12719	tumors
+T236	CellType 9229 9236	progeny
+T237	CellLine 18018 18022	SD56
+T238	Species 13574 13578	rats
+T239	Anatomy 13735 13754	subventricular zone
+T240	CellType 16997 17006	GABAergic
+T241	GeneProtein 13888 13892	hNuc
+T242	Anatomy 2640 2651	bone marrow
+T243	CellType 12989 12994	hNSCs
+T244	Anatomy 3951 3964	neural tissue
+T245	CellType 23387 23392	hESCs
+T246	CellType 13709 13719	precursors
+T247	CellType 16978 16982	NSCs
+T248	GeneProtein 6573 6578	Oct-4
+T249	CellType 4226 4241	precursor cells
+T250	CellType 4290 4302	neural cells
+T251	CellType 12984 12994	SD56 hNSCs
+T252	CellType 12680 12685	hNSCs
+T253	CellType 4530 4535	hESCs
+T254	CellType 4214 4241	tumorigenic precursor cells
+T255	Anatomy 3337 3352	inner cell mass
+T256	CellType 11606 11611	hNSCs
+T257	GeneProtein 5895 5902	trypsin
+T258	Anatomy 15834 15844	parenchyma
+T259	GeneProtein 4874 4878	bFGF
+T260	GeneProtein 9247 9253	nestin
+T261	CellType 15499 15506	neurons
+T262	CellType 15463 15468	hNSCs
+T263	CellType 15797 15802	hNSCs
+T264	GeneProtein 10742 10774	microtubule-associated protein 2
+T265	CellType 10901 10915	GABAergic cell
+T266	GeneProtein 10732 10736	NF-M
+T267	GeneProtein 32816 32820	TuJ1
+T268	Anatomy 18088 18101	contralateral
+T269	GeneProtein 10705 10730	medium-size neurofilament
+T270	Anatomy 11914 11920	neural
+T271	GeneProtein 37168 37173	HNF3B
+T272	CellType 8155 8160	hNSCs
+T273	GeneProtein 10684 10703	β-tubulin class III
+T274	Species 21494 21500	murine
+T275	GeneProtein 24360 24364	Oct4
+T276	CellType 30866 30871	hNSCs
+T277	CellType 13679 13719	transit amplifying endogenous precursors
+T278	GeneProtein 10628 10633	N-CAM
+T279	GeneProtein 17048 17057	glutamate
+T280	Species 30361 30365	rats
+T281	CellType 21494 21504	murine ESC
+T282	GeneProtein 24326 24330	Sox1
+T283	Anatomy 30356 30360	male
+T284	GeneProtein 6206 6210	3CB2
+T285	Species 30335 30365	Sprague Dawley adult male rats
+T286	CellType 2794 2812	somatic stem cells
+T287	Anatomy 37530 37539	forelimbs
+T288	GeneProtein 15197 15209	doublecortin
+T289	Anatomy 30518 30540	middle cerebral artery
+T290	CellLine 22591 22595	SD56
+T291	Anatomy 18855 18863	Forelimb
+T292	GeneProtein 33360 33372	doublecortin
+T293	CellType 19027 19032	hNSCs
+T294	CellType 10393 10400	neurons
+T295	Anatomy 19197 19210	contralateral
+T296	CellType 1159 1164	hNSCs
+T297	Anatomy 1107 1115	endoderm
+T298	CellType 11277 11287	astrocytic
+T299	Anatomy 1095 1103	mesoderm
+T300	GeneProtein 1051 1056	Nanog
+T301	GeneProtein 26428 26439	transferrin
+T302	CellType 23641 23653	neural cells
+T303	CellType 27650 27655	hNSCs
+T304	GeneProtein 37113 37120	Notch-1
+T305	Anatomy 23641 23647	neural
+T306	CellType 488 498	stem cells
+T307	Anatomy 23678 23686	rosettes
+T308	Species 2780 2785	human
+T309	GeneProtein 26920 26927	trypsin
+T310	CellType 19679 19684	hESCs
+T311	Anatomy 14337 14345	cerebral
+T312	Anatomy 14330 14352	middle cerebral artery
+T313	Anatomy 14346 14352	artery
+T314	GeneProtein 10842 10845	MBP
+T315	Anatomy 24620 24630	parenchyma
+T316	CellType 10402 10412	astrocytes
+T317	GeneProtein 33241 33254	Anti-vimentin
+T318	CellComponent 20115 20124	chromosom
+T319	CellLine 16450 16454	SD56
+T320	CellLine 1452 1456	SD56
+T321	GeneProtein 33423 33432	Anti-Ki67
+T322	CellLine 1239 1243	SD56
+T323	GeneProtein 33374 33377	DCX
+T324	CellType 24602 24607	hNSCs
+T325	GeneProtein 33032 33050	galactocerebrocide
+T326	Anatomy 16264 16270	neural
+T327	GeneProtein 33133 33159	Glucose Transporter type 1
+T328	GeneProtein 33355 33372	Anti-doublecortin
+T329	CellType 10417 10433	oligodendrocytes
+T330	GeneProtein 33090 33096	CNPase
+T331	CellType 24517 24529	neural cells
+T332	GeneProtein 10776 10781	MAP-2
+T333	GeneProtein 33203 33209	Nestin
+T334	GeneProtein 33287 33296	Anti-3CB2
+T335	GeneProtein 10796 10800	GFAP
+T336	GeneProtein 33292 33296	3CB2
+T337	CellLine 24784 24788	SD56
+T338	CellType 10787 10794	neurons
+T339	CellType 26650 26655	hNSCs
+T340	Anatomy 11560 11582	central nervous system
+T341	GeneProtein 11369 11371	GC
+T342	CellType 11560 11587	central nervous system cell
+T343	CellType 13928 13938	SD56 hNSCs
+T344	CellType 13933 13938	hNSCs
+T345	Anatomy 16043 16056	blood vessels
+T346	CellLine 13928 13932	SD56
+T347	CellType 10 36	Human embryonic stem cells
+T348	CellType 83 95	neural cells
+T349	CellType 38 43	hESCs
+T350	CellType 1244 1249	hNSCs
+T351	CellType 19649 19654	hNSCs
+T352	GeneProtein 33246 33254	vimentin
+T353	GeneProtein 1043 1047	Oct4
+T354	Anatomy 34000 34008	striatum
+T355	Anatomy 161 167	Neural
+T356	GeneProtein 10923 10950	glutamic acid decarboxylase
+T357	GeneProtein 10997 11017	tyrosine hydroxylase
+T358	CellLine 30861 30865	SD56
+T359	CellType 996 1001	hNSCs
+T360	CellType 13829 13839	SD56 hNSCs
+T361	GeneProtein 14923 14928	GluT1
+T362	Anatomy 24517 24523	neural
+T363	CellLine 29128 29132	SD56
+T364	Species 32762 32767	human
+T365	CellComponent 32768 32774	Nuclei
+T366	GeneProtein 33027 33050	Anti-galactocerebrocide
+T367	Anatomy 2669 2674	fetal
+T368	GeneProtein 32776 32780	hNuc
+T369	GeneProtein 32962 32966	GFAP
+T370	GeneProtein 32811 32820	Anti-TuJ1
+T371	GeneProtein 32879 32892	anti-GAD65/67
+T372	GeneProtein 32757 32774	Anti-human Nuclei
+T373	GeneProtein 33085 33096	Anti-CNPase
+T374	CellType 31040 31045	hNSCs
+T375	Anatomy 30534 30540	artery
+T376	GeneProtein 16503 16509	nestin
+T377	CellType 10851 10867	oligodendrocytes
+T378	CellType 6522 6527	hNSCs
+T379	GeneProtein 10820 10840	myelin basic protein
+T380	CellType 16595 16599	NSCs
+T381	GeneProtein 10952 10955	GAD
+T382	Anatomy 6360 6368	rosettes
+T383	GeneProtein 16572 16576	hNuc
+T384	GeneProtein 801 804	LIF
+T385	Anatomy 1627 1633	flanks
+T386	CellType 813 818	hNSCs
+T387	CellType 10805 10815	astrocytes
+T388	CellType 12279 12295	oligodendrocytes
+T389	CellType 931 935	NSCs
+T390	CellType 6462 6467	hESCs
+T391	GeneProtein 756 760	bFGF
+T392	Anatomy 83 89	neural
+T393	CellLine 9569 9573	SD56
+T394	CellType 12203 12222	NSC-derived progeny
+T395	Anatomy 14972 14980	striatum
+T396	Anatomy 4290 4296	neural
+T397	GeneProtein 33052 33054	GC
+T398	GeneProtein 37135 37139	Oct4
+T399	GeneProtein 9157 9163	nestin
+T400	GeneProtein 8934 8940	nestin
+T401	GeneProtein 32924 32960	Anti-glial fibrillary acidic protein
+T402	Anatomy 3372 3379	embryos
+T403	CellType 8787 8792	hNSCs
+T404	GeneProtein 766 799	leukemia inhibitory growth factor
+T405	GeneProtein 8546 8552	nestin
+T406	Anatomy 1616 1622	brains
+T407	CellType 9563 9568	hNSCs
+T408	Anatomy 1735 1745	parenchyma
+T409	CellType 9619 9624	hNSCs
+T410	CellLine 1871 1875	SD56
+T411	Anatomy 1882 1888	neural
+T412	Species 1876 1881	human
+T413	CellType 20715 20719	NSCs
+T414	Anatomy 20851 20860	embryonic
+T415	CellType 20861 20871	stem cells
+T416	CellType 20851 20871	embryonic stem cells
+T417	GeneProtein 16777 16781	TuJ1
+T418	Species 29856 29860	rats
+T419	GeneProtein 16742 16746	hNuc
+T420	Species 27857 27863	bovine
+T421	GeneProtein 16585 16588	DCX
+T422	Species 30065 30069	rats
+T423	CellType 21254 21258	NSCs
+T424	CellType 21081 21091	stem cells
+T425	CellType 1648 1653	hNSCs
+T426	Anatomy 1962 1968	tumors
+T427	CellType 1871 1899	SD56 human neural stem cells
+T428	CellType 623 628	hNSCs
+T429	CellType 7912 7917	hNSCs
+T430	CellType 647 652	hESCs
+T431	CellLine 636 640	SD56
+T432	CellType 9610 9615	hNSCs
+T433	Anatomy 16761 16769	neuronal
+T434	Anatomy 7883 7895	neurospheres
+T435	CellType 1239 1249	SD56 hNSCs
+T436	CellType 9669 9674	hNSCs
+T437	Species 10 15	Human
+T438	CellType 9451 9456	hNSCs
+T439	CellType 26 36	stem cells
+T440	CellType 7976 7981	hNSCs
+T441	Anatomy 16 25	embryonic
+T442	CellLine 7971 7975	SD56
+T443	GeneProtein 29213 29220	trypsin
+T444	CellType 29157 29162	hNSCs
+T445	Anatomy 29811 29825	subcutaneously
+T446	GeneProtein 15235 15239	TuJ1
+T447	GeneProtein 15313 15317	GFAP
+T448	Species 29006 29010	rats
+T449	CellType 29133 29138	hNSCs
+T450	Species 4828 4833	mouse
+T451	GeneProtein 12084 12088	GFAP
+T452	CellType 5062 5086	human fetal-derived NSCs
+T453	CellType 5082 5086	NSCs
+T454	CellType 15295 15305	astroglial
+T455	Anatomy 19468 19481	contralateral
+T456	GeneProtein 11953 11959	Notch1
+T457	Anatomy 19455 19466	ipsilateral
+T458	GeneProtein 4999 5002	LIF
+T459	Anatomy 5068 5073	fetal
+T460	GeneProtein 10597 10626	neural cell adhesion molecule
+T461	GeneProtein 10578 10584	nestin
+T462	Species 5062 5067	human
+T463	GeneProtein 4990 4994	bFGF
+T464	Anatomy 19296 19309	contralateral
+T465	CellType 11988 11995	neurons
+T466	Anatomy 27851 27856	fetal
+T467	CellType 10520 10525	hNSCs
+T468	GeneProtein 10586 10592	Notch1
+T469	CellComponent 28252 28263	chromosomes
+T470	Anatomy 10556 10562	neural
+T471	CellType 15371 15387	oligodendrocytes
+T472	GeneProtein 6132 6138	nestin
+T473	CellType 25495 25500	hNSCs
+T474	CellComponent 20781 20803	extracellular matrices
+T475	CellType 9846 9851	hNSCs
+T476	GeneProtein 15353 15359	CNPase
+T477	CellType 10074 10079	hNSCs
+T478	GeneProtein 5721 5732	collagenase
+T479	CellType 10353 10358	hNSCs
+T480	CellType 5949 5954	hNSCs
+T481	CellType 10489 10494	hNSCs
+T482	GeneProtein 15420 15423	GAD
+T483	CellType 4781 4786	hNSCs
+T484	GeneProtein 12061 12065	NF-M
+T485	Anatomy 23122 23132	parenchyma
+T486	GeneProtein 37176 37185	Brachyury
+T487	GeneProtein 36820 36824	MAP2
+T488	GeneProtein 6671 6676	foxa2
+T489	CellType 21909 21914	hNSCs
+T490	GeneProtein 36891 36894	MBP
+T491	GeneProtein 6657 6666	brachyury
+T492	CellType 25068 25073	hNSCs
+T493	GeneProtein 37071 37090	β-tubulin class III
+T494	GeneProtein 21797 21800	EGF
+T495	GeneProtein 37099 37105	Nestin
+T496	GeneProtein 11179 11185	nestin
+T497	CellType 11050 11057	neurons
+T498	CellType 21923 21927	NSCs
+T499	Anatomy 33881 33887	caudal
+T500	CellType 11232 11240	neuronal
+T501	GeneProtein 6583 6588	Nanog
+T502	GeneProtein 21811 21814	LIF
+T503	GeneProtein 36731 36735	GFAP
+T504	Anatomy 23832 23838	neural
+T505	Species 23861 23866	mouse
+T506	Anatomy 23693 23702	teratomas
+T507	GeneProtein 26622 26625	LIF
+T508	CellType 23784 23794	astrocytes
+T509	CellType 26111 26115	NSCs
+T510	CellType 1279 1289	astrocytes
+T511	CellType 26129 26134	hESCs
+T512	CellType 334 339	hNSCs
+T513	CellType 6186 6198	radial glial
+T514	CellType 16455 16460	hNSCs
+T515	Anatomy 18639 18645	dermal
+T516	CellType 18646 18657	fibroblasts
+T517	CellType 18787 18791	NSCs
+T518	Anatomy 18639 18657	dermal fibroblasts
+T519	GeneProtein 35481 35491	Polymerase
+T520	CellType 16450 16460	SD56 hNSCs
+T521	GeneProtein 36135 36145	polymerase
+T522	GeneProtein 15985 15989	hNuc
+T523	CellComponent 12350 12356	nuclei
+T524	GeneProtein 33128 33159	Anti-Glucose Transporter type 1
+T525	Anatomy 16205 16213	striatum
+T526	Anatomy 14036 14047	tumorigenic
+T527	CellType 16071 16076	hNSCs
+T528	Species 17376 17380	rats
+T529	Anatomy 16049 16056	vessels
+T530	CellType 14227 14232	hNSCs
+T531	CellType 16406 16411	hNSCs
+T532	GeneProtein 6152 6160	vimentin
+T533	GeneProtein 16392 16396	Ki67
+T534	CellType 25272 25277	hESCs
+T535	GeneProtein 33161 33167	Glut-1
+T536	GeneProtein 16486 16490	hNuc
+T537	Anatomy 34013 34019	cortex
+T538	Anatomy 20350 20365	brain parenchym
+T539	GeneProtein 32929 32960	glial fibrillary acidic protein
+T540	GeneProtein 32884 32892	GAD65/67
+T541	CellComponent 9399 9408	chromatid
+T542	GeneProtein 26408 26415	insulin
+T543	GeneProtein 26602 26606	bFGF
+T544	GeneProtein 33428 33432	Ki67
+T545	Anatomy 6708 6716	endoderm
+T546	CellType 6619 6624	hNSCs
+T547	CellType 22235 22240	hNSCs
+T548	GeneProtein 37092 37097	N-CAM
+T549	CellType 25253 25258	hNSCs
+T550	GeneProtein 37107 37111	NF-M
+T551	GeneProtein 21802 21806	bFGF
+T552	GeneProtein 35807 35812	RNase
