@@ -155,7 +155,7 @@ _LICENSE = ""
 _URLs = {
     "en_plain": "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
     "de_plain": "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
-    "en_de_plain": [
+    "muchmore - translation": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
@@ -203,7 +203,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             description="muchmore: plaintext of german abstracts",
         ),
         datasets.BuilderConfig(
-            name="en_de_plain",
+            name="muchmore - translation",
             version=VERSION,
             description="muchmore: plaintext of matched english + german abstracts",
         ),
@@ -271,13 +271,15 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 "abstract": datasets.Value("string"),
             })
 
-        elif self.config.name == "en_de_plain":
+        elif self.config.name == "muchmore - translation":
             features = datasets.Features({
-                "sample_id_prefix": datasets.Value("string"),
-                "sample_id_en": datasets.Value("string"),
-                "sample_id_de": datasets.Value("string"),
-                "abstract_en": datasets.Value("string"),
-                "abstract_de": datasets.Value("string"),
+                "en": datasets.Value("string"),
+                "de": datasets.Value("string"),
+                "metadata": {
+                    "sample_id_prefix": datasets.Value("string"),
+                    "sample_id_en": datasets.Value("string"),
+                    "sample_id_de": datasets.Value("string"),
+                }
             })
 
 
@@ -468,7 +470,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     "abstract": fp.read().decode(NATIVE_ENCODING),
                 }
 
-        elif self.config.name == "en_de_plain":
+        elif self.config.name == "muchmore - translation":
             sample_map = defaultdict(list)
             for file_name, fp in file_names_and_pointers:
                 if file_name.endswith("eng.abstr"):
@@ -492,10 +494,12 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 en_idx = 0 if sample_pair[0]["language"] == "en" else 1
                 de_idx = 0 if en_idx == 1 else 1
                 yield _id, {
-                    "sample_id_prefix": sample_id_prefix,
-                    "sample_id_en": sample_pair[en_idx]["sample_id"],
-                    "sample_id_de": sample_pair[de_idx]["sample_id"],
-                    "abstract_en": sample_pair[en_idx]["abstract"],
-                    "abstract_de": sample_pair[de_idx]["abstract"],
+                    "en": sample_pair[en_idx]["abstract"],
+                    "de": sample_pair[de_idx]["abstract"],
+                    "metadata": {
+                        "sample_id_prefix": sample_id_prefix,
+                        "sample_id_en": sample_pair[en_idx]["sample_id"],
+                        "sample_id_de": sample_pair[de_idx]["sample_id"],
+                    }
                 }
                 _id += 1
