@@ -37,6 +37,7 @@ Your imports go here; the only mandatory one is `datasets`, as methods and attri
 
 We have provided some import statements that we strongly recommend. Feel free to adapt; so long as the style-guide requirements are satisfied (Step 5), then you should be able to push your code.
 """
+from collections import defaultdict
 from pathlib import Path
 
 import datasets
@@ -60,6 +61,7 @@ The following variables are used to populate the dataset entry. Common ones incl
 """
 
 _DATASETNAME = "mlee"
+_UNIFIED_VIEW_NAME = "bigscience"
 
 _CITATION = """\
 @article{,
@@ -108,9 +110,33 @@ class MLEE(datasets.GeneratorBasedBuilder):
             version=VERSION,
             description=_DESCRIPTION,
         ),
+        datasets.BuilderConfig(
+            name=_UNIFIED_VIEW_NAME,
+            version=VERSION,
+            description=_DESCRIPTION,
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
+
+    _ENTITY_TYPES = {
+        "Anatomical_system",
+        "Cell",
+        "Cellular_component",
+        "DNA_domain_or_region",
+        "Developing_anatomical_structure",
+        "Drug_or_compound",
+        "Gene_or_gene_product",
+        "Immaterial_anatomical_entity",
+        "Multi-tissue_structure",
+        "Organ",
+        "Organism",
+        "Organism_subdivision",
+        "Organism_substance",
+        "Pathological_formation",
+        "Protein_domain_or_region",
+        "Tissue",
+    }
 
     """
     Step 4: Populate "information" about the dataset that creates a skeletal structure for an example within the dataset looks like.
@@ -180,7 +206,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                                 "ref_id": datasets.Value("string"),
                                 "role": datasets.Value("string"),
                             },
-                            "type": datasets.Value("string")
+                            "type": datasets.Value("string"),
                         }
                     ),
                     "equivalences": datasets.Sequence(  # Equiv line in brat
@@ -202,16 +228,88 @@ class MLEE(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource": {
-                                "name": datasets.Value("string"), # Name of the resource, e.g. "Wikipedia"
-                                "cuid": datasets.Value("string"), # ID in the resource, e.g. 534366
-                            },
-                            "text": datasets.Value("string"), # Human readable description/name of the entity, e.g. "Barack Obama"
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
+                            "text": datasets.Value(
+                                "string"
+                            ),  # Human readable description/name of the entity, e.g. "Barack Obama"
                         }
                     ),
                 },
             )
-
+        elif self.config.name == _UNIFIED_VIEW_NAME:
+            features = datasets.Features(
+                {
+                    "article_id": {
+                        "type": datasets.Value("string"),
+                        "id": datasets.Value("string"),
+                    },
+                    "text": datasets.Value("string"),
+                    "entities": datasets.Sequence(
+                        {
+                            "spans":
+                            # This will contain only one (start, end) pair in most cases.
+                            # Only use multiple pairs for discontiguous spans
+                            datasets.Sequence(
+                                {
+                                    "start": datasets.Value("int32"),  # inclusive
+                                    "end": datasets.Value("int32"),  # exclusive
+                                }
+                            ),
+                            "text": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "id": datasets.Value("string"),
+                            "db_refs": datasets.Sequence(
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "cuid": datasets.Value("string"),
+                                }
+                            ),
+                        }
+                    ),
+                    "event_triggers": datasets.Sequence(
+                        {
+                            "spans":
+                            # This will contain only one (start, end) pair in most cases.
+                            # Only use multiple pairs for discontiguous spans
+                            datasets.Sequence(
+                                {
+                                    "start": datasets.Value("int32"),  # inclusive
+                                    "end": datasets.Value("int32"),  # exclusive
+                                }
+                            ),
+                            "text": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "id": datasets.Value("string"),
+                        }
+                    ),
+                    "events": datasets.Sequence(  # E line in brat
+                        {
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "arguments": datasets.Sequence(
+                                {
+                                    "role": datasets.Value("string"),
+                                    "ref_id": datasets.Value("string"),
+                                }
+                            ),
+                        }
+                    ),
+                    "relations": datasets.Sequence(
+                        {
+                            "head": datasets.Value("string"),
+                            "tail": datasets.Value("string"),
+                        }
+                    ),
+                },
+            )
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -259,7 +357,11 @@ class MLEE(datasets.GeneratorBasedBuilder):
         my_urls = _URLs[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "train",
+            "train": data_dir
+            / "MLEE-1.0.2-rev1"
+            / "standoff"
+            / "development"
+            / "train",
             "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
             "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
         }
@@ -279,9 +381,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(
-        self, data_files: Path
-    ):
+    def _generate_examples(self, data_files: Path):
         """
         Step 6: Create a generator that yields (key, example) of the dataset of interest.
 
@@ -301,6 +401,54 @@ class MLEE(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 yield guid, self.parse_brat_file(txt_file)
+        elif self.config.name == _UNIFIED_VIEW_NAME:
+            txt_files = list(data_files.glob("*txt"))
+            for guid, txt_file in enumerate(txt_files):
+                yield guid, self.brat_parse_to_unified_schema(
+                    self.parse_brat_file(txt_file)
+                )
+
+    def brat_parse_to_unified_schema(self, brat_parse: Dict) -> Dict:
+        unified_example = {}
+
+        # identical
+        unified_example["article_id"] = brat_parse["article_id"]
+        unified_example["text"] = brat_parse["text"]
+        unified_example["events"] = brat_parse["events"]
+
+        # get normalizations
+        ref_id_to_normalizations = defaultdict(list)
+        for normalization in brat_parse["normalizations"]:
+            ref_id_to_normalizations[normalization["ref_id"]].append(
+                {
+                    "resource_name": normalization["resource_name"],
+                    "cuid": normalization["cuid"],
+                }
+            )
+
+        # separate entities and event triggers
+        unified_example["entities"] = []
+        unified_example["event_triggers"] = []
+        for ann in brat_parse["text_bound_annotations"]:
+            if ann["type"] in self._ENTITY_TYPES:
+                entity_ann = ann.copy()
+                entity_ann["db_refs"] = ref_id_to_normalizations[ann["id"]]
+                unified_example["entities"].append(entity_ann)
+            else:
+                unified_example["event_triggers"].append(ann.copy())
+
+        # massage relations
+        unified_example["relations"] = []
+        for ann in brat_parse["relations"]:
+            unified_example["relations"].append(
+                {
+                    "head": ann["head"]["ref_id"],
+                    "tail": ann["tail"]["ref_id"],
+                }
+            )
+
+        return unified_example
+
 
     def parse_brat_file(self, txt_file):
         example = {}
@@ -337,8 +485,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 span_str = fields[1].removeprefix(ann["type"] + " ")
                 for span in span_str.split(";"):
                     start, end = span.split()
-                    ann["spans"].append({"start": int(start),
-                                         "end": int(end)})
+                    ann["spans"].append({"start": int(start), "end": int(end)})
 
                 example["text_bound_annotations"].append(ann)
 
@@ -352,8 +499,10 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
                 ann["arguments"] = []
                 for role_ref_id in fields[1].split()[1:]:
-                    argument = {"role": (role_ref_id.split(":"))[0],
-                                "ref_id": (role_ref_id.split(":"))[1]}
+                    argument = {
+                        "role": (role_ref_id.split(":"))[0],
+                        "ref_id": (role_ref_id.split(":"))[1],
+                    }
                     ann["arguments"].append(argument)
 
                 example["events"].append(ann)
@@ -417,10 +566,8 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
                 ann["type"] = info[0]
                 ann["ref_id"] = info[1]
-                ann["resource"] = {
-                    "name": info[2].split(":")[0],
-                    "cuid": info[2].split(":")[1],
-                }
+                ann["resource_name"] = info[2].split(":")[0]
+                ann["cuid"] = info[2].split(":")[1]
                 example["normalizations"].append(ann)
 
         return example
