@@ -193,7 +193,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
         * data_dir
         * data_files
 
-        These will then be available in this class as `self.config.datadir` and/or
+        These will then be available in this class as `self.config.data_dir` and
         self.config.data_files`. For example,
 
           dataset = datasets.load_dataset("my_script", data_dir="/path/to/data")
