@@ -48,7 +48,7 @@ _URLs = {"biosses": "https://raw.githubusercontent.com/debajyotidatta/biomedical
 _VERSION = "1.0.0"
 
 
-class MQPDataset(datasets.GeneratorBasedBuilder):
+class Biosses(datasets.GeneratorBasedBuilder):
     """BIOSSES : Biomedical Semantic Similarity Estimation System"""
 
     VERSION = datasets.Version("1.0.0")
