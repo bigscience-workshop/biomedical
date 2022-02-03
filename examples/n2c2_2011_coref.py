@@ -40,8 +40,6 @@ The individual data files (inside the zip and tar archives)come in 4 types,
 * pairs (*.txt.pairs files): pairs of coreferent entities
 
 
-TODO: Figure out canonical train/val/test split
-TODO: Figure out license
 TODO: Figure out canonical coreference schema
 probably something like,
 * text
@@ -108,9 +106,11 @@ particular attention being paid to duplicates and enforcing consistency in the a
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "License"
+_LICENSE = "Data User Agreement"
 
 _VERSION = "1.0.0"
+
+
 
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
@@ -189,6 +189,12 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                     "split": "train",
                 },
             ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "split": "test",
+                },
+            ),
         ]
 
 
@@ -257,33 +263,40 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         """
         if self.config.name == "original":
 
-            _id = 0
+            if split=="train":
 
-            # These files have complete sample info
-            # (so we get a fresh `samples` defaultdict from each)
-            paths = [
-                os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
-            ]
-            for path in paths:
-                samples = self._read_tar_gz(path)
+                _id = 0
+
+                # These files have complete sample info
+                # (so we get a fresh `samples` defaultdict from each)
+                paths = [
+                    os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
+                    os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
+                ]
+                for path in paths:
+                    samples = self._read_tar_gz(path)
+                    for sample_id, sample in samples.items():
+                        yield _id, self._get_original_sample(sample_id, sample)
+                        _id += 1
+
+            elif split == "test":
+
+                _id = 0
+
+                # Information from these files has to be combined to create a full sample
+                # (so we pass the `samples` defaultdict back to the `_read_zip` method)
+                paths = [
+                    os.path.join(self.config.data_dir, "Task_1C.zip"),
+                    os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
+                ]
+                samples = defaultdict(dict)
+                for path in paths:
+                    samples = self._read_zip(path, samples=samples)
+
                 for sample_id, sample in samples.items():
                     yield _id, self._get_original_sample(sample_id, sample)
                     _id += 1
 
-            # Information from these files has to be combined to create a full sample
-            # (so we pass the `samples` defaultdict back to the `_read_zip` method)
-            paths = [
-                os.path.join(self.config.data_dir, "Task_1C.zip"),
-                os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
-            ]
-            samples = defaultdict(dict)
-            for path in paths:
-                samples = self._read_zip(path, samples=samples)
-
-            for sample_id, sample in samples.items():
-                yield _id, self._get_original_sample(sample_id, sample)
-                _id += 1
 
         elif self.config.name == _DATASETNAME:
             raise NotImplemented()
