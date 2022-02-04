@@ -3,7 +3,7 @@
 
 .PHONY: quality style
 
-check_dirs := promptsource
+check_dirs := examples templates
 
 # Check that source code meets quality standards
 

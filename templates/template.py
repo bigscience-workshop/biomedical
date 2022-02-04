@@ -37,11 +37,11 @@ Your imports go here; the only mandatory one is `datasets`, as methods and attri
 
 We have provided some import statements that we strongly recommend. Feel free to adapt; so long as the style-guide requirements are satisfied (Step 5), then you should be able to push your code.
 """
-import datasets
-import os  # useful for paths
-from typing import Iterable, Dict, List
 import logging
+import os  # useful for paths
+from typing import Dict, Iterable, List
 
+import datasets
 
 """
 Step 2: Create keyword descriptors for your dataset
@@ -81,7 +81,7 @@ _HOMEPAGE = "Homepage of the dataset"
 
 _LICENSE = "License"
 
-_URLs = {'your_dataset_name': "your_dataset_URL"}
+_URLs = {"your_dataset_name": "your_dataset_URL"}
 
 _VERSION = "1.0.0"
 
@@ -101,11 +101,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version(_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name=_DATASETNAME,
-            version=VERSION,
-            description=_DESCRIPTION,
-        ),
+        datasets.BuilderConfig(name=_DATASETNAME, version=VERSION, description=_DESCRIPTION,),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
@@ -135,9 +131,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "spans": datasets.Sequence(
-                                datasets.Value("int32")
-                            ),
+                            "spans": datasets.Sequence(datasets.Value("int32")),
                             "text": datasets.Value("string"),
                             "entity_type": datasets.Value("string"),
                         }
@@ -168,9 +162,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """
         Step 5: Download and extract the dataset.
 
@@ -211,9 +203,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(
-        self, filepath, abstract_file, entity_file, relation_file, split
-    ):
+    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
         """
         Step 6: Create a generator that yields (key, example) of the dataset of interest.
 

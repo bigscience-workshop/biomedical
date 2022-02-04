@@ -18,7 +18,6 @@ from typing import Dict, Tuple
 
 import datasets
 
-
 _DATASETNAME = "chemprot"
 
 _CITATION = """\
@@ -54,11 +53,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version("1.0.0")
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name=_DATASETNAME,
-            version=VERSION,
-            description=_DESCRIPTION,
-        ),
+        datasets.BuilderConfig(name=_DATASETNAME, version=VERSION, description=_DESCRIPTION,),
     ]
 
     DEFAULT_CONFIG_NAME = (
@@ -179,13 +174,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
 
             # NOTE: Not all relations have a gold standard (i.e. annotated by human curators).
-            empty_reln = [
-                {
-                    "type": None,
-                    "arg1": None,
-                    "arg2": None,
-                }
-            ]
+            empty_reln = [{"type": None, "arg1": None, "arg2": None,}]
             for id_, pmid in enumerate(abstracts.keys()):
                 yield id_, {
                     "pmid": pmid,

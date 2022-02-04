@@ -18,10 +18,9 @@
 import csv
 import json
 import os
+
 import bioc
-
 import datasets
-
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -57,9 +56,7 @@ _HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
 
 _LICENSE = "Public Domain Mark 1.0"
 
-_URLs = {
-    'biocreative': "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip"
-}
+_URLs = {"biocreative": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip"}
 
 
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
@@ -79,14 +76,12 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     # data = datasets.load_dataset('my_dataset', 'first_domain')
     # data = datasets.load_dataset('my_dataset', 'second_domain')
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="biocreative",
-            version=VERSION,
-            description="Original annotation files.",
-        ),
+        datasets.BuilderConfig(name="biocreative", version=VERSION, description="Original annotation files.",),
     ]
 
-    DEFAULT_CONFIG_NAME = "biocreative"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    DEFAULT_CONFIG_NAME = (
+        "biocreative"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    )
 
     def _info(self):
 
@@ -100,9 +95,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "text": datasets.Value("string"),
                             "entities": datasets.Sequence(
                                 {
-                                    "offsets": datasets.Sequence(
-                                        [datasets.Value("int32")]
-                                    ),
+                                    "offsets": datasets.Sequence([datasets.Value("int32")]),
                                     "text": datasets.Value("string"),
                                     "type": datasets.Value("string"),
                                     "entity_id": datasets.Value("string"),
@@ -110,9 +103,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             ),
                             "relations": datasets.Sequence(
                                 {
-                                    'relation': datasets.Value("string"),
-                                    'chemical': datasets.Value("string"),
-                                    'disease': datasets.Value("string"),
+                                    "relation": datasets.Value("string"),
+                                    "chemical": datasets.Value("string"),
+                                    "disease": datasets.Value("string"),
                                 }
                             ),
                         }
@@ -152,10 +145,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir,
-                        "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml",
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml",),
                     "split": "train",
                 },
             ),
@@ -163,10 +153,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir,
-                        "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml",
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml",),
                     "split": "test",
                 },
             ),
@@ -174,31 +161,24 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir,
-                        "CDR_Data/CDR.Corpus.v010516/CDR_DevelopmentSet.BioC.xml",
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_DevelopmentSet.BioC.xml",),
                     "split": "dev",
                 },
             ),
         ]
 
-    def _get_bioc_entity(self, span, kb_id_key='MESH'):
-        offsets = [
-            (loc.offset, loc.offset + loc.length) for loc in span.locations
-        ]
+    def _get_bioc_entity(self, span, kb_id_key="MESH"):
+        offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
         kb_id = span.infons[kb_id_key] if kb_id_key else -1
         return {
             "offsets": offsets,
             "text": span.text,
-            "type": span.infons['type'],
+            "type": span.infons["type"],
             "entity_id": kb_id,
         }
 
     def _generate_examples(
-        self,
-        filepath,
-        split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
+        self, filepath, split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
         """Yields examples as (key, example) tuples."""
         if self.config.name == "biocreative":
@@ -208,18 +188,11 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     "passages": [
                         {
                             "pmid": xdoc.id,
-                            "type": passage.infons['type'],
+                            "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [
-                                self._get_bioc_entity(span)
-                                for span in passage.annotations
-                            ],
+                            "entities": [self._get_bioc_entity(span) for span in passage.annotations],
                             "relations": [
-                                {
-                                    key.lower(): value
-                                    for key, value in rel.infons.items()
-                                }
-                                for rel in xdoc.relations
+                                {key.lower(): value for key, value in rel.infons.items()} for rel in xdoc.relations
                             ],
                         }
                         for passage in xdoc.passages
