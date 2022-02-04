@@ -101,7 +101,11 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version(_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(name=_DATASETNAME, version=VERSION, description=_DESCRIPTION,),
+        datasets.BuilderConfig(
+            name=_DATASETNAME,
+            version=VERSION,
+            description=_DESCRIPTION,
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
@@ -178,7 +182,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
         Nested zip files can be cached also, but make sure to save their path.
 
-        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`. 
+        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
 
         Note:
 

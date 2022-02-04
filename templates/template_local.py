@@ -100,7 +100,11 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version(_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(name=_DATASETNAME, version=VERSION, description=_DESCRIPTION,),
+        datasets.BuilderConfig(
+            name=_DATASETNAME,
+            version=VERSION,
+            description=_DESCRIPTION,
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
@@ -169,7 +173,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
         If the user has the dataset properly downloaded, they may simply use `os.getcwd()` to get the string-formatted path of the current working directory. This can be used to reference the dataset subsequently.
 
-        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`. 
+        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
 
         Note:
 

@@ -100,7 +100,11 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version(_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(name=_DATASETNAME, version=VERSION, description=_DESCRIPTION,),
+        datasets.BuilderConfig(
+            name=_DATASETNAME,
+            version=VERSION,
+            description=_DESCRIPTION,
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
@@ -185,7 +189,13 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
         # No need for a download location; just specify file location
         data_dir = os.getcwd()
         return [
-            datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": data_dir, "split": "train",},),
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "split": "train",
+                },
+            ),
         ]
 
     def _generate_examples(self, filepath, split):
@@ -232,20 +242,37 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
             for e in x.entities:
                 ents.append(
-                    {"spans": [e.start, e.end], "text": e.type, "entity_type": e.mention,}
+                    {
+                        "spans": [e.start, e.end],
+                        "text": e.type,
+                        "entity_type": e.mention,
+                    }
                 )
 
             for r in x.relations:
                 if len(r):
                     relns.append(
-                        {"relation_type": None, "arg1": None, "arg2": None,}
+                        {
+                            "relation_type": None,
+                            "arg1": None,
+                            "arg2": None,
+                        }
                     )
                 else:
                     relns.append(
-                        {"relation_type": None, "arg1": None, "arg2": None,}
+                        {
+                            "relation_type": None,
+                            "arg1": None,
+                            "arg2": None,
+                        }
                     )
 
             output.append(
-                {"article_id": pmid, "text": text, "entities": ents, "relations": relns,}
+                {
+                    "article_id": pmid,
+                    "text": text,
+                    "entities": ents,
+                    "relations": relns,
+                }
             )
         return output
