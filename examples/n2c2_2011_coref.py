@@ -32,19 +32,12 @@ ds = load_dataset("n2c2_2011_coref.py", name="original", data_dir="/path/to/data
 * i2b2_Partners_Train_Release.tar.gz
 * i2b2_Beth_Train_Release.tar.gz
 
-The individual data files (inside the zip and tar archives)come in 4 types,
+The individual data files (inside the zip and tar archives) come in 4 types,
 
-* chains (*.txt.chains files): chains (i.e. one or more) coreferent entities
-* concepts (*.txt.con files): entities used as input to a coreference model
 * docs (*.txt files): text of a patient record
-* pairs (*.txt.pairs files): pairs of coreferent entities
-
-
-TODO: Figure out canonical coreference schema
-probably something like,
-* text
-* candidate entities (IDs, offsets, types, ...)
-* coref sets (groups of entity IDs that are coreferent)
+* concepts (*.txt.con files): entities used as input to a coreference model
+* chains (*.txt.chains files): chains (i.e. one or more) coreferent entities
+* pairs (*.txt.pairs files): pairs of coreferent entities (not required)
 
 
 Data Access
@@ -61,11 +54,13 @@ for your account on the Data Portal, but your original DUA will be retained."
 from collections import defaultdict
 import logging
 import os
+import re
 import tarfile
-from typing import Iterable, Dict, List
+from typing import Dict, List, Match, Tuple
 import zipfile
 
 import datasets
+from datasets import Value, Features
 
 
 _DATASETNAME = "n2c2_2011_coref"
@@ -111,6 +106,242 @@ _LICENSE = "Data User Agreement"
 _VERSION = "1.0.0"
 
 
+def _read_tar_gz(file_path, samples=None):
+    if samples is None:
+        samples = defaultdict(dict)
+    with tarfile.open(file_path, "r:gz") as tf:
+        for member in tf.getmembers():
+
+            base, filename = os.path.split(member.name)
+            _, ext = os.path.splitext(filename)
+            ext = ext[1:]  # get rid of dot
+            sample_id = filename.split(".")[0]
+
+            if ext in ["txt", "con", "pairs", "chains"]:
+                samples[sample_id][f"{ext}_source"] = (
+                    os.path.basename(file_path) + "|" + member.name
+                )
+                with tf.extractfile(member) as fp:
+                    content_bytes = fp.read()
+                content = content_bytes.decode("utf-8")
+                samples[sample_id][ext] = content
+
+    return samples
+
+
+def _read_zip(file_path, samples=None):
+    if samples is None:
+        samples = defaultdict(dict)
+    with zipfile.ZipFile(file_path) as zf:
+        for info in zf.infolist():
+
+            base, filename = os.path.split(info.filename)
+            _, ext = os.path.splitext(filename)
+            ext = ext[1:]  # get rid of dot
+            sample_id = filename.split(".")[0]
+
+            if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith(
+                "."
+            ):
+                samples[sample_id][f"{ext}_source"] = (
+                    os.path.basename(file_path) + "|" + info.filename
+                )
+                content = zf.read(info).decode("utf-8")
+                samples[sample_id][ext] = content
+
+    return samples
+
+
+C_PATTERN = r"c=\"(.+?)\" (\d+):(\d+) (\d+):(\d+)"
+T_PATTERN = r"t=\"(.+?)\""
+
+
+def _ct_match_to_dict(c_match: Match, t_match: Match) -> dict:
+    """Return a dictionary with groups from concept and type regex matches."""
+    return {
+        "text": c_match.group(1),
+        "start_line": int(c_match.group(2)),
+        "start_token": int(c_match.group(3)),
+        "end_line": int(c_match.group(4)),
+        "end_token": int(c_match.group(5)),
+        "type": t_match.group(1),
+    }
+
+
+def _parse_con_line(line: str) -> dict:
+    """Parse one line from a *.con file.
+
+    A typical line has the form,
+      'c="angie cm johnson , m.d." 13:2 13:6||t="person"
+
+    This represents one concept to be placed into a coreference group.
+    It can be interpreted as follows,
+      'c="<string>" <start_line>:<start_token> <end_line>:<end_token>||t="<type>"'
+
+    """
+    c_part, t_part = line.split("||")
+    c_match, t_match = re.match(C_PATTERN, c_part), re.match(T_PATTERN, t_part)
+    return _ct_match_to_dict(c_match, t_match)
+
+
+def _parse_chains_line(line: str) -> List[Dict]:
+    """Parse one line from a *.chains file.
+
+    A typical line has a chain of concepts and then a type.
+      'c="patient" 12:0 12:0||c="mr. andersen" 19:0 19:1||...||t="coref person"'
+    """
+    pieces = line.split("||")
+    c_parts, t_part = pieces[:-1], pieces[-1]
+    c_matches, t_match = (
+        [re.match(C_PATTERN, c_part) for c_part in c_parts],
+        re.match(T_PATTERN, t_part),
+    )
+    return [_ct_match_to_dict(c_match, t_match) for c_match in c_matches]
+
+
+def _tokoff_from_line(text: str) -> List[Tuple[int, int]]:
+    """Produce character offsets for each token (whitespace split)
+
+    For example,
+      text = " one  two three ."
+      tokoff = [(1,4), (6,9), (10,15), (16,17)]
+    """
+    tokoff = []
+    start = None
+    end = None
+    for ii, char in enumerate(text):
+        if char != " " and start is None:
+            start = ii
+        if char == " " and start is not None:
+            end = ii
+            tokoff.append((start, end))
+            start = None
+    if start is not None:
+        end = ii + 1
+        tokoff.append((start, end))
+    return tokoff
+
+
+def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
+    """Parse the lines of a *.chains file into coreference objects
+
+    A small number of concepts from the *.con files could not be
+    aligned with the text and were excluded. For this reason we
+    pass in the full set of matched entity IDs and ensure that
+    no coreference refers to an exlcluded entity.
+    """
+    chains_lines = sample["chains"].splitlines()
+    chains_parsed = [_parse_chains_line(line) for line in chains_lines]
+    corefs = []
+    for ii_cp, cp in enumerate(chains_parsed):
+        coref_id = f"{sample_id}-{ii_cp}"
+        coref_entity_ids = [
+            "{}-{}-{}-{}-{}".format(
+                sample_id,
+                entity["start_line"],
+                entity["start_token"],
+                entity["end_line"],
+                entity["end_token"],
+            )
+            for entity in cp
+        ]
+        coref_entity_ids = [
+            ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids
+        ]
+        coref = {
+            "coreference_id": coref_id,
+            "entity_ids": coref_entity_ids,
+        }
+        corefs.append(coref)
+
+    return corefs
+
+
+def _get_entities_from_sample(sample_id, sample):
+    """Parse the lines of a *.con concept file into entity objects
+
+    Here we parse the *.con files and form entities. For a small
+    number of entities the text snippet in the concept file could not
+    be aligned with the slice from the full text produced by using
+    the line and token offsets. These entities are excluded from the
+    entities object and the coreferences object.
+
+    Note: unique entity IDs are formed using the following pattern,
+
+      entity_id = f"{sample_id}-{start_line}-{start_token}-{end_line}-{end_token}"
+
+    """
+    con_lines = sample["con"].splitlines()
+    text = sample["txt"]
+    text_lines = text.splitlines()
+    text_line_lengths = [len(el) for el in text_lines]
+
+    # parsed concepts (sort is just a convenience)
+    con_parsed = sorted(
+        [_parse_con_line(line) for line in con_lines],
+        key=lambda x: (x["start_line"], x["start_token"]),
+    )
+
+    entities = []
+    for ii_cp, cp in enumerate(con_parsed):
+
+        # annotations can span multiple lines
+        # we loop over all lines and build up the character offsets
+        for ii_line in range(cp["start_line"], cp["end_line"] + 1):
+
+            # character offset to the beginning of the line
+            # line length of each line + 1 new line character for each line
+            start_line_off = sum(text_line_lengths[: ii_line - 1]) + (ii_line - 1)
+
+            # offsets for each token relative to the beginning of the line
+            # "one two" -> [(0,3), (4,6)]
+            tokoff = _tokoff_from_line(text_lines[ii_line - 1])
+
+            # if this is a single line annotation
+            if ii_line == cp["start_line"] == cp["end_line"]:
+                start_off = start_line_off + tokoff[cp["start_token"]][0]
+                end_off = start_line_off + tokoff[cp["end_token"]][1]
+
+            # if multi-line and on first line
+            # end_off gets a +1 for new line character
+            elif (ii_line == cp["start_line"]) and (ii_line != cp["end_line"]):
+                start_off = start_line_off + tokoff[cp["start_token"]][0]
+                end_off = start_line_off + text_line_lengths[ii_line - 1] + 1
+
+            # if multi-line and on last line
+            elif (ii_line != cp["start_line"]) and (ii_line == cp["end_line"]):
+                end_off = end_off + tokoff[cp["end_token"]][1]
+
+            # if mult-line and not on first or last line
+            # (this does not seem to occur in this corpus)
+            else:
+                end_off += text_line_lengths[ii_line - 1] + 1
+
+        text_slice = text[start_off:end_off]
+        text_slice_norm_1 = text_slice.replace("\n", "").lower()
+        text_slice_norm_2 = text_slice.replace("\n", " ").lower()
+        match = text_slice_norm_1 == cp["text"] or text_slice_norm_2 == cp["text"]
+        if not match:
+            continue
+
+        entity_id = "{}-{}-{}-{}-{}".format(
+            sample_id,
+            cp["start_line"],
+            cp["start_token"],
+            cp["end_line"],
+            cp["end_token"],
+        )
+        entity = {
+            "entity_id": entity_id,
+            "offsets": [(start_off, end_off)],
+            "text": cp["text"],
+            "type": cp["type"],
+            "entity_kb_id": "",
+        }
+        entities.append(entity)
+
+    return entities
+
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
@@ -124,10 +355,10 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             description="original form of data",
         ),
         datasets.BuilderConfig(
-            name="coref",
+            name=_DATASETNAME,
             version=VERSION,
             description="canonical coref form of data",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME
@@ -135,31 +366,45 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     def _info(self):
 
         if self.config.name == "original":
-            features = datasets.Features(
+            features = Features(
                 {
-                    "sample_id": datasets.Value("string"),
-                    "txt": datasets.Value("string"),
-                    "con": datasets.Value("string"),
-                    "pairs": datasets.Value("string"),
-                    "chains": datasets.Value("string"),
+                    "sample_id": Value("string"),
+                    "txt": Value("string"),
+                    "con": Value("string"),
+                    "pairs": Value("string"),
+                    "chains": Value("string"),
                     "metadata": {
-                        "txt_source": datasets.Value("string"),
-                        "con_source": datasets.Value("string"),
-                        "pairs_source": datasets.Value("string"),
-                        "chains_source": datasets.Value("string"),
-                    }
+                        "txt_source": Value("string"),
+                        "con_source": Value("string"),
+                        "pairs_source": Value("string"),
+                        "chains_source": Value("string"),
+                    },
                 }
             )
 
-        elif self.config.name == "coref":
-            features = datasets.Features(
+        elif self.config.name == _DATASETNAME:
+            features = Features(
                 {
                     "passages": [
                         {
-                            "document_id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Value("string"),
-
+                            "document_id": Value("string"),
+                            "type": Value("string"),
+                            "text": Value("string"),
+                            "entities": [
+                                {
+                                    "entity_id": Value("string"),
+                                    "offsets": [[Value("int32")]],
+                                    "text": Value("string"),
+                                    "type": Value("string"),
+                                    "entity_kb_id": Value("string"),
+                                }
+                            ],
+                            "coreferences": [
+                                {
+                                    "coreference_id": Value("string"),
+                                    "entity_ids": [Value("string")],
+                                }
+                            ],
                         }
                     ]
                 }
@@ -206,49 +451,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-
-    @staticmethod
-    def _read_tar_gz(file_path, samples=None):
-        if samples is None:
-            samples = defaultdict(dict)
-        with tarfile.open(file_path, "r:gz") as tf:
-            for member in tf.getmembers():
-
-                base, filename = os.path.split(member.name)
-                _, ext = os.path.splitext(filename)
-                ext = ext[1:] # get rid of dot
-                sample_id = filename.split('.')[0]
-
-                if ext in ["txt", "con", "pairs", "chains"]:
-                    samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + member.name
-                    with tf.extractfile(member) as fp:
-                        content_bytes = fp.read()
-                    content = content_bytes.decode("utf-8")
-                    samples[sample_id][ext] = content
-
-        return samples
-
-
-    @staticmethod
-    def _read_zip(file_path, samples=None):
-        if samples is None:
-            samples = defaultdict(dict)
-        with zipfile.ZipFile(file_path) as zf:
-            for info in zf.infolist():
-
-                base, filename = os.path.split(info.filename)
-                _, ext = os.path.splitext(filename)
-                ext = ext[1:] # get rid of dot
-                sample_id = filename.split('.')[0]
-
-                if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith("."):
-                    samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + info.filename
-                    content = zf.read(info).decode("utf-8")
-                    samples[sample_id][ext] = content
-
-        return samples
-
-
     @staticmethod
     def _get_original_sample(sample_id, sample):
         return {
@@ -262,42 +464,46 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 "con_source": sample.get("con_source", ""),
                 "pairs_source": sample.get("pairs_source", ""),
                 "chains_source": sample.get("chains_source", ""),
-            }
+            },
         }
-
 
     @staticmethod
     def _get_coref_sample(sample_id, sample):
+
+        entities = _get_entities_from_sample(sample_id, sample)
+        entity_ids = set([entity["entity_id"] for entity in entities])
+        coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids)
         return {
             "passages": [
                 {
                     "document_id": sample_id,
                     "type": "discharge summary",
                     "text": sample.get("txt", ""),
-                 }
+                    "entities": entities,
+                    "coreferences": coreferences,
+                }
             ]
         }
 
-
-
     def _generate_examples(self, split):
-        """
+        """Generate samples using the info passed in from _split_generators."""
 
-        """
-        if split=="train":
+        if split == "train":
             _id = 0
             # These files have complete sample info
             # (so we get a fresh `samples` defaultdict from each)
             paths = [
                 os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
+                os.path.join(
+                    self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"
+                ),
             ]
             for path in paths:
-                samples = self._read_tar_gz(path)
+                samples = _read_tar_gz(path)
                 for sample_id, sample in samples.items():
                     if self.config.name == "original":
                         yield _id, self._get_original_sample(sample_id, sample)
-                    elif self.config.name == "coref":
+                    elif self.config.name == _DATASETNAME:
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -311,11 +517,11 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             ]
             samples = defaultdict(dict)
             for path in paths:
-                samples = self._read_zip(path, samples=samples)
+                samples = _read_zip(path, samples=samples)
 
             for sample_id, sample in samples.items():
                 if self.config.name == "original":
                     yield _id, self._get_original_sample(sample_id, sample)
-                elif self.config.name == "coref":
+                elif self.config.name == _DATASETNAME:
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
