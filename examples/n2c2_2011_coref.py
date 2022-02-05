@@ -112,7 +112,6 @@ _VERSION = "1.0.0"
 
 
 
-
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
 
@@ -125,7 +124,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             description="original form of data",
         ),
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name="coref",
             version=VERSION,
             description="canonical coref form of data",
         )
@@ -152,9 +151,19 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == _DATASETNAME:
-            raise NotImplemented()
+        elif self.config.name == "coref":
+            features = datasets.Features(
+                {
+                    "passages": [
+                        {
+                            "document_id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Value("string"),
 
+                        }
+                    ]
+                }
+            )
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -257,46 +266,56 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         }
 
 
+    @staticmethod
+    def _get_coref_sample(sample_id, sample):
+        return {
+            "passages": [
+                {
+                    "document_id": sample_id,
+                    "type": "discharge summary",
+                    "text": sample.get("txt", ""),
+                 }
+            ]
+        }
+
+
+
     def _generate_examples(self, split):
         """
 
         """
-        if self.config.name == "original":
-
-            if split=="train":
-
-                _id = 0
-
-                # These files have complete sample info
-                # (so we get a fresh `samples` defaultdict from each)
-                paths = [
-                    os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                    os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
-                ]
-                for path in paths:
-                    samples = self._read_tar_gz(path)
-                    for sample_id, sample in samples.items():
-                        yield _id, self._get_original_sample(sample_id, sample)
-                        _id += 1
-
-            elif split == "test":
-
-                _id = 0
-
-                # Information from these files has to be combined to create a full sample
-                # (so we pass the `samples` defaultdict back to the `_read_zip` method)
-                paths = [
-                    os.path.join(self.config.data_dir, "Task_1C.zip"),
-                    os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
-                ]
-                samples = defaultdict(dict)
-                for path in paths:
-                    samples = self._read_zip(path, samples=samples)
-
+        if split=="train":
+            _id = 0
+            # These files have complete sample info
+            # (so we get a fresh `samples` defaultdict from each)
+            paths = [
+                os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
+                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
+            ]
+            for path in paths:
+                samples = self._read_tar_gz(path)
                 for sample_id, sample in samples.items():
-                    yield _id, self._get_original_sample(sample_id, sample)
+                    if self.config.name == "original":
+                        yield _id, self._get_original_sample(sample_id, sample)
+                    elif self.config.name == "coref":
+                        yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
+        elif split == "test":
+            _id = 0
+            # Information from these files has to be combined to create a full sample
+            # (so we pass the `samples` defaultdict back to the `_read_zip` method)
+            paths = [
+                os.path.join(self.config.data_dir, "Task_1C.zip"),
+                os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
+            ]
+            samples = defaultdict(dict)
+            for path in paths:
+                samples = self._read_zip(path, samples=samples)
 
-        elif self.config.name == _DATASETNAME:
-            raise NotImplemented()
+            for sample_id, sample in samples.items():
+                if self.config.name == "original":
+                    yield _id, self._get_original_sample(sample_id, sample)
+                elif self.config.name == "coref":
+                    yield _id, self._get_coref_sample(sample_id, sample)
+                _id += 1
