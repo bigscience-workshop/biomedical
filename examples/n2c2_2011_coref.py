@@ -25,6 +25,7 @@ the `data_dir` kwarg.
 
 ```
 ds = load_dataset("n2c2_2011_coref.py", name="original", data_dir="/path/to/dataset/files")
+ds = load_dataset("n2c2_2011_coref.py", name="n2c2_2011_coref", data_dir="/path/to/dataset/files")
 ```
 
 * Task_1C.zip
