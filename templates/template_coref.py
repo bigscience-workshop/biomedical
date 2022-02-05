@@ -2,75 +2,56 @@
 A dataset template for coreference resolution.
 
 {
-    "sample_id": "note-1234",
-    "text": "Jane Doe loves NLP. It is her favorite thing.",
-    "entities": [
+    "passages": [
         {
-            "id": "E0",
-            "span_start": 0,
-            "span_end": 8,
-            "text": "Jane Doe"
-        },
-        {
-            "id": "E1",
-            "span_start": 15,
-            "span_end": 18,
-            "text": "NLP"
-        },
-        {
-            "id": "E2",
-            "span_start": 20,
-            "span_end": 22,
-            "text": "It"
-        },
-        {
-            "id": "E3",
-            "span_start": 26,
-            "span_end": 29,
-            "text": "her"
-        }
-    ],
-    "corefs": [
-        {
-            "id": "C0",
-            "members": [
-                "E0",
-                "E3"
-            ]
-        },
-        {
-            "id": "C1",
-            "members": [
-                "E1",
-                "E2"
-            ]
+            "document_id": "clinical-103"
+            "type": "discharge summary",
+            "text": "Jane Doe loves NLP. It is her favorite thing ......",
+            "entities": [
+                {
+                    "entity_id": "clinical-103-0-0-0-2",
+                    "offsets": [[0, 8]],
+                    "text": "Jane Doe",
+                    "type": "person",
+                    "entity_kb_id": "",
+                },...
+            ],
+            "coreferences": [
+                {
+                    "corefernce_id": "clinical-103-0",
+                    "entity_ids": ["clinical-103-0-0-0-2", ...],
+                },...
         }
     ]
 }
-
 
 """
 
 import datasets
 
-
-features = datasets.Features(
+features = Features(
     {
-        "sample_id": datasets.Value("string"),
-        "text": datasets.Value("string"),
-        "entities": datasets.Sequence(
+        "passages": [
             {
-                "id": datasets.Value("string"),
-                "span_start": datasets.Value("int32"),
-                "span_end": datasets.Value("int32"),
-                "text": datasets.Value("string"),
+                "document_id": Value("string"),
+                "type": Value("string"),
+                "text": Value("string"),
+                "entities": [
+                    {
+                        "entity_id": Value("string"),
+                        "offsets": [[Value("int32")]],
+                        "text": Value("string"),
+                        "type": Value("string"),
+                        "entity_kb_id": Value("string"),
+                    }
+                ],
+                "coreferences": [
+                    {
+                        "coreference_id": Value("string"),
+                        "entity_ids": [Value("string")],
+                    }
+                ],
             }
-        ),
-        "corefs": datasets.Sequence(
-            {
-                "id": datasets.Value("string"),
-                "members": datasets.Sequence(datasets.Value("string")),
-            }
-        ),
+        ]
     }
 )
