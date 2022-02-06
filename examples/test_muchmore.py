@@ -12,18 +12,6 @@ description of annotation format
 
 
 """
-
-from dataclasses import dataclass
-import gzip
-import os
-import re
-import tarfile
-from typing import Iterable, Tuple
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element
-
-import chardet
-import pandas as pd
 from datasets import load_dataset
 
 """
@@ -34,23 +22,59 @@ from datasets import load_dataset
 .ger.abstr.chunkmorph.annotated.xml
 """
 
-#ds_translation = load_dataset(
-#    'muchmore.py',
-#    name="translation",
-#)
-
-#ds_original = load_dataset(
-#    'muchmore.py',
-#    name="original",
-#)
+ds_original = load_dataset(
+    'muchmore.py',
+    name="original",
+)
 
 ds = load_dataset(
     'muchmore.py',
     name="muchmore",
 )
 
+ds_en = load_dataset(
+    'muchmore.py',
+    name="muchmore_en",
+)
 
-for snippet in ds['train'][0]['passages'][0]['snippets']:
-    print(snippet['text'])
-    start, end = snippet['offsets'][0]
-    print(ds['train'][0]['passages'][0]['text'][start:end])
+ds_de = load_dataset(
+    'muchmore.py',
+    name="muchmore_de",
+)
+
+ds_plain = load_dataset(
+    'muchmore.py',
+    name="plain",
+)
+
+ds_plain_en = load_dataset(
+    'muchmore.py',
+    name="plain_en",
+)
+
+ds_plain_de = load_dataset(
+    'muchmore.py',
+    name="plain_de",
+)
+
+ds_translation = load_dataset(
+    'muchmore.py',
+    name="translation",
+)
+
+
+for sample in ds['train']:
+
+    # assert snippets (sentences) line up with main text
+    for snippet in sample['passages'][0]['snippets']:
+        snip_text = snippet['text']
+        start, end = snippet['offsets']
+        main_text = sample['passages'][0]['text'][start:end]
+        assert(snip_text == main_text)
+
+    # assert entities line up with main text
+    for entity in sample['passages'][0]['entities']:
+        entity_text = entity['text'][0]
+        start, end = entity['offsets'][0]
+        main_text = sample['passages'][0]['text'][start:end]
+        assert(entity_text == main_text)

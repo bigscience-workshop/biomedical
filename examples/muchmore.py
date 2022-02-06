@@ -117,15 +117,21 @@ _URLs = {
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     ],
-    "translation": [
-        "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
-        "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
-    ],
-    "en_plain": "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
-    "de_plain": "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     "muchmore": [
         "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
+    ],
+    "muchmore_en": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
+    "muchmore_de": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
+    "plain": [
+        "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
+        "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
+    ],
+    "plain_en": "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
+    "plain_de": "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
+    "translation": [
+        "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
+        "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
 }
 
@@ -133,6 +139,9 @@ _URLs = {
 _VERSION = "4.2.0"
 
 NATIVE_ENCODING = "ISO-8859-1"
+FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
+LANG_MAP = {"eng": "en", "ger": "de"}
+
 
 class MuchMoreDataset(datasets.GeneratorBasedBuilder):
     """MuchMore Springer Bilingual Corpus"""
@@ -149,17 +158,32 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         datasets.BuilderConfig(
             name=DEFAULT_CONFIG_NAME,
             version=VERSION,
-            description=_DESCRIPTION,
+            description="muchmore: big science biomedical format (en & de)",
         ),
         datasets.BuilderConfig(
-            name="en_plain",
+            name="muchmore_en",
             version=VERSION,
-            description="muchmore: plaintext of english abstracts",
+            description="muchmore: big science biomedical format (en only)",
         ),
         datasets.BuilderConfig(
-            name="de_plain",
+            name="muchmore_de",
             version=VERSION,
-            description="muchmore: plaintext of german abstracts",
+            description="muchmore: big science biomedical format (de only)",
+        ),
+        datasets.BuilderConfig(
+            name="plain",
+            version=VERSION,
+            description="muchmore: plaintext of abstracts (en & de)",
+        ),
+        datasets.BuilderConfig(
+            name="plain_en",
+            version=VERSION,
+            description="muchmore: plaintext of abstracts (en only)",
+        ),
+        datasets.BuilderConfig(
+            name="plain_de",
+            version=VERSION,
+            description="muchmore: plaintext of abstracts (de only)",
         ),
         datasets.BuilderConfig(
             name="translation",
@@ -172,58 +196,78 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
     def _info(self):
 
         if self.config.name == "original":
-            features = Features({
-                "sample_id": Value("string"),
-                "corresp": Value("string"),
-                "language": Value("string"),
-                "abstract": Value("string"),
-                "sentences": [{
-                    "id": Value("string"),
+            features = Features(
+                {
+                    "sample_id": Value("string"),
                     "corresp": Value("string"),
-                    "umlsterms": [{
-                        "id": Value("string"),
-                        "from": Value("string"),
-                        "to": Value("string"),
-                        "concepts": [{
+                    "language": Value("string"),
+                    "abstract": Value("string"),
+                    "sentences": [
+                        {
                             "id": Value("string"),
-                            "cui": Value("string"),
-                            "preferred": Value("string"),
-                            "tui": Value("string"),
-                            "mshs": [{
-                                "code": Value("string"),
-                            }],
-                        }],
-                    }],
-                    "ewnterms": [{
-                        "id": Value("string"),
-                        "to": Value("string"),
-                        "from": Value("string"),
-                        "senses": [{
-                            "offset": Value("string"),
-                        }],
-                    }],
-                    "semrels": [{
-                        "id": Value("string"),
-                        "term1": Value("string"),
-                        "term2": Value("string"),
-                        "reltype": Value("string"),
-                    }],
-                    "chunks": [{
-                        "id": Value("string"),
-                        "to": Value("string"),
-                        "from": Value("string"),
-                        "type": Value("string"),
-                    }],
-                    "tokens": [{
-                        "id": Value("string"),
-                        "pos": Value("string"),
-                        "lemma": Value("string"),
-                        "text": Value("string"),
-                    }],
-                }]
-            })
+                            "corresp": Value("string"),
+                            "umlsterms": [
+                                {
+                                    "id": Value("string"),
+                                    "from": Value("string"),
+                                    "to": Value("string"),
+                                    "concepts": [
+                                        {
+                                            "id": Value("string"),
+                                            "cui": Value("string"),
+                                            "preferred": Value("string"),
+                                            "tui": Value("string"),
+                                            "mshs": [
+                                                {
+                                                    "code": Value("string"),
+                                                }
+                                            ],
+                                        }
+                                    ],
+                                }
+                            ],
+                            "ewnterms": [
+                                {
+                                    "id": Value("string"),
+                                    "to": Value("string"),
+                                    "from": Value("string"),
+                                    "senses": [
+                                        {
+                                            "offset": Value("string"),
+                                        }
+                                    ],
+                                }
+                            ],
+                            "semrels": [
+                                {
+                                    "id": Value("string"),
+                                    "term1": Value("string"),
+                                    "term2": Value("string"),
+                                    "reltype": Value("string"),
+                                }
+                            ],
+                            "chunks": [
+                                {
+                                    "id": Value("string"),
+                                    "to": Value("string"),
+                                    "from": Value("string"),
+                                    "type": Value("string"),
+                                }
+                            ],
+                            "tokens": [
+                                {
+                                    "id": Value("string"),
+                                    "pos": Value("string"),
+                                    "lemma": Value("string"),
+                                    "text": Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                }
+            )
 
-        elif self.config.name == _DATASETNAME:
+        elif self.config.name in ("muchmore", "muchmore_en", "muchmore_de"):
             features = Features(
                 {
                     "passages": [
@@ -234,9 +278,23 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                             "snippets": [
                                 {
                                     "snippet_id": Value("string"),
-                                    "offsets": [[Value("int32")]],
+                                    "offsets": [Value("int32")],
                                     "text": Value("string"),
                                     "type": Value("string"),
+                                }
+                            ],
+                            "entities": [
+                                {
+                                    "entity_id": Value("string"),
+                                    "offsets": [[Value("int32")]],
+                                    "text": [Value("string")],
+                                    "type": Value("string"),
+                                    "entity_kb_ids": [
+                                        {
+                                            "system": Value("string"),
+                                            "id": Value("string"),
+                                        }
+                                    ],
                                 }
                             ],
                         }
@@ -244,24 +302,28 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "translation":
-            features = Features({
-                "en": Value("string"),
-                "de": Value("string"),
-                "metadata": {
+        elif self.config.name in ("plain", "plain_en", "plain_de"):
+            features = Features(
+                {
+                    "sample_id": Value("string"),
                     "sample_id_prefix": Value("string"),
-                    "sample_id_en": Value("string"),
-                    "sample_id_de": Value("string"),
+                    "language": Value("string"),
+                    "abstract": Value("string"),
                 }
-            })
+            )
 
-        elif self.config.name in ["en_plain", "de_plain"]:
-            features = Features({
-                "sample_id": Value("string"),
-                "sample_id_prefix": Value("string"),
-                "language": Value("string"),
-                "abstract": Value("string"),
-            })
+        elif self.config.name == "translation":
+            features = Features(
+                {
+                    "en": Value("string"),
+                    "de": Value("string"),
+                    "metadata": {
+                        "sample_id_prefix": Value("string"),
+                        "sample_id_en": Value("string"),
+                        "sample_id_de": Value("string"),
+                    },
+                }
+            )
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -284,10 +346,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "file_names_and_pointers": itertools.chain(*[
-                        dl_manager.iter_archive(data_dir)
-                        for data_dir in data_dirs
-                    ]),
+                    "file_names_and_pointers": itertools.chain(
+                        *[dl_manager.iter_archive(data_dir) for data_dir in data_dirs]
+                    ),
                     "split": "train",
                 },
             ),
@@ -303,9 +364,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             concepts = []
             for xconcept in xumlsterm.findall("./concept"):
 
-                mshs = [{
-                    "code": xmsh.get("code")
-                } for xmsh in xconcept.findall("./msh")]
+                mshs = [{"code": xmsh.get("code")} for xmsh in xconcept.findall("./msh")]
 
                 concept = {
                     "id": xconcept.get("id"),
@@ -326,7 +385,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
 
         return umlsterms
 
-
     @staticmethod
     def _get_ewnterms_from_xsent(xsent: Element) -> List:
         xewnterms = xsent.find("./ewnterms")
@@ -334,9 +392,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         ewnterms = []
         for xewnterm in xewnterms.findall("./ewnterm"):
 
-            senses = [{
-                "offset": xsense.get("offset")
-            } for xsense in xewnterm.findall("./sense")]
+            senses = [{"offset": xsense.get("offset")} for xsense in xewnterm.findall("./sense")]
 
             ewnterm = {
                 "id": xewnterm.get("id"),
@@ -348,39 +404,44 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
 
         return ewnterms
 
-
     @staticmethod
-    def _get_semrels_from_xsent(xsent: Element) -> List[Dict[str,str]]:
+    def _get_semrels_from_xsent(xsent: Element) -> List[Dict[str, str]]:
         xsemrels = xsent.find("./semrels")
-        return [{
-            "id": xsemrel.get("id"),
-            "term1": xsemrel.get("term1"),
-            "term2": xsemrel.get("term2"),
-            "reltype": xsemrel.get("reltype"),
-        } for xsemrel in xsemrels.findall("./semrel")]
-
+        return [
+            {
+                "id": xsemrel.get("id"),
+                "term1": xsemrel.get("term1"),
+                "term2": xsemrel.get("term2"),
+                "reltype": xsemrel.get("reltype"),
+            }
+            for xsemrel in xsemrels.findall("./semrel")
+        ]
 
     @staticmethod
-    def _get_chunks_from_xsent(xsent: Element) -> List[Dict[str,str]]:
+    def _get_chunks_from_xsent(xsent: Element) -> List[Dict[str, str]]:
         xchunks = xsent.find("./chunks")
-        return [{
-            "id": xchunk.get("id"),
-            "to": xchunk.get("to"),
-            "from": xchunk.get("from"),
-            "type": xchunk.get("type"),
-        } for xchunk in xchunks.findall("./chunk")]
-
+        return [
+            {
+                "id": xchunk.get("id"),
+                "to": xchunk.get("to"),
+                "from": xchunk.get("from"),
+                "type": xchunk.get("type"),
+            }
+            for xchunk in xchunks.findall("./chunk")
+        ]
 
     @staticmethod
-    def _get_tokens_from_xsent(xsent: Element) -> List[Dict[str,str]]:
+    def _get_tokens_from_xsent(xsent: Element) -> List[Dict[str, str]]:
         xtext = xsent.find("./text")
-        return [{
-            "id": xtoken.get("id"),
-            "pos": xtoken.get("pos"),
-            "lemma": xtoken.get("lemma"),
-            "text": xtoken.text,
-        } for xtoken in xtext.findall("./token")]
-
+        return [
+            {
+                "id": xtoken.get("id"),
+                "pos": xtoken.get("pos"),
+                "lemma": xtoken.get("lemma"),
+                "text": xtoken.text,
+            }
+            for xtoken in xtext.findall("./token")
+        ]
 
     def _generate_original_examples(self, file_names_and_pointers):
         """Generate something close to the original dataset.
@@ -434,11 +495,8 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             sample["abstract"] = abstracts[sample_id]
             yield _id, sample
 
-
     def _generate_muchmore_examples(self, file_names_and_pointers):
-        """Generate big science canonical dataset.
-
-        """
+        """Generate big science biomedical canonical examples."""
 
         def snippets_tokens_from_sents(sentences):
             snippets = []
@@ -449,10 +507,18 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
 
         def sid_to_text_off(sid, snip_txts_lens):
             ii_sid = int(sid[1:])
-            start = sum(snip_txts_lens[:ii_sid-1]) + (ii_sid-1)
-            end = start + snip_txts_lens[ii_sid-1]
+            start = sum(snip_txts_lens[: ii_sid - 1]) + (ii_sid - 1)
+            end = start + snip_txts_lens[ii_sid - 1]
             return start, end
 
+        def sid_wid_to_text_off(sid, wid, snip_txts_lens, snip_toks_lens):
+            s_start, s_end = sid_to_text_off(sid, snip_txts_lens)
+            ii_sid = int(sid[1:])
+            ii_wid = int(wid[1:])
+            w_start = sum(snip_toks_lens[ii_sid - 1][: ii_wid - 1]) + (ii_wid - 1)
+            start = s_start + w_start
+            end = start + snip_toks_lens[ii_sid - 1][ii_wid - 1]
+            return start, end
 
         for _id, (file_name, fp) in enumerate(file_names_and_pointers):
 
@@ -480,19 +546,50 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 sentences.append(sentence)
 
             snip_toks = snippets_tokens_from_sents(sentences)
-            snip_txts = [' '.join(snip_tok) for snip_tok in snip_toks]
+            snip_txts = [" ".join(snip_tok) for snip_tok in snip_toks]
             snip_txts_lens = [len(el) for el in snip_txts]
-            text = ' '.join(snip_txts)
+            snip_toks_lens = [[len(tok) for tok in snip] for snip in snip_toks]
+            text = " ".join(snip_txts)
 
             snippets = []
             for ii in range(len(sentences)):
                 snippet = {
                     "snippet_id": sentences[ii]["id"],
-                    "offsets": [sid_to_text_off(sentences[ii]["id"], snip_txts_lens)],
+                    "offsets": sid_to_text_off(sentences[ii]["id"], snip_txts_lens),
                     "text": snip_txts[ii],
                     "type": "sentence",
                 }
                 snippets.append(snippet)
+
+            entities = []
+            for sentence in sentences:
+                sid = sentence["id"]
+                ii_sid = int(sid[1:])
+
+                for umlsterm in sentence["umlsterms"]:
+                    umlsterm_id = umlsterm["id"]
+                    entity_id = f"{sid}-{umlsterm_id}"
+                    wid_from = umlsterm["from"]
+                    wid_to = umlsterm["to"]
+                    ii_wid_from = int(wid_from[1:])
+                    ii_wid_to = int(wid_to[1:])
+
+                    tok_text = " ".join(snip_toks[ii_sid - 1][ii_wid_from - 1 : ii_wid_to])
+                    w_from_start, w_from_end = sid_wid_to_text_off(sid, wid_from, snip_txts_lens, snip_toks_lens)
+                    w_to_start, w_to_end = sid_wid_to_text_off(sid, wid_to, snip_txts_lens, snip_toks_lens)
+
+                    offsets = [(w_from_start, w_to_end)]
+                    main_text = text[w_from_start:w_to_end]
+                    umls_cuis = [el["cui"] for el in umlsterm["concepts"]]
+
+                    entity = {
+                        "entity_id": entity_id,
+                        "offsets": offsets,
+                        "text": [tok_text],
+                        "type": "umlsterm",
+                        "entity_kb_ids": [{"system": "UMLS", "id": cui} for cui in umls_cuis],
+                    }
+                    entities.append(entity)
 
             yield _id, {
                 "passages": [
@@ -501,8 +598,20 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                         "type": "abstract",
                         "text": text,
                         "snippets": snippets,
+                        "entities": entities,
                     }
                 ]
+            }
+
+    def _generate_plain_examples(self, file_names_and_pointers):
+        """Generate plain text abstract examples."""
+        for _id, (file_name, fp) in enumerate(file_names_and_pointers):
+            match = re.match(FILE_NAME_PATTERN, file_name)
+            yield _id, {
+                "sample_id_prefix": match.group(1),
+                "sample_id": file_name,
+                "language": LANG_MAP[match.group(2)],
+                "abstract": fp.read().decode(NATIVE_ENCODING),
             }
 
     def _generate_translation_examples(self, file_names_and_pointers):
@@ -517,10 +626,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             sample_id_prefix = re.sub(".(eng|ger).abstr$", "", file_name)
             sample_id = file_name
             abstract = fp.read().decode(NATIVE_ENCODING)
-            sample_map[sample_id_prefix].append({
-                "language": language,
-                "sample_id": sample_id,
-                "abstract": abstract})
+            sample_map[sample_id_prefix].append({"language": language, "sample_id": sample_id, "abstract": abstract})
 
         _id = 0
         for sample_id_prefix, sample_pair in sample_map.items():
@@ -535,40 +641,23 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     "sample_id_prefix": sample_id_prefix,
                     "sample_id_en": sample_pair[en_idx]["sample_id"],
                     "sample_id_de": sample_pair[de_idx]["sample_id"],
-                }
+                },
             }
             _id += 1
-
 
     def _generate_examples(self, file_names_and_pointers, split):
 
         if self.config.name == "original":
             genny = self._generate_original_examples(file_names_and_pointers)
 
-        elif self.config.name == "translation":
-            genny = self._generate_translation_examples(file_names_and_pointers)
-
-        elif self.config.name == "en_plain":
-            for _id, (file_name, fp) in enumerate(file_names_and_pointers):
-                yield _id, {
-                    "sample_id_prefix": re.sub(".eng.abstr$", "", file_name),
-                    "sample_id": file_name,
-                    "language": "en",
-                    "abstract": fp.read().decode(NATIVE_ENCODING),
-                }
-
-        elif self.config.name == "de_plain":
-            for _id, (file_name, fp) in enumerate(file_names_and_pointers):
-                yield _id, {
-                    "sample_id_prefix": re.sub(".ger.abstr$", "", file_name),
-                    "sample_id": file_name,
-                    "language": "de",
-                    "abstract": fp.read().decode(NATIVE_ENCODING),
-                }
-
-        elif self.config.name == _DATASETNAME:
+        elif self.config.name in ("muchmore", "muchmore_en", "muchmore_de"):
             genny = self._generate_muchmore_examples(file_names_and_pointers)
 
+        elif self.config.name in ("plain", "plain_en", "plain_de"):
+            genny = self._generate_plain_examples(file_names_and_pointers)
+
+        elif self.config.name == "translation":
+            genny = self._generate_translation_examples(file_names_and_pointers)
 
         for _id, sample in genny:
             yield _id, sample
