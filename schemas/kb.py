@@ -19,6 +19,7 @@ import datasets
 
 features = datasets.Features(
     {
+        "id": datasets.Value("int32"),
         "document_id": datasets.Value("string"),
         "passages": datasets.Sequence(
             {
@@ -42,16 +43,16 @@ features = datasets.Features(
                 ),
             }
         ),
-        "events": datasets.Sequence(
+        "events": datasets.Sequence(  # E line in brat
             {
-                "id": datasets.Value("int32"),
-                "offsets": datasets.Sequence([datasets.Value("int32")]),
-                "text": datasets.Sequence([datasets.Value("string")]),
+                "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
-                "normalized": datasets.Sequence(
+                # refers to the text_bound_annotation of the trigger
+                "trigger": datasets.Value("int32"),
+                "arguments": datasets.Sequence(
                     {
-                        "db_name": datasets.Value("string"),
-                        "db_id": datasets.Value("string"),
+                        "role": datasets.Value("string"),
+                        "ref_id": datasets.Value("string"),
                     }
                 ),
             }
@@ -78,33 +79,3 @@ features = datasets.Features(
         ),
     }
 )
-
-
-# foobar = {
-#     "entities": [
-#         {
-#             "id": 2,
-#             "offsets": [[0, 8]],
-#             "text": "Naloxone",
-#             "type": "Chemical",
-#             "normalized": [
-#                 {
-#                     "db_name": "MESH",
-#                     "db_id": "D009270",
-#                 }
-#             ],
-#         },
-#         {
-#             "id": 3,
-#             "offsets": [[49, 58]],
-#             "text": "clonidine",
-#             "type": "Chemical",
-#             "normalized": [
-#                 {
-#                     "db_name": "MESH",
-#                     "db_id": "D003000",
-#                 }
-#             ],
-#         },
-#     ],
-# }

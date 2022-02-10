@@ -1,14 +1,14 @@
 """
-Knowledge Base Schema
+Textual Entailment Schema
 """
 import datasets
 
 
 features = datasets.Features(
     {
-        "question": datasets.Value("string"),
-        "text1": datasets.Value("string"),  # Passage/sentence 1
-        "text2": datasets.Value("string"),  # Passage/sentence
-        "label": datasets.Value("string"),  # entails/etc
+        "id": datasets.Value("string"),
+        "premise": datasets.Value("string"),
+        "hypothesis": datasets.Value("string"),
+        "label": datasets.Value("string"),
     }
 )

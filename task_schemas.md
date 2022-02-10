@@ -2,17 +2,17 @@
 We have defined a set of lightwieght, task-specific schema to help simplify programmatic access to common biomedical datasets. This schema should be implemented for each dataset in addition to a schema that preserves the original dataset format.
 
 ### Example Schemas by Task
-- Information Extraction
+- [Information Extraction](#information-extraction)
   - Named entity recognition (NER)
   - Named entity disambiguation/normalization/linking (NED)
   - Event extraction
   - Relation extraction (RE)
   - Coreference resolution
-- Textual Entailment (TE)
-- Question Answering (QA)
-- Paraphasing, Translation, Summarization
+- [Textual Entailment (TE)](#textual-entailment)
+- [Question Answering (QA)](#question-answering)
+- [Paraphasing, Translation, Summarization](#translation,-paraphasing,-summarization)
 - [Semantic Similarity](#semantic-similarity)
-- Text Classification
+- [Text Classification](#text-classification)
 
 ## Information Extraction
 
@@ -93,6 +93,11 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ### Events
+- Examples: [MLEE]()
+
+```
+TBD
+```
 
 ### Coreferences
 
@@ -101,8 +106,8 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 "coreferences": [
 	{
-   		"id": 32,
-   		"entity_ids": [1, 10, 23],
+	   "id": 32,
+	   "entity_ids": [1, 10, 23],
 	},
 	...
 ]
@@ -129,13 +134,13 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ```
 {
-    "id": 0,
-    "document_id": "24267510",
-    "question_id": "55031181e9bde69634000014",
-    "question": "Is RANKL secreted from the cells?", 
-    "type": "yesno",
-    "context": Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)", 
-    "answer": "yes"
+	"id": 0,
+	"document_id": "24267510",
+	"question_id": "55031181e9bde69634000014",
+	"question": "Is RANKL secreted from the cells?", 
+	"type": "yesno",
+	"context": Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)", 
+	"answer": "yes",
 }
 ```
 
@@ -147,14 +152,14 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 {
 	"id": 0,
+	"document_id": "NULL",
 	"premise": "Pluto rotates once on its axis every 6.39 Earth days;",
 	"hypothesis": "Earth rotates on its axis once times in one day.",
 	"label": "neutral",
 }
 ```
 
-## Paraphasing, Translation, Summarization
-
+## Translation, Paraphasing, Summarization
 
 - [Schema Template](schema/text_to_text.py)
 - Examples: [ParaMed](examples/paramed.py)
@@ -162,6 +167,7 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 {
 	"id": 0,
+	"document_id": "NULL",
 	"text_1": "也许 不能 : 分析 结果 提示 激素 疗法 在 维持 去 脂 体重 方面 作用 很小 .",
 	"text_2": "probably not : analysis suggests minimal effect of HT in maintaining lean body mass .",
 	"text_1_name": "zh",
@@ -177,6 +183,7 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 {
 	"id": 0,
+	"document_id": "NULL",
 	"text_1": "Am I over weight (192.9) for my age (39)?",
 	"text_2": "I am a 39 y/o male currently weighing about 193 lbs. Do you think I am overweight?",
 	"label": 1,
@@ -184,3 +191,13 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ## Text Classification
+- [Schema Template](schema/text.py)
+
+```
+{
+	"id": 0,
+	"document_id": "NULL",
+	"text": "Am I over weight (192.9) for my age (39)?",
+	"label": 1,
+}
+```
