@@ -8,8 +8,8 @@ We have defined a set of lightwieght, task-specific schema to help simplify prog
   - Event extraction
   - Relation extraction (RE)
   - Coreference resolution
-- [Textual Entailment (TE)](#textual-entailment)
-- [Question Answering (QA)](#question-answering)
+- [Textual Entailment](#textual-entailment)
+- [Question Answering](#question-answering)
 - [Paraphasing, Translation, Summarization](#translation,-paraphasing,-summarization)
 - [Semantic Similarity](#semantic-similarity)
 - [Text Classification](#text-classification)
@@ -128,7 +128,7 @@ TBD
 ]
 ```
 
-## Question Answering (QA)
+## Question Answering
 - [Schema Template](schemas/qa.py)
 - Examples: [BioASQ9 Task B](examples/bioasq9b.py)
 
@@ -144,7 +144,7 @@ TBD
 }
 ```
 
-## Textual Entailment (TE)
+## Textual Entailment
 
 - [Schema Template](schemas/entailment.py)
 - Examples: [SciTail](examples/scitail.py)
