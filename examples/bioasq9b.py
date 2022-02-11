@@ -110,6 +110,13 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
                     "concepts": datasets.Sequence(datasets.Value("string")),
                     "ideal_answer": datasets.Sequence(datasets.Value("string")),
                     "exact_answer": datasets.Sequence(datasets.Value("string")),
+                    "triples": datasets.Sequence(
+                        {
+                            "p": datasets.Value("string"),
+                            "s": datasets.Value("string"),
+                            "o": datasets.Value("string"),
+                        }
+                    ),
                     "snippets": datasets.Sequence(
                         {
                             "offsetInBeginSection": datasets.Value("int32"),
@@ -127,15 +134,12 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "question_id": datasets.Value("string"),
                     "question": datasets.Value("string"),
                     "type": datasets.Value("string"),
                     "context": datasets.Value("string"),
-                    "document": {
-                        "doc_id": datasets.Value("string"),
-                        "text": datasets.Value("string"),
-                    },
                     "answer": datasets.Sequence(datasets.Value("string")),
-                    "expanded_answer": datasets.Sequence(datasets.Value("string")),
                 }
             )
 
@@ -205,18 +209,24 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
                         "id": record["id"],
                         "type": record["type"],
                         "body": record["body"],
+                        "documents": record["documents"],
+                        "concepts": record["concepts"] if "concepts" in record else [],
+                        "triples": record["triplets"] if "triples" in record else [],
+                        "ideal_answer": record["ideal_answer"],
+                        "exact_answer": record["exact_answer"],
+                        "snippets": record["snippets"],
                     }
+
                 elif self.config.name == "bigbio":
-                    # TBD: materialize each record as question X snippet/context
-                    yield record["id"], {
-                        "id": record["id"],
-                        "type": record["body"],
-                        "question": record["type"],
-                        "context": record["body"],
-                        "document": {
-                            "doc_id": "",
-                            "text": "",
-                        },
-                        "answer": record["body"],
-                        "expanded_answer": record["body"],
-                    }
+                    # instances are defined over snippets/documents
+                    for i, snippet in enumerate(record["snippets"]):
+                        uid = f'{record["id"]}_{i}'
+                        yield uid, {
+                            "id": record["id"],
+                            "document_id": snippet["document"],
+                            "question_id": record["id"],
+                            "question": record["body"],
+                            "type": record["type"],
+                            "context": snippet["text"],
+                            "answer": record["exact_answer"],
+                        }

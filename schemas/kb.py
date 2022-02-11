@@ -19,11 +19,11 @@ import datasets
 
 features = datasets.Features(
     {
-        "id": datasets.Value("int32"),
+        "id": datasets.Value("string"),
         "document_id": datasets.Value("string"),
         "passages": datasets.Sequence(
             {
-                "id": datasets.Value("int32"),
+                "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
                 "text": datasets.Value("string"),
                 "offsets": datasets.Sequence([datasets.Value("int32")]),
@@ -31,7 +31,7 @@ features = datasets.Features(
         ),
         "entities": datasets.Sequence(
             {
-                "id": datasets.Value("int32"),
+                "id": datasets.Value("string"),
                 "offsets": datasets.Sequence([datasets.Value("int32")]),
                 "text": datasets.Sequence([datasets.Value("string")]),
                 "type": datasets.Value("string"),
@@ -48,7 +48,7 @@ features = datasets.Features(
                 "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
                 # refers to the text_bound_annotation of the trigger
-                "trigger": datasets.Value("int32"),
+                "trigger": datasets.Value("string"),
                 "arguments": datasets.Sequence(
                     {
                         "role": datasets.Value("string"),
@@ -59,16 +59,16 @@ features = datasets.Features(
         ),
         "coreferences": datasets.Sequence(
             {
-                "id": datasets.Value("int32"),
-                "entity_ids": [datasets.Value("string")],
+                "id": datasets.Value("string"),
+                "entity_ids": datasets.Sequence(datasets.Value("string")),
             }
         ),
         "relations": datasets.Sequence(
             {
                 "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
-                "arg1_id": datasets.Value("int32"),
-                "arg2_id": datasets.Value("int32"),
+                "arg1_id": datasets.Value("string"),
+                "arg2_id": datasets.Value("string"),
                 "normalized": datasets.Sequence(
                     {
                         "db_name": datasets.Value("string"),
