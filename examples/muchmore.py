@@ -117,19 +117,19 @@ _URLs = {
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     ],
-    "muchmore": [
+    "bigbio-kb": [
         "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     ],
-    "muchmore_en": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
-    "muchmore_de": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
+    "bigbio-kb-en": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
+    "bigbio-kb-de": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     "plain": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
     "plain_en": "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
     "plain_de": "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
-    "translation": [
+    "bigbio-text-to-text": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
@@ -147,7 +147,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
     """MuchMore Springer Bilingual Corpus"""
 
     VERSION = datasets.Version(_VERSION)
-    DEFAULT_CONFIG_NAME = _DATASETNAME
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
@@ -156,17 +155,17 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             description="muchmore: original format",
         ),
         datasets.BuilderConfig(
-            name=DEFAULT_CONFIG_NAME,
+            name="bigbio-kb",
             version=VERSION,
             description="muchmore: big science biomedical format (en & de)",
         ),
         datasets.BuilderConfig(
-            name="muchmore_en",
+            name="bigbio-kb-en",
             version=VERSION,
             description="muchmore: big science biomedical format (en only)",
         ),
         datasets.BuilderConfig(
-            name="muchmore_de",
+            name="bigbio-kb-de",
             version=VERSION,
             description="muchmore: big science biomedical format (de only)",
         ),
@@ -186,7 +185,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             description="muchmore: plaintext of abstracts (de only)",
         ),
         datasets.BuilderConfig(
-            name="translation",
+            name="bigbio-text-to-text",
             version=VERSION,
             description="muchmore: plaintext of matched english + german abstracts",
         ),
@@ -267,38 +266,33 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name in ("muchmore", "muchmore_en", "muchmore_de"):
+        elif self.config.name in ("bigbio-kb", "bigbio-kb-en", "bigbio-kb-de"):
             features = Features(
                 {
+                    "id": Value("string"),
+                    "document_id": Value("string"),
                     "passages": [
                         {
-                            "document_id": Value("string"),
+                            "id": Value("string"),
                             "type": Value("string"),
                             "text": Value("string"),
-                            "snippets": [
+                            "offsets": [Value("int32")],
+                        }
+                    ],
+                    "entities": [
+                        {
+                            "id": Value("string"),
+                            "offsets": [[Value("int32")]],
+                            "text": [Value("string")],
+                            "type": Value("string"),
+                            "normalized": [
                                 {
-                                    "snippet_id": Value("string"),
-                                    "offsets": [Value("int32")],
-                                    "text": Value("string"),
-                                    "type": Value("string"),
-                                }
-                            ],
-                            "entities": [
-                                {
-                                    "entity_id": Value("string"),
-                                    "offsets": [[Value("int32")]],
-                                    "text": [Value("string")],
-                                    "type": Value("string"),
-                                    "entity_kb_ids": [
-                                        {
-                                            "system": Value("string"),
-                                            "id": Value("string"),
-                                        }
-                                    ],
+                                    "db_name": Value("string"),
+                                    "db_id": Value("string"),
                                 }
                             ],
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -312,16 +306,15 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "translation":
+        elif self.config.name == "bigbio-text-to-text":
             features = Features(
                 {
-                    "en": Value("string"),
-                    "de": Value("string"),
-                    "metadata": {
-                        "sample_id_prefix": Value("string"),
-                        "sample_id_en": Value("string"),
-                        "sample_id_de": Value("string"),
-                    },
+                    "id": Value("string"),
+                    "document_id": Value("string"),
+                    "text_1": Value("string"),
+                    "text_2": Value("string"),
+                    "text_1_name": Value("string"),
+                    "text_2_name": Value("string"),
                 }
             )
 
@@ -495,8 +488,8 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             sample["abstract"] = abstracts[sample_id]
             yield _id, sample
 
-    def _generate_muchmore_examples(self, file_names_and_pointers):
-        """Generate big science biomedical canonical examples."""
+    def _generate_bigbio_kb_examples(self, file_names_and_pointers):
+        """Generate big science biomedical kb examples."""
 
         def snippets_tokens_from_sents(sentences):
             snippets = []
@@ -550,16 +543,14 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             snip_txts_lens = [len(el) for el in snip_txts]
             snip_toks_lens = [[len(tok) for tok in snip] for snip in snip_toks]
             text = " ".join(snip_txts)
-
-            snippets = []
-            for ii in range(len(sentences)):
-                snippet = {
-                    "snippet_id": sentences[ii]["id"],
-                    "offsets": sid_to_text_off(sentences[ii]["id"], snip_txts_lens),
-                    "text": snip_txts[ii],
-                    "type": "sentence",
+            passages = [
+                {
+                    "id": xroot.get("id"),
+                    "type": "abstract",
+                    "text": text,
+                    "offsets": (0, len(text)),
                 }
-                snippets.append(snippet)
+            ]
 
             entities = []
             for sentence in sentences:
@@ -583,24 +574,19 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     umls_cuis = [el["cui"] for el in umlsterm["concepts"]]
 
                     entity = {
-                        "entity_id": entity_id,
+                        "id": entity_id,
                         "offsets": offsets,
                         "text": [tok_text],
                         "type": "umlsterm",
-                        "entity_kb_ids": [{"system": "UMLS", "id": cui} for cui in umls_cuis],
+                        "normalized": [{"db_name": "UMLS", "db_id": cui} for cui in umls_cuis],
                     }
                     entities.append(entity)
 
             yield _id, {
-                "passages": [
-                    {
-                        "document_id": xroot.get("id"),
-                        "type": "abstract",
-                        "text": text,
-                        "snippets": snippets,
-                        "entities": entities,
-                    }
-                ]
+                "id": xroot.get("id"),
+                "document_id": xroot.get("id"),
+                "passages": passages,
+                "entities": entities,
             }
 
     def _generate_plain_examples(self, file_names_and_pointers):
@@ -635,13 +621,12 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             en_idx = 0 if sample_pair[0]["language"] == "en" else 1
             de_idx = 0 if en_idx == 1 else 1
             yield _id, {
-                "en": sample_pair[en_idx]["abstract"],
-                "de": sample_pair[de_idx]["abstract"],
-                "metadata": {
-                    "sample_id_prefix": sample_id_prefix,
-                    "sample_id_en": sample_pair[en_idx]["sample_id"],
-                    "sample_id_de": sample_pair[de_idx]["sample_id"],
-                },
+                "id": sample_id_prefix,
+                "document_id": sample_id_prefix,
+                "text_1": sample_pair[en_idx]["abstract"],
+                "text_2": sample_pair[de_idx]["abstract"],
+                "text_1_name": "en",
+                "text_2_name": "de",
             }
             _id += 1
 
@@ -650,13 +635,13 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         if self.config.name == "original":
             genny = self._generate_original_examples(file_names_and_pointers)
 
-        elif self.config.name in ("muchmore", "muchmore_en", "muchmore_de"):
-            genny = self._generate_muchmore_examples(file_names_and_pointers)
+        elif self.config.name in ("bigbio-kb", "bigbio-kb-en", "bigbio-kb-de"):
+            genny = self._generate_bigbio_kb_examples(file_names_and_pointers)
 
         elif self.config.name in ("plain", "plain_en", "plain_de"):
             genny = self._generate_plain_examples(file_names_and_pointers)
 
-        elif self.config.name == "translation":
+        elif self.config.name == "bigbio-text-to-text":
             genny = self._generate_translation_examples(file_names_and_pointers)
 
         for _id, sample in genny:
