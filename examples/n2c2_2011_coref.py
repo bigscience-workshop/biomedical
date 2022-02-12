@@ -287,11 +287,6 @@ def _get_entities_from_sample(sample_id, sample):
     be aligned with the slice from the full text produced by using
     the line and token offsets. These entities are excluded from the
     entities object and the coreferences object.
-
-    Note: unique entity IDs are formed using the following pattern,
-
-      entity_id = f"{sample_id}-{start_line}-{start_token}-{end_line}-{end_token}"
-
     """
     con_lines = sample["con"].splitlines()
     text = sample["txt"]
