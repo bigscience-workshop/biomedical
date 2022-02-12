@@ -19,14 +19,7 @@ A dataset loader for the n2c2 2011 coref dataset.
 
 https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
 
-The files comprising this dataset must be on the users local machine
-in a single directory that is passed to `datasets.load_datset` via
-the `data_dir` kwarg.
-
-```
-ds = load_dataset("n2c2_2011_coref.py", name="original", data_dir="/path/to/dataset/files")
-ds = load_dataset("n2c2_2011_coref.py", name="n2c2_2011_coref", data_dir="/path/to/dataset/files")
-```
+The dataset consists of four archive files,
 
 * Task_1C.zip
 * Task_1C_Test_groundtruth.zip
@@ -41,6 +34,28 @@ The individual data files (inside the zip and tar archives) come in 4 types,
 * pairs (*.txt.pairs files): pairs of coreferent entities (not required)
 
 
+The files comprising this dataset must be on the users local machine
+in a single directory that is passed to `datasets.load_datset` via
+the `data_dir` kwarg. This loader script will read the archive files
+directly (i.e. the user should not uncompress, untar or unzip any of
+the files). For example, if the following directory structure exists
+on the users local machine,
+
+
+n2c2_2011_coref
+├── i2b2_Beth_Train_Release.tar.gz
+├── i2b2_Partners_Train_Release.tar.gz
+├── Task_1C_Test_groundtruth.zip
+└── Task_1C.zip
+
+The following commands can be used to load the dataset
+
+```
+ds_orig = load_dataset("n2c2_2011_coref.py", name="original", data_dir="/path/to/n2c2_2011_coref")
+ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio-kb", data_dir="/path/to/n2c2_2011_coref")
+```
+
+
 Data Access
 
 from https://www.i2b2.org/NLP/DataSets/Main.php
@@ -53,7 +68,6 @@ for your account on the Data Portal, but your original DUA will be retained."
 """
 
 from collections import defaultdict
-import logging
 import os
 import re
 import tarfile
@@ -61,7 +75,7 @@ from typing import Dict, List, Match, Tuple
 import zipfile
 
 import datasets
-from datasets import Value, Features
+from datasets import Features, Sequence, Value
 
 
 _DATASETNAME = "n2c2_2011_coref"
@@ -222,6 +236,14 @@ def _tokoff_from_line(text: str) -> List[Tuple[int, int]]:
         tokoff.append((start, end))
     return tokoff
 
+def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
+    return "{}-entity-{}-{}-{}-{}".format(
+        sample_id,
+        start_line,
+        start_token,
+        end_line,
+        end_token,
+    )
 
 def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
     """Parse the lines of a *.chains file into coreference objects
@@ -235,9 +257,9 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
     chains_parsed = [_parse_chains_line(line) for line in chains_lines]
     corefs = []
     for ii_cp, cp in enumerate(chains_parsed):
-        coref_id = f"{sample_id}-{ii_cp}"
+        coref_id = f"{sample_id}-coref-{ii_cp}"
         coref_entity_ids = [
-            "{}-{}-{}-{}-{}".format(
+            _form_entity_id(
                 sample_id,
                 entity["start_line"],
                 entity["start_token"],
@@ -250,13 +272,12 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
             ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids
         ]
         coref = {
-            "coreference_id": coref_id,
+            "id": coref_id,
             "entity_ids": coref_entity_ids,
         }
         corefs.append(coref)
 
     return corefs
-
 
 def _get_entities_from_sample(sample_id, sample):
     """Parse the lines of a *.con concept file into entity objects
@@ -325,7 +346,7 @@ def _get_entities_from_sample(sample_id, sample):
         if not match:
             continue
 
-        entity_id = "{}-{}-{}-{}-{}".format(
+        entity_id = _form_entity_id(
             sample_id,
             cp["start_line"],
             cp["start_token"],
@@ -333,11 +354,11 @@ def _get_entities_from_sample(sample_id, sample):
             cp["end_token"],
         )
         entity = {
-            "entity_id": entity_id,
+            "id": entity_id,
             "offsets": [(start_off, end_off)],
             "text": cp["text"],
             "type": cp["type"],
-            "entity_kb_id": "",
+            "normalized": [],
         }
         entities.append(entity)
 
@@ -353,16 +374,21 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         datasets.BuilderConfig(
             name="original",
             version=VERSION,
-            description="original form of data",
+            description="Original n2c2 2011 coreference schema",
         ),
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name="bigbio-kb",
             version=VERSION,
-            description="canonical coref form of data",
+            description="Simplified schema for BigScience-Biomedical KB tasks",
+        ),
+        datasets.BuilderConfig(
+            name="bigbio-kb-list",
+            version=VERSION,
+            description="Simplified schema for BigScience-Biomedical KB tasks (lists not sequence)",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME
+    DEFAULT_CONFIG_NAME = "bigbio-kb"
 
     def _info(self):
 
@@ -383,33 +409,78 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == _DATASETNAME:
+        elif self.config.name == "bigbio-kb":
             features = Features(
                 {
-                    "passages": [
+                    "id": Value("string"),
+                    "document_id": Value("string"),
+                    "passages": Sequence(
                         {
-                            "document_id": Value("string"),
+                            "id": Value("string"),
                             "type": Value("string"),
                             "text": Value("string"),
-                            "entities": [
+                            "offsets": Sequence([Value("int32")]),
+                        }
+                    ),
+                    "entities": Sequence(
+                        {
+                            "id": Value("string"),
+                            "offsets": Sequence([Value("int32")]),
+                            "text": Value("string"),
+                            "type": Value("string"),
+                            "normalized": Sequence(
                                 {
-                                    "entity_id": Value("string"),
-                                    "offsets": [[Value("int32")]],
-                                    "text": Value("string"),
-                                    "type": Value("string"),
-                                    "entity_kb_id": Value("string"),
+                                    "db_name": Value("string"),
+                                    "db_id": Value("string"),
                                 }
-                            ],
-                            "coreferences": [
+                            ),
+                        }
+                    ),
+                    "coreferences": Sequence(
+                        {
+                            "id": Value("string"),
+                            "entity_ids": Sequence(Value("string")),
+                        }
+                    ),
+                }
+            )
+
+        elif self.config.name == "bigbio-kb-list":
+            features = Features(
+                {
+                    "id": Value("string"),
+                    "document_id": Value("string"),
+                    "passages": [
+                        {
+                            "id": Value("string"),
+                            "type": Value("string"),
+                            "text": Value("string"),
+                            "offsets": [[Value("int32")]],
+                        }
+                    ],
+                    "entities": [
+                        {
+                            "id": Value("string"),
+                            "offsets": [[Value("int32")]],
+                            "text": Value("string"),
+                            "type": Value("string"),
+                            "normalized": [
                                 {
-                                    "coreference_id": Value("string"),
-                                    "entity_ids": [Value("string")],
+                                    "db_name": Value("string"),
+                                    "db_id": Value("string"),
                                 }
                             ],
                         }
-                    ]
+                    ],
+                    "coreferences": [
+                        {
+                            "id": Value("string"),
+                            "entity_ids": [Value("string")],
+                        }
+                    ],
                 }
             )
+
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -471,20 +542,25 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     @staticmethod
     def _get_coref_sample(sample_id, sample):
 
+        passage_text = sample.get("txt", "")
         entities = _get_entities_from_sample(sample_id, sample)
-        entity_ids = set([entity["entity_id"] for entity in entities])
+        entity_ids = set([entity["id"] for entity in entities])
         coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids)
         return {
+            "id": sample_id,
+            "document_id": sample_id,
             "passages": [
                 {
-                    "document_id": sample_id,
+                    "id": f"{sample_id}-passage-0",
                     "type": "discharge summary",
-                    "text": sample.get("txt", ""),
-                    "entities": entities,
-                    "coreferences": coreferences,
+                    "text": passage_text,
+                    "offsets": [(0, len(passage_text))],
                 }
-            ]
+            ],
+            "entities": entities,
+            "coreferences": coreferences,
         }
+
 
     def _generate_examples(self, split):
         """Generate samples using the info passed in from _split_generators."""
@@ -504,7 +580,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 for sample_id, sample in samples.items():
                     if self.config.name == "original":
                         yield _id, self._get_original_sample(sample_id, sample)
-                    elif self.config.name == _DATASETNAME:
+                    elif self.config.name in ("bigbio-kb", "bigbio-kb-list"):
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -523,6 +599,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for sample_id, sample in samples.items():
                 if self.config.name == "original":
                     yield _id, self._get_original_sample(sample_id, sample)
-                elif self.config.name == _DATASETNAME:
+                elif self.config.name in ("bigbio-kb", "bigbio-kb-list"):
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
