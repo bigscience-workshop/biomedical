@@ -34,7 +34,7 @@ from datasets import load_dataset
 
 ds_en = load_dataset(
     "muchmore.py",
-    name="bigbio-kb-en",
+    name="bigbio-kb-en-list",
 )
 
 # ds_de = load_dataset(

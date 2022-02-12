@@ -123,6 +123,12 @@ _URLs = {
     ],
     "bigbio-kb-en": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
     "bigbio-kb-de": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
+    "bigbio-kb-list": [
+        "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
+        "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
+    ],
+    "bigbio-kb-en-list": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
+    "bigbio-kb-de-list": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     "plain": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
@@ -166,6 +172,21 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         ),
         datasets.BuilderConfig(
             name="bigbio-kb-de",
+            version=VERSION,
+            description="muchmore: big science biomedical format (de only)",
+        ),
+        datasets.BuilderConfig(
+            name="bigbio-kb-list",
+            version=VERSION,
+            description="muchmore: big science biomedical format (en & de)",
+        ),
+        datasets.BuilderConfig(
+            name="bigbio-kb-en-list",
+            version=VERSION,
+            description="muchmore: big science biomedical format (en only)",
+        ),
+        datasets.BuilderConfig(
+            name="bigbio-kb-de-list",
             version=VERSION,
             description="muchmore: big science biomedical format (de only)",
         ),
@@ -267,6 +288,36 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.name in ("bigbio-kb", "bigbio-kb-en", "bigbio-kb-de"):
+            features = Features(
+                {
+                    "id": Value("string"),
+                    "document_id": Value("string"),
+                    "passages": Sequence(
+                        {
+                            "id": Value("string"),
+                            "type": Value("string"),
+                            "text": Value("string"),
+                            "offsets": Sequence(Value("int32")),
+                        }
+                    ),
+                    "entities": Sequence(
+                        {
+                            "id": Value("string"),
+                            "offsets": Sequence([Value("int32")]),
+                            "text": Sequence(Value("string")),
+                            "type": Value("string"),
+                            "normalized": Sequence(
+                                {
+                                    "db_name": Value("string"),
+                                    "db_id": Value("string"),
+                                }
+                            ),
+                        }
+                    ),
+                }
+            )
+
+        elif self.config.name in ("bigbio-kb-list", "bigbio-kb-en-list", "bigbio-kb-de-list"):
             features = Features(
                 {
                     "id": Value("string"),
@@ -635,7 +686,14 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         if self.config.name == "original":
             genny = self._generate_original_examples(file_names_and_pointers)
 
-        elif self.config.name in ("bigbio-kb", "bigbio-kb-en", "bigbio-kb-de"):
+        elif self.config.name in (
+            "bigbio-kb",
+            "bigbio-kb-en",
+            "bigbio-kb-de",
+            "bigbio-kb-list",
+            "bigbio-kb-en-list",
+            "bigbio-kb-de-list",
+        ):
             genny = self._generate_bigbio_kb_examples(file_names_and_pointers)
 
         elif self.config.name in ("plain", "plain_en", "plain_de"):
