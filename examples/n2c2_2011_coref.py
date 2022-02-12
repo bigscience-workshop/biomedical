@@ -346,7 +346,7 @@ def _get_entities_from_sample(sample_id, sample):
         entity = {
             "id": entity_id,
             "offsets": [(start_off, end_off)],
-            "text": cp["text"],
+            "text": [cp["text"]],
             "type": cp["type"],
             "normalized": [],
         }
@@ -409,14 +409,14 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                             "id": Value("string"),
                             "type": Value("string"),
                             "text": Value("string"),
-                            "offsets": Sequence([Value("int32")]),
+                            "offsets": Sequence(Value("int32")),
                         }
                     ),
                     "entities": Sequence(
                         {
                             "id": Value("string"),
                             "offsets": Sequence([Value("int32")]),
-                            "text": Value("string"),
+                            "text": Sequence(Value("string")),
                             "type": Value("string"),
                             "normalized": Sequence(
                                 {
@@ -445,14 +445,14 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                             "id": Value("string"),
                             "type": Value("string"),
                             "text": Value("string"),
-                            "offsets": [[Value("int32")]],
+                            "offsets": [Value("int32")],
                         }
                     ],
                     "entities": [
                         {
                             "id": Value("string"),
                             "offsets": [[Value("int32")]],
-                            "text": Value("string"),
+                            "text": [Value("string")],
                             "type": Value("string"),
                             "normalized": [
                                 {
@@ -541,7 +541,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                     "id": f"{sample_id}-passage-0",
                     "type": "discharge summary",
                     "text": passage_text,
-                    "offsets": [(0, len(passage_text))],
+                    "offsets": (0, len(passage_text)),
                 }
             ],
             "entities": entities,

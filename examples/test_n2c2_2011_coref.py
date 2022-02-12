@@ -53,7 +53,7 @@ for sample in dsbb["train"]:
     for ii_entity, entity_id in enumerate(entity_ids):
         ii, ff = entity_offsets[ii_entity][0], entity_offsets[ii_entity][1]
         ptext = passage_text[ii:ff]
-        ctext = entity_texts[ii_entity]
+        ctext = entity_texts[ii_entity][0]
         assert ptext.lower() == ctext
         num_entities += 1
 
