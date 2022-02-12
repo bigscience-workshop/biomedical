@@ -133,9 +133,7 @@ def _read_tar_gz(file_path, samples=None):
             sample_id = filename.split(".")[0]
 
             if ext in ["txt", "con", "pairs", "chains"]:
-                samples[sample_id][f"{ext}_source"] = (
-                    os.path.basename(file_path) + "|" + member.name
-                )
+                samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + member.name
                 with tf.extractfile(member) as fp:
                     content_bytes = fp.read()
                 content = content_bytes.decode("utf-8")
@@ -155,12 +153,8 @@ def _read_zip(file_path, samples=None):
             ext = ext[1:]  # get rid of dot
             sample_id = filename.split(".")[0]
 
-            if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith(
-                "."
-            ):
-                samples[sample_id][f"{ext}_source"] = (
-                    os.path.basename(file_path) + "|" + info.filename
-                )
+            if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith("."):
+                samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + info.filename
                 content = zf.read(info).decode("utf-8")
                 samples[sample_id][ext] = content
 
@@ -236,6 +230,7 @@ def _tokoff_from_line(text: str) -> List[Tuple[int, int]]:
         tokoff.append((start, end))
     return tokoff
 
+
 def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
     return "{}-entity-{}-{}-{}-{}".format(
         sample_id,
@@ -244,6 +239,7 @@ def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
         end_line,
         end_token,
     )
+
 
 def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
     """Parse the lines of a *.chains file into coreference objects
@@ -268,9 +264,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
             )
             for entity in cp
         ]
-        coref_entity_ids = [
-            ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids
-        ]
+        coref_entity_ids = [ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids]
         coref = {
             "id": coref_id,
             "entity_ids": coref_entity_ids,
@@ -278,6 +272,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
         corefs.append(coref)
 
     return corefs
+
 
 def _get_entities_from_sample(sample_id, sample):
     """Parse the lines of a *.con concept file into entity objects
@@ -476,7 +471,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -486,9 +480,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """
         self.config.data_dir and self.config.data_files can be made available by
         passing the `data_dir` and/or `data_files` kwargs to `load_dataset`.
@@ -556,7 +548,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             "coreferences": coreferences,
         }
 
-
     def _generate_examples(self, split):
         """Generate samples using the info passed in from _split_generators."""
 
@@ -566,9 +557,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             # (so we get a fresh `samples` defaultdict from each)
             paths = [
                 os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                os.path.join(
-                    self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"
-                ),
+                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
             ]
             for path in paths:
                 samples = _read_tar_gz(path)
