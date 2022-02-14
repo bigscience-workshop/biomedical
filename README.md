@@ -94,7 +94,7 @@ We provide template scripts for the most common biomedical NLP schemas: <br>
 10. [Topic classification](templates/template_topiccls.py)
 11. [Co-reference](templates/template_coref.py)
 
-**Don't see your task or have questions? [reach out to an admin](#Community-channels)**
+**Don't see your task or have questions? [Reach out to an admin](#Community-channels)**
 
 We have provided some examples of how to implement a dataset as follows:
 
