@@ -211,7 +211,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                         (loc.offset - offset, loc.offset + loc.length - offset)
                         for loc in a.locations
                     ],
-                    "text": [a.text],
+                    "text": [[a.text]],
                     "id": a.id,
                     "normalized": self._get_normalized(a),
                 }
