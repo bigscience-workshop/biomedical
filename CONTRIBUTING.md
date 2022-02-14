@@ -1,13 +1,60 @@
 # Guide to Implementing a dataset
 
-The following guide will walk you through how to make a data-loading script for your dataset.
+## Pre-Requisites
 
-For the first step, it's important to create a **reproducible test environment**. To do so, please make a python environment with the following instructions:
 
-## 1) Create a development environment
+
+
+### 1. **Setup a local version of the datasets repo to update**
+Fork the dataset [repository](https://github.com/huggingface/datasets) from huggingface to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github. 
+
+After you fork, clone the repository locally. You can do so as follows:
+
+    git clone git@github.com:<your_github_username>/datasets.git
+    cd datasets  # enter the directory
+
+Next, you want to set your `upstream` location to enable you to push/pull (add or receive updates). You can do so as follows:
+    
+    git remote add upstream https://github.com/huggingface/datasets.git
+
+You can optionally check that this was set properly by running the following command:
+    
+    git remote -v 
+
+The output of this command should look as follows:
+
+    origin  https://github.com/<your_github_username>/datasets (fetch)
+    origin  https://github.com/<your_github_username>/datasets (push)
+    upstream    https://github.com/huggingface/datasets.git (fetch)
+    upstream    https://github.com/huggingface/datasets.git (push)
+
+If you do NOT have an `origin` for whatever reason, then run:
+
+    git remote add origin https://github.com/<your_github_username>/datasets.git
+
+The goal of `upstream` is to keep your repository up-to-date to any changes that are made officially to the datasets library. You can do this as follows by running the following commands:
+
+    git fetch upstream
+    git pull
+
+Provided you have no *merge conflicts*, this will ensure the library stays up-to-date as you make changes. However, before you make changes, you should make a custom branch to implement your changes. 
+
+You can make a new branch as such:
+
+    git checkout -b <name_of_my_dataset_branch>
+
+<p style="color:red"> <b> Please do not make changes on the master branch! </b></p>
+
+Always make sure you're on the right branch with the following command:
+
+    git branch
+
+The correct branch will have a asterisk \* in front of it.
+
+### 2. **Create a development environment** 
 You can make an environment in any way you choose to. We highlight two possible options:
 
-#### 1a) Create a conda environment
+#### 2a) Create a conda environment
 
 - Install [anaconda](https://docs.anaconda.com/anaconda/install/) for your appropriate operating system.
 - Run the following command while in the `datasets` folder (you can pick your python version):
@@ -15,60 +62,78 @@ You can make an environment in any way you choose to. We highlight two possible 
 ```
 conda create --name <your_env_name_here> python=<your_python_version_here>  # Creates a conda env
 conda activate <your_env_name_here> # Activate your conda environment
+pip install -e ".[dev]"  # Install this while in the datasets folder
 ```
 
 Make sure you are using the correct pip by checking `which pip`; this should point to the pip within your conda environment. You can deactivate your environment at any time by either exiting your terminal or using `conda deactivate`.
 
-#### 1b) Create a venv environment
+#### 2b) Create a venv environment
 
 Python 3.3+ has venv automatically installed; official information is found [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
 
 ```
 python3 -m venv <your_env_name_here>
 source <your_env_name_here>/bin/activate  # activate environment
+pip install -e ".[dev]"  # Install this while in the datasets folder
 ```
 
-## 2) Activate the Huggingface hub
+**Note! If you already have the `datasets` library installed in a different environment of choice, please uninstall it first (via `pip uninstall datasets`) and re-install in the editable mode**
 
-You can find the official instructions [here](https://huggingface.co/welcome). We will provide what you need for the biomedical-datasets hackathon environment.
+### 3. Implement your dataset
 
-Download the `requirements.txt` file from [bigscience-biomedical](https://github.com/bigscience-workshop/biomedical/blob/master/requirements.txt).
+Make a new directory within the `datasets` folder as such: <br>
 
-With your environment active, install the requirements with `pip install -r requirements.txt`
+    mkdir datasets/<name_of_my_dataset>
+    cd datasets/<name_of_my_dataset>
 
-<!-- @NATASHA tidy up requirements.txt -->
+To implement your dataset, follow instructions in the necessary files:
 
-With the requirements downloaded, run the following command:
+- **Option 1:** To add a dataset that has a public license, use `template.py`
+- **Option 2:** To add a dataset where files are local, use `template_local.py`
 
+Make sure your dataset is implemented correctly by checking in python the following commands:
+
+```python
+import datasets
+from datasets import load_dataset
+
+data = load_dataset('your_dataset_name')
 ```
-huggingface-cli login
-```
 
-Login with your 🤗 Hub account username and password. 
+Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.
 
-## 3) Implementation details
+### 4. Format code 
 
-TBA
+Return to the main directory (assuming you are in your dataset-specific folder) via the following commands:
 
-### 4) Format code 
-
-Run the following commands:
-
+    cd ../../  # return to the datasets main location
     make style
     make quality
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
-<!---
-@NATASHA adapt make style/quality
--->
+### 5. Commit your changes
 
-## 5) Test your data-loader 
+First, commit your changes to the branch to "add" the work:
 
-Run the following command **in a folder that does not include your data-loading script**:
+    git add datasets/<name_of_my_dataset>/<name_of_my_dataset>.py
+    git commit
 
-```python
-from datasets import load_dataset
+*Ideally, run* `git commit -m "A message of your commits"`
 
-dataset = load_dataset("bigscience-biomedical/<your_dataset_name>", use_auth_token=True)
-```
+Then, run the following commands to incorporate any new changes in the master branch of datasets as follows:
+
+    git fetch upstream
+    git rebase upstream/master
+
+**Run these commands in your custom branch**.
+
+Push these changes to **your fork** with the following command:
+
+    git push -u origin <name_of_my_dataset_branch>
+
+**[Optional Step]** Add unit-tests and meta data by following instructions [here](https://huggingface.co/docs/datasets/share_dataset.html#adding-tests).
+
+### 6. **Make a pull request** 
+
+Make a PR to implement your changes on the main repository [here](https://github.com/huggingface/datasets/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".

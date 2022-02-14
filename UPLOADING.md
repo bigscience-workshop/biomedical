@@ -1,4 +1,4 @@
-## Uploading a dataloader script to the Hub
+# Uploading a dataloader script to the Hub
 
 ### 1. Make an account on the Hub
 
@@ -14,7 +14,25 @@ Please do the following before getting started:
 
 **Note - your permissions will be set to READ. Please contact an admin in a github issue to be granted WRITE access**
 
-### 2. Create a dataset repository
+### 2) Activate the Huggingface hub
+
+You can find the official instructions [here](https://huggingface.co/welcome). We will provide what you need for the biomedical-datasets hackathon environment.
+
+Download the `requirements.txt` file from [bigscience-biomedical](https://github.com/bigscience-workshop/biomedical/blob/master/requirements.txt).
+
+With your environment active, install the requirements with `pip install -r requirements.txt`
+
+<!-- @NATASHA tidy up requirements.txt -->
+
+With the requirements downloaded, run the following command:
+
+```
+huggingface-cli login
+```
+
+Login with your 🤗 Hub account username and password. 
+
+### 3. Create a dataset repository
 
 Make a repository via the 🤗 Hub [here](https://huggingface.co/new-dataset) with the following details
 
@@ -23,7 +41,7 @@ Make a repository via the 🤗 Hub [here](https://huggingface.co/new-dataset) wi
 + Select Private
 + Click `Create dataset`
 
-### 3. Clone the dataset repository
+### 4. Clone the dataset repository
 
 Using terminal access, find a location to place your github repository. In this location, use the following command:
 
@@ -31,7 +49,7 @@ Using terminal access, find a location to place your github repository. In this 
 git clone https://huggingface.co/datasets/bigscience-biomedical/<your_dataset_name>
 ```
 
-### 4. Commit your changes
+### 5. Commit your changes
 
 Run the following commands to add and push your work
 
@@ -41,9 +59,16 @@ git commit -m "Adds <your_dataset_name>"
 git push origin
 ```
 
-And with that, you have successfully contributed a data-loading script! You can check out your script as follows:
+At this point, there should be **no further changes in your code**. 
+
+## 6) Test your data-loader 
+
+Run the following command **in a folder that does not include your data-loading script**:
 
 ```python
 from datasets import load_dataset
-data = load_dataset("bigscience-biomedical/<your_dataset_name>")
+
+dataset = load_dataset("bigscience-biomedical/<your_dataset_name>", use_auth_token=True)
 ```
+
+And with that, you have successfully contributed a data-loading script! 
