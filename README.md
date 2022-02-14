@@ -1,4 +1,4 @@
-***Update 2022.01.26: This is a WIP stay tuned for the launch of this hackathon! We're excited to have you!***
+***Update 2022.02.14: We're close to launch! We're excited to have you!***
 
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
@@ -9,7 +9,9 @@ We are running a **Biomedical Datasets hackathon** to centralize many NLP datase
 
 ## Goals of this hackathon
 
-Our goal is to **enable easy programatic access to these datasets** using 🤗's [`datasets` library](https://huggingface.co/docs/datasets/). To do this, we propose a unified schema for dataset extraction, with the intention of implementing as many biomedical datasets as possible to enable **reproducibility in data processing**. We are leveraging Huggingface's (🤗) **Community Hub** in order to centralize these scripts so that practioners and researchers have easy access to these tools with a simple API.
+Our goal is to **enable easy programatic access to these datasets** using 🤗's [`datasets` library](https://huggingface.co/docs/datasets/). To do this, we propose a unified schema for dataset extraction, with the intention of implementing as many biomedical datasets as possible to enable **reproducibility in data processing**. 
+
+We are leveraging Huggingface's (🤗) **Community Hub** in order to centralize these scripts so that practioners and researchers have easy access to these tools with a simple API.
 
 There are two broad categories of biomedical datasets:
 
@@ -19,34 +21,19 @@ There are two broad categories of biomedical datasets:
 We will accept data-loading scripts for either type; please see the [FAQs](#FAQs) for more explicit details on what we propose.
 
 
-### Scope and Future Vision
-<!---
-Here, we should write maybe 1-3 sentences around our plans for prompting.
--->
-
 ## Contribution Guidelines
 
-There are official guides to contributing to the `datasets` library from Huggingface's  for a [shared dataset](https://huggingface.co/docs/datasets/share_dataset.html) and to [add a dataset](https://huggingface.co/docs/datasets/add_dataset.html). Our guide follows closely from these, with adaptations to suit this intitiative.
+To be guaranteed acknowledgement, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 1 dataset**. Explicit instructions are found in [Get started](#Get-started), but the overall criteria to get accepted is as follows: <br>
 
-Contributors must implement an *accepted data-loading script* to the collection for **at least 1 dataset** to be guaranteed acknowledgement. All PRs submitted will be subject to code review prior to acceptance.
+- Implement a data-loading script as a branch
+- PR the branch to the bigscience-biomedical repo
+- If an admin approves the PR, follow the instructions on [uploading to the hub](UPLOADING.md).
 
 Details for contributor acknowledgements and rewards can be found [here](#Thank-you)
 
-## Get started
+*Optional* If you are looking for the official guides for contributing to the `datasets` library from Huggingface for a [shared dataset](https://huggingface.co/docs/datasets/share_dataset.html) or to [add a dataset](https://huggingface.co/docs/datasets/add_dataset.html), you can find them in the links attached. Our guide follows closely from these, with adaptations to suit this intitiative.
 
-### Pre-Requisites
-
-Please do the following before getting started: 
-
-- [Make](https://huggingface.co/join) an account on 🤗's Hub and [login](https://huggingface.co/login). **Choose a good password, as you'll need to authenticate your credentials**. 
-
-- Join the BigScience Biomedical initiative [here](https://huggingface.co/bigscience-biomedical)
-    - click the "Request to join this org" button in the upper right corner.
-
-- Make a github account; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
-
-*Optional* <br>
-- You will also likely need at Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. 
+## Get started!
 
 ### 1. Choose a dataset to implement
 
@@ -75,62 +62,50 @@ In your new issue, please provide the following details:
 
 Ideally, also check to see if the dataset already exists in the 🤗 [Hub](https://huggingface.co/datasets). 
 
-If an admin approves it, the dataset will count toward the hackathon contributions.
+If an admin approves it, then you are welcome to implement this dataset and it will count toward contribution credit.
 
-### 2. Create a dataset repository
-
-Make a repository via the 🤗 Hub [here](https://huggingface.co/new-dataset) with the following details
-
-+ Set Owner: bigscience-biomedical
-+ Set Dataset name: the name of the dataset 
-+ Select Private
-+ Click `Create dataset`
-
-### 3. Clone the dataset repository
-
-Using terminal access, find a location to place your github repository. In this location, use the following command:
-
-```
-git clone https://huggingface.co/datasets/bigscience-biomedical/chemprot
-```
-### 4. Implement the dataloader for your dataset
+### 2. Implement the dataloader for your dataset
 
 A step-by-step guide on how you can implementing a data-loading script can be found [here](CONTRIBUTING.md).
 
-Please ensure your dataloader follows our expected biomedical schema <!---  @Natasha This needs to be a hyperlink [Biomedical Schema]() -->
+Please ensure your dataloader follows our expected biomedical schema, found [here](#Template-scripts)
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
 
-Below, you can find some example template scripts
-
 #### Template scripts
 
-You can find template scripts and examples as follows: <br>
+We provide template scripts for the most common biomedical NLP schemas: <br>
+
+1. [Named entity recognition (NER), relational extraction (RE), event extraction](templates/template_ner.py)
+2. [Translation](templates/template_translation.py)
+3. [Part-of-speech (POS)](templates/template_pos.py)
+4. [Question-answering (QA)](templates/template_qa.py)
+5. [Natural language inference (NLI)](templates/template_nli.py)
+6. [Normalization](templates/template_normalization.py)
+7. [Sentence classification](templates/template_sentcls.py)
+8. [Fact verification](templates/template_factver.py)
+9. [Semantic similarity](templates/template_semsim.py)
+10. [Topic classification](templates/template_topiccls.py)
+11. [Co-reference](templates/template_coref.py)
+
+**Don't see your task or have questions? [reach out to an admin](#Community-channels)**
+
+We have provided some examples of how to implement a dataset as follows:
+
+#### Example scripts
+You can find examples scripts on how to implement a dataset here: <br>
 
 1. [Template for publically licensed data](templates/template.py)
 2. [Template for externally licensed data](templates/template_local.py)
 3. [Example of publically licensed data](examples/chemprot.py)
 4. [Example of externally licensed data](examples/cellfinder.py)
 5. [Example of Bio-C format annotation](examples/bc5cdr.py)
-6. Example with BRAT format annotation (coming soon)
 
-<!---
-@NATASHA Make DDI script
+### 3. PR your dataloader!
 
-[Example with BRAT format annotation](examples/ddi.py)
--->
+Explicit instructions on how to PR a dataloader are found [here](CONTRIBUTING.md). Once you do, an admin will code-review your changes. Admins may propose changes before acceptance, or accept as-is. Please feel free to reach out to get your PRs accepted!
 
-### 5. Commit your changes
-
-Run the following commands to add and push your work
-
-```
-git add <your_file_name.py>  # add the dataset
-git commit -m "Adds <your_dataset_name"
-git push origin
-```
-
-And with that, you have successfully contributed a data-loading script!
+Once the PR is accepted, please follow the instructions to upload the dataset into the [Hub](UPLOADING.md).
 
 ## Community channels
 
