@@ -26,14 +26,14 @@ features = datasets.Features(
                 "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
                 "text": datasets.Value("string"),
-                "offsets": datasets.Sequence([datasets.Value("int32")]),
+                "offsets": datasets.Sequence(datasets.Value("int32")),
             }
         ],
         "entities": [
             {
                 "id": datasets.Value("string"),
                 "offsets": datasets.Sequence([datasets.Value("int32")]),
-                "text": datasets.Sequence([datasets.Value("string")]),
+                "text": datasets.Sequence(datasets.Value("string")),
                 "type": datasets.Value("string"),
                 "normalized": [
                     {
