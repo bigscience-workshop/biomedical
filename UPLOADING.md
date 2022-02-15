@@ -70,8 +70,8 @@ Test both the original dataset schema/config and the bigbio schema/config.
 ```python
 from datasets import load_dataset
 
-dataset_orig = load_dataset("bigscience-biomedical/<your_dataset_name>", name="original", use_auth_token=True)
-dataset_bigbio = load_dataset("bigscience-biomedical/<your_dataset_name>", name="bigbio-<task>", use_auth_token=True)
+dataset_orig = load_dataset("bigscience-biomedical/<your_dataset_name>", name="source", use_auth_token=True)
+dataset_bigbio = load_dataset("bigscience-biomedical/<your_dataset_name>", name="bigbio", use_auth_token=True)
 ```
 
 For datasets that are licensed such that they must already exist on the users local machine, 
@@ -82,12 +82,12 @@ from datasets import load_dataset
 
 dataset_orig = load_dataset(
     "bigscience-biomedical/<your_dataset_name>", 
-    name="original", 
+    name="source", 
     data_dir="/local/path/to/data/files",
     use_auth_token=True)
 dataset_bigbio = load_dataset(
     "bigscience-biomedical/<your_dataset_name>", 
-    name="bigbio-<task>", 
+    name="bigbio", 
     data_dir="/local/path/to/data/files",
     use_auth_token=True)
 ```
