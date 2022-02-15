@@ -38,8 +38,16 @@ Make a repository via the 🤗 Hub [here](https://huggingface.co/new-dataset) wi
 
 + Set Owner: bigscience-biomedical
 + Set Dataset name: the name of the dataset 
++ Set License: the license that applies to this dataset
 + Select Private
 + Click `Create dataset`
+
+The dataset name and the dataset loader script file name must match. 
+For example, if your dataset loader script is called `n2c2_2011_coref.py`, then 
+your dataset name should be `n2c2_2011_coref`. 
+
+If there is no appropriate license available in the provided options (for example 
+for datasets with specific data user agreements) you should select "other". 
 
 ### 4. Clone the dataset repository
 
