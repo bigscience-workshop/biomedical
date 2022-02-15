@@ -75,7 +75,7 @@ dataset_bigbio = load_dataset("bigscience-biomedical/<your_dataset_name>", name=
 ```
 
 For datasets that are licensed such that they must already exist on the users local machine, 
-the text commands might look something like this instead,
+the test commands might look something like this instead,
 
 ```python
 from datasets import load_dataset
