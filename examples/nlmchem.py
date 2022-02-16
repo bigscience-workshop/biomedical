@@ -1,6 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
-#
+# Copyright 2022 The HuggingFace Datasets Authors and Samuele Garda.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +15,7 @@
 
 import os
 import re
+from typing import Iterator
 
 import bioc
 import datasets
@@ -48,15 +48,15 @@ _LICENSE = " CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
 # files found here `https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/` have issues at extraction
 # _URLs = {"biocreative": "https://ftp.ncbi.nlm.nih.gov/pub/lu/NLMChem" }
 _URLs = {
-    "biocreative": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz"
+    "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
+    "bigbio": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
 
 
 class NLMChemDataset(datasets.GeneratorBasedBuilder):
     """NLMChem"""
 
-    # v2 here: https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/
-    VERSION = datasets.Version("1.0.0")
+    VERSION = datasets.Version("2.0.0")
 
     # This is an example of a dataset with multiple configurations.
     # If you don't want/need to define several sub-sets in your dataset,
@@ -71,43 +71,77 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
     # data = datasets.load_dataset('my_dataset', 'second_domain')
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name="biocreative",
+            name="source",
             version=VERSION,
-            description="Original annotation files.",
+            description="Original format",
+        ),
+        datasets.BuilderConfig(
+            name="bigbio",
+            version="1.0.0",
+            description="BigScience biomedical hackathon schema",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "biocreative"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    DEFAULT_CONFIG_NAME = "source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def _info(self):
 
-        if self.config.name == "biocreative":
+        if self.config.name == "source":
+            # this is a variation on the BioC format
+            features = datasets.Features(
+                {
+                    "passages": [
+                        {
+                            "document_id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Value("string"),
+                            "offset": datasets.Value("int32"),
+                            "entities": [
+                                {
+                                    "id": datasets.Value("string"),
+                                    "offsets": [[datasets.Value("int32")]],
+                                    "text": [datasets.Value("string")],
+                                    "type": datasets.Value("string"),
+                                    "normalized": [
+                                        {
+                                            "db_name": datasets.Value("string"),
+                                            "db_id": datasets.Value("string"),
+                                        }
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                }
+            )
+
+        elif self.config.name == "bigbio":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
-                    "passages": datasets.Sequence(
+                    "passages": [
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "text": datasets.Value("string"),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                         }
-                    ),
-                    "entities": datasets.Sequence(
+                    ],
+                    "entities": [
                         {
                             "id": datasets.Value("string"),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence([datasets.Value("string")]),
+                            "text": datasets.Sequence(datasets.Value("string")),
                             "type": datasets.Value("string"),
-                            "normalized": datasets.Sequence(
+                            "normalized": [
                                 {
                                     "db_name": datasets.Value("string"),
                                     "db_id": datasets.Value("string"),
                                 }
-                            ),
+                            ],
                         }
-                    ),
+                    ],
                 }
             )
 
@@ -173,29 +207,35 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
     def _get_passages_and_entities(
         self, d: bioc.BioCDocument
-    ) -> tuple[list[dict], list[dict]]:
+    ) -> tuple[list[dict], list[list[dict]]]:
 
         passages: list[dict] = []
-        entities: list[dict] = []
+        entities: list[list[dict]] = []
 
         text_total_length = 0
 
+        po_start = 0
+
         for id_, p in enumerate(d.passages):
 
-            offset = p.offset - text_total_length
-
-            length = offset + len(p.text)
+            eo = p.offset - text_total_length
 
             text_total_length += len(p.text) + 1
 
-            ep = {
-                "id": str(id_),
+            po_end = po_start + len(p.text)
+
+            dp = {
                 "text": p.text,
                 "type": p.infons.get("type"),
-                "offsets": [(offset, length)],
+                "offsets": [(po_start, po_end)],
+                "offset": p.offset,  # original offset
             }
 
-            passages.append(ep)
+            po_start = po_end + 1
+
+            passages.append(dp)
+
+            pe = []
 
             for a in p.annotations:
 
@@ -205,24 +245,29 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 # if entity_type in ["MeSH_Indexing_Chemical", "OTHER"]:
                 #     continue
 
-                ea = {
+                da = {
                     "type": a.infons.get("type"),
                     "offsets": [
-                        (loc.offset - offset, loc.offset + loc.length - offset)
+                        (
+                            loc.offset - eo,
+                            loc.offset + loc.length - eo,
+                        )
                         for loc in a.locations
                     ],
-                    "text": [[a.text]],
+                    "text": (a.text,),
                     "id": a.id,
                     "normalized": self._get_normalized(a),
                 }
 
-                entities.append(ea)
+                pe.append(da)
+
+            entities.append(pe)
 
         return passages, entities
 
     def _get_normalized(self, a: bioc.BioCAnnotation) -> list[dict]:
         """
-        Get normalization DB and ID from annotation
+        Get normalization DB and ID from annotation identifiers
         """
 
         identifiers = a.infons.get("identifier")
@@ -249,64 +294,48 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         self,
         filepath: str,
         split: str,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    ):
+    ) -> Iterator[tuple[int, dict]]:
         """Yields examples as (key, example) tuples."""
-        if self.config.name == "biocreative":
-            reader = bioc.BioCXMLDocumentReader(str(filepath))
-            for did, doc in enumerate(reader):
 
-                passages, entities = self._get_passages_and_entities(doc)
-                encoded = {
-                    "id": str(did),
+        reader = bioc.BioCXMLDocumentReader(str(filepath))
+
+        if self.config.name == "source":
+
+            for idx, doc in enumerate(reader):
+
+                passages, passages_entities = self._get_passages_and_entities(doc)
+
+                for p, pe in zip(passages, passages_entities):
+
+                    p.pop("offsets")  # BioC has only start for passages offsets
+
+                    p["document_id"] = doc.id
+                    p["entities"] = pe
+
+        elif self.config.name == "bigbio":
+            uid = 0
+            for idx, doc in enumerate(reader):
+
+                # global id
+                uid += 1
+
+                passages, passages_entities = self._get_passages_and_entities(doc)
+
+                # unpack per-passage entities
+                entities = [e for pe in passages_entities for e in pe]
+
+                for p in passages:
+                    p.pop("offset")  # drop original offset
+                    p["id"] = uid  # override BioC default id
+                    uid += 1
+
+                for e in entities:
+                    e["id"] = uid  # override BioC default id
+                    uid += 1
+
+                yield idx, {
+                    "id": uid,
                     "document_id": doc.id,
                     "passages": passages,
                     "entities": entities,
                 }
-
-                yield did, encoded
-
-
-# def _get_entities(self, d: bioc.BioCDocument) -> list[dict]:
-#     """
-#     Get all normalized entities in document
-#     """
-#
-#     return [
-#         {
-#             "id": a.id,
-#             "offsets": [
-#                 (loc.offset, loc.offset + loc.length) for loc in a.locations
-#             ],
-#             "text": [a.text],
-#             "type": a.infons.get("type"),
-#             "normalized": self._get_normalized(a),
-#         }
-#         for p in d.passages
-#         for a in p.annotations
-#     ]
-#
-# def _get_passages(self, d: bioc.BioCDocument) -> list[dict]:
-#     """
-#     Encode passages in schema
-#     """
-#
-#     offset_start = 0
-#     passages = []
-#
-#     for id_, p in enumerate(d.passages):
-#
-#         offset_end = offset_start + len(p.text)
-#
-#         encoded = {
-#             "id": str(id_),
-#             "type": p.infons.get("type"),
-#             "text": p.text,
-#             "offsets": [(offset_start, offset_end)],
-#         }
-#
-#         # white space separating passages
-#         offset_start = offset_end + 1
-#
-#         passages.append(encoded)
-#
-#     return passages
