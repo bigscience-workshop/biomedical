@@ -61,7 +61,8 @@ The following variables are used to populate the dataset entry. Common ones incl
 """
 
 _DATASETNAME = "mlee"
-_UNIFIED_VIEW_NAME = "bigscience"
+_SOURCE_VIEW_NAME = "source"
+_UNIFIED_VIEW_NAME = "bigbio"
 
 _CITATION = """\
 @article{,
@@ -106,18 +107,18 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name=_SOURCE_VIEW_NAME,
             version=VERSION,
             description=_DESCRIPTION,
         ),
         datasets.BuilderConfig(
             name=_UNIFIED_VIEW_NAME,
             version=VERSION,
-            description=_DESCRIPTION,
+            description="BigScience biomedical hackathon schema",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME
+    DEFAULT_CONFIG_NAME = _SOURCE_VIEW_NAME
 
     _ENTITY_TYPES = {
         "Anatomical_system",
@@ -156,26 +157,16 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == _SOURCE_VIEW_NAME:
             features = datasets.Features(
                 {
-                    "article_id": {
-                        "type": datasets.Value("string"),
-                        "id": datasets.Value("string"),
-                    },
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "text_bound_annotations": datasets.Sequence(  # T line in brat, e.g. type or event trigger
                         {
-                            "spans":
-                            # This will contain only one (start, end) pair in most cases.
-                            # Only use multiple pairs for discontiguous spans
-                            datasets.Sequence(
-                                {
-                                    "start": datasets.Value("int32"),  # inclusive
-                                    "end": datasets.Value("int32"),  # exclusive
-                                }
-                            ),
-                            "text": datasets.Value("string"),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Sequence(datasets.Value("string")),
                             "type": datasets.Value("string"),
                             "id": datasets.Value("string"),
                         }
@@ -244,71 +235,68 @@ class MLEE(datasets.GeneratorBasedBuilder):
         elif self.config.name == _UNIFIED_VIEW_NAME:
             features = datasets.Features(
                 {
-                    "article_id": {
-                        "type": datasets.Value("string"),
-                        "id": datasets.Value("string"),
-                    },
-                    "text": datasets.Value("string"),
-                    "entities": datasets.Sequence(
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "passages": [
                         {
-                            "spans":
-                            # This will contain only one (start, end) pair in most cases.
-                            # Only use multiple pairs for discontiguous spans
-                            datasets.Sequence(
-                                {
-                                    "start": datasets.Value("int32"),  # inclusive
-                                    "end": datasets.Value("int32"),  # exclusive
-                                }
-                            ),
-                            "text": datasets.Value("string"),
-                            "type": datasets.Value("string"),
                             "id": datasets.Value("string"),
-                            "db_refs": datasets.Sequence(
+                            "type": datasets.Value("string"),
+                            "text": datasets.Value("string"),
+                            "offsets": datasets.Sequence(datasets.Value("int32")),
+                        }
+                    ],
+                    "entities": [
+                        {
+                            "id": datasets.Value("string"),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "type": datasets.Value("string"),
+                            "normalized": [
                                 {
                                     "db_name": datasets.Value("string"),
-                                    "cuid": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
                                 }
-                            ),
+                            ],
                         }
-                    ),
-                    "event_triggers": datasets.Sequence(
+                    ],
+                    "events": [
                         {
-                            "spans":
-                            # This will contain only one (start, end) pair in most cases.
-                            # Only use multiple pairs for discontiguous spans
-                            datasets.Sequence(
-                                {
-                                    "start": datasets.Value("int32"),  # inclusive
-                                    "end": datasets.Value("int32"),  # exclusive
-                                }
-                            ),
-                            "text": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "id": datasets.Value("string"),
-                        }
-                    ),
-                    "events": datasets.Sequence(  # E line in brat
-                        {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "arguments": datasets.Sequence(
+                            # refers to the text_bound_annotation of the trigger
+                            "trigger": {
+                                "offsets": datasets.Sequence([datasets.Value("int32")]),
+                                "text": datasets.Value("string")
+                            },
+                            "arguments": [
                                 {
                                     "role": datasets.Value("string"),
                                     "ref_id": datasets.Value("string"),
                                 }
-                            ),
+                            ],
                         }
-                    ),
-                    "relations": datasets.Sequence(
+                    ],
+                    "coreferences": [
                         {
-                            "head": datasets.Value("string"),
-                            "tail": datasets.Value("string"),
+                            "id": datasets.Value("string"),
+                            "entity_ids": datasets.Sequence(datasets.Value("string")),
                         }
-                    ),
-                },
+                    ],
+                    "relations": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "arg1_id": datasets.Value("string"),
+                            "arg2_id": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                }
             )
 
         return datasets.DatasetInfo(
@@ -397,63 +385,99 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
         An assumption in this pseudo code is that the abstract, entity, and relation file all have linking keys.
         """
-        if self.config.name == _DATASETNAME:
+        if self.config.name == _SOURCE_VIEW_NAME:
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                yield guid, self.parse_brat_file(txt_file)
+                example = self.parse_brat_file(txt_file)
+                example["id"] = str(guid)
+                yield guid, example
         elif self.config.name == _UNIFIED_VIEW_NAME:
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                yield guid, self.brat_parse_to_unified_schema(
+                example = self.brat_parse_to_unified_schema(
                     self.parse_brat_file(txt_file)
                 )
+                example["id"] = str(guid)
+                yield guid, example
+        else:
+            raise ValueError(f"Invalid config: {self.config.name}")
 
     def brat_parse_to_unified_schema(self, brat_parse: Dict) -> Dict:
         unified_example = {}
 
         # identical
-        unified_example["article_id"] = brat_parse["article_id"]
-        unified_example["text"] = brat_parse["text"]
-        unified_example["events"] = brat_parse["events"]
+        unified_example["document_id"] = brat_parse["document_id"]
+        unified_example["passages"] = [
+            {
+                "id": "0",
+                "type": "abstract",
+                "text": brat_parse["text"],
+                "offsets": [0, len(brat_parse["text"])],
+            }
+        ]
 
         # get normalizations
         ref_id_to_normalizations = defaultdict(list)
         for normalization in brat_parse["normalizations"]:
             ref_id_to_normalizations[normalization["ref_id"]].append(
                 {
-                    "resource_name": normalization["resource_name"],
-                    "cuid": normalization["cuid"],
+                    "db_name": normalization["resource_name"],
+                    "db_id": normalization["cuid"],
                 }
             )
 
         # separate entities and event triggers
         unified_example["entities"] = []
-        unified_example["event_triggers"] = []
+        id_to_event_trigger = {}
         for ann in brat_parse["text_bound_annotations"]:
             if ann["type"] in self._ENTITY_TYPES:
                 entity_ann = ann.copy()
-                entity_ann["db_refs"] = ref_id_to_normalizations[ann["id"]]
+                entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
                 unified_example["entities"].append(entity_ann)
             else:
-                unified_example["event_triggers"].append(ann.copy())
+                id_to_event_trigger[ann["id"]] = ann
+
+        unified_example["events"] = []
+        for event in brat_parse["events"]:
+            event = event.copy()
+            trigger = id_to_event_trigger[event["trigger"]]
+            event["trigger"] = {
+                "text": trigger["text"].copy(),
+                "offsets": trigger["offsets"].copy()
+            }
 
         # massage relations
         unified_example["relations"] = []
         for ann in brat_parse["relations"]:
             unified_example["relations"].append(
                 {
-                    "head": ann["head"]["ref_id"],
-                    "tail": ann["tail"]["ref_id"],
+                    "arg1_id": ann["head"]["ref_id"],
+                    "arg2_id": ann["tail"]["ref_id"],
+                    "id": ann["id"],
+                    "type": ann["type"],
+                    "normalized": []
                 }
             )
 
-        return unified_example
+        # get coreferences
+        unified_example["coreferences"] = []
+        for ann in brat_parse["equivalences"]:
+            is_entity_cluster = True
+            for ref_id in ann["ref_ids"]:
+                if not ref_id.startswith("T"): # not textbound -> no entity
+                    is_entity_cluster = False
+                elif ref_id in id_to_event_trigger: # event trigger -> no entity
+                    is_entity_cluster = False
+            if is_entity_cluster:
+                unified_example["coreferences"].append(
+                    {"id": ann["id"], "entity_ids": ann["ref_ids"]}
+                )
 
+        return unified_example
 
     def parse_brat_file(self, txt_file):
         example = {}
-        article_id_type, article_id = txt_file.name.removesuffix(".txt").split("-")
-        example["article_id"] = {"type": article_id_type, "id": article_id}
+        example["document_id"] = txt_file.name.removesuffix(".txt")
         with txt_file.open() as f:
             example["text"] = f.read()
         a1_file = txt_file.with_suffix(".a1")
@@ -479,13 +503,13 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 fields = line.split("\t")
 
                 ann["id"] = fields[0]
-                ann["text"] = fields[2]
+                ann["text"] = [fields[2]]
                 ann["type"] = fields[1].split()[0]
-                ann["spans"] = []
+                ann["offsets"] = []
                 span_str = fields[1].removeprefix(ann["type"] + " ")
                 for span in span_str.split(";"):
                     start, end = span.split()
-                    ann["spans"].append({"start": int(start), "end": int(end)})
+                    ann["offsets"].append([int(start), int(end)])
 
                 example["text_bound_annotations"].append(ann)
 
