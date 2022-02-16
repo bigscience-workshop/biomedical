@@ -18,6 +18,9 @@ class TestKBFeatures(unittest.TestCase):
         self.dataset = load_dataset("examples/nlmchem.py", "bigbio")
 
     def test_source(self):
+        """
+        Verify that the source view is present
+        """
 
         dataset = load_dataset("examples/nlmchem.py", "source")
 
