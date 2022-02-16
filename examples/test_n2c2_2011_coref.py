@@ -27,7 +27,7 @@ for sample in dsbb_list["train"]:
     top_id = sample["id"]
     doc_id = sample["document_id"]
 
-    passage_text = sample['passages'][0]['text']
+    passage_text = sample['passages'][0]['text'][0]
     entity_lookup = {ent["id"]: ent for ent in sample["entities"]}
 
 
@@ -61,7 +61,7 @@ for sample in dsbb_sequence["train"]:
 
     passage_id = sample["passages"]["id"][0]
     passage_type = sample["passages"]["type"][0]
-    passage_text = sample["passages"]["text"][0]
+    passage_text = sample["passages"]["text"][0][0]
     passage_offset = sample["passages"]["offsets"][0][0]
 
     entity_ids = sample["entities"]["id"]

@@ -118,7 +118,8 @@ _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
 _LICENSE = "Data User Agreement"
 
-_VERSION = "1.0.0"
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 
 def _read_tar_gz(file_path, samples=None):
@@ -358,22 +359,23 @@ def _get_entities_from_sample(sample_id, sample):
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
 
-    VERSION = datasets.Version(_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
             name="source",
-            version=VERSION,
+            version=SOURCE_VERSION,
             description="Source format",
         ),
         datasets.BuilderConfig(
             name="bigbio",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="BigScience biomedical hackathon schema",
         ),
         datasets.BuilderConfig(
             name="bigbio-sequence",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="BigScience biomedical hackaton schema (sequence instead of list)",
         ),
     ]
@@ -408,8 +410,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": Value("string"),
                             "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": Sequence(Value("int32")),
+                            "text": Sequence(Value("string")),
+                            "offsets": Sequence([Value("int32")]),
                         }
                     ),
                     "entities": Sequence(
@@ -444,8 +446,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": Value("string"),
                             "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": [Value("int32")],
+                            "text": [Value("string")],
+                            "offsets": [[Value("int32")]],
                         }
                     ],
                     "entities": [
@@ -540,8 +542,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 {
                     "id": f"{sample_id}-passage-0",
                     "type": "discharge summary",
-                    "text": passage_text,
-                    "offsets": (0, len(passage_text)),
+                    "text": [passage_text],
+                    "offsets": [(0, len(passage_text))],
                 }
             ],
             "entities": entities,
