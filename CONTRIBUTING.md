@@ -10,7 +10,7 @@ Fork the dataset [repository](https://github.com/huggingface/datasets) from hugg
 
 After you fork, clone the repository locally. You can do so as follows:
 
-    git clone git@github.com:<your_github_username>/datasets.git
+    git clone https://github.com/<your Github handle>/datasets
     cd datasets  # enter the directory
 
 Next, you want to set your `upstream` location to enable you to push/pull (add or receive updates). You can do so as follows:
@@ -97,10 +97,10 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('your_dataset_name')
+data = load_dataset('path_to_your_dataset_directory')
 ```
 
-Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.
+~~Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.~~
 
 ### 4. Format code 
 
