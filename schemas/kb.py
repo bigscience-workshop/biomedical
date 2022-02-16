@@ -48,7 +48,10 @@ features = datasets.Features(
                 "id": datasets.Value("string"),
                 "type": datasets.Value("string"),
                 # refers to the text_bound_annotation of the trigger
-                "trigger": datasets.Value("string"),
+                "trigger": {
+                    "offsets": datasets.Sequence([datasets.Value("int32")]),
+                    "text": datasets.Value("string")
+                },
                 "arguments": [
                     {
                         "role": datasets.Value("string"),
