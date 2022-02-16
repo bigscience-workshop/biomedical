@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2020 The HuggingFace Datasets Authors and the Jason Alan Fries.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 # See http://participants-area.bioasq.org/accounts/register/
 _LICENSE = ""
 
-_URLs = {"train": "BioASQ-training9b.zip", "test": "Task9BGoldenEnriched.zip"}
+_URLs = ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"]
 
 
 class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
@@ -84,7 +84,7 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name="original",
+            name="source",
             version=VERSION,
             description="Original BioASQ9 source schema.",
         ),
@@ -95,12 +95,12 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "original"
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
-        # BioASQ9 Task B original schema
-        if self.config.name == "original":
+        # BioASQ9 Task B source schema
+        if self.config.name == "source":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -110,14 +110,14 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
                     "concepts": datasets.Sequence(datasets.Value("string")),
                     "ideal_answer": datasets.Sequence(datasets.Value("string")),
                     "exact_answer": datasets.Sequence(datasets.Value("string")),
-                    "triples": datasets.Sequence(
+                    "triples": [
                         {
                             "p": datasets.Value("string"),
                             "s": datasets.Value("string"),
                             "o": datasets.Value("string"),
                         }
-                    ),
-                    "snippets": datasets.Sequence(
+                    ],
+                    "snippets": [
                         {
                             "offsetInBeginSection": datasets.Value("int32"),
                             "offsetInEndSection": datasets.Value("int32"),
@@ -126,7 +126,7 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
                             "endSection": datasets.Value("string"),
                             "document": datasets.Value("string"),
                         }
-                    ),
+                    ],
                 }
             )
         # simplified scheam for QA tasks
@@ -162,20 +162,30 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        data_dir = dl_manager.download_and_extract(list(_URLs.values()))
+        train_dir, test_dir = dl_manager.download_and_extract(_URLs)
+
         # BioASQ test data is split into multiple records {9B1_golden.json,...,9B5_golden.json}
-        # combine these files into a single test set 9Bx_golden.json
-        if not os.path.exists(
-            os.path.join(data_dir, "Task9BGoldenEnriched/9Bx_golden.json")
-        ):
-            pass
+        # combine these files into a single test set file 9Bx_golden.json
+        test_fpath = os.path.join(test_dir, "Task9BGoldenEnriched/9Bx_golden.json")
+
+        if not os.path.exists(test_fpath):
+            filelist = glob.glob(os.path.join(test_dir, "Task9BGoldenEnriched/*.json"))
+            test_data = None
+            for fname in sorted(filelist):
+                data = json.load(open(fname, "rt"))
+                if test_data is None:
+                    test_data = data
+                else:
+                    test_data["questions"].extend(data["questions"])
+            json.dump(data, open(test_fpath, "wt"))
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(
-                        data_dir, "BioASQ-training9b/training9b.json"
+                        train_dir, "BioASQ-training9b/training9b.json"
                     ),
                     "split": "train",
                 },
@@ -185,12 +195,24 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(
-                        data_dir, "BioASQ-training9b/training9b.json"
+                        test_dir, "Task9BGoldenEnriched/9Bx_golden.json"
                     ),
                     "split": "test",
                 },
             ),
         ]
+
+    def _get_exact_answer(self, record):
+        """The value exact_answer can be in different formats based on question type."""
+        if record["type"] == "yesno":
+            exact_answer = [record["exact_answer"]]
+        elif record["type"] == "summary":
+            exact_answer = []
+        elif record["type"] == "list":
+            exact_answer = record["exact_answer"]
+        elif record["type"] == "factoid":
+            exact_answer = record["exact_answer"]
+        return exact_answer
 
     def _generate_examples(
         self,
@@ -198,35 +220,35 @@ class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
         split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
         """Yields examples as (key, example) tuples."""
-        # This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
-        # The `key` is here for legacy reason (tfds) and is not important in itself.
-
-        with open(filepath, encoding="utf-8") as file:
-            data = json.load(file)
-            for record in enumerate(data):
-                if self.config.name == "original":
-                    yield record["id"], {
+        if self.config.name == "source":
+            with open(filepath, encoding="utf-8") as file:
+                data = json.load(file)
+                for key, record in enumerate(data["questions"]):
+                    yield key, {
                         "id": record["id"],
                         "type": record["type"],
                         "body": record["body"],
                         "documents": record["documents"],
                         "concepts": record["concepts"] if "concepts" in record else [],
-                        "triples": record["triplets"] if "triples" in record else [],
+                        "triples": record["triples"] if "triples" in record else [],
                         "ideal_answer": record["ideal_answer"],
-                        "exact_answer": record["exact_answer"],
+                        "exact_answer": self._get_exact_answer(record),
                         "snippets": record["snippets"],
                     }
 
-                elif self.config.name == "bigbio":
-                    # instances are defined over snippets/documents
-                    for i, snippet in enumerate(record["snippets"]):
-                        uid = f'{record["id"]}_{i}'
+        elif self.config.name == "bigbio":
+            with open(filepath, encoding="utf-8") as file:
+                data = json.load(file)
+                for key, record in enumerate(data["questions"]):
+                    for key, snippet in enumerate(record["snippets"]):
+                        uid = f'{record["id"]}_{key}'
                         yield uid, {
-                            "id": record["id"],
+                            "id": uid,
                             "document_id": snippet["document"],
                             "question_id": record["id"],
                             "question": record["body"],
                             "type": record["type"],
                             "context": snippet["text"],
-                            "answer": record["exact_answer"],
+                            # summary question types only have an idea answer
+                            "answer": self._get_exact_answer(record),
                         }
