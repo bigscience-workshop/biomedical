@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2022 The HuggingFace Datasets Authors and Gabriel Altay
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ n2c2_2011_coref
 The following commands can be used to load the dataset
 
 ```
-ds_orig = load_dataset("n2c2_2011_coref.py", name="original", data_dir="/path/to/n2c2_2011_coref")
-ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio-kb", data_dir="/path/to/n2c2_2011_coref")
+ds_orig = load_dataset("n2c2_2011_coref.py", name="source", data_dir="/path/to/n2c2_2011_coref")
+ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", data_dir="/path/to/n2c2_2011_coref")
 ```
 
 
@@ -362,27 +362,27 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name="original",
+            name="source",
             version=VERSION,
-            description="Original n2c2 2011 coreference schema",
+            description="Source format",
         ),
         datasets.BuilderConfig(
-            name="bigbio-kb",
+            name="bigbio",
             version=VERSION,
-            description="Simplified schema for BigScience-Biomedical KB tasks",
+            description="BigScience biomedical hackathon schema",
         ),
         datasets.BuilderConfig(
-            name="bigbio-kb-list",
+            name="bigbio-sequence",
             version=VERSION,
-            description="Simplified schema for BigScience-Biomedical KB tasks (lists not sequence)",
+            description="BigScience biomedical hackaton schema (sequence instead of list)",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "bigbio-kb"
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
-        if self.config.name == "original":
+        if self.config.name == "source":
             features = Features(
                 {
                     "sample_id": Value("string"),
@@ -399,7 +399,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio-kb":
+        elif self.config.name == "bigbio-sequence":
             features = Features(
                 {
                     "id": Value("string"),
@@ -435,7 +435,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio-kb-list":
+        elif self.config.name == "bigbio":
             features = Features(
                 {
                     "id": Value("string"),
@@ -487,7 +487,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
 
         dataset = datasets.load_dataset(
             "n2c2_2011_coref.py",
-            name="original",
+            name="source",
             data_dir="path/to/n2c2_2011_coref/data"
         )
 
@@ -511,7 +511,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_original_sample(sample_id, sample):
+    def _get_source_sample(sample_id, sample):
         return {
             "sample_id": sample_id,
             "txt": sample.get("txt", ""),
@@ -562,9 +562,9 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for path in paths:
                 samples = _read_tar_gz(path)
                 for sample_id, sample in samples.items():
-                    if self.config.name == "original":
-                        yield _id, self._get_original_sample(sample_id, sample)
-                    elif self.config.name in ("bigbio-kb", "bigbio-kb-list"):
+                    if self.config.name == "source":
+                        yield _id, self._get_source_sample(sample_id, sample)
+                    elif self.config.name in ("bigbio", "bigbio-sequence"):
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -581,8 +581,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 samples = _read_zip(path, samples=samples)
 
             for sample_id, sample in samples.items():
-                if self.config.name == "original":
-                    yield _id, self._get_original_sample(sample_id, sample)
-                elif self.config.name in ("bigbio-kb", "bigbio-kb-list"):
+                if self.config.name == "source":
+                    yield _id, self._get_source_sample(sample_id, sample)
+                elif self.config.name in ("bigbio", "bigbio-sequence"):
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
