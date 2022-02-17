@@ -373,11 +373,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             version=BIGBIO_VERSION,
             description="BigScience biomedical hackathon schema",
         ),
-        datasets.BuilderConfig(
-            name="bigbio-sequence",
-            version=BIGBIO_VERSION,
-            description="BigScience biomedical hackaton schema (sequence instead of list)",
-        ),
     ]
 
     DEFAULT_CONFIG_NAME = "source"
@@ -401,42 +396,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio-sequence":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": Sequence(
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": Sequence(Value("string")),
-                            "offsets": Sequence([Value("int32")]),
-                        }
-                    ),
-                    "entities": Sequence(
-                        {
-                            "id": Value("string"),
-                            "offsets": Sequence([Value("int32")]),
-                            "text": Sequence(Value("string")),
-                            "type": Value("string"),
-                            "normalized": Sequence(
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ),
-                        }
-                    ),
-                    "coreferences": Sequence(
-                        {
-                            "id": Value("string"),
-                            "entity_ids": Sequence(Value("string")),
-                        }
-                    ),
-                }
-            )
-
         elif self.config.name == "bigbio":
             features = Features(
                 {
@@ -453,9 +412,9 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                     "entities": [
                         {
                             "id": Value("string"),
-                            "offsets": [[Value("int32")]],
-                            "text": [Value("string")],
                             "type": Value("string"),
+                            "text": [Value("string")],
+                            "offsets": [[Value("int32")]],
                             "normalized": [
                                 {
                                     "db_name": Value("string"),
@@ -566,7 +525,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 for sample_id, sample in samples.items():
                     if self.config.name == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
-                    elif self.config.name in ("bigbio", "bigbio-sequence"):
+                    elif self.config.name == "bigbio":
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -585,6 +544,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for sample_id, sample in samples.items():
                 if self.config.name == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
-                elif self.config.name in ("bigbio", "bigbio-sequence"):
+                elif self.config.name == "bigbio":
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
