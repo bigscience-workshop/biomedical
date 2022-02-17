@@ -137,7 +137,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "text": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                         }
                     ],
@@ -296,11 +296,12 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": uid,
                             "type": passage.infons["type"],
-                            "text": passage.text,
+                            "text": [passage.text],
                             "offsets": offsets,
                         }
                     )
                     uid += 1
+
                 # entities
                 for passage in xdoc.passages:
                     for span in passage.annotations:
@@ -308,6 +309,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                         ent["id"] = uid  # override BioC default id
                         data["entities"].append(ent)
                         uid += 1
+
                 # relations
                 for rela in xdoc.relations:
                     data["relations"].append(
