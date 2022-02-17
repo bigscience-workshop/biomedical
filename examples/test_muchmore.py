@@ -22,52 +22,52 @@ from datasets import load_dataset
 .ger.abstr.chunkmorph.annotated.xml
 """
 
-# ds_original = load_dataset(
-#     'muchmore.py',
-#     name="original",
-# )
-
-# ds = load_dataset(
-#    'muchmore.py',
-#    name="bigbio-kb",
-# )
-
-ds_en = load_dataset(
-    "muchmore.py",
-    name="bigbio-kb-en-list",
+ds_source = load_dataset(
+    'muchmore.py',
+    name="source",
 )
 
-# ds_de = load_dataset(
-#     'muchmore.py',
-#     name="muchmore_de",
-# )
+ds_kb = load_dataset(
+    'muchmore.py',
+    name="bigbio-kb",
+)
 
-# ds_plain = load_dataset(
-#     'muchmore.py',
-#     name="plain",
-# )
+ds_kb_en = load_dataset(
+    "muchmore.py",
+    name="bigbio-kb-en",
+)
 
-# ds_plain_en = load_dataset(
-#     'muchmore.py',
-#     name="plain_en",
-# )
+ds_kb_de = load_dataset(
+    'muchmore.py',
+    name="bigbio-kb-de",
+)
 
-# ds_plain_de = load_dataset(
-#     'muchmore.py',
-#     name="plain_de",
-# )
+ds_plain = load_dataset(
+    'muchmore.py',
+    name="plain",
+)
+
+ds_plain_en = load_dataset(
+    'muchmore.py',
+    name="plain_en",
+)
+
+ds_plain_de = load_dataset(
+    'muchmore.py',
+    name="plain_de",
+)
 
 ds_translation = load_dataset(
     "muchmore.py",
-    name="bigbio-text-to-text",
+    name="bigbio-translation",
 )
 
 
-for sample in ds_en["train"]:
+for sample in ds_kb_en["train"]:
 
     # assert entities line up with main text
     for entity in sample["entities"]:
         entity_text = entity["text"][0]
         start, end = entity["offsets"][0]
-        main_text = sample["passages"][0]["text"][start:end]
+        main_text = sample["passages"][0]["text"][0][start:end]
         assert entity_text == main_text

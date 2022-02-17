@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2022 The HuggingFace Datasets Authors and Gabriel Altay.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -108,10 +108,10 @@ _HOMEPAGE = "https://muchmore.dfki.de/resources1.htm"
 # multilingual information on the basis of a domain ontology and classification.
 # For the main task of multilingual domain modelling, the project will focus
 # on German and English. "
-_LICENSE = ""
+_LICENSE = "other"
 
 _URLs = {
-    "original": [
+    "source": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
@@ -123,26 +123,22 @@ _URLs = {
     ],
     "bigbio-kb-en": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
     "bigbio-kb-de": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
-    "bigbio-kb-list": [
-        "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
-        "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
-    ],
-    "bigbio-kb-en-list": "https://muchmore.dfki.de/pubs/springer_english_train_V4.2.tar.gz",
-    "bigbio-kb-de-list": "https://muchmore.dfki.de/pubs/springer_german_train_V4.2.tar.gz",
     "plain": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
     "plain_en": "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
     "plain_de": "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
-    "bigbio-text-to-text": [
+    "bigbio-translation": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
         "https://muchmore.dfki.de/pubs/springer_german_train_plain.tar.gz",
     ],
 }
 
 # took version from annotated file names
-_VERSION = "4.2.0"
+_SOURCE_VERSION = "4.2.0"
+_BIGBIO_VERSION = "1.0.0"
+
 
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
@@ -152,62 +148,48 @@ LANG_MAP = {"eng": "en", "ger": "de"}
 class MuchMoreDataset(datasets.GeneratorBasedBuilder):
     """MuchMore Springer Bilingual Corpus"""
 
-    VERSION = datasets.Version(_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name="original",
-            version=VERSION,
+            name="source",
+            version=SOURCE_VERSION,
             description="muchmore: original format",
         ),
         datasets.BuilderConfig(
             name="bigbio-kb",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: big science biomedical format (en & de)",
         ),
         datasets.BuilderConfig(
             name="bigbio-kb-en",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: big science biomedical format (en only)",
         ),
         datasets.BuilderConfig(
             name="bigbio-kb-de",
-            version=VERSION,
-            description="muchmore: big science biomedical format (de only)",
-        ),
-        datasets.BuilderConfig(
-            name="bigbio-kb-list",
-            version=VERSION,
-            description="muchmore: big science biomedical format (en & de)",
-        ),
-        datasets.BuilderConfig(
-            name="bigbio-kb-en-list",
-            version=VERSION,
-            description="muchmore: big science biomedical format (en only)",
-        ),
-        datasets.BuilderConfig(
-            name="bigbio-kb-de-list",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: big science biomedical format (de only)",
         ),
         datasets.BuilderConfig(
             name="plain",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: plaintext of abstracts (en & de)",
         ),
         datasets.BuilderConfig(
             name="plain_en",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: plaintext of abstracts (en only)",
         ),
         datasets.BuilderConfig(
             name="plain_de",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="muchmore: plaintext of abstracts (de only)",
         ),
         datasets.BuilderConfig(
-            name="bigbio-text-to-text",
-            version=VERSION,
+            name="bigbio-translation",
+            version=BIGBIO_VERSION,
             description="muchmore: plaintext of matched english + german abstracts",
         ),
     ]
@@ -215,7 +197,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
     # default config produces english annotations at the moment
     def _info(self):
 
-        if self.config.name == "original":
+        if self.config.name == "source":
             features = Features(
                 {
                     "sample_id": Value("string"),
@@ -292,42 +274,12 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 {
                     "id": Value("string"),
                     "document_id": Value("string"),
-                    "passages": Sequence(
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": Sequence(Value("int32")),
-                        }
-                    ),
-                    "entities": Sequence(
-                        {
-                            "id": Value("string"),
-                            "offsets": Sequence([Value("int32")]),
-                            "text": Sequence(Value("string")),
-                            "type": Value("string"),
-                            "normalized": Sequence(
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ),
-                        }
-                    ),
-                }
-            )
-
-        elif self.config.name in ("bigbio-kb-list", "bigbio-kb-en-list", "bigbio-kb-de-list"):
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
                     "passages": [
                         {
                             "id": Value("string"),
                             "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": [Value("int32")],
+                            "text": [Value("string")],
+                            "offsets": [[Value("int32")]],
                         }
                     ],
                     "entities": [
@@ -357,7 +309,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio-text-to-text":
+        elif self.config.name == "bigbio-translation":
             features = Features(
                 {
                     "id": Value("string"),
@@ -507,9 +459,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 content_bytes = fp.read()
                 content_str = content_bytes.decode(NATIVE_ENCODING)
                 if content_str == "":
-                    print()
-                    print(f"skipping {file_name} with no content")
-                    print()
                     continue
 
                 xroot = ET.fromstring(content_str)
@@ -569,9 +518,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             content_bytes = fp.read()
             content_str = content_bytes.decode(NATIVE_ENCODING)
             if content_str == "":
-                print()
-                print(f"skipping {file_name} with no content")
-                print()
                 continue
 
             xroot = ET.fromstring(content_str)
@@ -598,8 +544,8 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 {
                     "id": xroot.get("id"),
                     "type": "abstract",
-                    "text": text,
-                    "offsets": (0, len(text)),
+                    "text": [text],
+                    "offsets": [(0, len(text))],
                 }
             ]
 
@@ -683,23 +629,20 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, file_names_and_pointers, split):
 
-        if self.config.name == "original":
+        if self.config.name == "source":
             genny = self._generate_original_examples(file_names_and_pointers)
 
         elif self.config.name in (
             "bigbio-kb",
             "bigbio-kb-en",
             "bigbio-kb-de",
-            "bigbio-kb-list",
-            "bigbio-kb-en-list",
-            "bigbio-kb-de-list",
         ):
             genny = self._generate_bigbio_kb_examples(file_names_and_pointers)
 
         elif self.config.name in ("plain", "plain_en", "plain_de"):
             genny = self._generate_plain_examples(file_names_and_pointers)
 
-        elif self.config.name == "bigbio-text-to-text":
+        elif self.config.name == "bigbio-translation":
             genny = self._generate_translation_examples(file_names_and_pointers)
 
         for _id, sample in genny:
