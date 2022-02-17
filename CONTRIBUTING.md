@@ -10,7 +10,7 @@ Fork the dataset [repository](https://github.com/huggingface/datasets) from hugg
 
 After you fork, clone the repository locally. You can do so as follows:
 
-    git clone git@github.com:<your_github_username>/datasets.git
+    git clone https://github.com/<your Github handle>/datasets
     cd datasets  # enter the directory
 
 Next, you want to set your `upstream` location to enable you to push/pull (add or receive updates). You can do so as follows:
@@ -88,19 +88,32 @@ Make a new directory within the `datasets` folder as such: <br>
 
 To implement your dataset, follow instructions in the necessary files:
 
-- **Option 1:** To add a dataset that has a public license, use `template.py`
-- **Option 2:** To add a dataset where files are local, use `template_local.py`
+- **Option 1:** To add a dataset that has a public license, use [template.py](https://github.com/bigscience-workshop/biomedical/blob/rework_readme/templates/template.py)
+- **Option 2:** To add a dataset where files are local, use [template_local.py](https://github.com/bigscience-workshop/biomedical/blob/rework_readme/templates/template_local.py)
 
-Make sure your dataset is implemented correctly by checking in python the following commands:
+You can also start (or copy any part) from one of the template scripts listed below, provided for the most common biomedical NLP schemas: <br>
+
+1. [Named entity recognition (NER), relational extraction (RE), event extraction](templates/template_ner.py)
+2. [Translation](templates/template_translation.py)
+3. [Part-of-speech (POS)](templates/template_pos.py)
+4. [Question-answering (QA)](templates/template_qa.py)
+5. [Natural language inference (NLI)](templates/template_nli.py)
+6. [Normalization](templates/template_normalization.py)
+7. [Sentence classification](templates/template_sentcls.py)
+8. [Fact verification](templates/template_factver.py)
+9. [Semantic similarity](templates/template_semsim.py)
+10. [Topic classification](templates/template_topiccls.py)
+11. [Co-reference](templates/template_coref.py)
+
+Make sure your dataset is implemented correctly by checking in python the following commands (the script is dynamically updated each time you modify it):
 
 ```python
-import datasets
 from datasets import load_dataset
 
-data = load_dataset('your_dataset_name')
+data = load_dataset('path_to_your_dataset_directory')
 ```
 
-Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.
+~~Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.~~
 
 ### 4. Format code 
 
