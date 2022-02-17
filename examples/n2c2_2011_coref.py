@@ -118,7 +118,8 @@ _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
 _LICENSE = "Data User Agreement"
 
-_VERSION = "1.0.0"
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 
 def _read_tar_gz(file_path, samples=None):
@@ -358,23 +359,19 @@ def _get_entities_from_sample(sample_id, sample):
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
 
-    VERSION = datasets.Version(_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
             name="source",
-            version=VERSION,
+            version=SOURCE_VERSION,
             description="Source format",
         ),
         datasets.BuilderConfig(
             name="bigbio",
-            version=VERSION,
+            version=BIGBIO_VERSION,
             description="BigScience biomedical hackathon schema",
-        ),
-        datasets.BuilderConfig(
-            name="bigbio-sequence",
-            version=VERSION,
-            description="BigScience biomedical hackaton schema (sequence instead of list)",
         ),
     ]
 
@@ -399,42 +396,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio-sequence":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": Sequence(
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": Sequence(Value("int32")),
-                        }
-                    ),
-                    "entities": Sequence(
-                        {
-                            "id": Value("string"),
-                            "offsets": Sequence([Value("int32")]),
-                            "text": Sequence(Value("string")),
-                            "type": Value("string"),
-                            "normalized": Sequence(
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ),
-                        }
-                    ),
-                    "coreferences": Sequence(
-                        {
-                            "id": Value("string"),
-                            "entity_ids": Sequence(Value("string")),
-                        }
-                    ),
-                }
-            )
-
         elif self.config.name == "bigbio":
             features = Features(
                 {
@@ -444,16 +405,16 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": Value("string"),
                             "type": Value("string"),
-                            "text": Value("string"),
-                            "offsets": [Value("int32")],
+                            "text": [Value("string")],
+                            "offsets": [[Value("int32")]],
                         }
                     ],
                     "entities": [
                         {
                             "id": Value("string"),
-                            "offsets": [[Value("int32")]],
-                            "text": [Value("string")],
                             "type": Value("string"),
+                            "text": [Value("string")],
+                            "offsets": [[Value("int32")]],
                             "normalized": [
                                 {
                                     "db_name": Value("string"),
@@ -540,8 +501,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 {
                     "id": f"{sample_id}-passage-0",
                     "type": "discharge summary",
-                    "text": passage_text,
-                    "offsets": (0, len(passage_text)),
+                    "text": [passage_text],
+                    "offsets": [(0, len(passage_text))],
                 }
             ],
             "entities": entities,
@@ -564,7 +525,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 for sample_id, sample in samples.items():
                     if self.config.name == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
-                    elif self.config.name in ("bigbio", "bigbio-sequence"):
+                    elif self.config.name == "bigbio":
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -583,6 +544,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for sample_id, sample in samples.items():
                 if self.config.name == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
-                elif self.config.name in ("bigbio", "bigbio-sequence"):
+                elif self.config.name == "bigbio":
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
