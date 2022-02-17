@@ -30,7 +30,7 @@ With the requirements downloaded, run the following command:
 huggingface-cli login
 ```
 
-Login with your 🤗 Hub account username and password. 
+Login with your 🤗 Hub token generated from https://huggingface.co/settings/token. 
 
 ### 3. Create a dataset repository
 
