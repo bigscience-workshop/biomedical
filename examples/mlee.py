@@ -405,11 +405,15 @@ class MLEE(datasets.GeneratorBasedBuilder):
     def brat_parse_to_unified_schema(self, brat_parse: Dict) -> Dict:
         unified_example = {}
 
+        # Prefix all ids with document id to ensure global uniqueness,
+        # because brat ids are only unique within their document
+        id_prefix = brat_parse["document_id"] + "_"
+
         # identical
         unified_example["document_id"] = brat_parse["document_id"]
         unified_example["passages"] = [
             {
-                "id": "0",
+                "id": id_prefix + "_text",
                 "type": "abstract",
                 "text": brat_parse["text"],
                 "offsets": [0, len(brat_parse["text"])],
@@ -432,6 +436,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
         for ann in brat_parse["text_bound_annotations"]:
             if ann["type"] in self._ENTITY_TYPES:
                 entity_ann = ann.copy()
+                entity_ann["id"] = id_prefix + entity_ann["id"]
                 entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
                 unified_example["entities"].append(entity_ann)
             else:
@@ -440,37 +445,43 @@ class MLEE(datasets.GeneratorBasedBuilder):
         unified_example["events"] = []
         for event in brat_parse["events"]:
             event = event.copy()
+            event["id"] = id_prefix + event["id"]
             trigger = id_to_event_trigger[event["trigger"]]
             event["trigger"] = {
                 "text": trigger["text"].copy(),
-                "offsets": trigger["offsets"].copy()
+                "offsets": trigger["offsets"].copy(),
             }
+            for argument in event["arguments"]:
+                argument["ref_id"] = id_prefix + argument["ref_id"]
+
+            unified_example["events"].append(event)
 
         # massage relations
         unified_example["relations"] = []
         for ann in brat_parse["relations"]:
             unified_example["relations"].append(
                 {
-                    "arg1_id": ann["head"]["ref_id"],
-                    "arg2_id": ann["tail"]["ref_id"],
-                    "id": ann["id"],
+                    "arg1_id": id_prefix + ann["head"]["ref_id"],
+                    "arg2_id": id_prefix + ann["tail"]["ref_id"],
+                    "id": id_prefix + ann["id"],
                     "type": ann["type"],
-                    "normalized": []
+                    "normalized": [],
                 }
             )
 
         # get coreferences
         unified_example["coreferences"] = []
-        for ann in brat_parse["equivalences"]:
+        for i, ann in enumerate(brat_parse["equivalences"], start=1):
             is_entity_cluster = True
             for ref_id in ann["ref_ids"]:
-                if not ref_id.startswith("T"): # not textbound -> no entity
+                if not ref_id.startswith("T"):  # not textbound -> no entity
                     is_entity_cluster = False
-                elif ref_id in id_to_event_trigger: # event trigger -> no entity
+                elif ref_id in id_to_event_trigger:  # event trigger -> no entity
                     is_entity_cluster = False
             if is_entity_cluster:
+                entity_ids = [id_prefix + i for i in ann["ref_ids"]]
                 unified_example["coreferences"].append(
-                    {"id": ann["id"], "entity_ids": ann["ref_ids"]}
+                    {"id": id_prefix + str(i), "entity_ids": entity_ids}
                 )
 
         return unified_example
