@@ -5,13 +5,48 @@ from collections import defaultdict
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
-from typing import Optional, Union
+from typing import Iterator, Optional, Union
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 import datasets
 
 from schemas.kb import features
+
+OFFSET_ERROR_MSG = (
+    "\n"
+    "There are features with wrong offsets!"
+    "This is not a hard failure, as it is common for this type of datasets"
+    "However, if the error list is long (e.g. >10) you should double check your code"
+)
+
+
+def _get_example_text(example: dict) -> str:
+    """
+    Get full text example
+    """
+    return " ".join([t for p in example["passages"] for t in p["text"]])
+
+
+def _check_offsets(
+    example_text: str,
+    offsets: list[list[int]],
+    texts: list[str],
+) -> Iterator:
+
+    for idx, (start, end) in enumerate(offsets):
+
+        try:
+            text = texts[idx]
+
+        # TODO: riase error?
+        except IndexError:
+            print("Pairing of a list of offsets with a single text is not allowed!")
+
+        by_offset_text = example_text[start:end]
+
+        if by_offset_text != text:
+            yield f" text:`{text}` != offsets_text:`{by_offset_text}`"
 
 
 class TestKBDataset(unittest.TestCase):
@@ -63,6 +98,10 @@ class TestKBDataset(unittest.TestCase):
         self.test_is_bigbio_schema_compatible()
         self.test_are_ids_globally_unique()
         self.test_do_all_referenced_ids_exist()
+        self.test_passages_offsets()
+        self.test_entities_offsets()
+        self.test_events_offsets()
+        self.test_coref_ids()
 
     def test_is_bigbio_schema_compatible(self):
         for split in self.dataset_bigbio.values():
@@ -142,6 +181,112 @@ class TestKBDataset(unittest.TestCase):
             existing_ids.append((event["id"], "event"))
 
         return existing_ids
+
+    def test_passages_offsets(self):
+        """
+        Verify that the passages offsets are correct,
+        i.e.: passage text == text extracted via the passage offsets
+        """
+
+        for split in self.dataset_bigbio:
+
+            if "passages" in self.dataset_bigbio[split].features:
+
+                for example in self.dataset_bigbio[split]:
+
+                    example_text = _get_example_text(example)
+
+                    for entity in example["passages"]:
+                        for idx, (start, end) in enumerate(entity["offsets"]):
+                            self.assertEqual(
+                                example_text[start:end], entity["text"][idx]
+                            )
+
+    def test_entities_offsets(self):
+        """
+        Verify that the entities offsets are correct,
+        i.e.: entity text == text extracted via the entity offsets
+        """
+
+        errors = []
+
+        for split in self.dataset_bigbio:
+
+            if "entities" in self.dataset_bigbio[split].features:
+
+                for example in self.dataset_bigbio[split]:
+
+                    example_id = example["id"]
+                    example_text = _get_example_text(example)
+
+                    for entity in example["entities"]:
+
+                        for msg in _check_offsets(
+                            example_text=example_text,
+                            offsets=entity["offsets"],
+                            texts=entity["text"],
+                        ):
+
+                            entity_id = entity["id"]
+                            errors.append(
+                                f"Example:{example_id} - entity:{entity_id} " + msg
+                            )
+
+        if len(errors) > 0:
+            self.fail(msg="\n".join(errors) + OFFSET_ERROR_MSG)
+
+    # UNTESTED: no dataset example
+    def test_events_offsets(self):
+        """
+        Verify that the events' trigger offsets are correct,
+        i.e.: trigger text == text extracted via the trigger offsets
+        """
+
+        errors = []
+
+        for split in self.dataset_bigbio:
+
+            if "events" in self.dataset_bigbio[split].features:
+
+                for example in self.dataset_bigbio[split]:
+
+                    example_id = example["id"]
+                    example_text = _get_example_text(example)
+
+                    for event in example["events"]:
+
+                        for msg in _check_offsets(
+                            example_text=example_text,
+                            offsets=event["trigger"]["offsets"],
+                            texts=event["trigger"]["text"],
+                        ):
+
+                            event_id = event["id"]
+                            errors.append(
+                                f"Example:{example_id} - event:{event_id} " + msg
+                            )
+
+        if len(errors) > 0:
+            self.fail(msg="\n".join(errors) + OFFSET_ERROR_MSG)
+
+    def test_coref_ids(self):
+        """
+        Verify that coreferences ids are entities
+
+        from `examples/test_n2c2_2011_coref.py`
+        """
+
+        for split in self.dataset_bigbio:
+
+            if "coreferences" in self.dataset_bigbio[split].features:
+
+                for example in self.dataset_bigbio[split]:
+                    entity_lookup = {ent["id"]: ent for ent in example["entities"]}
+
+                    # check all coref entity ids are in entity lookup
+                    for coref in example["coreferences"]:
+                        for entity_id in coref["entity_ids"]:
+                            assert entity_id in entity_lookup
 
 
 if __name__ == "__main__":
