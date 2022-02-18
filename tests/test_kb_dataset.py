@@ -2,7 +2,9 @@ import argparse
 import sys
 import unittest
 from collections import defaultdict
+from difflib import ndiff
 from pathlib import Path
+from pprint import pformat
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -44,7 +46,11 @@ class TestKBDataset(unittest.TestCase):
 
     def test_is_bigbio_schema_compatible(self):
         for split in self.dataset_bigbio.values():
-            self.assertEqual(split.features, features)
+            if not split.features == features:
+                s1 = pformat(split.features).splitlines()
+                s2 = pformat(features).splitlines()
+                print("\n".join(ndiff(s1, s2)))
+                assert split.features == features
 
     def test_are_ids_globally_unique(self):
         for split in self.dataset_bigbio.values():
