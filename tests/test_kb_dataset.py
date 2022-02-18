@@ -2,6 +2,7 @@ import argparse
 import sys
 import unittest
 from collections import defaultdict
+from pathlib import Path
 
 import datasets
 
@@ -117,10 +118,10 @@ class TestKBDataset(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("datset_script")
-    parser.add_argument("schema")
     args = parser.parse_args()
 
+    schema_file = Path(__file__).parent.parent / "schemas" / "kb.py"
     # Load the schema
-    with open(sys.argv[2]) as f:
+    with open(schema_file) as f:
         exec(f.read())
     unittest.TextTestRunner().run(TestKBDataset())
