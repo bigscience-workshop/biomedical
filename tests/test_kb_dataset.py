@@ -4,7 +4,10 @@ import unittest
 from collections import defaultdict
 from pathlib import Path
 
+sys.path.append(str(Path(__file__).parent.parent))
+
 import datasets
+from schemas.kb import features
 
 
 
@@ -120,8 +123,4 @@ if __name__ == "__main__":
     parser.add_argument("datset_script")
     args = parser.parse_args()
 
-    schema_file = Path(__file__).parent.parent / "schemas" / "kb.py"
-    # Load the schema
-    with open(schema_file) as f:
-        exec(f.read())
     unittest.TextTestRunner().run(TestKBDataset())
