@@ -5,18 +5,38 @@ from collections import defaultdict
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
+from typing import Optional, Union
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 import datasets
+
 from schemas.kb import features
 
 
-
 class TestKBDataset(unittest.TestCase):
+
+    PATH: str
+    DATA_DIR: str
+    USE_AUTH_TOKEN: Optional[Union[bool, str]]
+
     def setUp(self) -> None:
-        self.dataset_source = datasets.load_dataset(sys.argv[1], name="source")
-        self.dataset_bigbio = datasets.load_dataset(sys.argv[1], name="bigbio")
+
+        self.dataset_source = datasets.load_dataset(
+            self.PATH,
+            name="source",
+            data_dir=self.DATA_DIR,
+            use_auth_token=self.USE_AUTH_TOKEN,
+        )
+
+        self.dataset_bigbio = datasets.load_dataset(
+            self.PATH,
+            name="bigbio",
+            data_dir=self.DATA_DIR,
+            use_auth_token=self.USE_AUTH_TOKEN,
+        )
+        # self.dataset_source = datasets.load_dataset(sys.argv[1], name="source")
+        # self.dataset_bigbio = datasets.load_dataset(sys.argv[1], name="bigbio")
 
     def print_statistics(self):
         for split_name, split in self.dataset_bigbio.items():
@@ -125,8 +145,21 @@ class TestKBDataset(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("datset_script")
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("datset_script")
+    # args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="Unit tests for dataset with KB schema. Args are passed to `datasets.load_dataset`"
+    )
+
+    parser.add_argument("--path", type=str, required=True)
+    parser.add_argument("--data_dir", type=str, default=None)
+    parser.add_argument("--use_auth_token", default=None)
+
     args = parser.parse_args()
+
+    TestKBDataset.PATH = args.path
+    TestKBDataset.DATA_DIR = args.data_dir
+    TestKBDataset.USE_AUTH_TOKEN = args.use_auth_token
 
     unittest.TextTestRunner().run(TestKBDataset())
