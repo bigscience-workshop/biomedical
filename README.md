@@ -72,7 +72,7 @@ If an admin approves it, then you are welcome to implement this dataset and it w
 
 ### 2. Implement the dataloader for your dataset
 
-A step-by-step guide on how you can implementing a data-loading script can be found [here](CONTRIBUTING.md).
+A step-by-step guide on how you can implement a data-loading script can be found [here](CONTRIBUTING.md).
 
 Please ensure your dataloader follows our expected biomedical schema, found [here](#Template-scripts)
 
