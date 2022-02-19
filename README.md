@@ -130,15 +130,25 @@ You are welcome to use any of the above resources as necessary.
 
 ## FAQs
 
-*What if my dataset does not have a public license?*
+### *What if my dataset does not have a public license?*
 
-We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local [template](templates/template_local.py).
+We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has the dataset file(s) stored locally. You can find an example [here](examples/cellfinder.py) and follow the local [template](templates/template_local.py).
 
-*What types of libraries can we import?*
+### *What types of libraries can we import?*
 
-*Can I upload the data directly?*
+Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
 
-*My dataset is complicated, can you help me?*
+### *Can I upload the dataset directly?*
+
+You should never need to upload the dataset directly. Either your dataset loader provides the means to download the data from a publicly accessible source or your dataset loader points to local files. 
+
+### *My dataset is complicated, can you help me?*
+
+Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/PrhGdhJE) and ask for help. 
+
+### *My dataset is too complicated, can I switch?*
+
+Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
 
 ## Thank you!
 
