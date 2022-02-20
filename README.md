@@ -1,4 +1,4 @@
-***Update 2022.02.14: We're close to launch! We're excited to have you!***
+***Update 2022.02.21: We're close to launch! We're excited to have you!***
 
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 

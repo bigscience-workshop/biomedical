@@ -89,7 +89,35 @@ Make a new directory within the `biomedical/datasets` folder as such: <br>
     mkdir datasets/<name_of_my_dataset>
     cd datasets/<name_of_my_dataset>
 
-To implement your dataset, follow instructions in the necessary files:
+To implement your dataset, there are three key methods that are important:<br>
+
+  * `_info`: Specifies the schema of the expected dataloader
+  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
+  * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
+
+To start, copy [templates/template.py](templates/template.py) to your in `biomedical/datasets/<name_of_my_dataset>` with the name <name_of_my_dataset>.py. Within this file, fill out all the TODOs.
+
+
+For the `_info_` under the big-bio schema, be sure to copy the right schema from our list of examples. You can find them as follows:
+
+1. [Named entity recognition (NER)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
+2. [Relation Extraction (RE)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
+3. [Event Extraction](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
+4. [Named entity disambiguation/canonicalization/normalization (NED)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
+5. [Question-Answering](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/qa.py)
+6. [Entailment](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/entailment.py)
+7. [Translation](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+8. [Summarization](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+9. [Paraphrasing](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+10. [Sentence/Phrase/Text classification](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text.py)
+11. [Pair Labels](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/pairs.py)
+
+Please read the [Task Schemas](#task_schemas.md) to understand how each key should behave.
+
+Populate the information in the dataset according to this schema; some fields may be empty.
+
+##### Example scripts:
+To help you implement a dataset, we offer a template and example scripts.
 
 
 ### 4. Check if your dataloader works
