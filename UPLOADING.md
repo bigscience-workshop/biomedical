@@ -1,5 +1,7 @@
 # Uploading a dataloader script to the Hub
 
+**At this point, there should be no further changes to your dataloader script after the PR was accepted**.
+
 ### 1. Make an account on the Hub
 
 Please do the following before getting started: 
@@ -12,19 +14,13 @@ Please do the following before getting started:
 - Make a github account; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
 
 
-**Note - your permissions will be set to READ. Please contact an admin in a github issue to be granted WRITE access**
+**Note - your permissions will be set to READ. Please contact an admin in your dataset's github issue to be granted WRITE access; this should be given after your PR is accepted**.
 
 ### 2) Activate the Huggingface hub
 
 You can find the official instructions [here](https://huggingface.co/welcome). We will provide what you need for the biomedical-datasets hackathon environment.
 
-Download the `requirements.txt` file from [bigscience-biomedical](https://github.com/bigscience-workshop/biomedical/blob/master/requirements.txt).
-
-With your environment active, install the requirements with `pip install -r requirements.txt`
-
-<!-- @NATASHA tidy up requirements.txt -->
-
-With the requirements downloaded, run the following command:
+With your active `bigscience-biomedical` environment, use the following command:
 
 ```
 huggingface-cli login
@@ -42,12 +38,9 @@ Make a repository via the 🤗 Hub [here](https://huggingface.co/new-dataset) wi
 + Select Private
 + Click `Create dataset`
 
-The dataset name and the dataset loader script file name must match. 
-For example, if your dataset loader script is called `n2c2_2011_coref.py`, then 
-your dataset name should be `n2c2_2011_coref`. 
+**Please name your dataloading script with the same name as the dataset.** For example, if your dataset loader script is called `n2c2_2011_coref.py`, then your dataset name should be `n2c2_2011_coref`.
 
-If there is no appropriate license available in the provided options (for example 
-for datasets with specific data user agreements) you should select "other". 
+If there is no appropriate license available in the provided options (for example for datasets with specific data user agreements) you should select "other". 
 
 ### 4. Clone the dataset repository
 
@@ -67,14 +60,13 @@ git commit -m "Adds <your_dataset_name>"
 git push origin
 ```
 
-At this point, there should be **no further changes in your code**. 
-
 ## 6) Test your data-loader 
 
 Run the following command **in a folder that does not include your data-loading script**:
 
 Test both the original dataset schema/config and the bigbio schema/config. 
 
+**Public Dataset**
 ```python
 from datasets import load_dataset
 
@@ -82,8 +74,7 @@ dataset_orig = load_dataset("bigscience-biomedical/<your_dataset_name>", name="s
 dataset_bigbio = load_dataset("bigscience-biomedical/<your_dataset_name>", name="bigbio", use_auth_token=True)
 ```
 
-For datasets that are licensed such that they must already exist on the users local machine, 
-the test commands might look something like this instead,
+**Private Dataset**
 
 ```python
 from datasets import load_dataset
