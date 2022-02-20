@@ -142,6 +142,10 @@ Eventually, your dataloader script will need to run using only the packages supp
 
 No. Please do not upload your dataset directly. This is not the goal of the hackathon and many datasets have external licensing agreements. If the dataset is public (i.e. can be downloaded without credentials or signed data user agreement), include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. You can see examples of both in the [examples](https://github.com/bigscience-workshop/biomedical/tree/master/examples) directory. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
 
+*My dataset supports multiple tasks with different bigbio schemas. What should I do? 
+
+In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `text_to_text` schema) and a named entity recognition task (supported by the `kb` schema). In this case, please implement one config for each task and name the config `bigbio-<task>`. In the `muchmore` example, this would mean one config called `bigbio-translation` and one config called `bigbio-ner`.  
+
 *My dataset is complicated, can you help me?*
 
 Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/PrhGdhJE) and ask for help. 
