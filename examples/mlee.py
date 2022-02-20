@@ -136,15 +136,15 @@ class MLEE(datasets.GeneratorBasedBuilder):
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "text_bound_annotations": datasets.Sequence(  # T line in brat, e.g. type or event trigger
+                    "text_bound_annotations": [  # T line in brat, e.g. type or event trigger
                         {
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                             "text": datasets.Sequence(datasets.Value("string")),
                             "type": datasets.Value("string"),
                             "id": datasets.Value("string"),
                         }
-                    ),
-                    "events": datasets.Sequence(  # E line in brat
+                    ],
+                    "events": [  # E line in brat
                         {
                             "trigger": datasets.Value(
                                 "string"
@@ -158,8 +158,8 @@ class MLEE(datasets.GeneratorBasedBuilder):
                                 }
                             ),
                         }
-                    ),
-                    "relations": datasets.Sequence(  # R line in brat
+                    ],
+                    "relations": [  # R line in brat
                         {
                             "id": datasets.Value("string"),
                             "head": {
@@ -172,22 +172,22 @@ class MLEE(datasets.GeneratorBasedBuilder):
                             },
                             "type": datasets.Value("string"),
                         }
-                    ),
-                    "equivalences": datasets.Sequence(  # Equiv line in brat
+                    ],
+                    "equivalences": [  # Equiv line in brat
                         {
                             "id": datasets.Value("string"),
                             "ref_ids": datasets.Sequence(datasets.Value("string")),
                         }
-                    ),
-                    "attributes": datasets.Sequence(  # M or A lines in brat
+                    ],
+                    "attributes": [  # M or A lines in brat
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
                             "value": datasets.Value("string"),
                         }
-                    ),
-                    "normalizations": datasets.Sequence(  # N lines in brat
+                    ],
+                    "normalizations": [  # N lines in brat
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
@@ -202,7 +202,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
                         }
-                    ),
+                    ],
                 },
             )
         elif self.config.name == _UNIFIED_VIEW_NAME:
