@@ -97,35 +97,37 @@ You are welcome to use any of the above resources as necessary.
 
 ## FAQs
 
-##### What if my dataset does not have a public license?
+#### What if my dataset does not have a public license?
 
 We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local [template](templates/template_local.py).
 
-##### What if my dataset does not have a public license?
+#### What if my dataset does not have a public license?
 
 We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has the dataset file(s) stored locally. You can find an example [here](examples/cellfinder.py).
 
-##### What types of libraries can we import?
+#### What types of libraries can we import?
 
-Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
+Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. 
 
-##### Can I upload the dataset directly?
+We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
+
+#### Can I upload the dataset directly?
 
 No. Please do not upload your dataset directly. This is not the goal of the hackathon and many datasets have external licensing agreements. If the dataset is public (i.e. can be downloaded without credentials or signed data user agreement), include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. You can see examples of both in the [examples](https://github.com/bigscience-workshop/biomedical/tree/master/examples) directory. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
 
-##### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
+#### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
 
 In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `text_to_text` schema) and a named entity recognition task (supported by the `kb` schema). In this case, please implement one config for each task and name the config `bigbio-<task>`. In the `muchmore` example, this would mean one config called `bigbio-translation` and one config called `bigbio-ner`.  
 
-##### How should I handle offsets and text in the bigbio kb schema?
+#### How should I handle offsets and text in the bigbio kb schema?
 
 Full details on how to handle offsets and text in the bigbio kb schema can be found in the [schema documentation](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md).
 
-##### My dataset is complicated, can you help me?
+#### My dataset is complicated, can you help me?
 
 Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/PrhGdhJE) and ask for help. 
 
-##### My dataset is too complicated, can I switch?
+#### My dataset is too complicated, can I switch?
 
 Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
 
