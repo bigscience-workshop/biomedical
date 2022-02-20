@@ -66,11 +66,9 @@ If an admin approves it, then you are welcome to implement this dataset and it w
 
 ### 2. Implement the dataloader for your dataset
 
-A step-by-step guide on how you can implement a data-loading script can be found [here](CONTRIBUTING.md).
+[Check out our step-by-step guide to implementing a dataloader with the big-bio schema](CONTRIBUTING.md).
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
-
-Please ensure your dataloader follows our expected biomedical schema, found [here](#task_schemas.md)
 
 ### 3. Make a pull-request (PR) for your dataloader!
 
@@ -91,7 +89,7 @@ Please join the BigScience initiative [here](https://bigscience.huggingface.co/)
 Alternatively, you can ping us on the [Biomedical Discord Server](https://discord.gg/Cwf3nT3ajP). The Discord server can be used to share information quickly or ask code-related questions.
 
 #### Make a Github Issue
-For quick questions and clarifications, you can [make an issue via Github](https://github.com/bigscience-workshop/biomedical/issues).
+For quick questions and clarifications, you can [make an issue via Github](https://github.com/bigscience-workshop/biomedical/issues/new/choose).
 
 You are welcome to use any of the above resources as necessary. 
 
@@ -125,7 +123,7 @@ Full details on how to handle offsets and text in the bigbio kb schema can be fo
 
 #### My dataset is complicated, can you help me?
 
-Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/PrhGdhJE) and ask for help. 
+Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/Cwf3nT3ajP) and ask for help. 
 
 #### My dataset is too complicated, can I switch?
 
