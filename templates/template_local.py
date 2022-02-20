@@ -41,11 +41,11 @@ Your imports go here; the only mandatory one is `datasets`, as methods and attri
 from this library will be used throughout the script.
 
 """
-import datasets
-import os
-from typing import Iterable, Dict, List
 import logging
+import os  # useful for paths
+from typing import Dict, Iterable, List
 
+import datasets
 
 """
 Step 2: Create keyword descriptors for your dataset
@@ -83,6 +83,8 @@ A description of your dataset
 _HOMEPAGE = "Homepage of the dataset"
 
 _LICENSE = "License"
+
+_URLs = {"your_dataset_name": "your_dataset_URL"}
 
 _VERSION = "1.0.0"
 
@@ -147,9 +149,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "spans": datasets.Sequence(
-                                datasets.Value("int32")
-                            ),
+                            "spans": datasets.Sequence(datasets.Value("int32")),
                             "text": datasets.Value("string"),
                             "entity_type": datasets.Value("string"),
                         }
@@ -180,9 +180,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """
         Step 5: Access the dataset
 
@@ -201,6 +199,8 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
         will cause `self.config.data_dir` to be equal to "/path/to/data".
         You can use whichever kwarg makes the most sense for your dataset.
 
+        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
+        
         You can read more
           * in the BuilderConfig docs
             https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.BuilderConfig
@@ -210,8 +210,6 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
 
 
         Next, fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
-
-        Note:
 
         - `name` can be: datasets.Split.<TRAIN/TEST/VALIDATION> or a string
         - all keys in `gen_kwargs` are passed to `_generate_examples()`.
@@ -233,9 +231,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(
-        self, filepath, abstract_file, entity_file, relation_file, split
-    ):
+    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
         """
         Step 6: Create a generator that yields (key, example) of the dataset of interest.
 
@@ -276,6 +272,7 @@ class YourDatasetName(datasets.GeneratorBasedBuilder):
     It may be helpful to use static methods (via the decorator "@staticmethod")
     for these functions.
     """
+
     @staticmethod
     def _get_abstract(abstract_file: str) -> Dict[int, str]:
         """
