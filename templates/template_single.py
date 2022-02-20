@@ -129,7 +129,8 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # TODO: Choose the appropriate bigbio schema for your task and copy it here.
         # In rare cases you may get a dataset that supports multiple tasks. In that
-        # case you can define multiple bigbio configs (e.g. bigbio-translation, bigbio-kb)
+        # case you can define multiple bigbio configs with a bigbio-<task> format.
+        # For example bigbio-translation, bigbio-ner
         elif self.config.name == "bigbio":
             raise NotImplementedError()
 
@@ -147,10 +148,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # For local datasets there is no need to download the data. You will have access to self.config.data_dir and
         # self.config.data_files if they were passed to load_dataset.
 
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLS
+        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
         # https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
         # many examples use the download_and_extract method ... see the DownloadManager docs above for other options
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
+        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
 
         # Not all datasets have predefined canonical train/val/test splits. If your dataset does not have any splits, you
         # can return a single element list with just a train split.
