@@ -2,6 +2,7 @@ import argparse
 import sys
 import unittest
 from collections import defaultdict
+from collections.abc import Iterable
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
@@ -14,13 +15,10 @@ import datasets
 from schemas.kb import features
 
 OFFSET_ERROR_MSG = (
-    "\n"
+    "\n\n"
     "There are features with wrong offsets!"
-    "This is not a hard failure, as it is common for this type of datasets."
-    "However, if the error list is long (e.g. >10) you should double check your code."
-    # I do not see an easy way to cacth this in the test
-    "You can safely ignore this error if the dataset contains composite annotations"
-    "(see entities in `examples/bc5cdr.py` as an example)."
+    " This is not a hard failure, as it is common for this type of datasets."
+    " However, if the error list is long (e.g. >10) you should double check your code."
 )
 
 
@@ -29,27 +27,6 @@ def _get_example_text(example: dict) -> str:
     Get full text example
     """
     return " ".join([t for p in example["passages"] for t in p["text"]])
-
-
-def _check_offsets(
-    example_text: str,
-    offsets: list[list[int]],
-    texts: list[str],
-) -> Iterator:
-
-    for idx, (start, end) in enumerate(offsets):
-
-        try:
-            text = texts[idx]
-
-        # TODO: riase error?
-        except IndexError:
-            print("Pairing of a list of offsets with a single text is not allowed!")
-
-        by_offset_text = example_text[start:end]
-
-        if by_offset_text != text:
-            yield f" text:`{text}` != offsets_text:`{by_offset_text}`"
 
 
 class TestKBDataset(unittest.TestCase):
@@ -201,10 +178,62 @@ class TestKBDataset(unittest.TestCase):
                     example_text = _get_example_text(example)
 
                     for passage in example["passages"]:
-                        for idx, (start, end) in enumerate(passage["offsets"]):
-                            self.assertEqual(
-                                example_text[start:end], passage["text"][idx]
-                            )
+
+                        text = passage["text"]
+                        offsets = passage["offsets"]
+
+                        with self.subTest(
+                            "Offsets in passages must have only one element",
+                            offsets=offsets,
+                        ):
+                            self.assertEqual(len(offsets), 1)
+
+                        with self.subTest(
+                            "Text in passages must be an Iterable",
+                            text=text,
+                        ):
+                            self.assertIsInstance(text, Iterable)
+
+                        with self.subTest(
+                            "Text in passages must have only one element",
+                            text=text,
+                        ):
+                            self.assertEqual(len(text), 1)
+
+                        for idx, (start, end) in enumerate(offsets):
+                            self.assertEqual(example_text[start:end], text[idx])
+
+    def _check_offsets(
+        self,
+        example_text: str,
+        offsets: list[list[int]],
+        texts: list[str],
+    ) -> Iterator:
+
+        with self.subTest(
+            "# of texts must be equal to # of offsets", texts=texts, offsets=offsets
+        ):
+            self.assertEqual(len(texts), len(offsets))
+
+        with self.subTest(
+            "Text fields paired with offsets must be in the form [`text`, ...]",
+            texts=texts,
+        ):
+            self.assertIsInstance(texts, Iterable)
+
+        with self.subTest(
+            "All offsets must be in the form [(lo1, hi1), ...]", offsets=offsets
+        ):
+            self.assertTrue(all(len(o) == 2 for o in offsets))
+
+        # offsets are always list of lists
+        for idx, (start, end) in enumerate(offsets):
+
+            by_offset_text = example_text[start:end]
+            text = texts[idx]
+
+            if by_offset_text != text:
+                yield f" text:`{text}` != text_by_offset:`{by_offset_text}`"
 
     def test_entities_offsets(self):
         """
@@ -225,7 +254,7 @@ class TestKBDataset(unittest.TestCase):
 
                     for entity in example["entities"]:
 
-                        for msg in _check_offsets(
+                        for msg in self._check_offsets(
                             example_text=example_text,
                             offsets=entity["offsets"],
                             texts=entity["text"],
@@ -259,7 +288,7 @@ class TestKBDataset(unittest.TestCase):
 
                     for event in example["events"]:
 
-                        for msg in _check_offsets(
+                        for msg in self._check_offsets(
                             example_text=example_text,
                             offsets=event["trigger"]["offsets"],
                             texts=event["trigger"]["text"],
