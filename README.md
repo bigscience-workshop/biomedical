@@ -34,7 +34,7 @@ To be considered a contributor, participants must implement an *accepted data-lo
 Explicit instructions are found in [Get started](#Get-started), but the overall criteria to get accepted is as follows: <br>
 
 - Write a data-loading script for a dataset in a new branch
-- PR your branch to the ``bigscience-biomedical` repo and ping the admins
+- PR your branch to the `bigscience-biomedical` repo and ping the admins
 - If an admin approves the PR, follow the instructions on [uploading to the hub](UPLOADING.md).
 
 Details for contributor acknowledgements and rewards can be found [here](#Thank-you)

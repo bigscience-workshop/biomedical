@@ -2,20 +2,23 @@
 
 ## Pre-Requisites
 
+Please make a github account prior to implementing a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
 
+You will also need at least Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. **We strongly recommend Python 3.8+ for stability**. 
 
+**Optional** Setup your GitHub account with SSH ([instructions here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).)
 
-### 1. **Setup a local version of the datasets repo to update**
-Fork the dataset [repository](https://github.com/huggingface/datasets) from huggingface to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github. 
+### 1. **Setup a local version of the bigscience-biomed repo**
+Fork the bigscience-biomed dataset [repository](https://github.com/bigscience-workshop/biomedical) to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github. 
 
 After you fork, clone the repository locally. You can do so as follows:
 
-    git clone git@github.com:<your_github_username>/datasets.git
-    cd datasets  # enter the directory
+    git clone git@github.com:<your_github_username>/biomedical.git
+    cd biomedical  # enter the directory
 
 Next, you want to set your `upstream` location to enable you to push/pull (add or receive updates). You can do so as follows:
     
-    git remote add upstream https://github.com/huggingface/datasets.git
+    git remote add upstream git@github.com:bigscience-workshop/biomedical.git
 
 You can optionally check that this was set properly by running the following command:
     
@@ -23,14 +26,14 @@ You can optionally check that this was set properly by running the following com
 
 The output of this command should look as follows:
 
-    origin  https://github.com/<your_github_username>/datasets (fetch)
-    origin  https://github.com/<your_github_username>/datasets (push)
-    upstream    https://github.com/huggingface/datasets.git (fetch)
-    upstream    https://github.com/huggingface/datasets.git (push)
+    origin  git@github.com:<your_github_username>/biomedical.git(fetch)
+    origin  git@github.com:<your_github_username>/biomedical.git (push)
+    upstream    git@github.com:bigscience-workshop/biomedical.git (fetch)
+    upstream    git@github.com:bigscience-workshop/biomedical.git (push)
 
 If you do NOT have an `origin` for whatever reason, then run:
 
-    git remote add origin https://github.com/<your_github_username>/datasets.git
+    git remote add origin git@github.com:<your_github_username>/biomedical.git
 
 The goal of `upstream` is to keep your repository up-to-date to any changes that are made officially to the datasets library. You can do this as follows by running the following commands:
 
@@ -56,16 +59,17 @@ You can make an environment in any way you choose to. We highlight two possible 
 
 #### 2a) Create a conda environment
 
+The following instructions will create an Anaconda `bigscience-biomedical` environment.
+
 - Install [anaconda](https://docs.anaconda.com/anaconda/install/) for your appropriate operating system.
-- Run the following command while in the `datasets` folder (you can pick your python version):
+- Run the following command while in the `biomedical` folder (you can pick your python version):
 
 ```
-conda create --name <your_env_name_here> python=<your_python_version_here>  # Creates a conda env
-conda activate <your_env_name_here> # Activate your conda environment
-pip install -e ".[dev]"  # Install this while in the datasets folder
+conda env create -f environment.yml  # Creates a conda env
+conda activate bigscience-biomedical  # Activate your conda environment
 ```
 
-Make sure you are using the correct pip by checking `which pip`; this should point to the pip within your conda environment. You can deactivate your environment at any time by either exiting your terminal or using `conda deactivate`.
+You can deactivate your environment at any time by either exiting your terminal or using `conda deactivate`.
 
 #### 2b) Create a venv environment
 
@@ -74,22 +78,21 @@ Python 3.3+ has venv automatically installed; official information is found [her
 ```
 python3 -m venv <your_env_name_here>
 source <your_env_name_here>/bin/activate  # activate environment
-pip install -e ".[dev]"  # Install this while in the datasets folder
+pip install -r requirements.txt # Install this while in the datasets folder
 ```
-
-**Note! If you already have the `datasets` library installed in a different environment of choice, please uninstall it first (via `pip uninstall datasets`) and re-install in the editable mode**
+Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `datasets` folder as such: <br>
+Make a new directory within the `biomedical/datasets` folder as such: <br>
 
     mkdir datasets/<name_of_my_dataset>
     cd datasets/<name_of_my_dataset>
 
 To implement your dataset, follow instructions in the necessary files:
 
-- **Option 1:** To add a dataset that has a public license, use `template.py`
-- **Option 2:** To add a dataset where files are local, use `template_local.py`
+
+### 4. Check if your dataloader works
 
 Make sure your dataset is implemented correctly by checking in python the following commands:
 
@@ -97,12 +100,12 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('your_dataset_name')
+data = load_dataset('datasets/<your_dataset_name>')
 ```
 
 Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.
 
-### 4. Format code 
+### 5. Format your code 
 
 Return to the main directory (assuming you are in your dataset-specific folder) via the following commands:
 
@@ -112,7 +115,7 @@ Return to the main directory (assuming you are in your dataset-specific folder) 
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
-### 5. Commit your changes
+### 6. Commit your changes
 
 First, commit your changes to the branch to "add" the work:
 
@@ -134,6 +137,6 @@ Push these changes to **your fork** with the following command:
 
 **[Optional Step]** Add unit-tests and meta data by following instructions [here](https://huggingface.co/docs/datasets/share_dataset.html#adding-tests).
 
-### 6. **Make a pull request** 
+### 7. **Make a pull request** 
 
 Make a PR to implement your changes on the main repository [here](https://github.com/huggingface/datasets/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
