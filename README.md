@@ -29,7 +29,7 @@ Our unified schema allows researchers and practioners to **access the same type 
 
 ## Contribution Guidelines
 
-To be guaranteed acknowledgement, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 1 dataset**. 
+To be considered a contributor, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 1 dataset**. 
 
 Explicit instructions are found in [Get started](#Get-started), but the overall criteria to get accepted is as follows: <br>
 
@@ -70,11 +70,13 @@ A step-by-step guide on how you can implement a data-loading script can be found
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
 
-Please ensure your dataloader follows our expected biomedical schema, found [here](#Schemas)
+Please ensure your dataloader follows our expected biomedical schema, found [here](#task_schemas.md)
 
-### 3. PR your dataloader!
+### 3. Make a pull-request (PR) for your dataloader!
 
-Explicit instructions on how to PR a dataloader are found [here](CONTRIBUTING.md). Once you do, an admin will code-review your changes. Admins may propose changes before acceptance, or accept as-is. Please feel free to reach out to get your PRs accepted!
+Before your data-loading script is accepted, you will need to make a PR to the big-science biomedical repo. Explicit instructions on how to PR a dataloader are found [here](CONTRIBUTING.md). 
+
+Once you do, an admin will code-review your changes. Admins may propose changes before acceptance, or accept as-is. Please feel free to reach out to get your PRs accepted!
 
 Once the PR is accepted, please follow the instructions to upload the dataset into the [Hub](UPLOADING.md).
 
@@ -99,23 +101,40 @@ You are welcome to use any of the above resources as necessary.
 
 We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local [template](templates/template_local.py).
 
+*What if my dataset does not have a public license?*
+
+We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has the dataset file(s) stored locally. You can find an example [here](examples/cellfinder.py).
+
 *What types of libraries can we import?*
 
-*Can I upload the data directly?*
+Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
+
+*Can I upload the dataset directly?*
+
+No. Please do not upload your dataset directly. This is not the goal of the hackathon and many datasets have external licensing agreements. If the dataset is public (i.e. can be downloaded without credentials or signed data user agreement), include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. You can see examples of both in the [examples](https://github.com/bigscience-workshop/biomedical/tree/master/examples) directory. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
+
+*My dataset supports multiple tasks with different bigbio schemas. What should I do?* 
+
+In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `text_to_text` schema) and a named entity recognition task (supported by the `kb` schema). In this case, please implement one config for each task and name the config `bigbio-<task>`. In the `muchmore` example, this would mean one config called `bigbio-translation` and one config called `bigbio-ner`.  
+
+*How should I handle offsets and text in the bigbio kb schema?*
+
+Full details on how to handle offsets and text in the bigbio kb schema can be found in the [schema documentation](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md).
 
 *My dataset is complicated, can you help me?*
+
+Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/PrhGdhJE) and ask for help. 
+
+*My dataset is too complicated, can I switch?*
+
+Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
 
 ## Thank you!
 
 We greatly appreciate your help - as a token or our gratitude, contributors can get the following rewards:
 
+* **Authorship on a paper**; we are submitting this work to various venues centered on programmatic access to biomedical literature
+
+* **Recognition as an official contributor** if your script is accepted, you will be an official author on the **BigScience Biomedical library** from Huggingface.
+
 The hackathon guide is heavily inspired from [here](https://github.com/bigscience-workshop/data_tooling/wiki/datasets-hackathon).
-
-<!---
-@Natasha
-Contribution rewards:
-
-- t-shirts?
-- can we get a github star/badge that people can host on their profiles
-- minimum acknowledgement in a paper; may have authorship
--->
