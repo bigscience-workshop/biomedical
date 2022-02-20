@@ -124,7 +124,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "text": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                         }
                     ],
@@ -216,7 +216,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         po_start = 0
 
-        for id_, p in enumerate(d.passages):
+        for _, p in enumerate(d.passages):
 
             eo = p.offset - text_total_length
 
@@ -326,6 +326,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
                 for p in passages:
                     p.pop("offset")  # drop original offset
+                    p["text"] = (p["text"],)  # text in passage is Sequence
                     p["id"] = uid  # override BioC default id
                     uid += 1
 
