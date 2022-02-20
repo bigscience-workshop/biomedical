@@ -25,10 +25,9 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 import csv
 import json
 import os
+
 import bioc
-
 import datasets
-
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -69,7 +68,6 @@ _URLs = {
     "bigbio": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
     BioCreative V Chemical Disease Relation (CDR) Task.
@@ -88,7 +86,10 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = (
+        "source"  # "source" is the original view; big-bio is an accessible alternative view
+    )
+
 
     def _info(self):
 
@@ -103,6 +104,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "text": datasets.Value("string"),
                             "entities": [
                                 {
+
                                     "id": datasets.Value("string"),
                                     "offsets": [[datasets.Value("int32")]],
                                     "text": [datasets.Value("string")],
@@ -231,7 +233,6 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         """Load BioC entity"""
         offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
         db_id = span.infons[db_id_key] if db_id_key else -1
-
         return {
             "id": span.id,
             "offsets": offsets,
@@ -252,13 +253,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 yield uid, {
                     "passages": [
                         {
-                            "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [
-                                self._get_bioc_entity(span)
-                                for span in passage.annotations
-                            ],
+                            "entities": [self._get_bioc_entity(span) for span in passage.annotations],
                             "relations": [
                                 {
                                     "id": rel.id,

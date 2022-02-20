@@ -35,13 +35,13 @@ There are 3 key elements to implementing a dataset:
 Step 1: Declare imports
 Your imports go here; the only mandatory one is `datasets`, as methods and attributes from this library will be used throughout the script.
 """
-import datasets
-
 #  < Your imports here >
 import os  # useful for paths
-from typing import Iterable, Dict, List
-from pybrat.parser import BratParser
+from typing import Dict, Iterable, List
+
+import datasets
 import pybrat
+from pybrat.parser import BratParser
 
 """
 Step 2: Create keyword descriptors for your dataset
@@ -81,7 +81,7 @@ _HOMEPAGE = "Homepage of the dataset"
 
 _LICENSE = "License"
 
-_URLs = {'cellfinder': "None"}
+_URLs = {"cellfinder": "None"}
 
 _VERSION = "1.0.0"
 
@@ -132,9 +132,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "spans": datasets.Sequence(
-                                datasets.Value("int32")
-                            ),
+                            "spans": datasets.Sequence(datasets.Value("int32")),
                             "text": datasets.Value("string"),
                             "entity_type": datasets.Value("string"),
                         }
@@ -165,9 +163,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """
         Step 5: Download and extract the dataset.
 
@@ -230,9 +226,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
                 yield id_, key
 
     @staticmethod
-    def _parse_brat(
-        data_dir: str, parser: pybrat.parser.BratParser
-    ) -> List[Dict[str, object]]:
+    def _parse_brat(data_dir: str, parser: pybrat.parser.BratParser) -> List[Dict[str, object]]:
         """ """
         # Format is Example[entities, relations]
 
