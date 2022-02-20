@@ -18,7 +18,6 @@ from typing import Dict, Tuple
 
 import datasets
 
-
 _DATASETNAME = "chemprot"
 
 _CITATION = """\
