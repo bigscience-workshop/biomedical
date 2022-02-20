@@ -53,6 +53,8 @@ _CITATION = """\
 }
 """
 
+# TODO: create a module level variable with your dataset name (should match script name)
+_DATASETNAME = "dataset_name"
 
 # TODO: Add description of the dataset here
 # You can copy an official description
@@ -70,12 +72,11 @@ _LICENSE = ""
 # For local datasets, this variable can be an empty dictionary.
 
 # For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# You need to associate each dataset config ("source" and "bigbio") with a URL or set of URLs.
-# In most cases the URLs will be the same for each config.
+# In most cases the URLs will be the same for the source and bigbio config.
+# However, if you need to access different files for each config you can have multiple entries in this dict.
 # This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
-    "source": "url or list of urls or ... ",
-    "bigbio": "url or list of urls or ... ",
+    _DATASETNAME: "url or list of urls or ... ",
 }
 
 # TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
@@ -153,7 +154,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # Not all datasets have predefined canonical train/val/test splits. If your dataset does not have any splits, you
         # can return a single element list with just a train split.
-        urls = _URLS[self.config.name]
+        
+        # 
+        urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
         return [
             datasets.SplitGenerator(
