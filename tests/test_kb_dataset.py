@@ -16,8 +16,11 @@ from schemas.kb import features
 OFFSET_ERROR_MSG = (
     "\n"
     "There are features with wrong offsets!"
-    "This is not a hard failure, as it is common for this type of datasets"
-    "However, if the error list is long (e.g. >10) you should double check your code"
+    "This is not a hard failure, as it is common for this type of datasets."
+    "However, if the error list is long (e.g. >10) you should double check your code."
+    # I do not see an easy way to cacth this in the test
+    "You can safely ignore this error if the dataset contains composite annotations"
+    "(see entities in `examples/bc5cdr.py` as an example)."
 )
 
 
@@ -52,6 +55,7 @@ def _check_offsets(
 class TestKBDataset(unittest.TestCase):
 
     PATH: str
+    NAME: str
     DATA_DIR: str
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
 
@@ -66,7 +70,7 @@ class TestKBDataset(unittest.TestCase):
 
         self.dataset_bigbio = datasets.load_dataset(
             self.PATH,
-            name="bigbio",
+            name=self.NAME,
             data_dir=self.DATA_DIR,
             use_auth_token=self.USE_AUTH_TOKEN,
         )
@@ -196,10 +200,10 @@ class TestKBDataset(unittest.TestCase):
 
                     example_text = _get_example_text(example)
 
-                    for entity in example["passages"]:
-                        for idx, (start, end) in enumerate(entity["offsets"]):
+                    for passage in example["passages"]:
+                        for idx, (start, end) in enumerate(passage["offsets"]):
                             self.assertEqual(
-                                example_text[start:end], entity["text"][idx]
+                                example_text[start:end], passage["text"][idx]
                             )
 
     def test_entities_offsets(self):
@@ -298,12 +302,19 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--path", type=str, required=True)
+    parser.add_argument(
+        "--name",
+        type=str,
+        default="bigbio",
+        help="For datasets supporting multiple tasks, e.g. `bigbio-translation`",
+    )
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
 
     args = parser.parse_args()
 
     TestKBDataset.PATH = args.path
+    TestKBDataset.NAME = args.name
     TestKBDataset.DATA_DIR = args.data_dir
     TestKBDataset.USE_AUTH_TOKEN = args.use_auth_token
 
