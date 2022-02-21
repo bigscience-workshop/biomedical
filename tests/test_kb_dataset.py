@@ -2,7 +2,6 @@ import argparse
 import sys
 import unittest
 from collections import defaultdict
-from collections.abc import Iterable
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
@@ -163,6 +162,20 @@ class TestKBDataset(unittest.TestCase):
 
         return existing_ids
 
+    def _test_is_list(self, msg: str, field: list):
+        with self.subTest(
+            msg,
+            field=field,
+        ):
+            self.assertIsInstance(field, list)
+
+    def _test_has_only_one_item(self, msg: str, field: list):
+        with self.subTest(
+            msg,
+            field=field,
+        ):
+            self.assertEqual(len(field), 1)
+
     def test_passages_offsets(self):
         """
         Verify that the passages offsets are correct,
@@ -182,23 +195,23 @@ class TestKBDataset(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        with self.subTest(
-                            "Offsets in passages must have only one element",
-                            offsets=offsets,
-                        ):
-                            self.assertEqual(len(offsets), 1)
+                        self._test_is_list(
+                            msg="Text in passages must be a list", field=text
+                        )
 
-                        with self.subTest(
-                            "Text in passages must be an Iterable",
-                            text=text,
-                        ):
-                            self.assertIsInstance(text, Iterable)
+                        self._test_is_list(
+                            msg="Offsets in passages must be a list", field=offsets
+                        )
 
-                        with self.subTest(
-                            "Text in passages must have only one element",
-                            text=text,
-                        ):
-                            self.assertEqual(len(text), 1)
+                        self._test_has_only_one_item(
+                            msg="Offsets in passages must have only one element",
+                            field=offsets,
+                        )
+
+                        self._test_has_only_one_item(
+                            msg="Text in passages must have only one element",
+                            field=text,
+                        )
 
                         for idx, (start, end) in enumerate(offsets):
                             self.assertEqual(example_text[start:end], text[idx])
@@ -215,11 +228,10 @@ class TestKBDataset(unittest.TestCase):
         ):
             self.assertEqual(len(texts), len(offsets))
 
-        with self.subTest(
-            "Text fields paired with offsets must be in the form [`text`, ...]",
-            texts=texts,
-        ):
-            self.assertIsInstance(texts, Iterable)
+        self._test_is_list(
+            msg="Text fields paired with offsets must be in the form [`text`, ...]",
+            field=texts,
+        )
 
         with self.subTest(
             "All offsets must be in the form [(lo1, hi1), ...]", offsets=offsets
