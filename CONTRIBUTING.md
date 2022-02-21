@@ -98,7 +98,8 @@ To implement your dataset, there are three key methods that are important:<br>
 To start, copy [templates/template.py](templates/template.py) to your in `biomedical/datasets/<name_of_my_dataset>` with the name <name_of_my_dataset>.py. Within this file, fill out all the TODOs.
 
 
-For the `_info_` under the big-bio schema, be sure to copy the right schema from our list of examples. You can find them as follows:
+For the `_info_` function, you will need to define `features` for your
+`DatasetInfo` object. For the `big-bio` config, copy the right schema from our list of examples. You can find them as follows:
 
 1. [Named entity recognition (NER)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
 2. [Relation Extraction (RE)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
@@ -111,6 +112,8 @@ For the `_info_` under the big-bio schema, be sure to copy the right schema from
 9. [Paraphrasing](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
 10. [Sentence/Phrase/Text classification](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text.py)
 11. [Pair Labels](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/pairs.py)
+
+You will use this schema in the `_generate_examples` return value.
 
 Please read the [Task Schemas](#task_schemas.md) to understand how each key should behave.
 
