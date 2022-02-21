@@ -134,7 +134,7 @@ from datasets import load_dataset
 data = load_dataset('datasets/<your_dataset_name>')
 ```
 
-Run these commands in a folder that isn't directly in `datasets`, or else it will interfere with the import statement.
+Run these commands within the `biomedical` repo, not in `biomedical/datasets` as the relative path will not work.
 
 ### 5. Format your code 
 
