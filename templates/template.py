@@ -1,5 +1,8 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2022 The HuggingFace Datasets Authors and
+#
+# TODO: fill out the line below
+# * <append your name and optionally your github handle here>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,51 +17,27 @@
 # limitations under the License.
 
 """
-This is a template on how to implement a dataset in the biomedical repo.
+This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo. 
 
-A thorough walkthrough on how to implement a dataset can be found here:
+When modifying it for your dataset, look for TODO items that offer specific instructions.
+
+Full documentation on writing dataset loading scripts can be found here:
 https://huggingface.co/docs/datasets/add_dataset.html
 
-This script corresponds to Step 4 in the Biomedical Hackathon guide.
+To create a dataset loading script you will create a class and implement 3 methods:
+  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
+  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
+  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
 
-To start, copy this template file and save it as <your_dataset_name>.py in an appropriately named folder within datasets. Then, modify this file as necessary to implement your own method of extracting, and generating examples for your dataset. 
+TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
 
-There are 3 key elements to implementing a dataset:
-
-(1) `_info`: Create a skeletal structure that describes what is in the dataset and the nature of the features.
-
-(2) `_split_generators`: Download and extract data for each split of the data (ex: train/dev/test)
-
-(3) `_generate_examples`: From downloaded + extracted data, process files for the data in a feature format specified in "info".
-
-----------------------
-Step 1: Declare imports
-Your imports go here; the only mandatory one is `datasets`, as methods and attributes from this library will be used throughout the script.
-
-We have provided some import statements that we strongly recommend. Feel free to adapt; so long as the style-guide requirements are satisfied (Step 5), then you should be able to push your code.
 """
-import logging
-import os  # useful for paths
-from typing import Dict, Iterable, List
 
+import os
 import datasets
 
-"""
-Step 2: Create keyword descriptors for your dataset
 
-The following variables are used to populate the dataset entry. Common ones include:
-
-- `_DATASETNAME` = "your_dataset_name"
-- `_CITATION`: Latex-style citation of the dataset
-- `_DESCRIPTION`: Explanation of the dataset
-- `_HOMEPAGE`: Where to find the dataset's hosted location
-- `_LICENSE`: License to use the dataset
-- `_URLs`: How to download the dataset(s), by name; make this in the form of a dictionary where <dataset_name> is the key and <url_of_dataset> is the value
-- `_VERSION`: Version of the dataset
-"""
-
-_DATASETNAME = "your_dataset_name"
-
+# TODO: Add BibTeX citation
 _CITATION = """\
 @article{,
   author    = {},
@@ -73,206 +52,178 @@ _CITATION = """\
 }
 """
 
+# TODO: create a module level variable with your dataset name (should match script name)
+_DATASETNAME = "dataset_name"
+
+# TODO: Add description of the dataset here
+# You can copy an official description
 _DESCRIPTION = """\
-A description of your dataset
+This dataset is designed for XXX NLP task.
 """
 
-_HOMEPAGE = "Homepage of the dataset"
+# TODO: Add a link to an official homepage for the dataset here (if possible)
+_HOMEPAGE = ""
 
-_LICENSE = "License"
+# TODO: Add the licence for the dataset here (if possible)
+_LICENSE = ""
 
-_URLs = {"your_dataset_name": "your_dataset_URL"}
+# TODO: Add links to the urls needed to download your dataset files.
+# For local datasets, this variable can be an empty dictionary.
 
-_VERSION = "1.0.0"
+# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
+# In most cases the URLs will be the same for the source and bigbio config.
+# However, if you need to access different files for each config you can have multiple entries in this dict.
+# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
+_URLS = {
+    _DATASETNAME: "url or list of urls or ... ",
+}
 
-"""
-Step 3: Change the class name to correspond to your <Your_Dataset_Name> 
-ex: "ChemProtDataset".
+# TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
+_SOURCE_VERSION = ""
 
-Then, fill all relevant information to `BuilderConfig` which populates information about the class. You may have multiple builder configs (ex: a large dataset separated into multiple partitions) if you populate for different dataset names + descriptions. The following is setup for just 1 dataset, but can be adjusted.
+_BIGBIO_VERSION = "1.0.0"
 
-NOTE - train/test/dev splits can be handled in `_split_generators`.
-"""
+# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
+class NewDataset(datasets.GeneratorBasedBuilder):
+    """TODO: Short description of my dataset."""
 
+    VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-class YourDatasetName(datasets.GeneratorBasedBuilder):
-    """Write a short docstring documenting what this dataset is"""
+    # You will be able to load the "source" or "bigbio" configurations with
+    # ds_source = datasets.load_dataset('my_dataset', name='source')
+    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
 
-    VERSION = datasets.Version(_VERSION)
+    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
+    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
+    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
+    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
-            version=VERSION,
-            description=_DESCRIPTION,
+            name="source", version=VERSION, description="Source schema"
+        ),
+        datasets.BuilderConfig(
+            name="bigbio",
+            version=BIGBIO_VERSION,
+            description="BigScience Biomedical schema",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME
-
-    """
-    Step 4: Populate "information" about the dataset that creates a skeletal structure for an example within the dataset looks like.
-
-    The following data structures are useful:
-
-    datasets.Features - An instance that defines all descriptors within a feature in an arbitrary nested manner; the "feature" class must strictly adhere to this format. 
-
-    datasets.Value - the type of the data structure (ex: useful for text, PMIDs)
-
-    datasets.Sequence - for information that must be in a continuous sequence (ex: spans in the text, offsets)
-
-    An example is as follows for an ENTITY + RELATION dataset.
-
-    Your format may differ depending on what the dataset is. Please try to keep the extraction as close to the original dataset as possible. If you're having trouble adapting your dataset, please contact the community channels and an organizer will reach out!
-    """
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
-            features = datasets.Features(
-                {
-                    "article_id": datasets.Value("int32"),
-                    "text": datasets.Value("string"),
-                    "entities": datasets.Sequence(
-                        {
-                            "spans": datasets.Sequence(datasets.Value("int32")),
-                            "text": datasets.Value("string"),
-                            "entity_type": datasets.Value("string"),
-                        }
-                    ),
-                    "relations": datasets.Sequence(
-                        {
-                            "relation_type": datasets.Value("string"),
-                            "arg1": datasets.Value("string"),
-                            "arg2": datasets.Value("string"),
-                        }
-                    ),
-                }
-            )
+        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
+
+        # You can arbitrarily nest lists and dictionaries.
+        # For iterables, use lists over tuples or `datasets.Sequence`
+
+        if self.config.name == "source":
+            # TODO: Create your source schema here
+            raise NotImplementedError()
+
+            # EX: Arbitrary NER type dataset
+            #features = datasets.Features(
+            #    {
+            #        "doc_id": datasets.Value("string"),
+            #        "text": datasets.Value("string"),
+            #        "entities": [
+            #            {
+            #                "offsets": [datasets.Value("int64")],
+            #                "text": datasets.Value("string"),
+            #                "type": datasets.Value("string"),
+            #                "entity_id": datasets.Value("string"),
+            #            }
+            #        ],
+            #    }
+            #)
+
+        # Choose the appropriate bigbio schema for your task and copy it here. You can find the big-bio schemas here: https://github.com/bigscience-workshop/biomedical/tree/master/schemas or in the CONTRIBUTING guide.
+
+        # In rare cases you may get a dataset that supports multiple tasks. In that case you can define multiple bigbio configs with a bigbio-<task> format.
+
+        # For example bigbio-translation, bigbio-ner
+        elif self.config.name == "bigbio":
+            # TODO: Implement your big-bio schema here
+            raise NotImplementedError()
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
             features=features,
-            # If there's a common (input, target) tuple from the features,
-            # specify them here. They'll be used if as_supervised=True in
-            # builder.as_dataset.
-            supervised_keys=None,
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
-        """
-        Step 5: Download and extract the dataset.
+    def _split_generators(self, dl_manager):
+        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
-        For each config name, run `download_and_extract` from the dl_manager; this will download and unzip any files within a cache directory, specified by `data_dir`.
+        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
 
-        `download_and_extract` can accept an iterable object and return the same structure with the url replaced with the path to local files:
+        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
 
-        ex:
-        output = dl_manager.download_and_extract({"data1:" "url1", "data2": "url2"})
+        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
 
-        output
-        >> {"data1": "path1", "data2": "path2"}
+        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
 
-        Nested zip files can be cached also, but make sure to save their path.
+        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
+        
+        # TODO: KEEP if your dataset is PUBLIC; REMOVE if not
+        urls = _URLS[_DATASETNAME]
+        data_dir = dl_manager.download_and_extract(urls)
 
-        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
+        # TODO: KEEP if your dataset is LOCAL; remove if NOT
+        data_dir = self.config.data_dir
 
-        Note:
-
-        - `name` can be: datasets.Split.<TRAIN/TEST/VALIDATION> or a string
-        - all keys in `gen_kwargs` can be passed to `_generate_examples()`. If your dataset has multiple files, you can make a separate key for each file, as shown below:
-
-        """
-
-        my_urls = _URLs[self.config.name]
-        data_dir = dl_manager.download_and_extract(my_urls)
+        # Not all datasets have predefined canonical train/val/test splits. If your dataset does not have any splits, you can omit any missing splits.
 
         return [
             datasets.SplitGenerator(
-                name="DatasetSplit",
+                name=datasets.Split.TRAIN,
+                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": data_dir,
-                    "abstract_file": os.path.join(data_dir, "abstract.txt"),
-                    "entity_file": os.path.join(data_dir, "entities.txt"),
-                    "relation_file": os.path.join(data_dir, "relations.txt"),
-                    "split": "Name_of_Split",
+                    "filepath": os.path.join(data_dir, "train.jsonl"),
+                    "split": "train",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "test.jsonl"),
+                    "split": "test",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "dev.jsonl"),
+                    "split": "dev",
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
-        """
-        Step 6: Create a generator that yields (key, example) of the dataset of interest.
+    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
-        The arguments to this function come from `gen_kwargs` returned in `_split_generators()`
+    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
-        The goal of this function is to perform operations on any of the keys of `gen_kwargs` that allow you to extract and process the data.
+    def _generate_examples(self, filepath, split):
+        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
-        The following skeleton does the following:
+        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
 
-        - "extracts" abstracts
-        - "extracts" entities, assuming the output is of the form specified in `_info`
-        - "extracts" relations, assuming similarly the output in the form specified in `_info`.
+        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files 
 
-        An assumption in this pseudo code is that the abstract, entity, and relation file all have linking keys.
-        """
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
+            # TODO: yield (key, example) tuples in the original dataset schema
+            for key, example in thing:
+                yield key, example
 
-            abstracts = self._get_abstract(abstract_file)
+        elif self.config.name == "bigbio":
+            # TODO: yield (key, example) tuples in the bigbio schema
+            for key, example in thing:
+                yield key, example
 
-            entities, entity_id = self._get_entities(entity_file)
 
-            relations = self._get_relations(relation_file)
-
-            for id_, key in enumerate(abstracts.keys()):
-                yield id_, {
-                    "article_id": pmid,
-                    "text": abstracts[key],
-                    "entities": entities[key],
-                    "relations": relations[key],
-                }
-
-    @staticmethod
-    def _get_abstract(abstract_file: str) -> Dict[int, str]:
-        """
-        Create a function that can:
-
-        - Read the abstract file.
-        - Return {key: abstract_text} output.
-        """
-        pass
-
-    @staticmethod
-    def _get_entity(entity_file: str) -> Dict[int, Iterable]:
-        """
-        Create a function that can:
-
-        - Read the entity file
-        - Return a {key: entity_list}
-
-        Where the entity_list is an iterable where each element has the following form:
-
-        {"spans": [start, end], "text": entity_reference, "entity_type": entity_id}
-        """
-        pass
-
-    @staticmethod
-    def _get_relation(relation_file: str) -> Dict[int, Iterable]:
-        """
-        Create a function that can:
-
-        - Read the relation file
-        - Return a {key: relation_list}
-
-        Where the relation_list is an iterable where each element has the following form:
-
-        {"relation_type": relation_id, "arg1": relation1, "arg2": relation2}
-        """
-        pass
+# This template is based on the following template from the datasets package:
+# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
