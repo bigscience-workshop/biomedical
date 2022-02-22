@@ -97,7 +97,7 @@ You are welcome to use any of the above resources as necessary.
 
 #### What if my dataset does not have a public license?
 
-We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local [template](templates/template_local.py).
+We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local/private dataset specific instructions in  [template](templates/template.py).
 
 #### What if my dataset does not have a public license?
 
