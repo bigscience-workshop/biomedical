@@ -12,13 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely
+relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
+The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema
 
+"""
 import os
 from typing import Dict, Tuple
 
 import datasets
-
-_DATASETNAME = "chemprot"
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -33,6 +36,7 @@ _CITATION = """\
   bibsource = {}
 }
 """
+_DATASETNAME = "chemprot"
 
 _DESCRIPTION = """\
 The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
@@ -44,39 +48,44 @@ _LICENSE = "Public Domain Mark 1.0"
 
 _URLs = {"chemprot": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
-_VERSION = "1.0.0"
-
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
 
-    VERSION = datasets.Version("1.0.0")
+    VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name="source",
             version=VERSION,
-            description=_DESCRIPTION,
+            description="Source schema"
+        ),
+        datasets.BuilderConfig(
+            name="bigbio",
+            version= BIGBIO_VERSION,
+            description="BigScience Biomedical schema",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        _DATASETNAME  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    )
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
             features = datasets.Features(
                 {
                     "pmid": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "offsets": datasets.Sequence(datasets.Value("int64")),
+                            "entity_id": datasets.Value("string"),
                             "text": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "entity_id": datasets.Value("string"),
+                            "offsets": datasets.Sequence(datasets.Value("int64")),
+
                         }
                     ),
                     "relations": datasets.Sequence(
@@ -89,31 +98,61 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
+        elif self.config.name == "bigbio":
+            features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "passages": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                        }
+                    ],
+                    "entities": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+
+                    "relations": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "arg1_id": datasets.Value("string"),
+                            "arg2_id": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                }
+            )
+
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            # This defines the different columns of the dataset and their types
-            features=features,  # Here we define them above because they are different between the two configurations
-            # If there's a common (input, target) tuple from the features,
-            # specify them here. They'll be used if as_supervised=True in
-            # builder.as_dataset.
-            supervised_keys=None,
-            # Homepage of the dataset for documentation
+            features=features,
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-        # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
-        # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
         my_urls = _URLs[self.config.name]
         data_dir = dl_manager.download_and_extract(my_urls)
 
@@ -169,7 +208,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
         """Yields examples as (key, example) tuples."""
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
@@ -192,6 +231,12 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "entities": entities[pmid],
                     "relations": relations.get(pmid, empty_reln),
                 }
+
+        if self.config.name == "biobio":
+            """
+            TODO: implement the method for bigbio schema: Can we modify the out put from below static methods? 
+            """
+            pass
 
     @staticmethod
     def _get_abstract(abs_filename: str) -> Dict[str, str]:

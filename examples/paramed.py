@@ -17,7 +17,7 @@
 NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website.
 English articles are distributed through https://www.nejm.org/ and Chinese articles are distributed through
 http://nejmqianyan.cn/. The corpus contains all article pairs (around 2000 pairs) since 2011.
-The script either loads dataset using bigbio schema (using schemas/text-to-text) or source (default) schema
+The script loads dataset in bigbio schema (using schemas/text-to-text) AND/OR source (default) schema
 """
 import os  # useful for paths
 from typing import Dict, Iterable, List
@@ -111,7 +111,6 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
             features=features,
-            supervised_keys=None,
             homepage=_HOMEPAGE,
             license=_LICENSE,
             citation=_CITATION,
