@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+ADD dataset explanation
+"""
 
 import os
 from typing import Dict, Tuple
@@ -19,7 +22,7 @@ import datasets
 from datasets import load_dataset
 
 
-_DATASETNAME = "mqp"
+
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -35,6 +38,8 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "mqp"
+
 _DESCRIPTION = """\
 Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medical questions and paraphrased versions of 
 the question prepared by medical professional. Paraphrased versions were labelled as similar (syntactically dissimilar 
@@ -45,54 +50,65 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 
 _LICENSE = ""
 
-_URLs = {"mqp": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
+_URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
+         "bigbio": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
 
-_VERSION = "1.0.0"
+_SOURCE_VERSION = ""
+_BIGBIO_VERSION = "1.0.0"
 
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
 
-    VERSION = datasets.Version("1.0.0")
+    VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
-            version=VERSION,
-            description=_DESCRIPTION,
+            name="source",
+            version=_SOURCE_VERSION,
+            description="Source schema"
+        ),
+
+        datasets.BuilderConfig(
+            name="bigbio",
+            version=BIGBIO_VERSION,
+            description="BigScience Biomedical schema",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        _DATASETNAME  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    )
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
             features = datasets.Features(
                 {
-                    "annot_id": datasets.Value("int64"),
-                    "sentence_1": datasets.Value("string"),
-                    "sentence_2": datasets.Value("string"),
-                    "relation": datasets.Value("int64")
+                    "document_id": datasets.Value("string"),
+                    "text_1": datasets.Value("string"),
+                    "text_2": datasets.Value("string"),
+                    "label": datasets.Value("string")
                 }
             )
 
+        # Using in pairs schema
+        elif self.config.name == "bigbio":
+            features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "text_1": datasets.Value("string"),
+                    "text_2": datasets.Value("string"),
+                    "label": datasets.Value("string")
+                }
+            )
+
+
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            # This defines the different columns of the dataset and their types
-            features=features,  # Here we define them above because they are different between the two configurations
-            # If there's a common (input, target) tuple from the features,
-            # specify them here. They'll be used if as_supervised=True in
-            # builder.as_dataset.
-            supervised_keys=None,
-            # Homepage of the dataset for documentation
+            features=features,
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
@@ -116,21 +132,32 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             )
         ]
 
-    def _generate_examples(self, filepath,  split):
+    def _generate_examples(self,
+                           filepath,
+                           split):
         """Yields examples as (key, example) tuples."""
         ds_dict = load_dataset('csv', delimiter=',',
-                                column_names=['annot_id', 'sentence_1', 'sentence_2', 'relation'],
+                                column_names=["document_id", "text_1", "text_2", "label"],
                                data_files=filepath)
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
             for id_, (split, dataset) in enumerate(ds_dict.items()):
                 yield id_, {
-                    "annot_id": dataset['annot_id'][id_],
-                    "sentence_1": dataset['sentence_1'][id_],
-                    "sentence_2": dataset['sentence_2'][id_],
-                    "relation": dataset['relation'][id_],
+                    "document_id": dataset["document_id"][id_],
+                    "text_1": dataset["text_1"][id_],
+                    "text_2": dataset["text_2"][id_],
+                    "label": dataset["label"][id_],
                 }
 
+        elif self.config.name == "bigbio":
+            for id_, (split, dataset) in enumerate(ds_dict.items()):
+                yield id_, {
+                    "id": id_,
+                    "document_id": dataset["document_id"][id_],
+                    "text_1": dataset["text_1"][id_],
+                    "text_2": dataset["text_2"][id_],
+                    "label": dataset["label"][id_],
+                }
 
 
 
