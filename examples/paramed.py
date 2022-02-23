@@ -161,7 +161,6 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
                            en_file,
                            split):
 
-
         logger.info("generating examples from = %s", filepath)
         zh_file = open(zh_file, "r")
         en_file = open(en_file, "r")
@@ -170,7 +169,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
         zh_lines = zh_file.readlines()
         en_lines = en_file.readlines()
 
-        assert len(en_lines) == len(zh_lines)
+        assert len(en_lines) == len(zh_lines), "Line mismatch"
 
         if self.config.name == "source":
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
