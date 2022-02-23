@@ -13,15 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-ADD dataset explanation
+Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medical questions and paraphrased versions of
+the question prepared by medical professional.
 """
 
 import os
 from typing import Dict, Tuple
 import datasets
 from datasets import load_dataset
-
-
 
 
 _CITATION = """\
@@ -58,7 +57,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
-    """BioCreative VI Chemical-Protein Interaction Task."""
+    """Medical Question Pairing dataset"""
 
     VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -103,7 +102,6 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -114,12 +112,6 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self):
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-        # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
-        # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
         my_urls = _URLs[self.config.name]
 
         return [
@@ -150,18 +142,14 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                 }
 
         elif self.config.name == "bigbio":
+            # global id (uid) starts from 1
+            uid = 0
             for id_, (split, dataset) in enumerate(ds_dict.items()):
+                uid += 1
                 yield id_, {
-                    "id": id_,
+                    "id": uid,
                     "document_id": dataset["document_id"][id_],
                     "text_1": dataset["text_1"][id_],
                     "text_2": dataset["text_2"][id_],
                     "label": dataset["label"][id_],
                 }
-
-
-
-
-
-
-
