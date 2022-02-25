@@ -77,7 +77,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
             features = datasets.Features(
                 {
                 "document_id": datasets.Value("string"),
