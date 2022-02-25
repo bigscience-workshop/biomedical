@@ -33,6 +33,7 @@ _LICENSE = "GNU General Public License v3.0"
 _URLs = {"hallmarks_of_cancer": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"}
 
 _VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 
 _CLASS_NAMES = [
@@ -53,13 +54,20 @@ _CLASS_NAMES = [
 class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""
 
-    VERSION = datasets.Version("1.0.0")
+    VERSION = datasets.Version(_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
             name=_DATASETNAME,
             version=VERSION,
             description=_DESCRIPTION,
+        ),
+
+        datasets.BuilderConfig(
+            name="bigbio",
+            version=BIGBIO_VERSION,
+            description="BigScience Biomedical schema",
         ),
     ]
 
@@ -72,9 +80,19 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
         if self.config.name == _DATASETNAME:
             features = datasets.Features(
                 {
+                "document_id": datasets.Value("string"),
                 "text": datasets.Value("string"),
-                "labels": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
-                "id": datasets.Value("string"),
+                "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
+                }
+            )
+
+        elif self.config.name == "bigbio":
+            features = datasets.Features(
+                {
+                "id": datasets.Value("int32"),
+                "document_id": datasets.Value("string"),
+                "text": datasets.Value("string"),
+                "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
                 }
             )
 
@@ -120,30 +138,38 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
         path_name = list(filepath.values())[0]+'/*'
         texts = glob.glob(path_name + '/text/*')
         labels = glob.glob(path_name + '/labels/')
-        key = 0
+        uid = 1
 
-        if self.config.name == _DATASETNAME:
-            for tf_name in texts:
-                filenname = os.path.basename(tf_name)
-                with open(tf_name, encoding='utf-8') as f:
-                    lines = f.readlines()
-                    text_body = "".join([j.strip() for j in lines])
+        for idx, tf_name in enumerate(texts):
+            filenname = os.path.basename(tf_name)
+            with open(tf_name, encoding='utf-8') as f:
+                lines = f.readlines()
+                text_body = "".join([j.strip() for j in lines])
 
-                label_file_name = labels[0] + '/' + filenname
-                with open(label_file_name, encoding='utf-8') as f:
-                    lines = f.readlines()
-                    label_body = "".join([j.strip() for j in lines])
-                    label_body = [i.strip() for i in label_body.split('<')]
-                    label_body = sum([k.split('AND') for k in label_body if len(k)>1], [])
-                    label_body = [i.split('--')[0].strip() for i in label_body]
-                
-                yield key, {
-                                'id': filenname.split('.')[0],
+            label_file_name = labels[0] + '/' + filenname
+            with open(label_file_name, encoding='utf-8') as f:
+                lines = f.readlines()
+                label_body = "".join([j.strip() for j in lines])
+                label_body = [i.strip() for i in label_body.split('<')]
+                label_body = sum([k.split('AND') for k in label_body if len(k)>1], [])
+                label_body = [i.split('--')[0].strip() for i in label_body]
+
+            if self.config.name == _DATASETNAME:        
+                yield idx, {
+                                'document_id': filenname.split('.')[0],
                                 'text': text_body,
-                                'labels': label_body
+                                'label': label_body
                             
                             }
+            elif self.config.name == "bigbio":
 
-                key += 1
+                yield idx, {
+                                'id':uid,
+                                'document_id': filenname.split('.')[0],
+                                'text': text_body,
+                                'label': label_body
+                }
+
+                uid+=1
 
 
