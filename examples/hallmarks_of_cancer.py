@@ -154,7 +154,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
                 label_body = sum([k.split('AND') for k in label_body if len(k)>1], [])
                 label_body = [i.split('--')[0].strip() for i in label_body]
 
-            if self.config.name == _DATASETNAME:        
+            if self.config.name == "source":        
                 yield idx, {
                                 'document_id': filenname.split('.')[0],
                                 'text': text_body,
