@@ -34,14 +34,13 @@ There are 3 key elements to implementing a dataset:
 ----------------------
 Step 1: Declare imports
 Your imports go here; the only mandatory one is `datasets`, as methods and attributes from this library will be used throughout the script.
+
+We have provided some import statements that we strongly recommend. Feel free to adapt; so long as the style-guide requirements are satisfied (Step 5), then you should be able to push your code.
 """
-#  < Your imports here >
 import os  # useful for paths
 from typing import Dict, Iterable, List
 
 import datasets
-import pybrat
-from pybrat.parser import BratParser
 
 """
 Step 2: Create keyword descriptors for your dataset
@@ -53,40 +52,45 @@ The following variables are used to populate the dataset entry. Common ones incl
 - `_DESCRIPTION`: Explanation of the dataset
 - `_HOMEPAGE`: Where to find the dataset's hosted location
 - `_LICENSE`: License to use the dataset
-- `_URLs`: How to download the dataset(s), by name; make this in the form of a dictionary where <dataset_name> is the key and <url_of_dataset> is the balue
+- `_URLs`: How to download the dataset(s), by name; make this in the form of a dictionary where <dataset_name> is the key and <url_of_dataset> is the value
 - `_VERSION`: Version of the dataset
 """
 
-_DATASETNAME = "your_dataset_name"
+logger = datasets.logging.get_logger(__name__)
+
+_DATASETNAME = "paramed"
 
 _CITATION = """\
 @article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+  author    = {Liu, Boxiang and Huang, Liang},
+  title     = {ParaMed: a parallel corpus for English–Chinese translation in the biomedical domain},
+  journal   = {BMC Medical Informatics and Decision Making},
+  volume    = {21},
+  year      = {2021},
+  url       = {https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-021-01621-8},
+  doi       = {10.1186/s12911-021-01621-8}
 }
 """
 
 _DESCRIPTION = """\
-Test for cell finder dataset
+NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website. English articles are distributed through https://www.nejm.org/ and Chinese articles are distributed through http://nejmqianyan.cn/. The corpus contains all article pairs (around 2000 pairs) since 2011.
 """
 
-_HOMEPAGE = "Homepage of the dataset"
+_HOMEPAGE = "https://github.com/boxiangliu/ParaMed"
 
-_LICENSE = "License"
+_LICENSE = "Creative Commons Attribution 4.0 International"
 
-_URLs = {"cellfinder": "None"}
+_URLs = {
+    "paramed": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true"
+}
 
 _VERSION = "1.0.0"
 
+_DATA_DIR = "./processed_data/open_access/open_access"
+
 """
-Step 3: Change the class name to correspond to your <Your_Dataset_Name> ex: "ChemProtDataset".
+Step 3: Change the class name to correspond to your <Your_Dataset_Name> 
+ex: "ChemProtDataset".
 
 Then, fill all relevant information to `BuilderConfig` which populates information about the class. You may have multiple builder configs (ex: a large dataset separated into multiple partitions) if you populate for different dataset names + descriptions. The following is setup for just 1 dataset, but can be adjusted.
 
@@ -94,7 +98,7 @@ NOTE - train/test/dev splits can be handled in `_split_generators`.
 """
 
 
-class CellFinderDataset(datasets.GeneratorBasedBuilder):
+class ParaMed(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
     VERSION = datasets.Version(_VERSION)
@@ -120,7 +124,9 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
     datasets.Sequence - for information that must be in a continuous sequence (ex: spans in the text, offsets)
 
-    An example is as follows for an ENTITY + RELATION dataset
+    An example is as follows for an ENTITY + RELATION dataset.
+
+    Your format may differ depending on what the dataset is. Please try to keep the extraction as close to the original dataset as possible. If you're having trouble adapting your dataset, please contact the community channels and an organizer will reach out!
     """
 
     def _info(self):
@@ -128,22 +134,12 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
         if self.config.name == _DATASETNAME:
             features = datasets.Features(
                 {
-                    "article_id": datasets.Value("int32"),
-                    "text": datasets.Value("string"),
-                    "entities": datasets.Sequence(
-                        {
-                            "spans": datasets.Sequence(datasets.Value("int32")),
-                            "text": datasets.Value("string"),
-                            "entity_type": datasets.Value("string"),
-                        }
-                    ),
-                    "relations": datasets.Sequence(
-                        {
-                            "relation_type": datasets.Value("string"),
-                            "arg1": datasets.Value("string"),
-                            "arg2": datasets.Value("string"),
-                        }
-                    ),
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "text_1": datasets.Value("string"),
+                    "text_2": datasets.Value("string"),
+                    "text_1_name": datasets.Value("string"),
+                    "text_2_name": datasets.Value("string")
                 }
             )
 
@@ -163,7 +159,9 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """
         Step 5: Download and extract the dataset.
 
@@ -179,26 +177,50 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
         Nested zip files can be cached also, but make sure to save their path.
 
-        Populate "SplitGenerator" with `name` and `gen_kwargs`. Note:
+        Fill the arguments of "SplitGenerator" with `name` and `gen_kwargs`.
+
+        Note:
 
         - `name` can be: datasets.Split.<TRAIN/TEST/VALIDATION> or a string
         - all keys in `gen_kwargs` can be passed to `_generate_examples()`. If your dataset has multiple files, you can make a separate key for each file, as shown below:
 
         """
 
-        # No need for a download location; just specify file location
-        data_dir = os.getcwd()
+        my_urls = _URLs[self.config.name]
+        data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)
+        print(data_dir)
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepath": data_dir,
+                    "zh_file": os.path.join(data_dir, "nejm.train.zh"),
+                    "en_file": os.path.join(data_dir, "nejm.train.en"),
                     "split": "train",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "zh_file": os.path.join(data_dir, "nejm.dev.zh"),
+                    "en_file": os.path.join(data_dir, "nejm.dev.en"),
+                    "split": "dev",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "zh_file": os.path.join(data_dir, "nejm.test.zh"),
+                    "en_file": os.path.join(data_dir, "nejm.test.en"),
+                    "split": "test",
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, filepath, zh_file, en_file, split):
         """
         Step 6: Create a generator that yields (key, example) of the dataset of interest.
 
@@ -215,64 +237,24 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
         An assumption in this pseudo code is that the abstract, entity, and relation file all have linking keys.
         """
         if self.config.name == _DATASETNAME:
+            logger.info("generating examples from = %s", filepath)
+            zh_file = open(zh_file, "r")
+            en_file = open(en_file, "r")
+            zh_file.seek(0)
+            en_file.seek(0)
+            zh_lines = zh_file.readlines()
+            en_lines = en_file.readlines()
 
-            datadir = os.path.join(filepath, split)
+            assert len(en_lines) == len(zh_lines)
 
-            parser = BratParser(error="ignore")
-
-            data = self._parse_brat(datadir, parser)
-
-            for id_, key in enumerate(data):
-                yield id_, key
-
-    @staticmethod
-    def _parse_brat(data_dir: str, parser: pybrat.parser.BratParser) -> List[Dict[str, object]]:
-        """ """
-        # Format is Example[entities, relations]
-
-        data = parser.parse(data_dir)
-        output = []
-
-        for x in data:
-            pmid = x.id
-            text = x.text
-
-            ents = []
-            relns = []
-
-            for e in x.entities:
-                ents.append(
-                    {
-                        "spans": [e.start, e.end],
-                        "text": e.type,
-                        "entity_type": e.mention,
-                    }
-                )
-
-            for r in x.relations:
-                if len(r):
-                    relns.append(
-                        {
-                            "relation_type": None,
-                            "arg1": None,
-                            "arg2": None,
-                        }
-                    )
-                else:
-                    relns.append(
-                        {
-                            "relation_type": None,
-                            "arg1": None,
-                            "arg2": None,
-                        }
-                    )
-
-            output.append(
-                {
-                    "article_id": pmid,
-                    "text": text,
-                    "entities": ents,
-                    "relations": relns,
+            for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
+                yield key, {
+                    "id": str(key),
+                    "document_id": str(key),
+                    "text_1": zh_line,
+                    "text_2": en_line,
+                    "text_1_name": "zh",
+                    "text_2_name": "en",
                 }
-            )
-        return output
+            zh_file.close()
+            en_file.close()
