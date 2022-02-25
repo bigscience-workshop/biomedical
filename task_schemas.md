@@ -42,13 +42,13 @@ This is a simple container format with minimal nesting that supports a range of 
 
 **Schema Notes**
 
-- `id` these can be set in any fashion that makes every `id` field in a dataset unique.
-- `document_id` a dataset provided document id. if not provided in the dataset can be equal to `id`.
-- `offsets` contains absolute character offsets per span
-- `offsets` and `text` are lists to support discontinous spans.
-- `normalized` may contain 1 or more normalized links to database entity identifiers.
-- `passages` captures document structure such as named sections. offsets index into the string that would be created from `" ".join([passage["text"] for passage in passages])`
-- `entities`,`events`,`coreferences`,`relations` may be empty fields based on dataset and specific task.
+- `id` fields appear at the top (i.e. document) level and in every sub-component (`passages`, `entities`, `events`, `coreferences`, `relations`). They can be set in any fashion that makes every `id` field in a dataset unique.
+- `document_id` should be a dataset provided document id. If not provided in the dataset, it can be set equal to the top level `id`.
+- `offsets` contain character offsets into the string that would be created from `" ".join([passage["text"] for passage in passages])`
+- `offsets` and `text` are always lists to support discontinous spans. For continuous spans, they will have the form `offsets=[(lo,hi)], text=["text span"]`. For discontinuous spans, they will have the form `offsets=[(lo1,hi1), (lo2,hi2), ...], text=["text span 1", "text span 2", ...]`
+- `normalized` sub-component may contain 1 or more normalized links to database entity identifiers.
+- `passages` captures document structure such as named sections. 
+- `entities`,`events`,`coreferences`,`relations` may be empty fields depending on the dataset and specific task.
 
 
 
@@ -141,7 +141,7 @@ TBD
 	"question_id": "55031181e9bde69634000014",
 	"question": "Is RANKL secreted from the cells?",
 	"type": "yesno",
-	"context": Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)",
+	"context": "Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)",
 	"answer": ["yes"],
 }
 ```
