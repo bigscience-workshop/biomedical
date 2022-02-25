@@ -60,7 +60,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name="source",
             version=VERSION,
             description=_DESCRIPTION,
         ),
@@ -77,7 +77,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
 
     def _info(self):
 
-        if self.config.name == _DATASETNAME:
+        if self.config.name == "source":
             features = datasets.Features(
                 {
                     "id": datasets.Value("int64"),
@@ -145,7 +145,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
         df = pd.read_csv(filepath, sep='\t', encoding='utf-8')
         key=1
         for id_, row in df.iterrows():
-                if self.config.name == _DATASETNAME:
+                if self.config.name == "source":
                     yield id_, {
                         "id": key,
                         "sentence_id": row['sentence_id'],
