@@ -59,7 +59,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
-            name=_DATASETNAME,
+            name="source",
             version=VERSION,
             description=_DESCRIPTION,
         ),
