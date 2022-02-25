@@ -300,7 +300,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.name == "source":
 
-            for idx, doc in enumerate(reader):
+            for uid, doc in enumerate(reader):
 
                 passages, passages_entities = self._get_passages_and_entities(doc)
 
@@ -309,7 +309,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     p.pop("offsets")  # BioC has only start for passages offsets
 
                     p["document_id"] = doc.id
-                    p["entities"] = pe
+                    p["entities"] = pe  # BioC has per passage entities
+
+                yield uid, {"passages": passages}
 
         elif self.config.name == "bigbio":
             uid = 0
