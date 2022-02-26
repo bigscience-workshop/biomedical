@@ -143,7 +143,7 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('datasets/<your_dataset_name>')
+data = load_dataset('biomeddatasets/<your_dataset_name>')
 ```
 
 Run these commands within the `biomedical` repo, not in `biomedical/datasets` as the relative path will not work.
