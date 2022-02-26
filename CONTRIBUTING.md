@@ -105,13 +105,14 @@ For the `_info_` function, you will need to define `features` for your
 2. [Relation Extraction (RE)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
 3. [Event Extraction](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
 4. [Named entity disambiguation/canonicalization/normalization (NED)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-5. [Question-Answering](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/qa.py)
-6. [Entailment](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/entailment.py)
-7. [Translation](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-8. [Summarization](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-9. [Paraphrasing](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-10. [Sentence/Phrase/Text classification](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text.py)
-11. [Pair Labels](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/pairs.py)
+5. [Co-reference resolution](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
+6. [Question-Answering](https://github.com/bigscience-workshop/biomedical/blob/aster/schemas/qa.py)
+7. [Entailment](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/entailment.py)
+8. [Translation](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+9. [Summarization](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+10. [Paraphrasing](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
+11. [Sentence/Phrase/Text classification](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text.py)
+12. [Pair Labels](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/pairs.py)
 
 You will use this schema in the `_generate_examples` return value.
 
@@ -124,7 +125,7 @@ To enable quality control, please add the following line in your file before the
 _SUPPORTED_TASKS = ["your_task_name_here"]
 ```
 For ease, please refer to the following keywords, given your NLP task:
-1. **NER, RE, Event Extraction, NED**: `"kb"`
+1. **NER, RE, Event Extraction, NED/ Coreference resolution**: `"kb"`
 2. **Question-Answering**:"" `"qa"`
 3. **Entailment**: `"entailment"`
 4. **Translation, Summarization, Paraphrasing**: `"text_to_text"`
@@ -143,7 +144,7 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('biomeddatasets/<your_dataset_name>')
+data = load_dataset('biomeddatasets/<your_dataset_name>', name="bigbio")
 ```
 
 Run these commands within the `biomedical` repo, not in `biomedical/datasets` as the relative path will not work.
