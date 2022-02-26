@@ -10,7 +10,14 @@ import datasets
 import inspect
 import logging as log
 from datasets import load_dataset
-from .key_constants import KBSchema
+from .key_constants import (
+    KBSchema,
+    QASchema,
+    EntailmentSchema,
+    Text2TextSchema,
+    TextSchema,
+    PairsSchema,
+)
 
 log.basicConfig(level=log.INFO)
 
@@ -96,17 +103,87 @@ class TestSchema(unittest.TestCase):
             elif task == "qa":
                 log.info("Question-Answering Task")
 
+                schema = QASchema()
+
+                for split in data.keys():
+                    example = data[split][0]
+
+                    # Check for mandatory keys
+                    mandatory_keys = all(
+                        [key in example for key in schema.keys]
+                    )
+                    self.assertTrue(
+                        mandatory_keys,
+                        "/".join(schema.keys) + "missing from bigbio view",
+                    )
+
             elif task == "entailment":
                 log.info("Entailment Task")
+
+                schema = EntailmentSchema()
+
+                for split in data.keys():
+                    example = data[split][0]
+
+                    # Check for mandatory keys
+                    mandatory_keys = all(
+                        [key in example for key in schema.keys]
+                    )
+                    self.assertTrue(
+                        mandatory_keys,
+                        "/".join(schema.keys) + "missing from bigbio view",
+                    )
 
             elif task == "text_to_text":
                 log.info("Translation/Summarization/Paraphrasing Task")
 
+                schema = Text2TextSchema()
+
+                for split in data.keys():
+                    example = data[split][0]
+
+                    # Check for mandatory keys
+                    mandatory_keys = all(
+                        [key in example for key in schema.keys]
+                    )
+                    self.assertTrue(
+                        mandatory_keys,
+                        "/".join(schema.keys) + "missing from bigbio view",
+                    )
+
             elif task == "text":
                 log.info("Sentence/Phrase/Text Classification Task")
 
+                schema = TextSchema()
+
+                for split in data.keys():
+                    example = data[split][0]
+
+                    # Check for mandatory keys
+                    mandatory_keys = all(
+                        [key in example for key in schema.keys]
+                    )
+                    self.assertTrue(
+                        mandatory_keys,
+                        "/".join(schema.keys) + "missing from bigbio view",
+                    )
+
             elif task == "pairs":
                 log.info("Pair Labels Task")
+
+                schema = PairsSchema()
+
+                for split in data.keys():
+                    example = data[split][0]
+
+                    # Check for mandatory keys
+                    mandatory_keys = all(
+                        [key in example for key in schema.keys]
+                    )
+                    self.assertTrue(
+                        mandatory_keys,
+                        "/".join(schema.keys) + "missing from bigbio view",
+                    )
 
             else:
                 raise ValueError(
