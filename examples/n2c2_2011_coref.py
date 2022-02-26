@@ -154,6 +154,8 @@ _LICENSE = "Data User Agreement"
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+_SUPPORTED_TASKS = ["coref"]
+
 
 def _read_tar_gz(file_path, samples=None):
     if samples is None:
