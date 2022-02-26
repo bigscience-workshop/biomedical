@@ -488,8 +488,10 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         )
 
         """
-
-        data_dir = self.config.data_dir
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+        else:
+            data_dir = self.config.data_dir
 
         return [
             datasets.SplitGenerator(
