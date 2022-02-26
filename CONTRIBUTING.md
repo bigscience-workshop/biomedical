@@ -119,6 +119,18 @@ Please read the [Task Schemas](#task_schemas.md) to understand how each key shou
 
 Populate the information in the dataset according to this schema; some fields may be empty.
 
+To enable quality control, please add the following line in your file before the class definition:
+```python
+_SUPPORTED_TASKS = ["your_task_name_here"]
+```
+For ease, please refer to the following keywords, given your NLP task:
+1. **NER, RE, Event Extraction, NED**: `"kb"`
+2. **Question-Answering**:"" `"qa"`
+3. **Entailment**: `"entailment"`
+4. **Translation, Summarization, Paraphrasing**: `"text_to_text"`
+5. **Sentence/Phrase/Text Classification**: `"text"`
+6. **Pair Labels**: `"pairs"`
+
 ##### Example scripts:
 To help you implement a dataset, we offer a template and example scripts.
 
