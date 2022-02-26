@@ -148,6 +148,12 @@ data = load_dataset('biomeddatasets/<your_dataset_name>')
 
 Run these commands within the `biomedical` repo, not in `biomedical/datasets` as the relative path will not work.
 
+Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
+
+```
+python -m unittest tests/test_schema
+```
+
 ### 5. Format your code 
 
 Return to the main directory (assuming you are in your dataset-specific folder) via the following commands:
