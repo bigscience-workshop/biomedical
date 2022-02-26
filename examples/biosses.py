@@ -81,9 +81,9 @@ class Biosses(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("int64"),
-                    "sentence_id": datasets.Value("int64"),
-                    "sentence_1": datasets.Value("string"),
-                    "sentence_2": datasets.Value("string"),
+                    "document_id": datasets.Value("int64"),
+                    "text_1": datasets.Value("string"),
+                    "text_2": datasets.Value("string"),
                     "annotator_a": datasets.Value("int64"),
                     "annotator_b": datasets.Value("int64"),
                     "annotator_c": datasets.Value("int64"),
@@ -94,9 +94,9 @@ class Biosses(datasets.GeneratorBasedBuilder):
         elif self.config.name == "bigbio":
             features = datasets.Features(
                 {
-                    "sentence_id": datasets.Value("int64"),
-                    "sentence_1": datasets.Value("string"),
-                    "sentence_2": datasets.Value("string"),
+                    "document_id": datasets.Value("int64"),
+                    "text_1": datasets.Value("string"),
+                    "text_2": datasets.Value("string"),
                     "annotator_a": datasets.Value("int64"),
                     "annotator_b": datasets.Value("int64"),
                     "annotator_c": datasets.Value("int64"),
@@ -148,9 +148,9 @@ class Biosses(datasets.GeneratorBasedBuilder):
                 if self.config.name == "source":
                     yield id_, {
                         "id": key,
-                        "sentence_id": row['sentence_id'],
-                        "sentence_1": row['sentence_1'],
-                        "sentence_2": row['sentence_2'],
+                        "document_id": row['sentence_id'],
+                        "text_1": row['sentence_1'],
+                        "text_2": row['sentence_2'],
                         "annotator_a": row['annotator_a'],
                         "annotator_b": row['annotator_b'],
                         "annotator_c": row['annotator_c'],
@@ -159,9 +159,9 @@ class Biosses(datasets.GeneratorBasedBuilder):
                     }
                 if self.config.name == "bigbio":
                     yield id_, {
-                        "sentence_id": row['sentence_id'],
-                        "sentence_1": row['sentence_1'],
-                        "sentence_2": row['sentence_2'],
+                        "document_id": row['sentence_id'],
+                        "text_1": row['sentence_1'],
+                        "text_2": row['sentence_2'],
                         "annotator_a": row['annotator_a'],
                         "annotator_b": row['annotator_b'],
                         "annotator_c": row['annotator_c'],
