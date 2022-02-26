@@ -155,9 +155,10 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                     # global id (uid) starts from 1
                     uid = 0
                     for id_, row in enumerate(csv_reader):
+                        uid += 1
                         document_id, text_1, text_2, label = row
                         yield id_, {
-                            "id": uid,
+                            "id": uid, #uid is an unique identifier for every record that starts from 1
                             "document_id": document_id,
                             "text_1": text_1,
                             "text_2": text_2,
