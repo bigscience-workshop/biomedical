@@ -46,10 +46,12 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 
 _LICENSE = "Public Domain Mark 1.0"
 
-_URLs = {"chemprot": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
+_URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
+         "bigbio": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
@@ -65,7 +67,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         ),
         datasets.BuilderConfig(
             name="bigbio",
-            version= BIGBIO_VERSION,
+            version=BIGBIO_VERSION,
             description="BigScience Biomedical schema",
         ),
     ]
@@ -81,9 +83,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": datasets.Sequence(
                         {
-                            "entity_id": datasets.Value("string"),
-                            "text": datasets.Value("string"),
+                            "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
+                            "text": datasets.Value("string"),
                             "offsets": datasets.Sequence(datasets.Value("int64")),
 
                         }
@@ -232,11 +234,63 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "relations": relations.get(pmid, empty_reln),
                 }
 
-        if self.config.name == "biobio":
-            """
-            TODO: implement the method for bigbio schema: Can we modify the out put from below static methods? 
-            """
-            pass
+        if self.config.name == "bigbio":
+
+            abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
+            entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
+            relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
+
+            uid = 0
+            for id_, pmid in enumerate(abstracts.keys()):
+                data = {
+                    "id": str(uid),
+                    "document_id": str(pmid),
+                    "passages": [],
+                    "entities": [],
+                    "relations": [],
+                }
+                uid += 1
+
+                data["passages"] = [
+                    {
+                        "id": str(uid),
+                        "type": "title and abstract",
+                        "text": [abstracts[pmid]],
+                        "offsets": [[0, len(abstracts[pmid])]],
+                    }
+                ]
+                uid += 1
+
+                for entity in entities[pmid]:
+                    _text = entity["text"]
+                    entity.update({"text": [_text]})
+                    _offsets = entity["offsets"]
+                    entity.update({"offsets": [_offsets]})
+                    entity.update({"normalized":
+                                       [{"db_name": "Pubmed",
+                                         "db_id": pmid}]
+                                   })
+                    data["entities"].append(entity)
+
+                empty_reln = [
+                    {
+                        "type": None,
+                        "arg1": None,
+                        "arg2": None,
+                    }
+                ]
+                for relation in relations.get(pmid, empty_reln):
+                    relation["arg1_id"] = relation.pop("arg1")
+                    relation["arg2_id"] = relation.pop("arg2")
+                    relation.update({"id": str(uid)})
+                    relation.update({"normalized":
+                                       [{"db_name": "Pubmed",
+                                         "db_id": pmid}]
+                                   })
+                    data["relations"].append(relation)
+                uid +=1
+
+                yield id_, data
 
     @staticmethod
     def _get_abstract(abs_filename: str) -> Dict[str, str]:
@@ -287,7 +341,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 "offsets": [int(start_offset), int(end_offset)],
                 "text": name,
                 "type": label,
-                "entity_id": idx,
+                "id": idx,
             }
 
             entities[pmid].append(ann)
@@ -336,3 +390,4 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             relations[pmid].append(ann)
 
         return relations
+
