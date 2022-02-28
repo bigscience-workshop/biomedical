@@ -42,7 +42,7 @@ This is a simple container format with minimal nesting that supports a range of 
 
 **Schema Notes**
 
-- `id` fields appear at the top (i.e. document) level and in every sub-component (`passages`, `entities`, `events`, `coreferences`, `relations`). They can be set in any fashion that makes every `id` field in a dataset unique.
+- `id` fields appear at the top (i.e. document) level and in every sub-component (`passages`, `entities`, `events`, `coreferences`, `relations`). They can be set in any fashion that makes every `id` field in a dataset split (train/validation/test) unique.
 - `document_id` should be a dataset provided document id. If not provided in the dataset, it can be set equal to the top level `id`.
 - `offsets` contain character offsets into the string that would be created from `" ".join([passage["text"] for passage in passages])`
 - `offsets` and `text` are always lists to support discontinous spans. For continuous spans, they will have the form `offsets=[(lo,hi)], text=["text span"]`. For discontinuous spans, they will have the form `offsets=[(lo1,hi1), (lo2,hi2), ...], text=["text span 1", "text span 2", ...]`
