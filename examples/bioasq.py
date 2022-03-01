@@ -499,7 +499,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             "bioasq5b": "BioASQ-training5b/BioASQ-trainingDataset5b.json",
             "bioasq6b": "BioASQ-training6b/BioASQ-trainingDataset6b.json",
             "bioasq7b": "BioASQ-training7b/trainining7b.json",
-            "bioasq8b": "BioASQ-training8b/training8b.json",
+            "bioasq8b": "training8b.json", # HACK unzip strips the dir name
             "bioasq9b": "BioASQ-training9b/training9b.json",
             "bioasq10b": "BioASQ-training10b/training10b.json",
         }
