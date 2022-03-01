@@ -360,8 +360,6 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 # See http://participants-area.bioasq.org/accounts/register/
 _LICENSE = ""
 
-# _URLs = ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"]
-
 _URLs = {
     "bioasq10b": ["BioASQ-training10b.zip", None],
     "bioasq9b": ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"],
