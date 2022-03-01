@@ -499,7 +499,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             "bioasq5b": "BioASQ-training5b/BioASQ-trainingDataset5b.json",
             "bioasq6b": "BioASQ-training6b/BioASQ-trainingDataset6b.json",
             "bioasq7b": "BioASQ-training7b/trainining7b.json",
-            "bioasq8b": "training8b.json", # HACK unzip strips the dir name
+            "bioasq8b": "training8b.json",  # HACK - this zipfile strips the dirname
             "bioasq9b": "BioASQ-training9b/training9b.json",
             "bioasq10b": "BioASQ-training10b/training10b.json",
         }
@@ -526,7 +526,8 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         if record["type"] == "yesno":
             exact_answer = [record["exact_answer"]]
         elif record["type"] == "summary":
-            exact_answer = []
+            # summary question types only have an idea answer
+            exact_answer = record["ideal_answer"]
         elif record["type"] == "list":
             exact_answer = record["exact_answer"]
         elif record["type"] == "factoid":
@@ -563,9 +564,12 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         elif schema == "bigbio":
             with open(filepath, encoding="utf-8") as file:
                 data = json.load(file)
-                for key, record in enumerate(data["questions"]):
-                    for key, snippet in enumerate(record["snippets"]):
-                        uid = f'{record["id"]}_{key}'
+                for i, record in enumerate(data["questions"]):
+                    # for questions that do not have snippets, skip
+                    if "snippets" not in record:
+                        continue
+                    for j, snippet in enumerate(record["snippets"]):
+                        uid = f'{record["id"]}_{j}'
                         yield uid, {
                             "id": uid,
                             "document_id": snippet["document"],
@@ -573,6 +577,5 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                             "question": record["body"],
                             "type": record["type"],
                             "context": snippet["text"],
-                            # summary question types only have an idea answer
                             "answer": self._get_exact_answer(record),
                         }
