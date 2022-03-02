@@ -62,22 +62,22 @@ questions [1] with their relevant documents, snippets, concepts and RDF
 triples, exact and ideal answers.
 
 Differences with BioASQ-training9b.json 
-	- 492 new questions added from BioASQ9
-		- The question with id 56c1f01eef6e394741000046 had identical body with
-          602498cb1cb411341a00009e. All relevant elements from both questions
-          are available in the merged question with id 602498cb1cb411341a00009e.
-		- The question with id 5c7039207c78d69471000065 had identical body with
-          601c317a1cb411341a000014. All relevant elements from both questions
-          are available in the merged question with id 601c317a1cb411341a000014.
-		- The question with id 5e4b540b6d0a27794100001c had identical body with
-          602828b11cb411341a0000fc. All relevant elements from both questions
-          are available in the merged question with id 602828b11cb411341a0000fc.
-		- The question with id 5fdb42fba43ad31278000027 had identical body with
-          5d35eb01b3a638076300000f. All relevant elements from both questions
-          are available in the merged question with id 5d35eb01b3a638076300000f.
-        - The question with id 601d76311cb411341a000045 had identical body with
-          6060732b94d57fd87900003d. All relevant elements from both questions
-          are available in the merged question with id 6060732b94d57fd87900003d.
+- 492 new questions added from BioASQ9
+    - The question with id 56c1f01eef6e394741000046 had identical body with
+    602498cb1cb411341a00009e. All relevant elements from both questions
+    are available in the merged question with id 602498cb1cb411341a00009e.
+    - The question with id 5c7039207c78d69471000065 had identical body with
+    601c317a1cb411341a000014. All relevant elements from both questions
+    are available in the merged question with id 601c317a1cb411341a000014.
+	- The question with id 5e4b540b6d0a27794100001c had identical body with
+    602828b11cb411341a0000fc. All relevant elements from both questions
+    are available in the merged question with id 602828b11cb411341a0000fc.
+    - The question with id 5fdb42fba43ad31278000027 had identical body with
+    5d35eb01b3a638076300000f. All relevant elements from both questions
+    are available in the merged question with id 5d35eb01b3a638076300000f.
+    - The question with id 601d76311cb411341a000045 had identical body with
+    6060732b94d57fd87900003d. All relevant elements from both questions
+    are available in the merged question with id 6060732b94d57fd87900003d.
 
 [1] 4234 questions : 1252 factoid, 1148 yesno, 1018 summary, 816 list
 """
@@ -91,11 +91,11 @@ The file contains the data of the first seven editions of the challenge: 3742
 questions [1] with their relevant documents, snippets, concepts and RDF triples,
 exact and ideal answers.
 
-Differences with BioASQ-training8b.json 
-	- 499 new questions added from BioASQ8
-		- The question with id 5e30e689fbd6abf43b00003a had identical body with 
-          5880e417713cbdfd3d000001. All relevant elements from both questions
-          are available in the merged question with id 5880e417713cbdfd3d000001.
+Differences with BioASQ-training8b.json
+- 499 new questions added from BioASQ8
+    - The question with id 5e30e689fbd6abf43b00003a had identical body with 
+    5880e417713cbdfd3d000001. All relevant elements from both questions
+    are available in the merged question with id 5880e417713cbdfd3d000001.
 
 [1] 3742 questions : 1091 factoid, 1033 yesno, 899 summary, 719 list
 """
@@ -109,27 +109,26 @@ The file contains the data of the first seven editions of the challenge: 3243
 questions [1] with their relevant documents, snippets, concepts and RDF triples,
 exact and ideal answers.
 
-Differences with BioASQ-training7b.json 
-	- 500 new questions added from BioASQ7
-	- 4 questions were removed
-		- The question with id 5717fb557de986d80d000009 had identical body with
-          571e06447de986d80d000016. All relevant elements from both questions
-          are available in the merged question with id 571e06447de986d80d000016.
-		- The question with id 5c589ddb86df2b917400000b had identical body with
-          5c6b7a9e7c78d69471000029. All relevant elements from both questions
-          are available in the merged question with id 5c6b7a9e7c78d69471000029.
-		- The question with id 52ffb5d12059c6d71c00007c had identical body with
-          52e7870a98d023950500001a. All relevant elements from both questions
-          are available in the merged question with id 52e7870a98d023950500001a.
-		- The question with id 53359338d6d3ac6a3400004f had identical body with
-          589a246878275d0c4a000030. All relevant elements from both questions
-          are available in the merged question with id 589a246878275d0c4a000030.
+Differences with BioASQ-training7b.json
+- 500 new questions added from BioASQ7
+- 4 questions were removed
+    - The question with id 5717fb557de986d80d000009 had identical body with
+    571e06447de986d80d000016. All relevant elements from both questions
+    are available in the merged question with id 571e06447de986d80d000016.
+    - The question with id 5c589ddb86df2b917400000b had identical body with
+    5c6b7a9e7c78d69471000029. All relevant elements from both questions
+    are available in the merged question with id 5c6b7a9e7c78d69471000029.
+    - The question with id 52ffb5d12059c6d71c00007c had identical body with
+    52e7870a98d023950500001a. All relevant elements from both questions
+    are available in the merged question with id 52e7870a98d023950500001a.
+    - The question with id 53359338d6d3ac6a3400004f had identical body with
+    589a246878275d0c4a000030. All relevant elements from both questions
+    are available in the merged question with id 589a246878275d0c4a000030.
 
 **** UPDATE 25/02/2020 *****
 The previous version of the dataset contained an inconsistency on question with
 id "5c9904eaecadf2e73f00002e", where the "ideal_answer" field was missing.
 This has been fixed.
-
 """
 
 _BIOASQ_7B_DESCRIPTION = """\
@@ -141,22 +140,22 @@ The file contains the data of the first six editions of the challenge: 2747
 questions [1] with their relevant documents, snippets, concepts and RDF triples,
 exact and ideal answers.
 
-Differences with BioASQ-trainingDataset6b.json 
-	- 500 new questions added from BioASQ6
-	- 4 questions were removed
-		- The question with id 569ed752ceceede94d000004 had identical body with
-          a new question from BioASQ6. All relevant elements from both questions
-          are available in the merged question with id 5abd31e0fcf456587200002c
-		- 3 questions were removed as incomplete: 54d643023706e89528000007,
-          532819afd6d3ac6a3400000f, 517545168ed59a060a00002b
-	- 4 questions were revised for various confusions that have been identified
-		- In 2 questions the ideal answer has been revised :
-          51406e6223fec90375000009, 5172f8118ed59a060a000019
-		- In 4 questions the snippets and documents list has been revised :
-          51406e6223fec90375000009, 5172f8118ed59a060a000019,
-          51593dc8d24251bc05000099, 5158a5b8d24251bc05000097
-		- In 198 questions the documents list has updated with missing
-          documents from the relevant snippets list. [2]
+Differences with BioASQ-trainingDataset6b.json
+- 500 new questions added from BioASQ6
+    - 4 questions were removed
+        - The question with id 569ed752ceceede94d000004 had identical body with
+        a new question from BioASQ6. All relevant elements from both questions
+        are available in the merged question with id 5abd31e0fcf456587200002c
+        - 3 questions were removed as incomplete: 54d643023706e89528000007,
+        532819afd6d3ac6a3400000f, 517545168ed59a060a00002b
+    - 4 questions were revised for various confusions that have been identified
+        - In 2 questions the ideal answer has been revised :
+        51406e6223fec90375000009, 5172f8118ed59a060a000019
+        - In 4 questions the snippets and documents list has been revised :
+        51406e6223fec90375000009, 5172f8118ed59a060a000019,
+        51593dc8d24251bc05000099, 5158a5b8d24251bc05000097
+        - In 198 questions the documents list has updated with missing
+        documents from the relevant snippets list. [2]
 
 [1] 2747 questions : 779 factoid, 745 yesno, 667 summary, 556 list
 [2] 55031181e9bde69634000014, 51406e6223fec90375000009, 54d643023706e89528000007,
@@ -232,52 +231,51 @@ The data are intended to be used as training and development data for BioASQ 6,
 which will take place during 2018. There is one file containing the data:
  - BioASQ-trainingDataset6b.json
 
-Differences with BioASQ-trainingDataset5b.json 
-	- 500 new questions added from BioASQ5
-	- 48 pairs of questions with identical bodies have been merged into one
-      question having only one question-id, but all the documents, snippets,
-      concepts, RDF triples and answers of both questions of the pair. 
-		- This normalization lead to the removal of 48 deprecated question
-          ids [2] from the dataset and to the update of the 48 remaining
-          questions [3]. 
-		- In cases where a pair of questions with identical bodies had some
-          inconsistency (e.g. different question type), the inconsistency has
-          been solved merging the pair manually consulting the BioASQ
-          expert team.
-	- 12 questions were revised for various confusions that have been
-      identified
-		- In 8 questions the question type has been changed to better suit to
-          the question body. The change of type lead to corresponding changes
-          in exact answers existence and format : 54fc4e2e6ea36a810c000003,
-          530b01a6970c65fa6b000008, 530cf54dab4de4de0c000009,
-          531b2fc3b166e2b80600003c, 532819afd6d3ac6a3400000f,
-          532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
-          52f65f372059c6d71c000027 
+Differences with BioASQ-trainingDataset5b.json
+- 500 new questions added from BioASQ5
+    - 48 pairs of questions with identical bodies have been merged into one
+    question having only one question-id, but all the documents, snippets,
+    concepts, RDF triples and answers of both questions of the pair. 
+        - This normalization lead to the removal of 48 deprecated question
+        ids [2] from the dataset and to the update of the 48 remaining
+        questions [3].
+        - In cases where a pair of questions with identical bodies had some
+        inconsistency (e.g. different question type), the inconsistency has
+        been solved merging the pair manually consulting the BioASQ expert team.
+    - 12 questions were revised for various confusions that have been
+    identified
+        - In 8 questions the question type has been changed to better suit to
+        the question body. The change of type lead to corresponding changes
+        in exact answers existence and format : 54fc4e2e6ea36a810c000003,
+        530b01a6970c65fa6b000008, 530cf54dab4de4de0c000009,
+        531b2fc3b166e2b80600003c, 532819afd6d3ac6a3400000f,
+        532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
+        52f65f372059c6d71c000027 
 		- In 6 questions the ideal answer has been revised :
-          532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
-          53147b52e3eabad021000015, 5147c8a6d24251bc05000027,
-          5509bd6a1180f13250000002, 58bbb71f22d3005309000016
+        532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
+        53147b52e3eabad021000015, 5147c8a6d24251bc05000027,
+        5509bd6a1180f13250000002, 58bbb71f22d3005309000016
 		- In 5 questions the exact answer has been revised :
-          5314bd7ddae131f847000006, 53130a77e3eabad02100000f,
-          53148a07dae131f847000002, 53147b52e3eabad021000015,
-          5147c8a6d24251bc05000027
+        5314bd7ddae131f847000006, 53130a77e3eabad02100000f,
+        53148a07dae131f847000002, 53147b52e3eabad021000015,
+        5147c8a6d24251bc05000027
 		- In 2 questions the question body has been revised :
-          52f65f372059c6d71c000027, 5503145ee9bde69634000022
-	- In lists of ideal answers, documents, snippets, concepts and RDF triples
-      any duplicate identical elements have been removed.
-	- Ideal answers in format of one string have been converted to a list with
-      one element for consistency with cases where more than one golden ideal
-      answers are available. (i.e. "ideal_ans1" converted to ["ideal_ans1"])
-	- For yesno questions: All exact answers have been normalized to "yes" or
-      "no" (replacing "Yes", "YES" and "No")
-	- For factoid questions: The format of the exact answer was normalized to a
-      list of strings for each question, representing a set of synonyms
-      answering the question (i.e. [`ans1`, `syn11`, ... ]).
-	- For list questions: The format of the exact answer was normalized to a
-      list of lists. Each internal list represents one element of the answer
-      as a set of synonyms 
-      (i.e. [[`ans1`, `syn11`, `syn12`], [`ans2`], [`ans3`, `syn31`] ...]).
-	- Empty elements, e.g. empty lists of documents have been removed. 
+        52f65f372059c6d71c000027, 5503145ee9bde69634000022
+    - In lists of ideal answers, documents, snippets, concepts and RDF triples
+    any duplicate identical elements have been removed.
+    - Ideal answers in format of one string have been converted to a list with
+    one element for consistency with cases where more than one golden ideal
+    answers are available. (i.e. "ideal_ans1" converted to ["ideal_ans1"])
+    - For yesno questions: All exact answers have been normalized to "yes" or
+    "no" (replacing "Yes", "YES" and "No")
+    - For factoid questions: The format of the exact answer was normalized to a
+    list of strings for each question, representing a set of synonyms
+    answering the question (i.e. [`ans1`, `syn11`, ... ]).
+    - For list questions: The format of the exact answer was normalized to a
+    list of lists. Each internal list represents one element of the answer
+    as a set of synonyms
+    (i.e. [[`ans1`, `syn11`, `syn12`], [`ans2`], [`ans3`, `syn31`] ...]).
+    - Empty elements, e.g. empty lists of documents have been removed. 
 
 [1] 2251 questions : 619 factoid, 616 yesno, 531 summary, 485 list
 [2] The 48 deprecated question ids are : 52f8b2902059c6d71c000053,
