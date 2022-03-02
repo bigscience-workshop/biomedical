@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 """
 BioASQ Task B On Biomedical Semantic QA (Involves IR, QA, Summarization qnd
 More). This task uses benchmark datasets containing development and test
-questions, in English, alongwith gold standard (reference) answers constructed
+questions, in English, along with gold standard (reference) answers constructed
 by a team of biomedical experts. The participants have to respond with relevant
-concepts, articles, snippets and RDF triples, fromdesignated resources, as well
+concepts, articles, snippets and RDF triples, from designated resources, as well
 as exact and 'ideal' answers.
 
 Fore more information about the challenge, the organisers and the relevant
@@ -28,6 +28,7 @@ import os
 import re
 import glob
 import datasets
+from dataclasses import dataclass
 
 
 _CITATION = """\
@@ -74,7 +75,7 @@ Differences with BioASQ-training9b.json
 		- The question with id 5fdb42fba43ad31278000027 had identical body with
           5d35eb01b3a638076300000f. All relevant elements from both questions
           are available in the merged question with id 5d35eb01b3a638076300000f.
-		- The question with id 601d76311cb411341a000045 had identical body with
+        - The question with id 601d76311cb411341a000045 had identical body with
           6060732b94d57fd87900003d. All relevant elements from both questions
           are available in the merged question with id 6060732b94d57fd87900003d.
 
@@ -128,8 +129,7 @@ Differences with BioASQ-training7b.json
 The previous version of the dataset contained an inconsistency on question with
 id "5c9904eaecadf2e73f00002e", where the "ideal_answer" field was missing.
 This has been fixed.
- 
-[1] 2747 questions : 941 factoid, 881 yesno, 777 summary, 644 list
+
 """
 
 _BIOASQ_7B_DESCRIPTION = """\
@@ -377,6 +377,14 @@ _SOURCE_VERSION = datasets.Version("1.0.0")
 _BIOBIO_VERSION = datasets.Version("1.0.0")
 
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+
+    schema: str = None  # options = (source|bigbio)
+    task_id: str = None  # e.g, bioasq10b
+
+
 class BioasqDataset(datasets.GeneratorBasedBuilder):
     """
     BioASQ Task B On Biomedical Semantic QA.
@@ -386,30 +394,32 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     VERSION = datasets.Version("1.0.0")
     DEFAULT_CONFIG_NAME = "bioasq9b_source"
 
+    # BioASQ2 through BioASQ10
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name=f"bioasq{vers}b_source",
+        BigBioConfig(
+            name=f"bioasq{version}b_source",
             version=_SOURCE_VERSION,
-            description=f"bioasq{vers} Task B source schema",
+            description=f"bioasq{version} Task B source schema",
+            schema="source",
+            task_id=f"bioasq{version}b",
         )
-        for vers in range(2, 11)
+        for version in range(2, 11)
     ]
     BUILDER_CONFIGS += [
-        datasets.BuilderConfig(
-            name=f"bioasq{vers}b_bigbio",
+        BigBioConfig(
+            name=f"bioasq{version}b_bigbio",
             version=_BIOBIO_VERSION,
-            description=f"bioasq{vers} Task B in simplified BigBio schema",
+            description=f"bioasq{version} Task B in simplified BigBio schema",
+            schema="bigbio",
+            task_id=f"bioasq{version}b",
         )
-        # BioASQ2 through BioASQ10
-        for vers in range(2, 11)
+        for version in range(2, 11)
     ]
 
     def _info(self):
 
-        task_version, schema = self.config.name.split("_")
-
         # BioASQ Task B source schema
-        if schema == "source":
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -439,7 +449,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         # simplified schema for QA tasks
-        elif schema == "bigbio":
+        elif self.config.schema == "bigbio":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -453,7 +463,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             )
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION[task_version],
+            description=_DESCRIPTION[self.config.task_id],
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
@@ -466,9 +476,10 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         BioASQ test data is split into multiple records {9B1_golden.json,...,9B5_golden.json}
         We combine these files into a single test set file 9Bx_golden.json
         """
-        task_version = self.config.name.split("_")[0]
-        vers = re.search(r"bioasq([0-9]+)b", task_version).group(1)
-        gold_fpath = os.path.join(data_dir, f"Task{vers}BGoldenEnriched/bx_golden.json")
+        version = re.search(r"bioasq([0-9]+)b", self.config.task_id).group(1)
+        gold_fpath = os.path.join(
+            data_dir, f"Task{version}BGoldenEnriched/bx_golden.json"
+        )
 
         if not os.path.exists(gold_fpath):
             # combine all gold json files
@@ -479,14 +490,15 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                     data["questions"].extend(json.load(file)["questions"])
             # dump gold to json
             with open(gold_fpath, "wt", encoding="utf-8") as file:
-                json.dump(data, file)
+                json.dump(data, file, indent=2)
 
-        return f"Task{vers}BGoldenEnriched/bx_golden.json"
+        return f"Task{version}BGoldenEnriched/bx_golden.json"
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        task_version = self.config.name.split("_")[0]
-        train_dir, test_dir = dl_manager.download_and_extract(_URLs[task_version])
+        train_dir, test_dir = dl_manager.download_and_extract(
+            _URLs[self.config.task_id]
+        )
         gold_fpath = self._dump_gold_json(test_dir)
 
         # older versions of bioasq have different folder formats
@@ -506,7 +518,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(train_dir, train_fpaths[task_version]),
+                    "filepath": os.path.join(
+                        train_dir, train_fpaths[self.config.task_id]
+                    ),
                     "split": "train",
                 },
             ),
@@ -524,8 +538,15 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         if record["type"] == "yesno":
             exact_answer = [record["exact_answer"]]
         elif record["type"] == "summary":
-            # summary question types only have an idea answer
-            exact_answer = record["ideal_answer"]
+            exact_answer = []
+            # summary question types only have an ideal answer, so use that for bigbio
+            if self.config.schema == "bigbio":
+                exact_answer = (
+                    record["ideal_answer"]
+                    if isinstance(record["ideal_answer"], list)
+                    else [record["ideal_answer"]]
+                )
+
         elif record["type"] == "list":
             exact_answer = record["exact_answer"]
         elif record["type"] == "factoid":
@@ -539,13 +560,12 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, split):
         """Yields examples as (key, example) tuples."""
-        schema = self.config.name.split("_")[-1]
 
-        if schema == "source":
+        if self.config.schema == "source":
             with open(filepath, encoding="utf-8") as file:
                 data = json.load(file)
-                for key, record in enumerate(data["questions"]):
-                    yield key, {
+                for i, record in enumerate(data["questions"]):
+                    yield i, {
                         "id": record["id"],
                         "type": record["type"],
                         "body": record["body"],
@@ -559,17 +579,18 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                         "snippets": record["snippets"] if "snippets" in record else [],
                     }
 
-        elif schema == "bigbio":
+        elif self.config.schema == "bigbio":
+
             with open(filepath, encoding="utf-8") as file:
+                uid = 0
                 data = json.load(file)
-                for i, record in enumerate(data["questions"]):
+                for record in data["questions"]:
                     # for questions that do not have snippets, skip
                     if "snippets" not in record:
                         continue
-                    for j, snippet in enumerate(record["snippets"]):
-                        uid = f'{record["id"]}_{j}'
+                    for i, snippet in enumerate(record["snippets"]):
                         yield uid, {
-                            "id": uid,
+                            "id": f'{record["id"]}_{i}',
                             "document_id": snippet["document"],
                             "question_id": record["id"],
                             "question": record["body"],
@@ -577,3 +598,4 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                             "context": snippet["text"],
                             "answer": self._get_exact_answer(record),
                         }
+                        uid += 1
