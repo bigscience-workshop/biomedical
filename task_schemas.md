@@ -5,14 +5,17 @@ We have defined a set of lightwieght, task-specific schema to help simplify prog
 - [Information Extraction](#information-extraction)
   - Named entity recognition (NER)
   - Named entity disambiguation/normalization/linking (NED)
-  - Event extraction
+  - Event extraction (EE)
   - Relation extraction (RE)
-  - Coreference resolution
-- [Textual Entailment](#textual-entailment)
-- [Question Answering](#question-answering)
-- [Paraphasing, Translation, Summarization](#translation,-paraphasing,-summarization)
-- [Semantic Similarity](#semantic-similarity)
-- [Text Classification](#text-classification)
+  - Coreference resolution (COREF)
+- [Textual Entailment (TE)](#textual-entailment)
+- [Question Answering (QA)](#question-answering)
+- [Text Pairs](#translation,-paraphasing,-summarization)
+  - Paraphasing (PARA)
+  - Translation (TRANSL)
+  - Summarization (SUM) 	 
+- [Semantic Similarity (STS)](#semantic-similarity)
+- [Text Classification (TEXT)](#text-classification)
 
 ## Information Extraction
 
