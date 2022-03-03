@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Jason Alan Fries.
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import os
 
 import bioc
 import datasets
+from dataclasses import dataclass
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -68,32 +69,46 @@ _URLs = {
     "bigbio": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
+_SUPPORTED_TASKS = ["NER", "NED", "RE"]
+_SOURCE_VERSION = datasets.Version("01.05.16")
+_BIOBIO_VERSION = datasets.Version("1.0.0")
+
+
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+
+    schema: str = None  # options = (source|bigbio)
+    task_id: str = None  # e.g, bioasq10b
+
+
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
     BioCreative V Chemical Disease Relation (CDR) Task.
     """
 
-    VERSION = datasets.Version("01.05.16")
+    DEFAULT_CONFIG_NAME = "bc5cdr_source"
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source", version=VERSION, description="Source format",
+        BigBioConfig(
+            name="bc5cdr_source",
+            version=_SOURCE_VERSION,
+            description="BC5CDR source schema",
+            schema="source",
+            task_id="bc5cdr",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
-            version="1.0.0",
-            description="BigScience biomedical hackathon schema",
+        BigBioConfig(
+            name="bc5cdr_bigbio",
+            version=_BIOBIO_VERSION,
+            description="BC5CDR simplified BigBio schema",
+            schema="bigbio_kb",
+            task_id="bc5cdr",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        "source"  # "source" is the original view; big-bio is an accessible alternative view
-    )
-
-
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # this is a variation on the BioC format
             features = datasets.Features(
                 {
@@ -104,7 +119,6 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "text": datasets.Value("string"),
                             "entities": [
                                 {
-
                                     "id": datasets.Value("string"),
                                     "offsets": [[datasets.Value("int32")]],
                                     "text": [datasets.Value("string")],
@@ -130,7 +144,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -175,19 +189,11 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             )
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            # This defines the different columns of the dataset and their types
-            features=features,  # Here we define them above because they are different between the two configurations
-            # If there's a common (input, target) tuple from the features,
-            # specify them here. They'll be used if as_supervised=True in
-            # builder.as_dataset.
+            features=features,
             supervised_keys=None,
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
@@ -230,7 +236,10 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _get_bioc_entity(self, span, db_id_key="MESH"):
-        """Load BioC entity"""
+        """
+        Load BioC entity
+        TODO: Fix the discontiguous entity parsing issue with BioC
+        """
         offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
         db_id = span.infons[db_id_key] if db_id_key else -1
         return {
@@ -247,7 +256,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
         """ Yields examples as (key, example) tuples. """
-        if self.config.name == "source":
+        if self.config.schema == "source":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
             for uid, xdoc in enumerate(reader):
                 yield uid, {
@@ -255,7 +264,10 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                         {
                             "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [self._get_bioc_entity(span) for span in passage.annotations],
+                            "entities": [
+                                self._get_bioc_entity(span)
+                                for span in passage.annotations
+                            ],
                             "relations": [
                                 {
                                     "id": rel.id,
@@ -270,7 +282,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     ]
                 }
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
             uid = 0  # global unique id
 
