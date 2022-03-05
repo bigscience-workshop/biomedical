@@ -116,7 +116,7 @@ For the `_info_` function, you will need to define `features` for your
 
 You will use this schema in the `_generate_examples` return value.
 
-Please read the [Task Schemas](#task_schemas.md) to understand how each key should behave.
+Please read the [Task Schemas](task_schemas.md) to understand how each key should behave.
 
 Populate the information in the dataset according to this schema; some fields may be empty.
 

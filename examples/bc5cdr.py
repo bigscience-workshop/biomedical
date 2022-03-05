@@ -322,3 +322,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
 
                 yield i, data
 
+if __name__ == "__main__":
+    from datasets import load_dataset
+    dataset = load_dataset(__file__)
+    print(dataset)

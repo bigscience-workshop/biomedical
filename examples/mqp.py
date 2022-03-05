@@ -20,6 +20,7 @@ the question prepared by medical professional.
 import os
 from typing import Dict, Tuple
 import datasets
+import csv
 from datasets import load_dataset
 
 
@@ -52,7 +53,7 @@ _LICENSE = ""
 _URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
          "bigbio": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
 
-_SOURCE_VERSION = ""
+_SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -110,15 +111,17 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self):
+    def _split_generators(self,
+                          dl_manager):
         """Returns SplitGenerators."""
         my_urls = _URLs[self.config.name]
+        data_dir = dl_manager.download_and_extract(my_urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": my_urls,
+                    "filepath": data_dir,
                     "split": "train",
                 }
             )
@@ -128,29 +131,40 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                            filepath,
                            split):
         """Yields examples as (key, example) tuples."""
-        ds_dict = load_dataset('csv', delimiter=',',
-                                column_names=["document_id", "text_1", "text_2", "label"],
-                               data_files=filepath)
 
-        if self.config.name == "source":
-            for id_, (split, dataset) in enumerate(ds_dict.items()):
-                yield id_, {
-                    "document_id": dataset["document_id"][id_],
-                    "text_1": dataset["text_1"][id_],
-                    "text_2": dataset["text_2"][id_],
-                    "label": dataset["label"][id_],
-                }
+        if split == "train": #There's only training dataset available atm
+            with open(filepath, encoding="utf-8") as csv_file:
+                csv_reader = csv.reader(
+                    csv_file,
+                    quotechar='"',
+                    delimiter=",",
+                    quoting=csv.QUOTE_ALL,
+                    skipinitialspace=True)
 
-        elif self.config.name == "bigbio":
-            # global id (uid) starts from 1
-            uid = 0
-            for id_, (split, dataset) in enumerate(ds_dict.items()):
-                uid += 1
-                yield id_, {
-                    "id": uid,
-                    "document_id": dataset["document_id"][id_],
-                    "text_1": dataset["text_1"][id_],
-                    "text_2": dataset["text_2"][id_],
-                    "label": dataset["label"][id_],
-                }
-                
+                if self.config.name == "source":
+                    for id_, row in enumerate(csv_reader):
+                        document_id, text_1, text_2, label = row
+                        yield id_, {
+                            "document_id": document_id,
+                            "text_1": text_1,
+                            "text_2": text_2,
+                            "label": label,
+                        }
+
+                elif self.config.name == "bigbio":
+                    # global id (uid) starts from 1
+                    uid = 0
+                    for id_, row in enumerate(csv_reader):
+                        uid += 1
+                        document_id, text_1, text_2, label = row
+                        yield id_, {
+                            "id": uid, #uid is an unique identifier for every record that starts from 1
+                            "document_id": document_id,
+                            "text_1": text_1,
+                            "text_2": text_2,
+                            "label": label,
+                        }
+        else:
+            print("There's no test/val split available for the given dataset")
+            return
+
