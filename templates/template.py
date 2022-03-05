@@ -106,12 +106,12 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
             name="source", version=VERSION, description="Source schema"
-        ),
+        ), # TODO [Optional]: Source of dataset
         datasets.BuilderConfig(
             name="bigbio",
             version=BIGBIO_VERSION,
             description="BigScience Biomedical schema",
-        ),
+        ), # TODO: Big-bio schema config
     ]
 
     DEFAULT_CONFIG_NAME = "source"
