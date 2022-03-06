@@ -250,9 +250,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         if self.config.name == "source":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
             for uid, xdoc in enumerate(reader):
-                yield uid, {
+                yield uid,  {
                     "passages": [
-                        {
+                        {   "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
                             "entities": [self._get_bioc_entity(span) for span in passage.annotations],
