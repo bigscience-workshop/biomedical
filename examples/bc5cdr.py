@@ -321,8 +321,3 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     uid += 1
 
                 yield i, data
-
-if __name__ == "__main__":
-    from datasets import load_dataset
-    dataset = load_dataset(__file__)
-    print(dataset)
