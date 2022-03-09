@@ -14,7 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""
+BioSSES computes similarity of biomedical sentences by utilizing WordNet as the general domain  ontology
+and UMLS as the biomedical domain specific ontology.
+The original paper outlines the approaches with respect to using annotator score as golden standard.
+Source view will return all annotator score individually whereas the Bigbio view will return the mean of the annotator score
+"""
 import datasets
 from datasets import load_dataset
 import pandas as pd
@@ -38,6 +43,8 @@ _CITATION = """\
 _DESCRIPTION = """
 BioSSES computes similarity of biomedical sentences by utilizing WordNet as the general domain  ontology 
 and UMLS as the biomedical domain specific ontology.
+The original paper outlines the approaches with respect to using annotator score as golden standard. 
+Source view will return all annotator score individually whereas the Bigbio view will return the mean of the annotator score
 """
 
 _HOMEPAGE = "https://tabilab.cmpe.boun.edu.tr/BIOSSES/SourceCode.html"
@@ -93,15 +100,11 @@ class Biosses(datasets.GeneratorBasedBuilder):
             )
         elif self.config.name == "bigbio":
             features = datasets.Features(
-                {
-                    "document_id": datasets.Value("int64"),
+                {   "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "annotator_a": datasets.Value("int64"),
-                    "annotator_b": datasets.Value("int64"),
-                    "annotator_c": datasets.Value("int64"),
-                    "annotator_d": datasets.Value("int64"),
-                    "annotator_e": datasets.Value("int64")
+                    "label": datasets.Value("string"),
                 }
             )
 
@@ -143,7 +146,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
 
         df = pd.read_csv(filepath, sep='\t', encoding='utf-8')
-        key=1
+        key = 1
         for id_, row in df.iterrows():
                 if self.config.name == "source":
                     yield id_, {
@@ -159,13 +162,11 @@ class Biosses(datasets.GeneratorBasedBuilder):
                     }
                 if self.config.name == "bigbio":
                     yield id_, {
+                        "id": key,
                         "document_id": row['sentence_id'],
                         "text_1": row['sentence_1'],
                         "text_2": row['sentence_2'],
-                        "annotator_a": row['annotator_a'],
-                        "annotator_b": row['annotator_b'],
-                        "annotator_c": row['annotator_c'],
-                        "annotator_d": row['annotator_d'],
-                        "annotator_e": row['annotator_e']
+                        "label": str((row['annotator_a']+row['annotator_b']+ row['annotator_c']+row['annotator_d']+ row['annotator_e'])/5)
+
                     }
-        key+=1
+        key += 1
