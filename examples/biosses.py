@@ -51,17 +51,20 @@ _HOMEPAGE = "https://tabilab.cmpe.boun.edu.tr/BIOSSES/SourceCode.html"
 
 _LICENSE = ""
 
-_URLs = {"biosses": "https://raw.githubusercontent.com/debajyotidatta/biomedical/biosses_add/examples/biosses/biosses_full.tsv"}
 
-_VERSION = "1.0.0"
+_URLs = {
+    "source": "https://raw.githubusercontent.com/debajyotidatta/biomedical/biosses_add/examples/biosses/biosses_full.tsv",
+    "bigbio": "https://raw.githubusercontent.com/debajyotidatta/biomedical/biosses_add/examples/biosses/biosses_full.tsv",
+}
+
+_SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
 
 
 class Biosses(datasets.GeneratorBasedBuilder):
     """BIOSSES : Biomedical Semantic Similarity Estimation System"""
 
-    VERSION = datasets.Version(_VERSION)
+    VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
 
@@ -78,9 +81,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        _DATASETNAME  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    )
+    DEFAULT_CONFIG_NAME = "source"
 
     def _info(self):
 
@@ -123,14 +124,8 @@ class Biosses(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-        # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
-        # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
-        dl_dir = dl_manager.download_and_extract(_URLs['biosses'])
+        my_urls = _URLs[self.config.name]
+        dl_dir = dl_manager.download_and_extract(my_urls)
 
         return [
             datasets.SplitGenerator(
@@ -143,30 +138,35 @@ class Biosses(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, filepath,  split):
-        """Yields examples as (key, example) tuples."""
 
         df = pd.read_csv(filepath, sep='\t', encoding='utf-8')
         key = 1
         for id_, row in df.iterrows():
-                if self.config.name == "source":
-                    yield id_, {
-                        "id": key,
-                        "document_id": row['sentence_id'],
-                        "text_1": row['sentence_1'],
-                        "text_2": row['sentence_2'],
-                        "annotator_a": row['annotator_a'],
-                        "annotator_b": row['annotator_b'],
-                        "annotator_c": row['annotator_c'],
-                        "annotator_d": row['annotator_d'],
-                        "annotator_e": row['annotator_e']
-                    }
-                if self.config.name == "bigbio":
-                    yield id_, {
-                        "id": key,
-                        "document_id": row['sentence_id'],
-                        "text_1": row['sentence_1'],
-                        "text_2": row['sentence_2'],
-                        "label": str((row['annotator_a']+row['annotator_b']+ row['annotator_c']+row['annotator_d']+ row['annotator_e'])/5)
+            print(row)
+            if self.config.name == "source":
+                yield id_, {
+                    "id": key,
+                    "document_id": row['sentence_id'],
+                    "text_1": row['sentence_1'],
+                    "text_2": row['sentence_2'],
+                    "annotator_a": row['annotator_a'],
+                    "annotator_b": row['annotator_b'],
+                    "annotator_c": row['annotator_c'],
+                    "annotator_d": row['annotator_d'],
+                    "annotator_e": row['annotator_e']
+                }
+            if self.config.name == "bigbio":
+                yield id_, {
+                    "id": key,
+                    "document_id": row['sentence_id'],
+                    "text_1": row['sentence_1'],
+                    "text_2": row['sentence_2'],
+                    "label": str((row['annotator_a']+row['annotator_b']+ row['annotator_c']+row['annotator_d']+ row['annotator_e'])/5)
 
-                    }
-        key += 1
+                }
+            key += 1
+
+if __name__ == "__main__":
+    from datasets import load_dataset
+    ds = load_dataset(__file__)
+    print(ds)
