@@ -1,0 +1,3 @@
+[submodule "paramed"]
+	path = paramed
+	url = https://huggingface.co/datasets/bigscience-biomedical/paramed

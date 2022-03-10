@@ -55,6 +55,39 @@ ds_orig = load_dataset("n2c2_2011_coref.py", name="source", data_dir="/path/to/n
 ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", data_dir="/path/to/n2c2_2011_coref")
 ```
 
+Schema
+
+One sample of the n2c2_2011_coref bigbio schema (e.g. ds_bb['train'][0]) looks like this,
+
+{
+    "id": "clinical-103",
+    "document_id": "clinical-103",
+    "passages": [
+        {
+            "id": "clinical-103-passage-0",
+            "type": "discharge summary",
+            "text": ["......"],
+            "offsets": [[0, 5005]],
+        }
+    ],
+    "entities": [
+        {
+            "id": "clinical-103-entity-12-0-12-0",
+            "type": "person",
+            "text": ["patient"],
+            "offsets": [[128, 135]],
+            "normalized": [],
+        },
+        ...
+    ],
+    "coreferences": [
+        {
+            "id": "clinical-103-coref-0",
+            "entity_ids": ["clinical-103-entity-12-0-12-0", ...],
+        }
+    ]
+}
+
 
 Data Access
 
@@ -120,6 +153,8 @@ _LICENSE = "Data User Agreement"
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
+_SUPPORTED_TASKS = ["coref"]
 
 
 def _read_tar_gz(file_path, samples=None):
