@@ -403,7 +403,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio-kb":
+        elif self.config.schema == "kb":
             features = Features(
                 {
                     "id": Value("string"),
@@ -532,7 +532,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 for sample_id, sample in samples.items():
                     if self.config.schema == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
-                    elif self.config.schema == "bigbio-kb":
+                    elif self.config.schema == "kb":
                         yield _id, self._get_coref_sample(sample_id, sample)
                     _id += 1
 
@@ -551,6 +551,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for sample_id, sample in samples.items():
                 if self.config.schema == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
-                elif self.config.schema == "bigbio-kb":
+                elif self.config.schema == "kb":
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
