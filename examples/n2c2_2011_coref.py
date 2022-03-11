@@ -52,7 +52,7 @@ The following commands can be used to load the dataset
 
 ```
 ds_orig = load_dataset("n2c2_2011_coref.py", name="bigbio", schema="source", data_dir="/path/to/n2c2_2011_coref")
-ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", schema="bigbio-kb", data_dir="/path/to/n2c2_2011_coref")
+ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", schema="kb", data_dir="/path/to/n2c2_2011_coref")
 ```
 
 
@@ -130,7 +130,7 @@ class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
 
     schema: str = None  # options = (source|kb|entailment|pairs|qa|text|text2text)
-    task: str = None  # e.g, (ner|coref|translation|qa)
+    task: str = "coref"  # e.g, (ner|coref|translation|qa) default can be dataset specific
     subset: str = None # optional dataset specific subset e.g. "9b" for bioasq
 
 
