@@ -129,7 +129,7 @@ _SUPPORTED_TASKS = ["coref"]
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
 
-    schema: str = None  # options = (source|bigbio)
+    schema: str = None  # options = (source|kb|entailment|pairs|qa|text|text2text)
     task: str = None  # e.g, (ner|coref|translation|qa)
     subset: str = None # optional dataset specific subset e.g. "9b" for bioasq
 
