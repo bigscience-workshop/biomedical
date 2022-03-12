@@ -1,5 +1,5 @@
 """
-Unit-tests to ensure tasks adhere to QA for big-bio schema
+Unit-tests to ensure tasks adhere to QA for big-bio schema.
 """
 import os
 import sys
@@ -64,6 +64,21 @@ class TestDataLoader(unittest.TestCase):
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
 
     def runTest(self):
+        """
+        Run all tests that check:
+
+        (1) setUp: Checks data and _SUPPORTED_TASKS can be loaded
+        (2) print_statistics: Counts number of all possible schema keys/instances of the examples
+        (3) test_are_ids_globally_unique: 
+        (4)
+        (5)
+        (6)
+        (7)
+        (8)
+        (9)
+
+        """  # noqa
+        self.setUp()
         self.print_statistics()
         self.test_are_ids_globally_unique()
         self.test_do_all_referenced_ids_exist()
@@ -74,6 +89,7 @@ class TestDataLoader(unittest.TestCase):
         self.test_schema()
 
     def setUp(self) -> None:
+        """Load original and big-bio schema views"""
 
         self.dataset_source = datasets.load_dataset(
             self.PATH,
@@ -89,14 +105,16 @@ class TestDataLoader(unittest.TestCase):
             use_auth_token=self.USE_AUTH_TOKEN,
         )
 
+        # Get task type of the dataset
         self._SUPPORTED_TASKS = importlib.import_module(
             "biomeddatasets." + self.NAME + "." + self.NAME
         )._SUPPORTED_TASKS
 
+
     def print_statistics(self):
         """
         Gets sample statistics, for each split and sample of the number of features in the schema present; only works for the big-bio schema.
-        """
+        """  # noqa
         for split_name, split in self.dataset_bigbio.items():
             print(split_name)
             print("=" * 10)
@@ -155,14 +173,16 @@ class TestDataLoader(unittest.TestCase):
         """
         Checks if all IDs are globally unique across a feature list.
 
-        :param collection: An iterable of features that contain NLP info
+        :param collection: An iterable of features that contain NLP info (ex: entities, events)
         :param ids_seen: Empty set of numerical ids
         :param ignore_assertion:
-        """
+        """  # noqa
         if isinstance(collection, dict):
+
             for k, v in collection.items():
                 if isinstance(v, dict):
                     self._assert_ids_globally_unique(v, ids_seen)
+
                 elif isinstance(v, list):
                     for elem in v:
                         self._assert_ids_globally_unique(elem, ids_seen)
@@ -394,7 +414,7 @@ class TestDataLoader(unittest.TestCase):
                     for coref in example["coreferences"]:
                         for entity_id in coref["entity_ids"]:
                             assert entity_id in entity_lookup
-                            
+
 
     def test_name(self):
         """
@@ -563,3 +583,30 @@ class TestDataLoader(unittest.TestCase):
                 mandatory_keys,
                 "/".join(schema.keys()) + " keys missing from bigbio view",
             )
+
+if __name__ == "__main__":
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("datset_script")
+    # args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="Unit tests for dataset with KB schema. Args are passed to `datasets.load_dataset`"
+    )
+
+    parser.add_argument("--path", type=str, required=True)
+    parser.add_argument(
+        "--name",
+        type=str,
+        default="bigbio",
+        help="For datasets supporting multiple tasks, e.g. `bigbio-translation`",
+    )
+    parser.add_argument("--data_dir", type=str, default=None)
+    parser.add_argument("--use_auth_token", default=None)
+
+    args = parser.parse_args()
+
+    TestKBDataset.PATH = args.path
+    TestKBDataset.NAME = args.name
+    TestKBDataset.DATA_DIR = args.data_dir
+    TestKBDataset.USE_AUTH_TOKEN = args.use_auth_token
+
+    unittest.TextTestRunner().run(TestKBDataset())
