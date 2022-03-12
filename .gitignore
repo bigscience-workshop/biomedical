@@ -1,5 +1,5 @@
-# Biomeddatasets
-biomeddatasets/testdata/*
+# Ignore temp testing files
+biomeddatasets/testdata/testdata.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
