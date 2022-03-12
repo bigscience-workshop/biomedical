@@ -2,10 +2,9 @@
 Unit-tests to ensure tasks adhere to QA for big-bio schema.
 """
 import sys
-
 import datasets
 from datasets import load_dataset, Features
-from ..schemas import (
+from schemas import (
     kb_features,
     qa_features,
     entailment_features,
@@ -30,7 +29,7 @@ import logging as log
 log.basicConfig(level=log.INFO)
 
 
-_TASK_MAPPING = {
+_TASK_MAP = {
     "kb": "kb",
     "ner": "kb",
     "ned": "kb",
@@ -51,6 +50,14 @@ _TASK_MAPPING = {
     "pairs": "pairs",
 }
 
+_SCHEMA_MAP = {
+    "kb": kb_features,
+    "qa": qa_features,
+    "entailment": entailment_features,
+    "text_to_text": text2text_features,
+    "text": text_features,
+    "pairs": pairs_features
+}
 
 def _get_example_text(example: dict) -> str:
     """
@@ -99,18 +106,21 @@ class TestDataLoader(unittest.TestCase):
         """  # noqa
         #self.test_name()
         self.setUp()
-        self.print_statistics()
-        self.test_schema()
         self.test_are_ids_globally_unique()
 
         # KB-specific unit-tests
         for task in self._SUPPORTED_TASKS:
-            if _TASK_MAPPING[task] == "kb":
-                self.test_do_all_referenced_ids_exist()
-                self.test_passages_offsets()
-                self.test_entities_offsets()
-                self.test_events_offsets()
-                self.test_coref_ids()
+            self.test_schema(task)
+
+            mapped_task = _SCHEMA_MAP[_TASK_MAP[task.lower()]]
+            self.print_statistics(mapped_task)
+
+            #if _TASK_MAP[task.lower()] == "kb":
+                #self.test_do_all_referenced_ids_exist()
+                #self.test_passages_offsets()
+                #self.test_entities_offsets()
+                #self.test_events_offsets()
+                #self.test_coref_ids()
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
@@ -136,9 +146,11 @@ class TestDataLoader(unittest.TestCase):
             "biomeddatasets." + self.NAME + "." + self.NAME
         )._SUPPORTED_TASKS
 
-    def print_statistics(self):
+    def print_statistics(self, schema: Features):
         """
         Gets sample statistics, for each split and sample of the number of features in the schema present; only works for the big-bio schema.
+
+        :param schema_type: Type of schema to reference features from
         """  # noqa
         log.info("Gathering schema statistics")
         for split_name, split in self.dataset_bigbio.items():
@@ -147,14 +159,15 @@ class TestDataLoader(unittest.TestCase):
 
             counter = defaultdict(int)
             for example in split:
-                for feature_name, feature in features.items():
-                    if isinstance(feature, datasets.Value) or isinstance(
-                        feature_name, dict
-                    ):
-                        if example[feature_name]:
-                            counter[feature_name] += 1
-                    else:
-                        counter[feature_name] += len(example[feature_name])
+                for feature_name, feature in schema.items():
+                    if example.get(feature_name, None) is not None:
+                        if isinstance(feature, datasets.Value) or isinstance(
+                            feature_name, dict
+                        ):
+                            if example[feature_name]:
+                                counter[feature_name] += 1
+                        else:
+                            counter[feature_name] += len(example[feature_name])
 
             for k, v in counter.items():
                 print(f"{k}: {v}")
@@ -344,141 +357,143 @@ class TestDataLoader(unittest.TestCase):
             "Script not named " + self.NAME + ".py",
         )
 
-    def test_schema(self):
+    def test_schema(self, task: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
-        # Import the _SUPPORTED_TASKS
+        mapped_task = self._test_task_exists(task)
 
-        for task in self._SUPPORTED_TASKS:
+        if mapped_task == "kb":
+            log.info("NER/NED/RE/Event Extraction/Coref Task")
 
-            task = task.lower()
-            mapped_task = _TASK_MAPPING.get(task, None)
+            schema = kb_features
 
-            self.assertFalse(
-                mapped_task is None, task + " is not recognized"
+            # TODO - change this
+            opt_keys = [
+                "entities",
+                "events",
+                "coreferences",
+                "relations",
+            ]
+
+            for split in self.dataset_bigbio.keys():
+                example = self.dataset_bigbio[split][0]
+
+                # Check for mandatory keys
+                mandatory_keys = all(
+                    [
+                        key in example
+                        for key in schema.keys()
+                        if key not in opt_keys
+                    ]
+                )
+                self.assertTrue(
+                    mandatory_keys,
+                    "id/document_id/passages missing from bigbio view",
+                )
+
+                subkeys = []
+
+                # Ensure tasks that require certain fields are present
+                if task == "ner" or task == "re":
+                    subkeys += ["entities", "relations"]
+
+                    for key in subkeys:
+                        for attrs in schema[key]:
+
+                            self.assertTrue(
+                                all(
+                                    [
+                                        k in example[key][0]
+                                        for k in attrs.keys()
+                                    ]
+                                )
+                            )
+                elif task == "coref":
+                    subkeys += ["coreferences"]
+
+                    for key in subkeys:
+                        for attrs in schema[key]:
+
+                            self.assertTrue(
+                                all(
+                                    [
+                                        k in example[key][0]
+                                        for k in attrs.keys()
+                                    ]
+                                )
+                            )
+
+                elif task == "events":
+                    subkeys += ["events"]
+
+                    for key in subkeys:
+                        for attrs in schema[key]:
+
+                            self.assertTrue(
+                                all(
+                                    [
+                                        k in example[key][0]
+                                        for k in attrs.keys()
+                                    ]
+                                )
+                            )
+                else:
+                    # miscellaneous keys
+                    extra_keys = [
+                        k for k in example.keys() if k not in subkeys
+                    ]
+                    for key in extra_keys:
+                        if key in schema.keys():
+                            self.assertTrue(
+                                all(
+                                    [
+                                        k in example[key][0]
+                                        for k in attrs.keys()
+                                    ]
+                                )
+                            )
+
+        elif mapped_task == "qa":
+            log.info("Question-Answering Task")
+            schema = qa_features
+            self._check_keys(schema)
+
+        elif mapped_task == "entailment":
+            log.info("Entailment Task")
+            schema = entailment_features
+            self._check_keys(schema)
+
+        elif mapped_task == "text_to_text":
+            log.info("Translation/Summarization/Paraphrasing Task")
+            schema = text2text_features
+            self._check_keys(schema)
+
+        elif mapped_task == "text":
+            log.info("Sentence/Phrase/Text Classification Task")
+            schema = text_features
+            self._check_keys(schema)
+
+        elif mapped_task == "pairs":
+            log.info("Pair Labels Task")
+            schema = pairs_features
+            self._check_keys(schema)
+
+        else:
+            raise ValueError(
+                task
+                + " not specified; only 'kb', 'qa', 'entailment', 'text_to_text', 'text', 'pairs' allowed"
             )
 
-            if mapped_task == "kb":
-                log.info("NER/NED/RE/Event Extraction/Coref Task")
-
-                schema = kb_features
-
-                # TODO - change this
-                opt_keys = [
-                    "entities",
-                    "events",
-                    "coreferences",
-                    "relations",
-                ]
-
-                for split in self.dataset_bigbio.keys():
-                    example = self.dataset_bigbio[split][0]
-
-                    # Check for mandatory keys
-                    mandatory_keys = all(
-                        [
-                            key in example
-                            for key in schema.keys()
-                            if key not in opt_keys
-                        ]
-                    )
-                    self.assertTrue(
-                        mandatory_keys,
-                        "id/document_id/passages missing from bigbio view",
-                    )
-
-                    subkeys = []
-
-                    # Ensure tasks that require certain fields are present
-                    if task == "ner" or task == "re":
-                        subkeys += ["entities", "relations"]
-
-                        for key in subkeys:
-                            for attrs in schema[key]:
-
-                                self.assertTrue(
-                                    all(
-                                        [
-                                            k in example[key][0]
-                                            for k in attrs.keys()
-                                        ]
-                                    )
-                                )
-                    elif task == "coref":
-                        subkeys += ["coreferences"]
-
-                        for key in subkeys:
-                            for attrs in schema[key]:
-
-                                self.assertTrue(
-                                    all(
-                                        [
-                                            k in example[key][0]
-                                            for k in attrs.keys()
-                                        ]
-                                    )
-                                )
-
-                    elif task == "events":
-                        subkeys += ["events"]
-
-                        for key in subkeys:
-                            for attrs in schema[key]:
-
-                                self.assertTrue(
-                                    all(
-                                        [
-                                            k in example[key][0]
-                                            for k in attrs.keys()
-                                        ]
-                                    )
-                                )
-                    else:
-                        # miscellaneous keys
-                        extra_keys = [
-                            k for k in example.keys() if k not in subkeys
-                        ]
-                        for key in extra_keys:
-                            if key in schema.keys():
-                                self.assertTrue(
-                                    all(
-                                        [
-                                            k in example[key][0]
-                                            for k in attrs.keys()
-                                        ]
-                                    )
-                                )
-
-            elif mapped_task == "qa":
-                log.info("Question-Answering Task")
-                schema = qa_features
-                self._check_keys(schema)
-
-            elif mapped_task == "entailment":
-                log.info("Entailment Task")
-                schema = entailment_features
-                self._check_keys(schema)
-
-            elif mapped_task == "text_to_text":
-                log.info("Translation/Summarization/Paraphrasing Task")
-                schema = text2text_features
-                self._check_keys(schema)
-
-            elif mapped_task == "text":
-                log.info("Sentence/Phrase/Text Classification Task")
-                schema = text_features
-                self._check_keys(schema)
-
-            elif mapped_task == "pairs":
-                log.info("Pair Labels Task")
-                schema = pairs_features
-                self._check_keys(schema)
-
-            else:
-                raise ValueError(
-                    task
-                    + " not specified; only 'kb', 'qa', 'entailment', 'text_to_text', 'text', 'pairs' allowed"
-                )
+    def _test_task_exists(self, task_name: str):
+        """
+        Check if valid task name is provided
+        """
+        task = task_name.lower()
+        mapped_task = _TASK_MAP.get(task, None)
+        self.assertFalse(
+                mapped_task is None, task + " is not recognized"
+            )
+        return mapped_task
 
     def _check_keys(self, schema: Features):
         """Check if necessary keys are present in a given schema"""
@@ -526,40 +541,34 @@ class TestDataLoader(unittest.TestCase):
                 self._assert_ids_globally_unique(elem, ids_seen)
 
     def _get_referenced_ids(self, example):
-        """
-        Given a KB-schema, collects all referenced IDs
-
-        :param example: A feature instance in a schema
-        """
         referenced_ids = []
 
-        for event in example.get("events", []):
-            args = event.get("arguments", None)
-            if args is not None:
-                for argument in args:
+        if example.get("events", None) is not None:
+            for event in example["events"]:
+                for argument in event["arguments"]:
                     referenced_ids.append((argument["ref_id"], "event_arg"))
 
-        for coreference in example.get("coreferences", []):
-            args = coreference.get("entity_ids", None)
-            if args is not None:
-                for entity_id in args:
+        if example.get("coreferences", None) is not None:
+            for coreference in example["coreferences"]:
+                for entity_id in coreference["entity_ids"]:
                     referenced_ids.append((entity_id, "entity"))
 
-        for relation in example.get("relations", []):
-            referenced_ids.append((relation["arg1_id"], "entity"))
-            referenced_ids.append((relation["arg2_id"], "entity"))
+        if example.get("relations", None) is not None:
+            for relation in example["relations"]:
+                referenced_ids.append((relation["arg1_id"], "entity"))
+                referenced_ids.append((relation["arg2_id"], "entity"))
 
         return referenced_ids
 
     def _get_existing_referable_ids(self, example):
-        """ """
         existing_ids = []
 
-        for entity in example.get("entities", []):
+        for entity in example["entities"]:
             existing_ids.append((entity["id"], "entity"))
 
-        for event in example.get("events", []):
-            existing_ids.append((event["id"], "event"))
+        if example.get("events", None) is not None:
+            for event in example["events"]:
+                existing_ids.append((event["id"], "event"))
 
         return existing_ids
 
@@ -641,10 +650,10 @@ if __name__ == "__main__":
 
     name = args.path.split(".py")[0].split("/")[-1]
 
-    TestKBDataset.PATH = args.path
-    TestKBDataset.NAME = name
-    TestKBDataset.VIEW = args.view
-    TestKBDataset.DATA_DIR = args.data_dir
-    TestKBDataset.USE_AUTH_TOKEN = args.use_auth_token
+    TestDataLoader.PATH = args.path
+    TestDataLoader.NAME = name
+    TestDataLoader.VIEW = args.view
+    TestDataLoader.DATA_DIR = args.data_dir
+    TestDataLoader.USE_AUTH_TOKEN = args.use_auth_token
 
-    unittest.TextTestRunner().run(TestKBDataset())
+    unittest.TextTestRunner().run(TestDataLoader())
