@@ -106,7 +106,7 @@ class TestDataLoader(unittest.TestCase):
         """  # noqa
         #self.test_name()
         self.setUp()
-        self.test_are_ids_globally_unique()
+        #self.test_are_ids_globally_unique()
 
         # KB-specific unit-tests
         for task in self._SUPPORTED_TASKS:
