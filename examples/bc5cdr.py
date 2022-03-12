@@ -68,6 +68,8 @@ _URLs = {
     "bigbio": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
+_SUPPORTED_TASKS = ["ner"]
+
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
     BioCreative V Chemical Disease Relation (CDR) Task.
