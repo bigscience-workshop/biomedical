@@ -50,6 +50,8 @@ _CLASS_NAMES = [
     'Tumor promoting inflammation'
 ]
 
+_SUPPORTED_TASKS = ["ner"]
+
 
 class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""

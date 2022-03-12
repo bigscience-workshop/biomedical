@@ -52,6 +52,7 @@ _URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/file
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+_SUPPORTED_TASKS = ["ner"]
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
