@@ -378,6 +378,10 @@ class TestDataLoader(unittest.TestCase):
                 "relations",
             ]
 
+            needed_keys = [
+                key for key in schema.keys() if key not in opt_keys
+            ]
+
             for split in self.dataset_bigbio.keys():
                 example = self.dataset_bigbio[split][0]
 
@@ -404,12 +408,16 @@ class TestDataLoader(unittest.TestCase):
                         for attrs in schema[key]:
 
                             self.assertTrue(
-                                all(
-                                    [
-                                        k in example[key][0]
-                                        for k in attrs.keys()
-                                    ]
-                                )
+                                self._check_subkey(example[key][0], attrs)
+                            )
+                elif task == "ned":
+                    subkeys += ["entities"]
+
+                    for key in subkeys:
+                        for attrs in schema[key]:
+
+                            self.assertTrue(
+                                self._check_subkey(example[key][0], attrs)
                             )
                 elif task == "coref":
                     subkeys += ["coreferences"]
@@ -418,12 +426,7 @@ class TestDataLoader(unittest.TestCase):
                         for attrs in schema[key]:
 
                             self.assertTrue(
-                                all(
-                                    [
-                                        k in example[key][0]
-                                        for k in attrs.keys()
-                                    ]
-                                )
+                                self._check_subkey(example[key][0], attrs)
                             )
 
                 elif task == "events":
@@ -433,28 +436,23 @@ class TestDataLoader(unittest.TestCase):
                         for attrs in schema[key]:
 
                             self.assertTrue(
-                                all(
-                                    [
-                                        k in example[key][0]
-                                        for k in attrs.keys()
-                                    ]
-                                )
+                                self._check_subkey(example[key][0], attrs)
                             )
                 else:
-                    # miscellaneous keys
+                    # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
                     extra_keys = [
-                        k for k in example.keys() if k not in subkeys
+                        k
+                        for k in example.keys()
+                        if k not in subkeys + needed_keys
                     ]
                     for key in extra_keys:
                         if key in schema.keys():
-                            self.assertTrue(
-                                all(
-                                    [
-                                        k in example[key][0]
-                                        for k in attrs.keys()
-                                    ]
+                            for attrs in schema[key]:
+                                self.assertTrue(
+                                    self._check_subkey(
+                                        example[key][0], attrs
+                                    )
                                 )
-                            )
 
         elif mapped_task == "qa":
             log.info("Question-Answering Task")
@@ -490,6 +488,11 @@ class TestDataLoader(unittest.TestCase):
         mapped_task = _TASK_MAP.get(task, None)
         self.assertFalse(mapped_task is None, task + " is not recognized")
         return mapped_task
+
+    @staticmethod
+    def _check_subkey(inp, attrs):
+        """Checks if subkeys (esp. in KB) have necessary criteria"""
+        return all([k in inp for k in attrs.keys()])
 
     def _check_keys(self, schema: Features, schema_name: str):
         """Check if necessary keys are present in a given schema"""
