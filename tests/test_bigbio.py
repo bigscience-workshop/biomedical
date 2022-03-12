@@ -56,8 +56,9 @@ _SCHEMA_MAP = {
     "entailment": entailment_features,
     "text_to_text": text2text_features,
     "text": text_features,
-    "pairs": pairs_features
+    "pairs": pairs_features,
 }
+
 
 def _get_example_text(example: dict) -> str:
     """
@@ -104,9 +105,9 @@ class TestDataLoader(unittest.TestCase):
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
-        #self.test_name()
+        # self.test_name()
         self.setUp()
-        #self.test_are_ids_globally_unique()
+        # self.test_are_ids_globally_unique()
 
         # KB-specific unit-tests
         for task in self._SUPPORTED_TASKS:
@@ -115,12 +116,12 @@ class TestDataLoader(unittest.TestCase):
             mapped_task = _SCHEMA_MAP[_TASK_MAP[task.lower()]]
             self.print_statistics(mapped_task)
 
-            #if _TASK_MAP[task.lower()] == "kb":
-                #self.test_do_all_referenced_ids_exist()
-                #self.test_passages_offsets()
-                #self.test_entities_offsets()
-                #self.test_events_offsets()
-                #self.test_coref_ids()
+            # if _TASK_MAP[task.lower()] == "kb":
+            # self.test_do_all_referenced_ids_exist()
+            # self.test_passages_offsets()
+            # self.test_entities_offsets()
+            # self.test_events_offsets()
+            # self.test_coref_ids()
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
@@ -167,7 +168,9 @@ class TestDataLoader(unittest.TestCase):
                             if example[feature_name]:
                                 counter[feature_name] += 1
                         else:
-                            counter[feature_name] += len(example[feature_name])
+                            counter[feature_name] += len(
+                                example[feature_name]
+                            )
 
             for k, v in counter.items():
                 print(f"{k}: {v}")
@@ -455,33 +458,28 @@ class TestDataLoader(unittest.TestCase):
 
         elif mapped_task == "qa":
             log.info("Question-Answering Task")
-            schema = qa_features
-            self._check_keys(schema)
+            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "entailment":
             log.info("Entailment Task")
-            schema = entailment_features
-            self._check_keys(schema)
+            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "text_to_text":
             log.info("Translation/Summarization/Paraphrasing Task")
-            schema = text2text_features
-            self._check_keys(schema)
+            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "text":
             log.info("Sentence/Phrase/Text Classification Task")
-            schema = text_features
-            self._check_keys(schema)
+            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "pairs":
             log.info("Pair Labels Task")
-            schema = pairs_features
-            self._check_keys(schema)
+            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         else:
             raise ValueError(
                 task
-                + " not specified; only 'kb', 'qa', 'entailment', 'text_to_text', 'text', 'pairs' allowed"
+                + " not recognized; only 'kb', 'qa', 'entailment', 'text_to_text', 'text', 'pairs'-type tasks are allowed"
             )
 
     def _test_task_exists(self, task_name: str):
@@ -490,12 +488,10 @@ class TestDataLoader(unittest.TestCase):
         """
         task = task_name.lower()
         mapped_task = _TASK_MAP.get(task, None)
-        self.assertFalse(
-                mapped_task is None, task + " is not recognized"
-            )
+        self.assertFalse(mapped_task is None, task + " is not recognized")
         return mapped_task
 
-    def _check_keys(self, schema: Features):
+    def _check_keys(self, schema: Features, schema_name: str):
         """Check if necessary keys are present in a given schema"""
         for split in self.dataset_bigbio.keys():
             example = self.dataset_bigbio[split][0]
@@ -504,7 +500,9 @@ class TestDataLoader(unittest.TestCase):
             mandatory_keys = all([key in example for key in schema.keys()])
             self.assertTrue(
                 mandatory_keys,
-                "/".join(schema.keys()) + " keys missing from bigbio view",
+                "/".join(schema.keys())
+                + " keys missing from bigbio view for schema_type = "
+                + schema_name,
             )
 
     def _assert_ids_globally_unique(
