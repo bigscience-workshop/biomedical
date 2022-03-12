@@ -417,7 +417,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     def _info(self):
 
         # BioASQ Task B source schema
-        if self.config.schema == "source":
+        if "source" in self.config.schema:
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -447,7 +447,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         # simplified schema for QA tasks
-        elif self.config.schema == "bigbio":
+        elif "bigbio" in self.config.schema:
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -459,6 +459,8 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                     "answer": datasets.Sequence(datasets.Value("string")),
                 }
             )
+        else:
+            raise ValueError("Config not recognized")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION[self.config.task_id],
