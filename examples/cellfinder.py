@@ -19,8 +19,8 @@
 #  < Your imports here >
 import os  # useful for paths
 from typing import Dict, Iterable, List
-
 import datasets
+from dataclasses import dataclass
 import pybrat
 from pybrat.parser import BratParser
 
@@ -51,36 +51,49 @@ _HOMEPAGE = "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resour
 _LICENSE = ""
 
 _URLs = {"source": "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/cellfinder1_brat.tar.gz",
-         "bigbio": "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/cellfinder1_brat.tar.gz" }
+         "bigbio_kb": "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/cellfinder1_brat.tar.gz" }
 
+_SUPPORTED_TASKS = ["NER"]
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
+
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class CellFinderDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
-            version=VERSION,
-            description="Source schema"
+        BigBioConfig(
+            name="cellfinder_source",
+            version=SOURCE_VERSION,
+            description="CellFinder source schema",
+            schema="source",
+            subset_id="cellfinder",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="cellfinder_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="CellFinder BigBio schema",
+            schema="bigbio_kb",
+            subset_id="cellfinder",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "cellfinder_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "article_id": datasets.Value("int32"),
@@ -102,7 +115,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        if self.config.name == "bigbio":
+        if self.config.schema == "bigbio_kb":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -170,14 +183,14 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, split):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             datadir = os.path.join(filepath, split)
             parser = BratParser(error="ignore")
             data = self._parse_brat_source(datadir, parser)
             for id_, key in enumerate(data):
                 yield id_, key
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             datadir = os.path.join(filepath, split)
             parser = BratParser(error="ignore")
             data = self._parse_brat_bigbio(datadir, parser)
