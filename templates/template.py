@@ -35,7 +35,7 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 
 import os
 import datasets
-
+from dataclasses import dataclass
 
 # TODO: Add BibTeX citation
 _CITATION = """\
@@ -78,16 +78,29 @@ _URLS = {
     _DATASETNAME: "url or list of urls or ... ",
 }
 
+# TODO: add supported task by dataset. One dataset may support multiple tasks
+_SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
+
 # TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
 
+
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
+
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 class NewDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     # You will be able to load the "source" or "bigbio" configurations with
@@ -99,15 +112,29 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
     # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
+    # TODO: For each dataset, implement Config for Source and BigBio;
+    #  if dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them. Each of them should contain:
+    #  name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbioschema_name]
+    #  version: option = (SOURCE_VERSION |BIGBIO_VERSION)
+    #  description: one line description for the dataset
+    #  schema: options = (source|bigbio_[schema_name]) [schema_name] =(kb,pairs, qa, text, test_to_text, entailment)
+    #  subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
+
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source", version=VERSION, description="Source schema"
+        BigBioConfig(
+            name="[dataset_name]_source",
+            version=SOURCE_VERSION,
+            description="[dataset_name] source schema",
+            schema="source",
+            subset_id="[dataset_name]",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="[dataset_name]_bigbio_[schema_name]",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="[dataset_name] BigBio schema",
+            schema="bigbio_[bigbio_schema_name]",
+            subset_id="[dataset_name]",
+        )
     ]
 
     DEFAULT_CONFIG_NAME = "source"
@@ -119,7 +146,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # You can arbitrarily nest lists and dictionaries.
         # For iterables, use lists over tuples or `datasets.Sequence`
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # TODO: Create your source schema here
             raise NotImplementedError()
 
@@ -144,7 +171,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # In rare cases you may get a dataset that supports multiple tasks. In that case you can define multiple bigbio configs with a bigbio-<task> format.
 
         # For example bigbio-translation, bigbio-ner
-        elif self.config.name == "bigbio":
+        elif self.config.schema ==" bigbio_[bigbio_schema_name]":
             # TODO: Implement your big-bio schema here
             raise NotImplementedError()
 
