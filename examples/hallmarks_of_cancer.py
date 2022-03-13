@@ -59,9 +59,9 @@ _URLs = {
     "hoc": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"
 }
 
-_SUPPORTED_TASKS = ["TEXT"]
+_SUPPORTED_TASKS = ["TOPIC CLASSIFICATION"]
 _SOURCE_VERSION = datasets.Version("1.0.0")
-_BIOBIO_VERSION = datasets.Version("1.0.0")
+_BIGBIO_VERSION = datasets.Version("1.0.0")
 
 _CLASS_NAMES = [
     "Activating invasion and metastasis",
@@ -81,32 +81,35 @@ _CLASS_NAMES = [
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
-
-    schema: str = None  # options = (source|bigbio)
-    task_id: str = None  # e.g, bioasq10b
-
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""
 
-    DEFAULT_CONFIG_NAME = "hoc_source"
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="hoc_source",
-            version=_SOURCE_VERSION,
+            version=SOURCE_VERSION,
             description="Hallmarks of Cancer source schema",
             schema="source",
             task_id="hoc",
         ),
         BigBioConfig(
-            name="hoc_bigbio",
-            version=_BIOBIO_VERSION,
+            name="hoc_bigbio_text",
+            version=BIGBIO_VERSION,
             description="Hallmarks of Cancer Biomedical schema",
-            schema="biobio_text",
+            schema="bigbio_text",
             task_id="hoc",
         ),
     ]
+    DEFAULT_CONFIG_NAME = "hoc_source"
 
     def _info(self):
 
