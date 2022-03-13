@@ -137,7 +137,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "[dataset_name]_source"
 
     def _info(self):
 
@@ -171,7 +171,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # In rare cases you may get a dataset that supports multiple tasks. In that case you can define multiple bigbio configs with a bigbio-<task> format.
 
         # For example bigbio-translation, bigbio-ner
-        elif self.config.schema ==" bigbio_[bigbio_schema_name]":
+        elif self.config.schema =="bigbio_[bigbio_schema_name]":
             # TODO: Implement your big-bio schema here
             raise NotImplementedError()
 
