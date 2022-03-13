@@ -36,8 +36,6 @@ _CITATION = """\
   bibsource = {}
 }
 """
-_DATASETNAME = "chemprot"
-
 _DESCRIPTION = """\
 The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
 """
