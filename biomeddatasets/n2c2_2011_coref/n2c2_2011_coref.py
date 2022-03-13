@@ -267,9 +267,10 @@ def _tokoff_from_line(text: str) -> List[Tuple[int, int]]:
     return tokoff
 
 
-def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
-    return "{}-entity-{}-{}-{}-{}".format(
+def _form_entity_id(sample_id, split, start_line, start_token, end_line, end_token):
+    return "{}-entity-{}-{}-{}-{}-{}".format(
         sample_id,
+        split,
         start_line,
         start_token,
         end_line,
@@ -277,7 +278,7 @@ def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
     )
 
 
-def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
+def _get_corefs_from_sample(sample_id, sample, sample_entity_ids, split):
     """Parse the lines of a *.chains file into coreference objects
 
     A small number of concepts from the *.con files could not be
@@ -293,6 +294,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
         coref_entity_ids = [
             _form_entity_id(
                 sample_id,
+                split,
                 entity["start_line"],
                 entity["start_token"],
                 entity["end_line"],
@@ -310,7 +312,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
     return corefs
 
 
-def _get_entities_from_sample(sample_id, sample):
+def _get_entities_from_sample(sample_id, sample, split):
     """Parse the lines of a *.con concept file into entity objects
 
     Here we parse the *.con files and form entities. For a small
@@ -374,6 +376,7 @@ def _get_entities_from_sample(sample_id, sample):
 
         entity_id = _form_entity_id(
             sample_id,
+            split,
             cp["start_line"],
             cp["start_token"],
             cp["end_line"],
@@ -382,13 +385,35 @@ def _get_entities_from_sample(sample_id, sample):
         entity = {
             "id": entity_id,
             "offsets": [(start_off, end_off)],
-            "text": [cp["text"]],
+            # this is the difference between taking text from the entity
+            # or taking the text from the offsets. the differences are
+            # almost all casing with some small number of new line characters
+            # making up the rest
+            #"text": [cp["text"]],
+            "text": [text_slice],
             "type": cp["type"],
             "normalized": [],
         }
         entities.append(entity)
 
-    return entities
+    # IDs are constructed such that duplicate IDs indicate duplicate (i.e. redundant) entities
+    # In practive this removes one duplicate sample from the test set
+    # {
+    #    'id': 'clinical-627-entity-test-122-9-122-9',
+    #    'offsets': [(5600, 5603)],
+    #    'text': ['her'],
+    #    'type': 'person'
+    # }
+    dedupe_entities = []
+    dedupe_entity_ids = set()
+    for entity in entities:
+        if entity["id"] in dedupe_entity_ids:
+            continue
+        else:
+            dedupe_entity_ids.add(entity["id"])
+            dedupe_entities.append(entity)
+
+    return dedupe_entities
 
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
@@ -523,12 +548,12 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         }
 
     @staticmethod
-    def _get_coref_sample(sample_id, sample):
+    def _get_coref_sample(sample_id, sample, split):
 
         passage_text = sample.get("txt", "")
-        entities = _get_entities_from_sample(sample_id, sample)
+        entities = _get_entities_from_sample(sample_id, sample, split)
         entity_ids = set([entity["id"] for entity in entities])
-        coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids)
+        coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids, split)
         return {
             "id": sample_id,
             "document_id": sample_id,
@@ -561,7 +586,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                     if self.config.name == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
                     elif self.config.name == "bigbio":
-                        yield _id, self._get_coref_sample(sample_id, sample)
+                        yield _id, self._get_coref_sample(sample_id, sample, split)
                     _id += 1
 
         elif split == "test":
@@ -580,5 +605,5 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 if self.config.name == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
                 elif self.config.name == "bigbio":
-                    yield _id, self._get_coref_sample(sample_id, sample)
+                    yield _id, self._get_coref_sample(sample_id, sample, split)
                 _id += 1

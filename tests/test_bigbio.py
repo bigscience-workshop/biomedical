@@ -20,7 +20,7 @@ from collections import defaultdict
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
-from typing import Iterator, Optional, Union, Iterable
+from typing import Iterator, Optional, Union, Iterable, List
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -590,8 +590,8 @@ class TestDataLoader(unittest.TestCase):
     def _check_offsets(
         self,
         example_text: str,
-        offsets: list[list[int]],
-        texts: list[str],
+        offsets: List[List[int]],
+        texts: List[str],
     ) -> Iterator:
         """
 
