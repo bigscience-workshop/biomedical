@@ -77,10 +77,11 @@ _BIOBIO_VERSION = datasets.Version("1.0.0")
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
-
-    schema: str = None  # options = (source|bigbio)
-    task_id: str = None  # e.g, bioasq10b
-
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
@@ -98,7 +99,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             task_id="bc5cdr",
         ),
         BigBioConfig(
-            name="bc5cdr_bigbio",
+            name="bc5cdr_bigbio_kb",
             version=_BIOBIO_VERSION,
             description="BC5CDR simplified BigBio schema",
             schema="bigbio_kb",
