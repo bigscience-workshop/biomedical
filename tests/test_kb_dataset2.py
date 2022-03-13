@@ -5,7 +5,7 @@ from collections import defaultdict
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
-from typing import Iterator, Optional, Union
+from typing import List, Iterator, Optional, Union
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -227,8 +227,8 @@ class TestKBDataset(unittest.TestCase):
     def _check_offsets(
         self,
         example_text: str,
-        offsets: list[list[int]],
-        texts: list[str],
+        offsets: List[List[int]],
+        texts: List[str],
     ) -> Iterator:
         """
         From a KB instance, check if offsets in the text for a given key matches the actual found text.
