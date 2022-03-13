@@ -20,7 +20,7 @@ The script loads dataset in bigbio schema (using knowledgebase schema: schemas/k
 """
 import os
 from typing import Dict, Tuple
-
+from dataclasses import dataclass
 import datasets
 
 _CITATION = """\
@@ -49,34 +49,47 @@ _LICENSE = "Public Domain Mark 1.0"
 _URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
          "bigbio": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
+_SUPPORTED_TASKS = ["RE", "NER", "NED"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
-            version=VERSION,
-            description="Source schema"
+        BigBioConfig(
+            name="chemprot_source",
+            version=SOURCE_VERSION,
+            description="chemprot source schema",
+            schema="source",
+            subset_id="chemprot",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="chemprot_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="chemprot BigBio schema",
+            schema="bigbio_kb",
+            subset_id="chemprot",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "chemprot_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "pmid": datasets.Value("string"),
@@ -100,7 +113,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
