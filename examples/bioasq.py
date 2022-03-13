@@ -370,7 +370,7 @@ _URLs = {
     "bioasq2b": ["BioASQ-trainingDataset2b.zip", "Task2BGoldenEnriched.zip"],
 }
 
-_SUPPORTED_TASKS = ["qa"]
+_SUPPORTED_TASKS = ["QA"]
 _SOURCE_VERSION = datasets.Version("1.0.0")
 _BIOBIO_VERSION = datasets.Version("1.0.0")
 
@@ -389,7 +389,6 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     Creates configs for BioASQ2 through BioASQ10.
     """
 
-    VERSION = datasets.Version("1.0.0")
     DEFAULT_CONFIG_NAME = "bioasq9b_source"
 
     # BioASQ2 through BioASQ10
@@ -408,7 +407,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             name=f"bioasq{version}b_bigbio",
             version=_BIOBIO_VERSION,
             description=f"bioasq{version} Task B in simplified BigBio schema",
-            schema="bigbio",
+            schema="bigbio_qa",
             task_id=f"bioasq{version}b",
         )
         for version in range(2, 11)
@@ -447,7 +446,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         # simplified schema for QA tasks
-        elif self.config.schema == "bigbio":
+        elif self.config.schema == "bigbio_qa":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -538,7 +537,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         elif record["type"] == "summary":
             exact_answer = []
             # summary question types only have an ideal answer, so use that for bigbio
-            if self.config.schema == "bigbio":
+            if self.config.schema == "bigbio_qa":
                 exact_answer = (
                     record["ideal_answer"]
                     if isinstance(record["ideal_answer"], list)
@@ -577,8 +576,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                         "snippets": record["snippets"] if "snippets" in record else [],
                     }
 
-        elif self.config.schema == "bigbio":
-
+        elif self.config.schema == "bigbio_qa":
             with open(filepath, encoding="utf-8") as file:
                 uid = 0
                 data = json.load(file)
