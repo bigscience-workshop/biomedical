@@ -1,5 +1,5 @@
 """
-Unit-tests to ensure tasks adhere to QA for big-bio schema.
+Unit-tests to ensure tasks adhere to big-bio schema.
 """
 import sys
 import datasets
@@ -30,7 +30,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-_TASK_MAP = {
+_TASK_TO_SCHEMA = {
     "kb": "kb",
     "ner": "kb",
     "ned": "kb",
@@ -51,7 +51,7 @@ _TASK_MAP = {
     "pairs": "pairs",
 }
 
-_SCHEMA_MAP = {
+_SCHEMA_TO_FEAUTURES = {
     "kb": kb_features,
     "qa": qa_features,
     "entailment": entailment_features,
@@ -106,27 +106,27 @@ class TestDataLoader(unittest.TestCase):
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
-        # self.test_name()
+        self.test_name()
         self.setUp()
-        # self.test_are_ids_globally_unique()
+        self.test_are_ids_globally_unique()
 
         # KB-specific unit-tests
         for task in self._SUPPORTED_TASKS:
             self.test_schema(task)
 
-            mapped_task = _SCHEMA_MAP[_TASK_MAP[task.lower()]]
+            mapped_task = _SCHEMA_TO_FEAUTURES[_TASK_TO_SCHEMA[task.lower()]]
             self.print_statistics(mapped_task)
 
-            # if _TASK_MAP[task.lower()] == "kb":
-            # self.test_do_all_referenced_ids_exist()
-            # self.test_passages_offsets()
-            # self.test_entities_offsets()
-            # self.test_events_offsets()
-            # self.test_coref_ids()
+            if _TASK_TO_SCHEMA[task.lower()] == "kb":
+                self.test_do_all_referenced_ids_exist()
+                self.test_passages_offsets()
+                self.test_entities_offsets()
+                self.test_events_offsets()
+                self.test_coref_ids()
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
-        logger.info("Checking if data loads")
+        logger.info("Checking if source data loads")
         # TODO: Enforce if source is relevant
         self.dataset_source = datasets.load_dataset(
             self.PATH,
@@ -135,6 +135,7 @@ class TestDataLoader(unittest.TestCase):
             use_auth_token=self.USE_AUTH_TOKEN,
         )
 
+        logger.info("Checking if bigbio data loads")
         self.dataset_bigbio = datasets.load_dataset(
             self.PATH,
             name=self.VIEW,
@@ -150,7 +151,8 @@ class TestDataLoader(unittest.TestCase):
 
     def print_statistics(self, schema: Features):
         """
-        Gets sample statistics, for each split and sample of the number of features in the schema present; only works for the big-bio schema.
+        Gets sample statistics, for each split and sample of the number of
+        features in the schema present; only works for the big-bio schema.
 
         :param schema_type: Type of schema to reference features from
         """  # noqa
@@ -163,9 +165,7 @@ class TestDataLoader(unittest.TestCase):
             for example in split:
                 for feature_name, feature in schema.items():
                     if example.get(feature_name, None) is not None:
-                        if isinstance(feature, datasets.Value) or isinstance(
-                            feature_name, dict
-                        ):
+                        if isinstance(feature, datasets.Value):
                             if example[feature_name]:
                                 counter[feature_name] += 1
                         else:
@@ -353,7 +353,7 @@ class TestDataLoader(unittest.TestCase):
         biomedical/biomeddatasets/<name_of_dataset>/<name_of_dataloader_script>
         """  # noqa
         datafolder = Path("biomeddatasets/") / self.NAME
-        datascript = datafolder / self.NAME + ".py"
+        datascript = (datafolder / self.NAME).with_suffix(".py")
         self.assertTrue(datafolder.exists(), "Folder not named " + self.NAME)
 
         self.assertTrue(
@@ -364,14 +364,17 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, task: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
-        mapped_task = self._test_task_exists(task)
+        mapped_schema = self._test_task_exists(task)
+        logger.info(f"task={task}, mapped_schema={mapped_schema}")
 
-        if mapped_task == "kb":
+        if mapped_schema == "kb":
+
             logger.info("NER/NED/EE/RE/COREF Task")
 
-            schema = kb_features
+            features = kb_features
+            logger.info(f"all feature names: {set(features.keys())}")
 
-            # TODO - change this
+            # construct task specific required keys
             opt_keys = [
                 "entities",
                 "events",
@@ -379,106 +382,69 @@ class TestDataLoader(unittest.TestCase):
                 "relations",
             ]
 
-            needed_keys = [
-                key for key in schema.keys() if key not in opt_keys
-            ]
+            needed_keys = [key for key in features.keys() if key not in opt_keys]
+
+            if task == "ner" or task == "re":
+                sub_keys = ["entities", "relations"]
+            elif task == "ned":
+                sub_keys = ["entities"]
+            elif task == "coref":
+                sub_keys = ["entities", "coreferences"]
+            elif task == "events":
+                sub_keys = ["events"]
+            else:
+                raise ValueError(f"Task {task} not recognized")
+
+
+            logger.info(f"needed_keys: {needed_keys}")
+            logger.info(f"sub_keys: {sub_keys}")
+
 
             for split in self.dataset_bigbio.keys():
                 example = self.dataset_bigbio[split][0]
 
                 # Check for mandatory keys
-                mandatory_keys = all(
-                    [
-                        key in example
-                        for key in schema.keys()
-                        if key not in opt_keys
-                    ]
-                )
+                missing_keys = set(needed_keys) - set(example.keys())
                 self.assertTrue(
-                    mandatory_keys,
-                    "id/document_id/passages missing from bigbio view",
+                    len(missing_keys) == 0,
+                    f"{missing_keys} are missing from bigbio view",
                 )
 
-                subkeys = []
+                for key in sub_keys:
+                    for attrs in features[key]:
+                        self.assertTrue(self._check_subkey(example[key][0], attrs))
 
-                # Ensure tasks that require certain fields are present
-                if task == "ner" or task == "re":
-                    subkeys += ["entities", "relations"]
+                # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
+                extra_keys = set(example.keys()) - set(needed_keys) - set(sub_keys)
+                logger.info(f"extra_keys in {split}: {extra_keys}")
+                for key in extra_keys:
+                    if key in features.keys():
+                        for attrs in features[key]:
+                            self.assertTrue(self._check_subkey(example[key][0], attrs))
 
-                    for key in subkeys:
-                        for attrs in schema[key]:
-
-                            self.assertTrue(
-                                self._check_subkey(example[key][0], attrs)
-                            )
-                elif task == "ned":
-                    subkeys += ["entities"]
-
-                    for key in subkeys:
-                        for attrs in schema[key]:
-
-                            self.assertTrue(
-                                self._check_subkey(example[key][0], attrs)
-                            )
-                elif task == "coref":
-                    subkeys += ["coreferences"]
-
-                    for key in subkeys:
-                        for attrs in schema[key]:
-
-                            self.assertTrue(
-                                self._check_subkey(example[key][0], attrs)
-                            )
-
-                elif task == "events":
-                    subkeys += ["events"]
-
-                    for key in subkeys:
-                        for attrs in schema[key]:
-
-                            self.assertTrue(
-                                self._check_subkey(example[key][0], attrs)
-                            )
-                else:
-                    # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
-                    extra_keys = [
-                        k
-                        for k in example.keys()
-                        if k not in subkeys + needed_keys
-                    ]
-                    for key in extra_keys:
-                        if key in schema.keys():
-                            for attrs in schema[key]:
-                                self.assertTrue(
-                                    self._check_subkey(
-                                        example[key][0], attrs
-                                    )
-                                )
-
-        elif mapped_task == "qa":
+        elif mapped_schema == "qa":
             logger.info("Question-Answering Task")
-            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
+            self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_task == "entailment":
+        elif mapped_schema == "entailment":
             logger.info("Entailment Task")
-            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
+            self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_task == "text_to_text":
+        elif mapped_schema == "text_to_text":
             logger.info("Translation/Summarization/Paraphrasing Task")
-            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
+            self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_task == "text":
+        elif mapped_schema == "text":
             logger.info("Sentence/Phrase/Text Classification Task")
-            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
+            self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_task == "pairs":
+        elif mapped_schema == "pairs":
             logger.info("Pair Labels Task")
-            self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
+            self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
         else:
             raise ValueError(
-                task
-                + " not recognized; only 'kb', 'qa', 'entailment', 'text_to_text', 'text', 'pairs'-type tasks are allowed"
+                f"{task} not recognized, only {set(_TASK_TO_SCHEMA.values())}-type tasks are allowed"
             )
 
     def _test_task_exists(self, task_name: str):
@@ -486,9 +452,9 @@ class TestDataLoader(unittest.TestCase):
         Check if valid task name is provided
         """
         task = task_name.lower()
-        mapped_task = _TASK_MAP.get(task, None)
-        self.assertFalse(mapped_task is None, task + " is not recognized")
-        return mapped_task
+        mapped_schema = _TASK_TO_SCHEMA.get(task, None)
+        self.assertFalse(mapped_schema is None, task + " is not recognized")
+        return mapped_schema
 
     @staticmethod
     def _check_subkey(inp, attrs):
