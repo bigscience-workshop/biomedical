@@ -45,7 +45,7 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 _LICENSE = "Public Domain Mark 1.0"
 
 _URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
-         "bigbio": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
+         "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
 _SUPPORTED_TASKS = ["RE", "NER", "NED"]
 _SOURCE_VERSION = "1.0.0"
@@ -166,7 +166,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        my_urls = _URLs[self.config.name]
+        my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
 
         # Extract each of the individual folders
@@ -221,7 +221,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
         """Yields examples as (key, example) tuples."""
-        if self.config.name == "source":
+        if self.config.schema == "source":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
@@ -245,7 +245,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "relations": relations.get(pmid, empty_reln),
                 }
 
-        if self.config.name == "bigbio":
+        if self.config.schema == "bigbio_kb":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
