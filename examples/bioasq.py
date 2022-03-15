@@ -371,14 +371,13 @@ _URLs = {
 }
 
 _SUPPORTED_TASKS = ["QA"]
-_SOURCE_VERSION = datasets.Version("1.0.0")
-_BIGBIO_VERSION = datasets.Version("1.0.0")
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
-
     name: str = None
     version: str = None
     description: str = None
@@ -397,26 +396,27 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     # BioASQ2 through BioASQ10
-    BUILDER_CONFIGS = [
-        BigBioConfig(
-            name=f"bioasq{version}b_source",
-            version=SOURCE_VERSION,
-            description=f"bioasq{version} Task B source schema",
-            schema="source",
-            subset_id=f"bioasq{version}b",
+    BUILDER_CONFIGS = []
+    for version in range(2,11):
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"bioasq{version}b_source",
+                version=SOURCE_VERSION,
+                description=f"bioasq{version} Task B source schema",
+                schema="source",
+                subset_id=f"bioasq{version}b",
+            )
         )
-        for version in range(2, 11)
-    ]
-    BUILDER_CONFIGS += [
-        BigBioConfig(
-            name=f"bioasq{version}b_bigbio_qa",
-            version=BIGBIO_VERSION,
-            description=f"bioasq{version} Task B in simplified BigBio schema",
-            schema="bigbio_qa",
-            subset_id=f"bioasq{version}b",
+
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"bioasq{version}b_bigbio_qa",
+                version=BIGBIO_VERSION,
+                description=f"bioasq{version} Task B in simplified BigBio schema",
+                schema="bigbio_qa",
+                subset_id=f"bioasq{version}b",
+            )
         )
-        for version in range(2, 11)
-    ]
 
     def _info(self):
 
@@ -465,7 +465,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             )
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION[self.config.task_id],
+            description=_DESCRIPTION[self.config.subset_id],
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
@@ -478,7 +478,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         BioASQ test data is split into multiple records {9B1_golden.json,...,9B5_golden.json}
         We combine these files into a single test set file 9Bx_golden.json
         """
-        version = re.search(r"bioasq([0-9]+)b", self.config.task_id).group(1)
+        version = re.search(r"bioasq([0-9]+)b", self.config.subset_id).group(1)
         gold_fpath = os.path.join(
             data_dir, f"Task{version}BGoldenEnriched/bx_golden.json"
         )
@@ -499,7 +499,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         train_dir, test_dir = dl_manager.download_and_extract(
-            _URLs[self.config.task_id]
+            _URLs[self.config.subset_id]
         )
         gold_fpath = self._dump_gold_json(test_dir)
 
@@ -521,7 +521,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepath": os.path.join(
-                        train_dir, train_fpaths[self.config.task_id]
+                        train_dir, train_fpaths[self.config.subset_id]
                     ),
                     "split": "train",
                 },
@@ -600,3 +600,4 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                             "answer": self._get_exact_answer(record),
                         }
                         uid += 1
+
