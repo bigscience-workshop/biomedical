@@ -153,7 +153,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                     quoting=csv.QUOTE_ALL,
                     skipinitialspace=True)
 
-                if self.config.name == "source":
+                if self.config.schema == "source":
                     for id_, row in enumerate(csv_reader):
                         document_id, text_1, text_2, label = row
                         yield id_, {
@@ -163,7 +163,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                             "label": label,
                         }
 
-                elif self.config.name == "bigbio":
+                elif self.config.schema == "bigbio_pairs":
                     # global id (uid) starts from 1
                     uid = 0
                     for id_, row in enumerate(csv_reader):
@@ -179,4 +179,3 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
         else:
             print("There's no test/val split available for the given dataset")
             return
-
