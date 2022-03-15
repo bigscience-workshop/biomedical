@@ -56,12 +56,13 @@ _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 _LICENSE = "GNU General Public License v3.0"
 
 _URLs = {
-    "hoc": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"
+    "source": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
+    "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
 }
 
 _SUPPORTED_TASKS = ["TOPIC CLASSIFICATION"]
-_SOURCE_VERSION = datasets.Version("1.0.0")
-_BIGBIO_VERSION = datasets.Version("1.0.0")
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
 _CLASS_NAMES = [
     "Activating invasion and metastasis",
@@ -99,14 +100,14 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
             version=SOURCE_VERSION,
             description="Hallmarks of Cancer source schema",
             schema="source",
-            task_id="hoc",
+            subset_id="hoc",
         ),
         BigBioConfig(
             name="hoc_bigbio_text",
             version=BIGBIO_VERSION,
             description="Hallmarks of Cancer Biomedical schema",
             schema="bigbio_text",
-            task_id="hoc",
+            subset_id="hoc",
         ),
     ]
     DEFAULT_CONFIG_NAME = "hoc_source"
@@ -189,4 +190,3 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
                 }
 
                 uid += 1
-
