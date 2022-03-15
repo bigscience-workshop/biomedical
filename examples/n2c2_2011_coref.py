@@ -106,8 +106,8 @@ import re
 import tarfile
 from typing import Dict, List, Match, Tuple
 import zipfile
-
 import datasets
+from dataclasses import dataclass
 from datasets import Features, Sequence, Value
 
 
@@ -390,6 +390,15 @@ def _get_entities_from_sample(sample_id, sample):
 
     return entities
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
+
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
@@ -398,23 +407,27 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
+        BigBioConfig(
+            name="n2c2_2011_source",
             version=SOURCE_VERSION,
-            description="Source format",
+            description="n2c2_2011 source schema",
+            schema="source",
+            subset_id="n2c2_2011",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="n2c2_2011_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="BigScience biomedical hackathon schema",
-        ),
+            description="n2c2_2011 BigBio schema",
+            schema="bigbio_kb",
+            subset_id="n2c2_2011",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "n2c2_2011_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = Features(
                 {
                     "sample_id": Value("string"),
@@ -431,7 +444,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             features = Features(
                 {
                     "id": Value("string"),
@@ -582,3 +595,4 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 elif self.config.name == "bigbio":
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
+

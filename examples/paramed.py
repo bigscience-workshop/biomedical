@@ -21,7 +21,7 @@ The script loads dataset in bigbio schema (using schemas/text-to-text) AND/OR so
 """
 import os  # useful for paths
 from typing import Dict, Iterable, List
-
+from dataclasses import dataclass
 import datasets
 
 logger = datasets.logging.get_logger(__name__)
@@ -53,38 +53,51 @@ _LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
-    "bigbio": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
+    "bigbio_text_to_text": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
 }
-
+_SUPPORTED_TASKS = ["TRANSLATION"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _DATA_DIR = "./processed_data/open_access/open_access"
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
+
 class ParamedDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
-            version=VERSION,
-            description="Source schema"
+        BigBioConfig(
+            name="paramed_source",
+            version=SOURCE_VERSION,
+            description="Paramed source schema",
+            schema="source",
+            subset_id="paramed",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="paramed_bigbio_text_to_text",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="Paramed BigBio schema",
+            schema="bigbio_text_to_text",
+            subset_id="paramed",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "paramed_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "document_id": datasets.Value("string"),
@@ -95,7 +108,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_text_to_text":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -120,9 +133,9 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
 
-        my_urls = _URLs[self.config.name]
+        my_urls = _URLs[self.config.schema]
         data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)
-        #print(data_dir)
+        print(data_dir)
 
         return [
             datasets.SplitGenerator(
@@ -170,7 +183,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
 
         assert len(en_lines) == len(zh_lines), "Line mismatch"
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
                 yield key, {
                     "document_id": str(key),
@@ -182,7 +195,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             zh_file.close()
             en_file.close()
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_text_to_text":
             uid = 0
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
                 uid += 1

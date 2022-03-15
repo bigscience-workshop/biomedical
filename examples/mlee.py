@@ -20,25 +20,10 @@ The annotations span molecular, cellular, tissue, and organ-level processes.
 """
 from collections import defaultdict
 from pathlib import Path
-
 import datasets
 from typing import Iterable, Dict, List
-
+from dataclasses import dataclass
 import utils
-
-"""
-Step 2: Create keyword descriptors for your dataset
-
-The following variables are used to populate the dataset entry. Common ones include:
-
-- `_DATASETNAME` = "your_dataset_name"
-- `_CITATION`: Latex-style citation of the dataset
-- `_DESCRIPTION`: Explanation of the dataset
-- `_HOMEPAGE`: Where to find the dataset's hosted location
-- `_LICENSE`: License to use the dataset
-- `_URLs`: How to download the dataset(s), by name; make this in the form of a dictionary where <dataset_name> is the key and <url_of_dataset> is the value
-- `_VERSION`: Version of the dataset
-"""
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
@@ -68,39 +53,46 @@ _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 
 _LICENSE = "CC BY-NC-SA 3.0"
 
-_URLs = {"mlee": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz"}
+_URLs = {"source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+         "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",}
 
-_VERSION = "1.0.0"
+_SUPPORTED_TASKS = ["EVENT EXTRACTION"]
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
-"""
-Step 3: Change the class name to correspond to your <Your_Dataset_Name> 
-ex: "ChemProtDataset".
-
-Then, fill all relevant information to `BuilderConfig` which populates information about the class. You may have multiple builder configs (ex: a large dataset separated into multiple partitions) if you populate for different dataset names + descriptions. The following is setup for just 1 dataset, but can be adjusted.
-
-NOTE - train/test/dev splits can be handled in `_split_generators`.
-"""
-
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class MLEE(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
-    VERSION = datasets.Version(_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name=_SOURCE_VIEW_NAME,
-            version=VERSION,
-            description=_DESCRIPTION,
+        BigBioConfig(
+            name="mlee_source",
+            version=SOURCE_VERSION,
+            description="MLEE source schema",
+            schema="source",
+            subset_id="mlee",
         ),
-        datasets.BuilderConfig(
-            name=_UNIFIED_VIEW_NAME,
-            version=VERSION,
-            description="BigScience biomedical hackathon schema",
+        BigBioConfig(
+            name="mlee_bigbio_kb",
+            version=SOURCE_VERSION,
+            description="MLEE BigBio schema",
+            schema="bigbio_kb",
+            subset_id="mlee",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _SOURCE_VIEW_NAME
+    DEFAULT_CONFIG_NAME = "mlee_source"
 
     _ENTITY_TYPES = {
         "Anatomical_system",
@@ -129,9 +121,8 @@ class MLEE(datasets.GeneratorBasedBuilder):
         original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
         canonical KB-task schema defined in `biomedical/schemas/kb.py`.
 
-
         """
-        if self.config.name == _SOURCE_VIEW_NAME:
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -206,7 +197,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                     ],
                 },
             )
-        elif self.config.name == _UNIFIED_VIEW_NAME:
+        elif self.config.schema == "bigbio_kb":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -299,7 +290,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
         call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
         """
 
-        my_urls = _URLs[_DATASETNAME]
+        my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
             "train": data_dir
@@ -331,13 +322,13 @@ class MLEE(datasets.GeneratorBasedBuilder):
         Yield one `(guid, example)` pair per abstract in MLEE.
         The contents of `example` will depend on the chosen configuration.
         """
-        if self.config.name == _SOURCE_VIEW_NAME:
+        if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = utils.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
-        elif self.config.name == _UNIFIED_VIEW_NAME:
+        elif self.config.schema == "bigbio_kb":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = utils.brat_parse_to_bigbio_kb(
@@ -348,4 +339,5 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
+
 

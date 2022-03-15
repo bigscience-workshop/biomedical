@@ -22,7 +22,7 @@ from typing import Dict, Tuple
 import datasets
 import csv
 from datasets import load_dataset
-
+from dataclasses import dataclass
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -51,37 +51,49 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 _LICENSE = ""
 
 _URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
-         "bigbio": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
+         "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
 
+_SUPPORTED_TASKS = ["PARAPHRASING"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
     """Medical Question Pairing dataset"""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
-            version=_SOURCE_VERSION,
-            description="Source schema"
+        BigBioConfig(
+            name="mqp_source",
+            version=SOURCE_VERSION,
+            description="MQP source schema",
+            schema="source",
+            subset_id="mqp",
         ),
-
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="mqp_bigbio_pairs",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="MQP BigBio schema",
+            schema="bigbio_pairs",
+            subset_id="mqp",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "mqp_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "document_id": datasets.Value("string"),
@@ -92,7 +104,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             )
 
         # Using in pairs schema
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_pairs":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -114,7 +126,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self,
                           dl_manager):
         """Returns SplitGenerators."""
-        my_urls = _URLs[self.config.name]
+        my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
 
         return [
@@ -141,7 +153,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                     quoting=csv.QUOTE_ALL,
                     skipinitialspace=True)
 
-                if self.config.name == "source":
+                if self.config.schema == "source":
                     for id_, row in enumerate(csv_reader):
                         document_id, text_1, text_2, label = row
                         yield id_, {
@@ -151,7 +163,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                             "label": label,
                         }
 
-                elif self.config.name == "bigbio":
+                elif self.config.schema == "bigbio_pairs":
                     # global id (uid) starts from 1
                     uid = 0
                     for id_, row in enumerate(csv_reader):
@@ -167,4 +179,3 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
         else:
             print("There's no test/val split available for the given dataset")
             return
-

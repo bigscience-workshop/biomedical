@@ -14,8 +14,8 @@
 
 import os
 import re
-from typing import Iterator
-
+from typing import Iterator, Dict, List, Tuple
+from dataclasses import dataclass
 import bioc
 import datasets
 
@@ -41,51 +41,55 @@ and current state-of-the-art named entity recognition systems disagreed on bio-e
 """
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-2"
-
 _LICENSE = " CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
 
 # files found here `https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/` have issues at extraction
 # _URLs = {"biocreative": "https://ftp.ncbi.nlm.nih.gov/pub/lu/NLMChem" }
 _URLs = {
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
-    "bigbio": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
+    "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
+_SUPPORTED_TASKS = ["NER", "NED"]
+_SOURCE_VERSION = "1.0.0"
+_BIGBIO_VERSION = "1.0.0"
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 class NLMChemDataset(datasets.GeneratorBasedBuilder):
     """NLMChem"""
 
-    VERSION = datasets.Version("2.0.0")
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # This is an example of a dataset with multiple configurations.
-    # If you don't want/need to define several sub-sets in your dataset,
-    # just remove the BUILDER_CONFIG_CLASS and the BUILDER_CONFIGS attributes.
-
-    # If you need to make complex sub-parts in the datasets with configurable options
-    # You can create your own builder configuration class to store attribute, inheriting from datasets.BuilderConfig
-    # BUILDER_CONFIG_CLASS = MyBuilderConfig
-
-    # You will be able to load one or the other configurations in the following list with
-    # data = datasets.load_dataset('my_dataset', 'first_domain')
-    # data = datasets.load_dataset('my_dataset', 'second_domain')
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
-            version=VERSION,
-            description="Original format",
+        BigBioConfig(
+            name="nlmchem_source",
+            version=SOURCE_VERSION,
+            description="NLM_Chem source schema",
+            schema="source",
+            subset_id="nlmchem",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
-            version="1.0.0",
-            description="BigScience biomedical hackathon schema",
-        ),
+        BigBioConfig(
+            name="nlmchem_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="NLM_Chem BigBio schema",
+            schema="bigbio_kb",
+            subset_id="nlmchem",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # this is a variation on the BioC format
             features = datasets.Features(
                 {
@@ -114,7 +118,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -169,7 +173,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
         # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
         # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
-        my_urls = _URLs[self.config.name]
+        my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
         return [
             datasets.SplitGenerator(
@@ -206,10 +210,10 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
     def _get_passages_and_entities(
         self, d: bioc.BioCDocument
-    ) -> tuple[list[dict], list[list[dict]]]:
+    ) -> Tuple[List[Dict], List[List[Dict]]]:
 
-        passages: list[dict] = []
-        entities: list[list[dict]] = []
+        passages: List[Dict] = []
+        entities: List[List[Dict]] = []
 
         text_total_length = 0
 
@@ -264,7 +268,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         return passages, entities
 
-    def _get_normalized(self, a: bioc.BioCAnnotation) -> list[dict]:
+    def _get_normalized(self, a: bioc.BioCAnnotation) -> List[Dict]:
         """
         Get normalization DB and ID from annotation identifiers
         """
@@ -293,12 +297,12 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         self,
         filepath: str,
         split: str,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    ) -> Iterator[tuple[int, dict]]:
+    ) -> Iterator[Tuple[int, Dict]]:
         """Yields examples as (key, example) tuples."""
 
         reader = bioc.BioCXMLDocumentReader(str(filepath))
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
 
             for uid, doc in enumerate(reader):
 
@@ -313,7 +317,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
                 yield uid, {"passages": passages}
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             uid = 0
             for idx, doc in enumerate(reader):
 
@@ -341,3 +345,4 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     "passages": passages,
                     "entities": entities,
                 }
+
