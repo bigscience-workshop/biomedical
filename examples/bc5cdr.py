@@ -66,12 +66,12 @@ _LICENSE = "Public Domain Mark 1.0"
 
 _URLs = {
     "source": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
-    "bigbio": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
+    "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
 _SUPPORTED_TASKS = ["NER", "NED", "RE"]
-_SOURCE_VERSION = datasets.Version("01.05.16")
-_BIOBIO_VERSION = datasets.Version("1.0.0")
+_SOURCE_VERSION = "01.05.16"
+_BIGBIO_VERSION = "1.0.0"
 
 
 @dataclass
@@ -89,21 +89,23 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
 
     DEFAULT_CONFIG_NAME = "bc5cdr_source"
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="bc5cdr_source",
-            version=_SOURCE_VERSION,
+            version=SOURCE_VERSION,
             description="BC5CDR source schema",
             schema="source",
-            task_id="bc5cdr",
+            subset_id="bc5cdr",
         ),
         BigBioConfig(
             name="bc5cdr_bigbio_kb",
-            version=_BIOBIO_VERSION,
+            version=BIGBIO_VERSION,
             description="BC5CDR simplified BigBio schema",
             schema="bigbio_kb",
-            task_id="bc5cdr",
+            subset_id="bc5cdr",
         ),
     ]
 
@@ -200,7 +202,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        my_urls = _URLs[self.config.name]
+        my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
         return [
             datasets.SplitGenerator(
