@@ -53,7 +53,8 @@ _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 
 _LICENSE = "CC BY-NC-SA 3.0"
 
-_URLs = {"mlee": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz"}
+_URLs = {"source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+         "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",}
 
 _SUPPORTED_TASKS = ["EVENT EXTRACTION"]
 _SOURCE_VERSION = "1.0.0"
@@ -75,14 +76,14 @@ class MLEE(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
+        BigBioConfig(
             name="mlee_source",
             version=SOURCE_VERSION,
             description="MLEE source schema",
             schema="source",
             subset_id="mlee",
         ),
-        datasets.BuilderConfig(
+        BigBioConfig(
             name="mlee_bigbio_kb",
             version=SOURCE_VERSION,
             description="MLEE BigBio schema",
@@ -289,7 +290,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
         call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
         """
 
-        my_urls = _URLs[_DATASETNAME]
+        my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
             "train": data_dir
@@ -321,13 +322,13 @@ class MLEE(datasets.GeneratorBasedBuilder):
         Yield one `(guid, example)` pair per abstract in MLEE.
         The contents of `example` will depend on the chosen configuration.
         """
-        if self.config.name == _SOURCE_VIEW_NAME:
+        if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = utils.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
-        elif self.config.name == _UNIFIED_VIEW_NAME:
+        elif self.config.schema == "bigbio_kb":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = utils.brat_parse_to_bigbio_kb(
@@ -338,4 +339,5 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
+
 
