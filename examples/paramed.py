@@ -135,7 +135,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
 
         my_urls = _URLs[self.config.schema]
         data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)
-        #print(data_dir)
+        print(data_dir)
 
         return [
             datasets.SplitGenerator(
@@ -183,7 +183,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
 
         assert len(en_lines) == len(zh_lines), "Line mismatch"
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
                 yield key, {
                     "document_id": str(key),
@@ -195,7 +195,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             zh_file.close()
             en_file.close()
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_text_to_text":
             uid = 0
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
                 uid += 1
