@@ -14,7 +14,7 @@
 
 import os
 import re
-from typing import Iterator
+from typing import Iterator, Dict, List, Tuple
 from dataclasses import dataclass
 import bioc
 import datasets
@@ -210,10 +210,10 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
     def _get_passages_and_entities(
         self, d: bioc.BioCDocument
-    ) -> tuple[list[dict], list[list[dict]]]:
+    ) -> Tuple[List[Dict], List[List[Dict]]]:
 
-        passages: list[dict] = []
-        entities: list[list[dict]] = []
+        passages: List[Dict] = []
+        entities: List[List[Dict]] = []
 
         text_total_length = 0
 
@@ -268,7 +268,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         return passages, entities
 
-    def _get_normalized(self, a: bioc.BioCAnnotation) -> list[dict]:
+    def _get_normalized(self, a: bioc.BioCAnnotation) -> List[Dict]:
         """
         Get normalization DB and ID from annotation identifiers
         """
@@ -297,7 +297,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         self,
         filepath: str,
         split: str,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-    ) -> Iterator[tuple[int, dict]]:
+    ) -> Iterator[Tuple[int, Dict]]:
         """Yields examples as (key, example) tuples."""
 
         reader = bioc.BioCXMLDocumentReader(str(filepath))
@@ -345,3 +345,4 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     "passages": passages,
                     "entities": entities,
                 }
+

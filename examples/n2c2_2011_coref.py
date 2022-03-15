@@ -595,3 +595,4 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 elif self.config.name == "bigbio":
                     yield _id, self._get_coref_sample(sample_id, sample)
                 _id += 1
+
