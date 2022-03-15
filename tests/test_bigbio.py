@@ -24,9 +24,10 @@ from typing import Iterator, Optional, Union, Iterable, List
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-import logging as log
+import logging
 
-log.basicConfig(level=log.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 _TASK_MAP = {
@@ -125,7 +126,7 @@ class TestDataLoader(unittest.TestCase):
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
-        log.info("Checking if data loads")
+        logger.info("Checking if data loads")
         # TODO: Enforce if source is relevant
         self.dataset_source = datasets.load_dataset(
             self.PATH,
@@ -142,7 +143,7 @@ class TestDataLoader(unittest.TestCase):
         )
 
         # Get task type of the dataset
-        log.info("Checking _SUPPORTED_TASKS present.")
+        logger.info("Checking _SUPPORTED_TASKS present.")
         self._SUPPORTED_TASKS = importlib.import_module(
             "biomeddatasets." + self.NAME + "." + self.NAME
         )._SUPPORTED_TASKS
@@ -153,7 +154,7 @@ class TestDataLoader(unittest.TestCase):
 
         :param schema_type: Type of schema to reference features from
         """  # noqa
-        log.info("Gathering schema statistics")
+        logger.info("Gathering schema statistics")
         for split_name, split in self.dataset_bigbio.items():
             print(split_name)
             print("=" * 10)
@@ -180,7 +181,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Tests each example in a split has a unique ID.
         """
-        log.info("Checking global ID uniqueness")
+        logger.info("Checking global ID uniqueness")
         for split in self.dataset_bigbio.values():
             ids_seen = set()
             for example in split:
@@ -190,7 +191,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Checks if referenced IDs are correctly labeled.
         """
-        log.info("Checking if referenced IDs are properly mapped")
+        logger.info("Checking if referenced IDs are properly mapped")
         for split in self.dataset_bigbio.values():
             for example in split:
                 referenced_ids = set()
@@ -215,7 +216,7 @@ class TestDataLoader(unittest.TestCase):
         Verify that the passages offsets are correct,
         i.e.: passage text == text extracted via the passage offsets
         """  # noqa
-        log.info("KB ONLY: Checking passage offsets")
+        logger.info("KB ONLY: Checking passage offsets")
         for split in self.dataset_bigbio:
 
             if "passages" in self.dataset_bigbio[split].features:
@@ -259,7 +260,7 @@ class TestDataLoader(unittest.TestCase):
         Verify that the entities offsets are correct,
         i.e.: entity text == text extracted via the entity offsets
         """  # noqa
-        log.info("KB ONLY: Checking entity offsets")
+        logger.info("KB ONLY: Checking entity offsets")
         errors = []
 
         for split in self.dataset_bigbio:
@@ -294,7 +295,7 @@ class TestDataLoader(unittest.TestCase):
         Verify that the events' trigger offsets are correct,
         i.e.: trigger text == text extracted via the trigger offsets
         """
-        log.info("KB ONLY: Checking event offsets")
+        logger.info("KB ONLY: Checking event offsets")
         errors = []
 
         for split in self.dataset_bigbio:
@@ -329,7 +330,7 @@ class TestDataLoader(unittest.TestCase):
 
         from `examples/test_n2c2_2011_coref.py`
         """  # noqa
-        log.info("KB ONLY: Checking coref offsets")
+        logger.info("KB ONLY: Checking coref offsets")
         for split in self.dataset_bigbio:
 
             if "coreferences" in self.dataset_bigbio[split].features:
@@ -366,7 +367,7 @@ class TestDataLoader(unittest.TestCase):
         mapped_task = self._test_task_exists(task)
 
         if mapped_task == "kb":
-            log.info("NER/NED/RE/Event Extraction/Coref Task")
+            logger.info("NER/NED/EE/RE/COREF Task")
 
             schema = kb_features
 
@@ -455,23 +456,23 @@ class TestDataLoader(unittest.TestCase):
                                 )
 
         elif mapped_task == "qa":
-            log.info("Question-Answering Task")
+            logger.info("Question-Answering Task")
             self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "entailment":
-            log.info("Entailment Task")
+            logger.info("Entailment Task")
             self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "text_to_text":
-            log.info("Translation/Summarization/Paraphrasing Task")
+            logger.info("Translation/Summarization/Paraphrasing Task")
             self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "text":
-            log.info("Sentence/Phrase/Text Classification Task")
+            logger.info("Sentence/Phrase/Text Classification Task")
             self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         elif mapped_task == "pairs":
-            log.info("Pair Labels Task")
+            logger.info("Pair Labels Task")
             self._check_keys(_SCHEMA_MAP[mapped_task], mapped_task)
 
         else:
@@ -630,11 +631,10 @@ class TestDataLoader(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("datset_script")
-    # args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
+
     parser = argparse.ArgumentParser(
-        description="Unit tests for dataset with KB schema. Args are passed to `datasets.load_dataset`"
+        description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
     parser.add_argument("--path", type=str, required=True)
