@@ -3,6 +3,12 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 
+def remove_prefix(a: str, prefix: str) -> str:
+    if a.startswith(prefix):
+        a = a[len(prefix):]
+    return a
+
+
 def parse_brat_file(txt_file: Path) -> Dict:
     """
     Parse a brat file into the schema defined below.
@@ -88,7 +94,7 @@ def parse_brat_file(txt_file: Path) -> Dict:
     """
 
     example = {}
-    example["document_id"] = txt_file.name.removesuffix(".txt")
+    example["document_id"] = txt_file.with_suffix("").name
     with txt_file.open() as f:
         example["text"] = f.read()
     a1_file = txt_file.with_suffix(".a1")
@@ -128,7 +134,7 @@ def parse_brat_file(txt_file: Path) -> Dict:
             ann["text"] = [fields[2]]
             ann["type"] = fields[1].split()[0]
             ann["offsets"] = []
-            span_str = fields[1].removeprefix(ann["type"] + " ")
+            span_str = remove_prefix(fields[1], (ann["type"] + " "))
             for span in span_str.split(";"):
                 start, end = span.split()
                 ann["offsets"].append([int(start), int(end)])
