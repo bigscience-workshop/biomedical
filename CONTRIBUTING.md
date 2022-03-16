@@ -122,15 +122,19 @@ Populate the information in the dataset according to this schema; some fields ma
 
 To enable quality control, please add the following line in your file before the class definition:
 ```python
-_SUPPORTED_TASKS = ["your_task_name_here"]
+_SUPPORTED_TASKS = ["task1", "task2", ...]
 ```
-For ease, please refer to the following keywords, given your NLP task:
-1. **NER, RE, Event Extraction, NED/ Coreference resolution**: `"kb"`
-2. **Question-Answering**:"" `"qa"`
-3. **Entailment**: `"entailment"`
-4. **Translation, Summarization, Paraphrasing**: `"text_to_text"`
-5. **Sentence/Phrase/Text Classification**: `"text"`
-6. **Pair Labels**: `"pairs"`
+Refer to the following list to find the correct task identifier:
+1. **Named Entity Recognition**: `"ner"`
+1. **Relation Extraction**: `"re"`
+1. **Named Entity Disambiguation**: `"ned"`
+1. **Coreference Resolution**: `"coref"`
+1. **Event Extraction**: `"events"`
+1. **Question-Answering**:`"qa"`
+1. **Entailment**: `"entailment"`
+1. **Translation, Summarization, Paraphrasing**: `"text_to_text"`
+1. **Sentence/Phrase/Text Classification**: `"text"`
+1. **Pair Labels**: `"pairs"`
 
 ##### Example scripts:
 To help you implement a dataset, we offer a template and example scripts.
