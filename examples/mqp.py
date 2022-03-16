@@ -56,8 +56,6 @@ _URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pai
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["pairs"]
-
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
     """Medical Question Pairing dataset"""

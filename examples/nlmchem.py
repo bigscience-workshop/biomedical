@@ -51,7 +51,6 @@ _URLs = {
     "bigbio": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
 
-_SUPPORTED_TASKS = ["ned"]
 
 class NLMChemDataset(datasets.GeneratorBasedBuilder):
     """NLMChem"""

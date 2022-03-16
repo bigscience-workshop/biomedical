@@ -76,7 +76,6 @@ _LICENSE = ""
 
 _URLs = ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"]
 
-_SUPPORTED_TASKS = ["qa"]
 
 class Bioasq9bDataset(datasets.GeneratorBasedBuilder):
     """BioASQ Task B On Biomedical Semantic QA."""

@@ -61,8 +61,6 @@ _BIGBIO_VERSION = "1.0.0"
 
 _DATA_DIR = "./processed_data/open_access/open_access"
 
-_SUPPORTED_TASKS = ["translation"]
-
 class ParamedDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 

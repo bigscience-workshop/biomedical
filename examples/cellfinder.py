@@ -57,8 +57,6 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["ner"]
-
 class CellFinderDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
 
