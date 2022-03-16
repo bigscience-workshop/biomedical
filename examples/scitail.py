@@ -23,7 +23,6 @@ to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 
 entails label and 16,925 examples with neutral label.
 """
 
-import itertools as it
 import os
 from dataclasses import dataclass
 
@@ -92,10 +91,10 @@ class SciTail(datasets.GeneratorBasedBuilder):
             subset_id="scitail",
         ),
         BigBioConfig(
-            name="scitail_bigbio_te",
+            name="scitail_bigbio_entailment",
             version=BIGBIO_VERSION,
             description="SciTail BigBio schema",
-            schema="bigbio_te",
+            schema="bigbio_entailment",
             subset_id="scitail",
         ),
     ]
@@ -114,7 +113,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio_te":
+        elif self.config.schema == "bigbio_entailment":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -163,10 +162,16 @@ class SciTail(datasets.GeneratorBasedBuilder):
         data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"])
         data["id"] = data.index
 
-        if self.config.name == "scitail_source":
+        if self.config.schema == "source":
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
 
-        elif self.config.name == "scitail_bigbio_te":
+        elif self.config.schema == "bigbio_entailment":
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
+
+
+if __name__ == "__main__":
+    from datasets import load_dataset
+    a = load_dataset("./examples/scitail.py", "scitail_bigbio_entailment")
+    print(a)
