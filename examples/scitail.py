@@ -59,7 +59,7 @@ _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-_SUPPORTED_TASKS = ["TE"]
+_SUPPORTED_TASKS = ["entailment"]
 
 _SOURCE_VERSION = "1.1.0"
 
@@ -163,7 +163,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
         data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"])
         data["id"] = data.index
 
-        if self.config.name == "source":
+        if self.config.name == "scitail_source":
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
 
