@@ -152,7 +152,7 @@ Run these commands within the `biomedical` repo, not in `biomedical/datasets` as
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```
-python -m tests/test_bigbio --path biomeddatasets/<your_dataset_name> [--data_dir /path/to/local/data]
+python -m tests/test_bigbio --path biomeddatasets/<your_dataset_name>/<your_dataset_name>.py [--data_dir /path/to/local/data]
 ```
 
 ### 5. Format your code
