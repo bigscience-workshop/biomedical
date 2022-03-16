@@ -384,7 +384,9 @@ class TestDataLoader(unittest.TestCase):
 
             needed_keys = [key for key in features.keys() if key not in opt_keys]
 
-            if task == "ner" or task == "re":
+            if task == "ner":
+                sub_keys = ["entities"]
+            elif task == "re":
                 sub_keys = ["entities", "relations"]
             elif task == "ned":
                 sub_keys = ["entities"]
