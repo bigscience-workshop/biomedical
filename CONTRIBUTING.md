@@ -2,14 +2,14 @@
 
 ## Pre-Requisites
 
-Please make a github account prior to implementing a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
+Please make a github account prior to implementing a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
-You will also need at least Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. **We strongly recommend Python 3.8+ for stability**. 
+You will also need at least Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. **We strongly recommend Python 3.8+ for stability**.
 
 **Optional** Setup your GitHub account with SSH ([instructions here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).)
 
 ### 1. **Setup a local version of the bigscience-biomed repo**
-Fork the bigscience-biomed dataset [repository](https://github.com/bigscience-workshop/biomedical) to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github. 
+Fork the bigscience-biomed dataset [repository](https://github.com/bigscience-workshop/biomedical) to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github.
 
 After you fork, clone the repository locally. You can do so as follows:
 
@@ -17,12 +17,12 @@ After you fork, clone the repository locally. You can do so as follows:
     cd biomedical  # enter the directory
 
 Next, you want to set your `upstream` location to enable you to push/pull (add or receive updates). You can do so as follows:
-    
+
     git remote add upstream git@github.com:bigscience-workshop/biomedical.git
 
 You can optionally check that this was set properly by running the following command:
-    
-    git remote -v 
+
+    git remote -v
 
 The output of this command should look as follows:
 
@@ -40,7 +40,7 @@ The goal of `upstream` is to keep your repository up-to-date to any changes that
     git fetch upstream
     git pull
 
-Provided you have no *merge conflicts*, this will ensure the library stays up-to-date as you make changes. However, before you make changes, you should make a custom branch to implement your changes. 
+Provided you have no *merge conflicts*, this will ensure the library stays up-to-date as you make changes. However, before you make changes, you should make a custom branch to implement your changes.
 
 You can make a new branch as such:
 
@@ -54,7 +54,7 @@ Always make sure you're on the right branch with the following command:
 
 The correct branch will have a asterisk \* in front of it.
 
-### 2. **Create a development environment** 
+### 2. **Create a development environment**
 You can make an environment in any way you choose to. We highlight two possible options:
 
 #### 2a) Create a conda environment
@@ -152,10 +152,10 @@ Run these commands within the `biomedical` repo, not in `biomedical/datasets` as
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```
-python -m unittest tests/test_schema
+python -m tests/test_bigbio --path biomeddatasets/<your_dataset_name> [--data_dir /path/to/local/data]
 ```
 
-### 5. Format your code 
+### 5. Format your code
 
 Return to the main directory (assuming you are in your dataset-specific folder) via the following commands:
 
@@ -187,6 +187,6 @@ Push these changes to **your fork** with the following command:
 
 **[Optional Step]** Add unit-tests and meta data by following instructions [here](https://huggingface.co/docs/datasets/share_dataset.html#adding-tests).
 
-### 7. **Make a pull request** 
+### 7. **Make a pull request**
 
 Make a PR to implement your changes on the main repository [here](https://github.com/huggingface/datasets/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
