@@ -83,10 +83,6 @@ _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
 
-# TODO: Set the NLP task here
-# Options include: "kb", "qa", "entailment", "text_to_text", "text", "pairs"
-_SUPPORTED_TASKS = ["your_task_here"]
-
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 class NewDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
@@ -106,12 +102,12 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         datasets.BuilderConfig(
             name="source", version=VERSION, description="Source schema"
-        ), # TODO [Optional]: Source of dataset
+        ),
         datasets.BuilderConfig(
             name="bigbio",
             version=BIGBIO_VERSION,
             description="BigScience Biomedical schema",
-        ), # TODO: Big-bio schema config
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "source"
