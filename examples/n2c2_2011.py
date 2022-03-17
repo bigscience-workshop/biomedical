@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Gabriel Altay
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,46 +48,6 @@ n2c2_2011_coref
 ├── Task_1C_Test_groundtruth.zip
 └── Task_1C.zip
 
-The following commands can be used to load the dataset
-
-```
-ds_orig = load_dataset("n2c2_2011_coref.py", name="source", data_dir="/path/to/n2c2_2011_coref")
-ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", data_dir="/path/to/n2c2_2011_coref")
-```
-
-Schema
-
-One sample of the n2c2_2011_coref bigbio schema (e.g. ds_bb['train'][0]) looks like this,
-
-{
-    "id": "clinical-103",
-    "document_id": "clinical-103",
-    "passages": [
-        {
-            "id": "clinical-103-passage-0",
-            "type": "discharge summary",
-            "text": ["......"],
-            "offsets": [[0, 5005]],
-        }
-    ],
-    "entities": [
-        {
-            "id": "clinical-103-entity-12-0-12-0",
-            "type": "person",
-            "text": ["patient"],
-            "offsets": [[128, 135]],
-            "normalized": [],
-        },
-        ...
-    ],
-    "coreferences": [
-        {
-            "id": "clinical-103-coref-0",
-            "entity_ids": ["clinical-103-entity-12-0-12-0", ...],
-        }
-    ]
-}
-
 
 Data Access
 
@@ -106,8 +66,8 @@ import re
 import tarfile
 from typing import Dict, List, Match, Tuple
 import zipfile
-
 import datasets
+from dataclasses import dataclass
 from datasets import Features, Sequence, Value
 
 
@@ -311,7 +271,6 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids, split):
 
     return corefs
 
-
 def _get_entities_from_sample(sample_id, sample, split):
     """Parse the lines of a *.con concept file into entity objects
 
@@ -416,6 +375,16 @@ def _get_entities_from_sample(sample_id, sample, split):
     return dedupe_entities
 
 
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
+
+
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
 
@@ -423,23 +392,27 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
+        BigBioConfig(
+            name="n2c2_2011_source",
             version=SOURCE_VERSION,
-            description="Source format",
+            description="n2c2_2011 source schema",
+            schema="source",
+            subset_id="n2c2_2011",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="n2c2_2011_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="BigScience biomedical hackathon schema",
-        ),
+            description="n2c2_2011 BigBio schema",
+            schema="bigbio_kb",
+            subset_id="n2c2_2011",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "n2c2_2011_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = Features(
                 {
                     "sample_id": Value("string"),
@@ -456,7 +429,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio_kb":
             features = Features(
                 {
                     "id": Value("string"),
@@ -583,9 +556,9 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             for path in paths:
                 samples = _read_tar_gz(path)
                 for sample_id, sample in samples.items():
-                    if self.config.name == "source":
+                    if self.config.schema == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
-                    elif self.config.name == "bigbio":
+                    elif self.config.schema == "bigbio_kb":
                         yield _id, self._get_coref_sample(sample_id, sample, split)
                     _id += 1
 
@@ -602,8 +575,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 samples = _read_zip(path, samples=samples)
 
             for sample_id, sample in samples.items():
-                if self.config.name == "source":
+                if self.config.schema == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
-                elif self.config.name == "bigbio":
+                elif self.config.schema == "bigbio_kb":
                     yield _id, self._get_coref_sample(sample_id, sample, split)
                 _id += 1
