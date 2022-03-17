@@ -169,9 +169,3 @@ class SciTail(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_entailment":
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
-
-
-if __name__ == "__main__":
-    from datasets import load_dataset
-    a = load_dataset("./examples/scitail.py", "scitail_bigbio_entailment")
-    print(a)
