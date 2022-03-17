@@ -31,33 +31,30 @@ logger = logging.getLogger(__name__)
 
 
 _TASK_TO_SCHEMA = {
-    "kb": "kb",
-    "ner": "kb",
-    "ned": "kb",
-    "re": "kb",
-    "entities": "kb",
-    "relations": "kb",
-    "events": "kb",
-    "coref": "kb",
-    "qa": "qa",
-    "question-answering": "qa",
-    "entailment": "entailment",
-    "paraphrasing": "text_to_text",
-    "summarization": "text_to_text",
-    "translation": "text_to_text",
-    "text_to_text": "text_to_text",
-    "classification": "text",
-    "text": "text",
-    "pairs": "pairs",
+    "NER": "KB",
+    "NED": "KB",
+    "EE": "KB",
+    "RE": "KB",
+    "COREF": "KB",
+    "QA": "QA",
+    "TE": "TE",
+    "STS": "PAIRS",
+    "PARA": "T2T",
+    "TRANSL": "T2T",
+    "SUM": "T2T",
+    "TXTCLASS": "TEXT",
 }
 
+_VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
+_VALID_SCHEMA = set(_TASK_TO_SCHEMA.values())
+
 _SCHEMA_TO_FEAUTURES = {
-    "kb": kb_features,
-    "qa": qa_features,
-    "entailment": entailment_features,
-    "text_to_text": text2text_features,
-    "text": text_features,
-    "pairs": pairs_features,
+    "KB": kb_features,
+    "QA": qa_features,
+    "TE": entailment_features,
+    "T2T": text2text_features,
+    "TEXT": text_features,
+    "PAIRS": pairs_features,
 }
 
 
@@ -114,10 +111,10 @@ class TestDataLoader(unittest.TestCase):
         for task in self._SUPPORTED_TASKS:
             self.test_schema(task)
 
-            mapped_task = _SCHEMA_TO_FEAUTURES[_TASK_TO_SCHEMA[task.lower()]]
-            self.print_statistics(mapped_task)
+            mapped_features = _SCHEMA_TO_FEAUTURES[_TASK_TO_SCHEMA[task]]
+            self.print_statistics(mapped_features)
 
-            if _TASK_TO_SCHEMA[task.lower()] == "kb":
+            if _TASK_TO_SCHEMA[task] == "KB":
                 self.test_do_all_referenced_ids_exist()
                 self.test_passages_offsets()
                 self.test_entities_offsets()
@@ -129,7 +126,7 @@ class TestDataLoader(unittest.TestCase):
 
         logger.info(f"self.PATH: {self.PATH}")
         logger.info(f"self.NAME: {self.NAME}")
-        logger.info(f"self.VIEW: {self.VIEW}")
+        logger.info(f"self.SCHEMA: {self.SCHEMA}")
         logger.info(f"self.DATA_DIR: {self.DATA_DIR}")
 
         # Get task type of the dataset
@@ -141,7 +138,10 @@ class TestDataLoader(unittest.TestCase):
         self._SUPPORTED_TASKS = importlib.import_module(module)._SUPPORTED_TASKS
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
 
-        # TODO: Enforce if source is relevant
+        invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
+        if len(invalid_tasks) > 0:
+            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
+
         config_name = f"{self.NAME}_source"
         logger.info(f"Checking load_dataset with config name {config_name}")
         self.dataset_source = datasets.load_dataset(
@@ -151,7 +151,7 @@ class TestDataLoader(unittest.TestCase):
             use_auth_token=self.USE_AUTH_TOKEN,
         )
 
-        config_name = f"{self.NAME}_{self.VIEW}"
+        config_name = f"{self.NAME}_bigbio_{self.SCHEMA.lower()}"
         logger.info(f"Checking load_dataset with config name {config_name}")
         self.dataset_bigbio = datasets.load_dataset(
             self.PATH,
@@ -375,12 +375,10 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, task: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
-        mapped_schema = self._test_task_exists(task)
+        mapped_schema = _TASK_TO_SCHEMA[task]
         logger.info(f"task={task}, mapped_schema={mapped_schema}")
 
-        if mapped_schema == "kb":
-
-            logger.info("NER/NED/EE/RE/COREF Task")
+        if mapped_schema == "KB":
 
             features = kb_features
             logger.info(f"all feature names: {set(features.keys())}")
@@ -395,15 +393,15 @@ class TestDataLoader(unittest.TestCase):
 
             needed_keys = [key for key in features.keys() if key not in opt_keys]
 
-            if task == "ner":
+            if task == "NER":
                 sub_keys = ["entities"]
-            elif task == "re":
+            elif task == "RE":
                 sub_keys = ["entities", "relations"]
-            elif task == "ned":
+            elif task == "NED":
                 sub_keys = ["entities"]
-            elif task == "coref":
+            elif task == "COREF":
                 sub_keys = ["entities", "coreferences"]
-            elif task == "events":
+            elif task == "EE":
                 sub_keys = ["events"]
             else:
                 raise ValueError(f"Task {task} not recognized")
@@ -435,39 +433,30 @@ class TestDataLoader(unittest.TestCase):
                         for attrs in features[key]:
                             self.assertTrue(self._check_subkey(example[key][0], attrs))
 
-        elif mapped_schema == "qa":
-            logger.info("Question-Answering Task")
+        elif mapped_schema == "QA":
+            logger.info("Question-Answering Schema")
             self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_schema == "entailment":
-            logger.info("Entailment Task")
+        elif mapped_schema == "TE":
+            logger.info("Textual Entailment Schema")
             self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_schema == "text_to_text":
-            logger.info("Translation/Summarization/Paraphrasing Task")
+        elif mapped_schema == "T2T":
+            logger.info("Text to Text Schema")
             self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_schema == "text":
-            logger.info("Sentence/Phrase/Text Classification Task")
+        elif mapped_schema == "TEXT":
+            logger.info("Text Schema")
             self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
-        elif mapped_schema == "pairs":
-            logger.info("Pair Labels Task")
+        elif mapped_schema == "PAIRS":
+            logger.info("Text Pair Schema")
             self._check_keys(_SCHEMA_TO_FEAUTURES[mapped_schema], mapped_schema)
 
         else:
             raise ValueError(
-                f"{task} not recognized, only {set(_TASK_TO_SCHEMA.values())}-type tasks are allowed"
+                f"{mapped_schame} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
             )
-
-    def _test_task_exists(self, task_name: str):
-        """
-        Check if valid task name is provided
-        """
-        task = task_name.lower()
-        mapped_schema = _TASK_TO_SCHEMA.get(task, None)
-        self.assertFalse(mapped_schema is None, task + " is not recognized")
-        return mapped_schema
 
     @staticmethod
     def _check_subkey(inp, attrs):
@@ -623,10 +612,11 @@ if __name__ == "__main__":
         help="path to dataloader script"
     )
     parser.add_argument(
-        "--view",
+        "--schema",
         type=str,
         required=True,
-        help="specific bigbio schema to test e.g. `bigbio_translation`",
+        choices=list(_TASK_TO_SCHEMA.values()),
+        help="specific bigbio schema to test.",
     )
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
@@ -637,7 +627,7 @@ if __name__ == "__main__":
 
     TestDataLoader.PATH = args.path
     TestDataLoader.NAME = name
-    TestDataLoader.VIEW = args.view
+    TestDataLoader.SCHEMA = args.schema
     TestDataLoader.DATA_DIR = args.data_dir
     TestDataLoader.USE_AUTH_TOKEN = args.use_auth_token
 

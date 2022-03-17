@@ -1,7 +1,7 @@
 # BigBio Schema Documentation
 We have defined a set of lightwieght, task-specific schema to help simplify programmatic access to common biomedical datasets. This schema should be implemented for each dataset in addition to a schema that preserves the original dataset format.
 
-### Example Schemas and Tasks
+### Example Schema and Associated Tasks
 
 - [Knowledge Base (KB)](#knowledge-base)
   - Named entity recognition (NER)
