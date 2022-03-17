@@ -455,7 +455,7 @@ class TestDataLoader(unittest.TestCase):
 
         else:
             raise ValueError(
-                f"{mapped_schame} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
+                f"{mapped_schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
             )
 
     @staticmethod
