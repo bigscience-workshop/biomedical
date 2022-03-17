@@ -158,8 +158,9 @@ class SciTail(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, filepath):
-
-        data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"])
+        # since examples can contain quotes mid text set quoting to QUOTE_NONE (3) when reading tsv
+        # e.g.: ... and apply specific "tools" to examples and ... 
+        data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3)
         data["id"] = data.index
 
         if self.config.schema == "source":
