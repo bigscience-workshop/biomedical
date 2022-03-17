@@ -99,24 +99,9 @@ To start, copy [templates/template.py](templates/template.py) to your in `biomed
 
 
 For the `_info_` function, you will need to define `features` for your
-`DatasetInfo` object. For the `big-bio` config, copy the right schema from our list of examples. You can find them as follows:
-
-1. [Named entity recognition (NER)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-2. [Relation Extraction (RE)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-3. [Event Extraction](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-4. [Named entity disambiguation/canonicalization/normalization (NED)](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-5. [Co-reference resolution](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/kb.py)
-6. [Question-Answering](https://github.com/bigscience-workshop/biomedical/blob/aster/schemas/qa.py)
-7. [Entailment](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/entailment.py)
-8. [Translation](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-9. [Summarization](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-10. [Paraphrasing](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text_to_text.py)
-11. [Sentence/Phrase/Text classification](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/text.py)
-12. [Pair Labels](https://github.com/bigscience-workshop/biomedical/blob/master/schemas/pairs.py)
+`DatasetInfo` object. For the `bigbio` config, copy the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](https://github.com/bigscience-workshop/biomedical/tree/master/schemas).
 
 You will use this schema in the `_generate_examples` return value.
-
-Please read the [Task Schemas](task_schemas.md) to understand how each key should behave.
 
 Populate the information in the dataset according to this schema; some fields may be empty.
 
@@ -124,17 +109,9 @@ To enable quality control, please add the following line in your file before the
 ```python
 _SUPPORTED_TASKS = ["task1", "task2", ...]
 ```
-Refer to the following list to find the correct task identifier:
-1. **Named Entity Recognition**: `"ner"`
-1. **Relation Extraction**: `"re"`
-1. **Named Entity Disambiguation**: `"ned"`
-1. **Coreference Resolution**: `"coref"`
-1. **Event Extraction**: `"events"`
-1. **Question-Answering**:`"qa"`
-1. **Entailment**: `"entailment"`
-1. **Translation, Summarization, Paraphrasing**: `"text_to_text"`
-1. **Sentence/Phrase/Text Classification**: `"text"`
-1. **Pair Labels**: `"pairs"`
+
+Please refer to the [Task Schemas Document](task_schemas.md) to find the correct task identifier.
+
 
 ##### Example scripts:
 To help you implement a dataset, we offer a template and example scripts.
@@ -148,15 +125,15 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('biomeddatasets/<your_dataset_name>', name="bigbio")
+data = load_dataset('examples/<dataset_name>'.py, name="<dataset_name>_bigbio_<schema>")
 ```
 
-Run these commands within the `biomedical` repo, not in `biomedical/datasets` as the relative path will not work.
+Run these commands within the `biomedical` repo, not in `biomedical/examples` as the relative path will not work.
 
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```
-python -m tests/test_bigbio --path biomeddatasets/<your_dataset_name>/<your_dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio --path examples/<dataset_name>.py --schema <schema> [--data_dir /path/to/local/data]
 ```
 
 ### 5. Format your code
@@ -173,7 +150,7 @@ This runs the black formatter, isort, and lints to ensure that the code is reada
 
 First, commit your changes to the branch to "add" the work:
 
-    git add datasets/<name_of_my_dataset>/<name_of_my_dataset>.py
+    git add examples/<dataset_name>.py
     git commit
 
 *Ideally, run* `git commit -m "A message of your commits"`
