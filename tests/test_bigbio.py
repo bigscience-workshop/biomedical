@@ -126,28 +126,39 @@ class TestDataLoader(unittest.TestCase):
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
-        logger.info("Checking if source data loads")
-        # TODO: Enforce if source is relevant
-        self.dataset_source = datasets.load_dataset(
-            self.PATH,
-            name="source",
-            data_dir=self.DATA_DIR,
-            use_auth_token=self.USE_AUTH_TOKEN,
-        )
 
-        logger.info("Checking if bigbio data loads")
-        self.dataset_bigbio = datasets.load_dataset(
-            self.PATH,
-            name=self.VIEW,
-            data_dir=self.DATA_DIR,
-            use_auth_token=self.USE_AUTH_TOKEN,
-        )
+        logger.info(f"self.PATH: {self.PATH}")
+        logger.info(f"self.NAME: {self.NAME}")
+        logger.info(f"self.VIEW: {self.VIEW}")
+        logger.info(f"self.DATA_DIR: {self.DATA_DIR}")
 
         # Get task type of the dataset
-        logger.info("Checking _SUPPORTED_TASKS present.")
-        self._SUPPORTED_TASKS = importlib.import_module(
-            "biomeddatasets." + self.NAME + "." + self.NAME
-        )._SUPPORTED_TASKS
+        logger.info("Checking for _SUPPORTED_TASKS ...")
+        module = self.PATH
+        if module.endswith(".py"):
+            module = module[:-3]
+        module = module.replace("/", ".")
+        self._SUPPORTED_TASKS = importlib.import_module(module)._SUPPORTED_TASKS
+        logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
+
+        # TODO: Enforce if source is relevant
+        config_name = f"{self.NAME}_source"
+        logger.info(f"Checking load_dataset with config name {config_name}")
+        self.dataset_source = datasets.load_dataset(
+            self.PATH,
+            name=config_name,
+            data_dir=self.DATA_DIR,
+            use_auth_token=self.USE_AUTH_TOKEN,
+        )
+
+        config_name = f"{self.NAME}_{self.VIEW}"
+        logger.info(f"Checking load_dataset with config name {config_name}")
+        self.dataset_bigbio = datasets.load_dataset(
+            self.PATH,
+            name=config_name,
+            data_dir=self.DATA_DIR,
+            use_auth_token=self.USE_AUTH_TOKEN,
+        )
 
     def print_statistics(self, schema: Features):
         """
@@ -352,7 +363,7 @@ class TestDataLoader(unittest.TestCase):
 
         biomedical/biomeddatasets/<name_of_dataset>/<name_of_dataloader_script>
         """  # noqa
-        datafolder = Path("biomeddatasets/") / self.NAME
+        datafolder = Path("examples")
         datascript = (datafolder / self.NAME).with_suffix(".py")
         self.assertTrue(datafolder.exists(), "Folder not named " + self.NAME)
 
@@ -603,12 +614,17 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("--path", type=str, required=True)
+    parser.add_argument(
+        "--path",
+        type=str,
+        required=True,
+        help="path to dataloader script"
+    )
     parser.add_argument(
         "--view",
         type=str,
-        default="bigbio",
-        help="For datasets supporting multiple tasks, e.g. `bigbio-translation`",
+        required=True,
+        help="specific bigbio schema to test e.g. `bigbio_translation`",
     )
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
