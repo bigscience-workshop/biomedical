@@ -58,7 +58,7 @@ _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-_SUPPORTED_TASKS = ["entailment"]
+_SUPPORTED_TASKS = ["TE"]
 
 _SOURCE_VERSION = "1.1.0"
 
@@ -91,10 +91,10 @@ class SciTail(datasets.GeneratorBasedBuilder):
             subset_id="scitail",
         ),
         BigBioConfig(
-            name="scitail_bigbio_entailment",
+            name="scitail_bigbio_te",
             version=BIGBIO_VERSION,
             description="SciTail BigBio schema",
-            schema="bigbio_entailment",
+            schema="bigbio_te",
             subset_id="scitail",
         ),
     ]
@@ -113,7 +113,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio_entailment":
+        elif self.config.schema == "bigbio_te":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -167,6 +167,6 @@ class SciTail(datasets.GeneratorBasedBuilder):
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
 
-        elif self.config.schema == "bigbio_entailment":
+        elif self.config.schema == "bigbio_te":
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
