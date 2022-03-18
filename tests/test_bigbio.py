@@ -2,6 +2,8 @@
 Unit-tests to ensure tasks adhere to big-bio schema.
 """
 import sys
+import warnings
+
 import datasets
 from datasets import load_dataset, Features
 from schemas import (
@@ -215,12 +217,13 @@ class TestDataLoader(unittest.TestCase):
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event_arg":
-                        self.assertTrue(
+                        if not (
                             (ref_id, "entity") in existing_ids
                             or (ref_id, "event") in existing_ids
-                        )
+                        ):
+                            logger.warning(f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
                     else:
-                        self.assertIn((ref_id, ref_type), existing_ids)
+                        logger.warning(f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
 
     def test_passages_offsets(self):
         """
@@ -298,7 +301,7 @@ class TestDataLoader(unittest.TestCase):
                             )
 
         if len(errors) > 0:
-            self.fail(msg="\n".join(errors) + OFFSET_ERROR_MSG)
+            logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
 
     # UNTESTED: no dataset example
     def test_events_offsets(self):
@@ -332,8 +335,7 @@ class TestDataLoader(unittest.TestCase):
                                 + msg
                             )
 
-        if len(errors) > 0:
-            self.fail(msg="\n".join(errors) + OFFSET_ERROR_MSG)
+        logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
 
     def test_coref_ids(self):
         """
@@ -570,12 +572,8 @@ class TestDataLoader(unittest.TestCase):
 
         """  # noqa
 
-        with self.subTest(
-            "# of texts must be equal to # of offsets",
-            texts=texts,
-            offsets=offsets,
-        ):
-            self.assertEqual(len(texts), len(offsets))
+        if len(texts) != len(offsets):
+            logger.warning(f"Number of texts {len(texts)} != number of offsets {len(offsets)}. Please make sure that this error already exists in the original data and was not introduced in the data loader.")
 
         self._test_is_list(
             msg="Text fields paired with offsets must be in the form [`text`, ...]",
@@ -592,7 +590,10 @@ class TestDataLoader(unittest.TestCase):
         for idx, (start, end) in enumerate(offsets):
 
             by_offset_text = example_text[start:end]
-            text = texts[idx]
+            try:
+                text = texts[idx]
+            except IndexError:
+                text = ""
 
             if by_offset_text != text:
                 yield f" text:`{text}` != text_by_offset:`{by_offset_text}`"
