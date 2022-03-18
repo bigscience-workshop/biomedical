@@ -616,7 +616,7 @@ if __name__ == "__main__":
         "--schema",
         type=str,
         required=True,
-        choices=list(_TASK_TO_SCHEMA.values()),
+        choices=list(_VALID_SCHEMA),
         help="specific bigbio schema to test.",
     )
     parser.add_argument("--data_dir", type=str, default=None)
