@@ -71,7 +71,7 @@ from dataclasses import dataclass
 from datasets import Features, Sequence, Value
 
 
-_DATASETNAME = "n2c2_2011_coref"
+_DATASETNAME = "n2c2_2011"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
 _CITATION = """\
@@ -114,7 +114,7 @@ _LICENSE = "Data User Agreement"
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["coref"]
+_SUPPORTED_TASKS = ["COREF"]
 
 
 def _read_tar_gz(file_path, samples=None):

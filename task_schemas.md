@@ -1,33 +1,39 @@
 # BigBio Schema Documentation
 We have defined a set of lightwieght, task-specific schema to help simplify programmatic access to common biomedical datasets. This schema should be implemented for each dataset in addition to a schema that preserves the original dataset format.
 
-### Example Schemas by Task
-- [Information Extraction](#information-extraction)
+### Example Schema and Associated Tasks
+
+- [Knowledge Base (KB)](#knowledge-base)
   - Named entity recognition (NER)
   - Named entity disambiguation/normalization/linking (NED)
   - Event extraction (EE)
   - Relation extraction (RE)
   - Coreference resolution (COREF)
-- [Textual Entailment (TE)](#textual-entailment)
 - [Question Answering (QA)](#question-answering)
-- [Text Pairs](#translation,-paraphasing,-summarization)
+  - Question answering (QA)
+- [Textual Entailment (TE)](#textual-entailment)
+  - Textual entailment (TE)
+- [Text Pairs (PAIRS)](#text-pairs)
+  - Semantic Similarity (STS)
+- [Text to Text (T2T)](#text-to-text)
   - Paraphasing (PARA)
   - Translation (TRANSL)
-  - Summarization (SUM) 	 
-- [Semantic Similarity (STS)](#semantic-similarity)
-- [Text Classification (TEXT)](#text-classification)
+  - Summarization (SUM)
+- [Text (TEXT)](#text)
+  - Text classification (TXTCLASS)
 
-## Information Extraction
+
+## Knowledge Base
 
 [Schema Template](schemas/kb.py)
 
-This is a simple container format with minimal nesting that supports a range of common information extraction/knowledge base construction tasks.
+This is a simple container format with minimal nesting that supports a range of common knowledge base construction / information extraction tasks.
 
 - Named entity recognition (NER)
 - Named entity disambiguation/normalization/linking (NED)
-- Event extraction
+- Event extraction (EE)
 - Relation extraction (RE)
-- Coreference resolution
+- Coreference resolution (COREF)
 
 ```
 {
@@ -50,7 +56,7 @@ This is a simple container format with minimal nesting that supports a range of 
 - `offsets` contain character offsets into the string that would be created from `" ".join([passage["text"] for passage in passages])`
 - `offsets` and `text` are always lists to support discontinous spans. For continuous spans, they will have the form `offsets=[(lo,hi)], text=["text span"]`. For discontinuous spans, they will have the form `offsets=[(lo1,hi1), (lo2,hi2), ...], text=["text span 1", "text span 2", ...]`
 - `normalized` sub-component may contain 1 or more normalized links to database entity identifiers.
-- `passages` captures document structure such as named sections. 
+- `passages` captures document structure such as named sections.
 - `entities`,`events`,`coreferences`,`relations` may be empty fields depending on the dataset and specific task.
 
 
@@ -106,7 +112,7 @@ TBD
 
 ### Coreferences
 
-- Examples: [n2c2 2011: Coreference Challenge](examples/n2c2_2011_coref.py)
+- Examples: [n2c2 2011: Coreference Challenge](examples/n2c2_2011.py)
 
 ```
 "coreferences": [
@@ -164,7 +170,23 @@ TBD
 }
 ```
 
-## Translation, Paraphasing, Summarization
+## Text Pairs
+
+- [Schema Template](schema/pairs.py)
+- Examples: [MQP](examples/mqp.py)
+
+```
+{
+	"id": "0",
+	"document_id": "NULL",
+	"text_1": "Am I over weight (192.9) for my age (39)?",
+	"text_2": "I am a 39 y/o male currently weighing about 193 lbs. Do you think I am overweight?",
+	"label": 1,
+}
+```
+
+
+## Text to Text
 
 - [Schema Template](schema/text_to_text.py)
 - Examples: [ParaMed](examples/paramed.py)
@@ -181,21 +203,7 @@ TBD
 ```
 
 
-## Semantic Similarity
-- [Schema Template](schema/pairs.py)
-- Examples: [MQP](examples/mqp.py)
-
-```
-{
-	"id": "0",
-	"document_id": "NULL",
-	"text_1": "Am I over weight (192.9) for my age (39)?",
-	"text_2": "I am a 39 y/o male currently weighing about 193 lbs. Do you think I am overweight?",
-	"label": 1,
-}
-```
-
-## Text Classification
+## Text
 - [Schema Template](schema/text.py)
 
 ```
