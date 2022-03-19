@@ -61,7 +61,7 @@ The file contains the data of the first nine editions of the challenge: 4234
 questions [1] with their relevant documents, snippets, concepts and RDF
 triples, exact and ideal answers.
 
-Differences with BioASQ-training9b.json 
+Differences with BioASQ-training9b.json
 - 492 new questions added from BioASQ9
     - The question with id 56c1f01eef6e394741000046 had identical body with
     602498cb1cb411341a00009e. All relevant elements from both questions
@@ -93,7 +93,7 @@ exact and ideal answers.
 
 Differences with BioASQ-training8b.json
 - 499 new questions added from BioASQ8
-    - The question with id 5e30e689fbd6abf43b00003a had identical body with 
+    - The question with id 5e30e689fbd6abf43b00003a had identical body with
     5880e417713cbdfd3d000001. All relevant elements from both questions
     are available in the merged question with id 5880e417713cbdfd3d000001.
 
@@ -235,7 +235,7 @@ Differences with BioASQ-trainingDataset5b.json
 - 500 new questions added from BioASQ5
     - 48 pairs of questions with identical bodies have been merged into one
     question having only one question-id, but all the documents, snippets,
-    concepts, RDF triples and answers of both questions of the pair. 
+    concepts, RDF triples and answers of both questions of the pair.
         - This normalization lead to the removal of 48 deprecated question
         ids [2] from the dataset and to the update of the 48 remaining
         questions [3].
@@ -250,7 +250,7 @@ Differences with BioASQ-trainingDataset5b.json
         530b01a6970c65fa6b000008, 530cf54dab4de4de0c000009,
         531b2fc3b166e2b80600003c, 532819afd6d3ac6a3400000f,
         532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
-        52f65f372059c6d71c000027 
+        52f65f372059c6d71c000027
 		- In 6 questions the ideal answer has been revised :
         532aad53d6d3ac6a34000010, 5710ade4cf1c32585100002c,
         53147b52e3eabad021000015, 5147c8a6d24251bc05000027,
@@ -275,7 +275,7 @@ Differences with BioASQ-trainingDataset5b.json
     list of lists. Each internal list represents one element of the answer
     as a set of synonyms
     (i.e. [[`ans1`, `syn11`, `syn12`], [`ans2`], [`ans3`, `syn31`] ...]).
-    - Empty elements, e.g. empty lists of documents have been removed. 
+    - Empty elements, e.g. empty lists of documents have been removed.
 
 [1] 2251 questions : 619 factoid, 616 yesno, 531 summary, 485 list
 [2] The 48 deprecated question ids are : 52f8b2902059c6d71c000053,
@@ -295,8 +295,8 @@ Differences with BioASQ-trainingDataset5b.json
     52ffbddf2059c6d71c00007d, 56bc932aac7ad1001900001c, 56c02883ef6e394741000017,
     52d2b75403868f1b06000035, 52f118aa2059c6d71c000003, 52e929eb98d0239505000023,
     532c12f2d6d3ac6a3400001d, 52d8466298d0239505000006'
-[3] The 48 questions resulting from merging with their pair have the 
-    following ids: 5149aafcd24251bc05000045, 515db020298dcd4e51000011, 
+[3] The 48 questions resulting from merging with their pair have the
+    following ids: 5149aafcd24251bc05000045, 515db020298dcd4e51000011,
     515db54c298dcd4e51000016, 51680a49298dcd4e51000062, 52b06a68f828ad283c000005,
     52bf1aa503868f1b06000006, 52bf1af803868f1b06000008, 52bf1d6003868f1b0600000e,
     52cb9b9b03868f1b0600002d, 52d2818403868f1b06000033, 52df887498d023950500000c,
@@ -498,9 +498,10 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        train_dir, test_dir = dl_manager.download_and_extract(
-            _URLs[self.config.subset_id]
-        )
+        train_dir, test_dir = dl_manager.download_and_extract([
+            os.path.join(self.config.data_dir, _url)
+            for _url in _URLs[self.config.subset_id]
+        ])
         gold_fpath = self._dump_gold_json(test_dir)
 
         # older versions of bioasq have different folder formats
@@ -600,4 +601,3 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                             "answer": self._get_exact_answer(record),
                         }
                         uid += 1
-

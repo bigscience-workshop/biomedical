@@ -132,8 +132,15 @@ Run these commands within the `biomedical` repo, not in `biomedical/examples` as
 
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
+```bash
+python -m tests.test_bigbio examples/<dataset_name>.py [--data_dir /path/to/local/data]
 ```
-python -m tests.test_bigbio --path examples/<dataset_name>.py --schema <schema> [--data_dir /path/to/local/data]
+
+Your particulr dataset may require use of some of the other command line args in the test script.
+To view full usage instructions you can use the `--help` command,
+
+```bash
+python -m tests.test_bigbio --help
 ```
 
 ### 5. Format your code
