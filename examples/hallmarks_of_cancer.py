@@ -60,7 +60,7 @@ _URLs = {
     "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = ["TOPIC CLASSIFICATION"]
+_SUPPORTED_TASKS = ["TXTCLASS"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -96,21 +96,21 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="hoc_source",
+            name="hallmarks_of_cancer_source",
             version=SOURCE_VERSION,
             description="Hallmarks of Cancer source schema",
             schema="source",
-            subset_id="hoc",
+            subset_id="hallmarks_of_cancer",
         ),
         BigBioConfig(
-            name="hoc_bigbio_text",
+            name="hallmarks_of_cancer_bigbio_text",
             version=BIGBIO_VERSION,
             description="Hallmarks of Cancer Biomedical schema",
             schema="bigbio_text",
-            subset_id="hoc",
+            subset_id="hallmarks_of_cancer",
         ),
     ]
-    DEFAULT_CONFIG_NAME = "hoc_source"
+    DEFAULT_CONFIG_NAME = "hallmarks_of_cancer_source"
 
     def _info(self):
 
