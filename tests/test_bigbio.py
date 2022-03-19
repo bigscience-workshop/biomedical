@@ -580,7 +580,7 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("--path", type=str, required=True, help="path to dataloader script")
+    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
     parser.add_argument(
         "--schema",
         type=str,
@@ -593,7 +593,7 @@ if __name__ == "__main__":
         "--subset_id",
         default=None,
         required=False,
-        help="by default, subset_id will be generated from path and used to create the config name (e.g. path=examples/<subset_id>.py, config_name=<subset_id>_bigbio_<schema>). use this to explicitly set the subset_id (and therefore the config name).",
+        help="by default, subset_id will be generated from path (e.g. if path=examples/n2c2_2011.py then subset_id=n2c2_2011). the config name is then constructed as config_name=<subset_id>_bigbio_<schema>. use this to explicitly set the subset_id for the config name you want to test (e.g. bioasq9b).",
     ),
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
