@@ -91,21 +91,22 @@ class TestDataLoader(unittest.TestCase):
     def runTest(self):
         """
          Run all tests that check:
-         (1) test_name: Checks if dataloading script has correct path format
+         (1) [removed - full path to script is now passed in] test_name: Checks if
+             dataloading script has correct path format
          (2) setUp: Checks data and _SUPPORTED_TASKS can be loaded
          (3) print_statistics: Counts number of all possible schema keys/instances of the examples
          (4) test_schema: confirms big-bio keys present
          (5) test_are_ids_globally_unique: Checks if all examples have a unique identifier
 
          # KB-Specific tests
-         (6) test_do_all_referenced_ids_exist: Check if any sub-key (ex: entities/events etc.) have referenced keys
+         (6) test_do_all_referenced_ids_exist: Check if any sub-key (ex: entities/events etc.)
+             have referenced keys
          (7) test_passages_offsets: Check if text matches offsets in passages
          (8) test_entities_offsets: Check if text matches offsets in entities
          (9) test_events_offsets: Check if text matches offsets in events
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
-        self.test_name()
         self.setUp()
         self.test_are_ids_globally_unique()
 
@@ -358,21 +359,6 @@ class TestDataLoader(unittest.TestCase):
                         for entity_id in coref["entity_ids"]:
                             assert entity_id in entity_lookup
 
-    def test_name(self):
-        """
-        Checks if the dataloader script is in the right nested structure.
-        All dataloader scripts must be of the following format:
-
-        biomedical/biomeddatasets/<name_of_dataset>/<name_of_dataloader_script>
-        """  # noqa
-        datafolder = Path("examples")
-        datascript = (datafolder / self.NAME).with_suffix(".py")
-        self.assertTrue(datafolder.exists(), "Folder not named " + self.NAME)
-
-        self.assertTrue(
-            datascript.exists(),
-            "Script not named " + self.NAME + ".py",
-        )
 
     def test_schema(self, task: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
@@ -619,12 +605,22 @@ if __name__ == "__main__":
         choices=list(_VALID_SCHEMA),
         help="specific bigbio schema to test.",
     )
+    parser.add_argument(
+        "--name",
+        default=None,
+        help="use to override a config name"
+    ),
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
 
     args = parser.parse_args()
+    logger.info(f"args: {args}")
 
-    name = args.path.split(".py")[0].split("/")[-1]
+    if args.name is None:
+        name = args.path.split(".py")[0].split("/")[-1]
+    else:
+        name = args.name
+
 
     TestDataLoader.PATH = args.path
     TestDataLoader.NAME = name
