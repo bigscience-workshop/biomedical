@@ -276,12 +276,12 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 for entity in entities[pmid]:
                     _text = entity["text"]
                     entity.update({"text": [_text]})
-                    entity.update({"id": [uid]})
+                    entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
                     entity.update({"normalized":
                                        [{"db_name": "Pubmed",
-                                         "db_id": pmid}]
+                                         "db_id": str(pmid)}]
                                    })
                     data["entities"].append(entity)
                     uid += 1
@@ -299,7 +299,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     relation.update({"id": str(uid)})
                     relation.update({"normalized":
                                        [{"db_name": "Pubmed",
-                                         "db_id": pmid}]
+                                         "db_id": str(pmid)}]
                                    })
                     data["relations"].append(relation)
                     uid += 1
