@@ -25,7 +25,8 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 import csv
 import json
 import os
-
+import itertools
+import collections
 import bioc
 import datasets
 from dataclasses import dataclass
@@ -77,11 +78,13 @@ _BIGBIO_VERSION = "1.0.0"
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
+
     name: str = None
     version: str = None
     description: str = None
     schema: str = None
     subset_id: str = None
+
 
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     """
@@ -238,20 +241,84 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _get_bioc_entity(self, span, db_id_key="MESH"):
-        """
-        Load BioC entity
-        TODO: Fix the discontiguous entity parsing issue with BioC
+    def _get_bioc_entity(self, span, doc_text, db_id_key="MESH"):
+        """Parse BioC entity annotation.  
+
+        Parameters
+        ----------
+        span : BioCAnnotation
+            BioC entity annotation
+        doc_text : string
+            document text, required to construct text spans
+        db_id_key : str, optional
+            database name used for normalization, by default "MESH"
+
+        Returns
+        -------
+        dict
+            entity information
         """
         offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        db_id = span.infons[db_id_key] if db_id_key else -1
+        texts = [doc_text[i:j] for i, j in offsets]
+        db_ids = span.infons[db_id_key] if db_id_key else "-1"
+        normalized = [
+            # some entities are linked to multiple normalized ids
+            {"db_name": db_id_key, "db_id": db_id}
+            for db_id in db_ids.split("|")
+        ]
+
         return {
             "id": span.id,
             "offsets": offsets,
-            "text": [span.text],
+            "text": texts,
             "type": span.infons["type"],
-            "normalized": [{"db_name": db_id_key, "db_id": db_id}],
+            "normalized": normalized,
         }
+
+    def _get_relations(self, relations, entities):
+        """
+        BC5CDR provides abstract-level annotations for entity-linked relation
+        pairs rather than materializing links between all surface form
+        mentions of relations. An example from train id=2670794, the relation
+            - (chemical, disease) (D014148, D004211)
+        is materialized as 6 mentions of entity pairs
+            - 2x ('tranexamic acid', 'intravascular coagulation')
+            - 4x ('AMCA', 'intravascular coagulation')
+        """
+        # index entities by normalized id
+        index = collections.defaultdict(list)
+        for ent in entities:
+            for norm in ent["normalized"]:
+                index[norm["db_id"]].append(ent)
+        index = dict(index)
+
+        # transform doc-level relations to mention-level
+        rela_mentions = []
+        for rela in relations:
+            arg1 = rela.infons["Chemical"]
+            arg2 = rela.infons["Disease"]
+            # all mention pairs
+            all_pairs = itertools.product(index[arg1], index[arg2])
+            for a, b in all_pairs:
+                # create relations linked by entity ids
+                rela_mentions.append(
+                    {
+                        "id": None,
+                        "type": rela.infons["relation"],
+                        "arg1_id": a["id"],
+                        "arg2_id": b["id"],
+                        "normalized": [],
+                    }
+                )
+        return rela_mentions
+
+    def _get_document_text(self, xdoc):
+        """Build document text for unit testing entity span offsets."""
+        text = ""
+        for passage in xdoc.passages:
+            pad = passage.offset - len(text)
+            text += (" " * pad) + passage.text
+        return text
 
     def _generate_examples(
         self,
@@ -261,14 +328,17 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         """ Yields examples as (key, example) tuples. """
         if self.config.schema == "source":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
+
             for uid, xdoc in enumerate(reader):
-                yield uid,  {
+                doc_text = self._get_document_text(xdoc)
+                yield uid, {
                     "passages": [
-                        {   "document_id": xdoc.id,
+                        {
+                            "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
                             "entities": [
-                                self._get_bioc_entity(span)
+                                self._get_bioc_entity(span, doc_text)
                                 for span in passage.annotations
                             ],
                             "relations": [
@@ -298,6 +368,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     "relations": [],
                 }
                 uid += 1
+                doc_text = self._get_document_text(xdoc)
 
                 char_start = 0
                 # passages must not overlap and spans must cover the entire document
@@ -317,22 +388,16 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 # entities
                 for passage in xdoc.passages:
                     for span in passage.annotations:
-                        ent = self._get_bioc_entity(span, db_id_key="MESH")
+                        ent = self._get_bioc_entity(span, doc_text, db_id_key="MESH")
                         ent["id"] = uid  # override BioC default id
                         data["entities"].append(ent)
                         uid += 1
 
                 # relations
-                for rela in xdoc.relations:
-                    data["relations"].append(
-                        {
-                            "id": uid,
-                            "type": rela.infons["relation"],
-                            "arg1_id": rela.infons["Chemical"],
-                            "arg2_id": rela.infons["Disease"],
-                            "normalized": [],
-                        }
-                    )
+                relations = self._get_relations(xdoc.relations, data["entities"])
+                for rela in relations:
+                    rela["id"] = uid  # assign unique id
+                    data["relations"].append(rela)
                     uid += 1
 
                 yield i, data
