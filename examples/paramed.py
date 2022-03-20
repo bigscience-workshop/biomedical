@@ -53,9 +53,9 @@ _LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
-    "bigbio_text_to_text": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
+    "bigbio_t2t": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
 }
-_SUPPORTED_TASKS = ["TRANSLATION"]
+_SUPPORTED_TASKS = ["TRANSL"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -85,10 +85,10 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             subset_id="paramed",
         ),
         BigBioConfig(
-            name="paramed_bigbio_text_to_text",
+            name="paramed_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="Paramed BigBio schema",
-            schema="bigbio_text_to_text",
+            schema="bigbio_t2t",
             subset_id="paramed",
         )
     ]
@@ -108,7 +108,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio_text_to_text":
+        elif self.config.schema == "bigbio_t2t":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -195,7 +195,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             zh_file.close()
             en_file.close()
 
-        elif self.config.schema == "bigbio_text_to_text":
+        elif self.config.schema == "bigbio_t2t":
             uid = 0
             for key, (zh_line, en_line) in enumerate(zip(zh_lines, en_lines)):
                 uid += 1

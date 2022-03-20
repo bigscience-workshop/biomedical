@@ -53,7 +53,7 @@ _LICENSE = ""
 _URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
          "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
 
-_SUPPORTED_TASKS = ["PARAPHRASING"]
+_SUPPORTED_TASKS = ["STS"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
