@@ -60,6 +60,7 @@ class BigBioConfig(datasets.BuilderConfig):
     schema: str = None
     subset_id: str = None
 
+
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
 
@@ -275,6 +276,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 for entity in entities[pmid]:
                     _text = entity["text"]
                     entity.update({"text": [_text]})
+                    entity.update({"id": [uid]})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
                     entity.update({"normalized":
@@ -282,6 +284,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                                          "db_id": pmid}]
                                    })
                     data["entities"].append(entity)
+                    uid += 1
 
                 empty_reln = [
                     {
@@ -299,7 +302,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                                          "db_id": pmid}]
                                    })
                     data["relations"].append(relation)
-                uid +=1
+                    uid += 1
 
                 yield id_, data
 
@@ -402,3 +405,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
         return relations
 
+
+if __name__ == "__main__":
+    from datasets import load_dataset
+    # ds = load_dataset(__file__)
+    ds = load_dataset(__file__)
+    print(ds)
