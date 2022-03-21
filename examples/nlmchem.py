@@ -14,8 +14,9 @@
 
 import os
 import re
-from typing import Iterator, Dict, List, Tuple
 from dataclasses import dataclass
+from typing import Dict, Iterator, List, Tuple
+
 import bioc
 import datasets
 
@@ -53,14 +54,17 @@ _SUPPORTED_TASKS = ["NER", "NED"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
+
     name: str = None
     version: str = None
     description: str = None
     schema: str = None
     subset_id: str = None
+
 
 class NLMChemDataset(datasets.GeneratorBasedBuilder):
     """NLMChem"""
@@ -82,7 +86,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
             description="NLM_Chem BigBio schema",
             schema="bigbio_kb",
             subset_id="nlmchem",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
@@ -227,6 +231,10 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
             po_end = po_start + len(p.text)
 
+            # annotation used only for document indexing
+            if p.text is None:
+                continue
+
             dp = {
                 "text": p.text,
                 "type": p.infons.get("type"),
@@ -242,14 +250,14 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
             for a in p.annotations:
 
-                # atype = a.infons.get("type")
-                #
-                # # no in-text annotation
-                # if entity_type in ["MeSH_Indexing_Chemical", "OTHER"]:
-                #     continue
+                a_type = a.infons.get("type")
+
+                # no in-text annotation: only for document indexing
+                if a_type in ["MeSH_Indexing_Chemical", "OTHER"]:
+                    continue
 
                 da = {
-                    "type": a.infons.get("type"),
+                    "type": a_type,
                     "offsets": [
                         (
                             loc.offset - eo,
@@ -339,10 +347,12 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     e["id"] = uid  # override BioC default id
                     uid += 1
 
+                # if split == "validation" and uid == 6705:
+                #     breakpoint()
+
                 yield idx, {
                     "id": uid,
                     "document_id": doc.id,
                     "passages": passages,
                     "entities": entities,
                 }
-
