@@ -521,7 +521,8 @@ class TestDataLoader(unittest.TestCase):
                 for key in extra_keys:
                     if key in features.keys():
                         for attrs in features[key]:
-                            self.assertTrue(self._check_subkey(example[key][0], attrs))
+                            if example[key]:
+                                self.assertTrue(self._check_subkey(example[key][0], attrs))
 
         elif schema == "QA":
             logger.info("Question-Answering Schema")
