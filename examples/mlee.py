@@ -23,7 +23,9 @@ from pathlib import Path
 import datasets
 from typing import Iterable, Dict, List
 from dataclasses import dataclass
-import utils
+
+from examples import utils
+
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
@@ -56,7 +58,7 @@ _LICENSE = "CC BY-NC-SA 3.0"
 _URLs = {"source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
          "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",}
 
-_SUPPORTED_TASKS = ["EVENT EXTRACTION"]
+_SUPPORTED_TASKS = ["EE", "NER", "RE", "COREF"]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
