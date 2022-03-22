@@ -65,7 +65,7 @@ The following instructions will create an Anaconda `bigscience-biomedical` envir
 - Run the following command while in the `biomedical` folder (you can pick your python version):
 
 ```
-conda env create -f environment.yml  # Creates a conda env
+conda env create -f conda.yml  # Creates a conda env
 conda activate bigscience-biomedical  # Activate your conda environment
 ```
 
