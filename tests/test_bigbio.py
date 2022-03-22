@@ -1,33 +1,26 @@
 """
 Unit-tests to ensure tasks adhere to big-bio schema.
 """
-import sys
-import warnings
-
-import datasets
-from datasets import load_dataset, Features, DatasetDict
-from schemas import (
-    kb_features,
-    qa_features,
-    entailment_features,
-    text2text_features,
-    text_features,
-    pairs_features,
-)
-
-import unittest
-import importlib
 import argparse
+import importlib
+import sys
+import unittest
+import warnings
 from collections import defaultdict
 from difflib import ndiff
 from pathlib import Path
 from pprint import pformat
-from typing import Iterator, Optional, Union, Iterable, List
+from typing import Iterable, Iterator, List, Optional, Union
+
+import datasets
+from datasets import DatasetDict, Features, load_dataset
+
+from schemas import (entailment_features, kb_features, pairs_features,
+                     qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +65,7 @@ OFFSET_ERROR_MSG = (
     "\n\n"
     "There are features with wrong offsets!"
     " This is not a hard failure, as it is common for this type of datasets."
-    " However, if the error list is long (e.g. >10) you should double check your code."
+    " However, if the error list is long (e.g. >10) you should double check your code. \n\n"
 )
 
 
@@ -84,6 +77,7 @@ class TestDataLoader(unittest.TestCase):
     """
 
     PATH: str
+    SCHEMA: str
     SUBSET_ID: str
     DATA_DIR: Optional[str]
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
@@ -150,9 +144,13 @@ class TestDataLoader(unittest.TestCase):
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
         if len(invalid_tasks) > 0:
-            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
+            raise ValueError(
+                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
+            )
 
-        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
+        self._MAPPED_SCHEMAS = set(
+            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+        )
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
         config_name = f"{self.SUBSET_ID}_source"
@@ -318,10 +316,14 @@ class TestDataLoader(unittest.TestCase):
 
                     for passage in example["passages"]:
 
+                        example_id = example["id"]
+
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(msg="Text in passages must be a list", field=text)
+                        self._test_is_list(
+                            msg="Text in passages must be a list", field=text
+                        )
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -339,11 +341,13 @@ class TestDataLoader(unittest.TestCase):
                         )
 
                         for idx, (start, end) in enumerate(offsets):
-                            msg = f" text:`{example_text[start:end]}` != text_by_offset:`{text[idx]}`"
+                            msg = f"Split:{split} - Example:{example_id} - text:`{example_text[start:end]}` != text_by_offset:`{text[idx]}`"
                             self.assertEqual(example_text[start:end], text[idx], msg)
 
     def _check_offsets(
         self,
+        example_id: int,
+        split: str,
         example_text: str,
         offsets: List[List[int]],
         texts: List[str],
@@ -358,16 +362,16 @@ class TestDataLoader(unittest.TestCase):
 
         if len(texts) != len(offsets):
             logger.warning(
-                f"Number of texts {len(texts)} != number of offsets {len(offsets)}. Please make sure that this error already exists in the original data and was not introduced in the data loader."
+                f"Split:{split} - Example:{example_id} - Number of texts {len(texts)} != number of offsets {len(offsets)}. Please make sure that this error already exists in the original data and was not introduced in the data loader."
             )
 
         self._test_is_list(
-            msg="Text fields paired with offsets must be in the form [`text`, ...]",
+            msg=f"Split:{split} - Example:{example_id} - Text fields paired with offsets must be in the form [`text`, ...]",
             field=texts,
         )
 
         with self.subTest(
-            "All offsets must be in the form [(lo1, hi1), ...]",
+            f"Split:{split} - Example:{example_id} - All offsets must be in the form [(lo1, hi1), ...]",
             offsets=offsets,
         ):
             self.assertTrue(all(len(o) == 2 for o in offsets))
@@ -404,13 +408,17 @@ class TestDataLoader(unittest.TestCase):
                     for entity in example["entities"]:
 
                         for msg in self._check_offsets(
+                            example_id=example_id,
+                            split=split,
                             example_text=example_text,
                             offsets=entity["offsets"],
                             texts=entity["text"],
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - entity:{entity_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -436,13 +444,17 @@ class TestDataLoader(unittest.TestCase):
                     for event in example["events"]:
 
                         for msg in self._check_offsets(
+                            example_id=example_id,
+                            split=split,
                             example_text=example_text,
                             offsets=event["trigger"]["offsets"],
                             texts=event["trigger"]["text"],
                         ):
 
                             event_id = event["id"]
-                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - event:{event_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -459,12 +471,15 @@ class TestDataLoader(unittest.TestCase):
             if "coreferences" in dataset_bigbio[split].features:
 
                 for example in dataset_bigbio[split]:
+                    example_id = example["id"]
                     entity_lookup = {ent["id"]: ent for ent in example["entities"]}
 
                     # check all coref entity ids are in entity lookup
                     for coref in example["coreferences"]:
                         for entity_id in coref["entity_ids"]:
-                            assert entity_id in entity_lookup
+                            assert (
+                                entity_id in entity_lookup
+                            ), f"Split:{split} - Example:{example_id} - Entity:{entity_id} not found!"
 
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
@@ -545,7 +560,9 @@ class TestDataLoader(unittest.TestCase):
             self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
 
         else:
-            raise ValueError(f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}")
+            raise ValueError(
+                f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
+            )
 
     @staticmethod
     def _check_subkey(inp, attrs):
@@ -562,7 +579,9 @@ class TestDataLoader(unittest.TestCase):
             mandatory_keys = all([key in example for key in features.keys()])
             self.assertTrue(
                 mandatory_keys,
-                "/".join(features.keys()) + " keys missing from bigbio view for schema_type = " + schema_name,
+                "/".join(features.keys())
+                + " keys missing from bigbio view for schema_type = "
+                + schema_name,
             )
 
     def _test_is_list(self, msg: str, field: list):
@@ -587,7 +606,9 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
+    parser.add_argument(
+        "path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)"
+    )
     parser.add_argument(
         "--schema",
         type=str,
