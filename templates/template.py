@@ -67,6 +67,9 @@ This dataset is designed for XXX NLP task.
 _HOMEPAGE = ""
 
 # TODO: Add the licence for the dataset here (if possible)
+# Note that this doesn't have to be a common open source license.
+# Some datasets have custom licenses. In this case, simply put the full license terms
+# into `_LICENSE`
 _LICENSE = ""
 
 # TODO: Add links to the urls needed to download your dataset files.
