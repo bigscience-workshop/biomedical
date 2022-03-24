@@ -83,7 +83,9 @@ _URLS = {
 # TODO: add supported task by dataset. One dataset may support multiple tasks
 _SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
 
-# TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
+# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
+# this version doesn't have to be consistent with semantic versioning. Anything that is
+# provided by the original dataset as a version goes.
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
