@@ -114,7 +114,7 @@ Please refer to the [Task Schemas Document](task_schemas.md) to find the correct
 
 
 ##### Example scripts:
-To help you implement a dataset, we offer a template and example scripts.
+To help you implement a dataset, we offer a [template](templates/template.py) and [example scripts](examples/).
 
 #### Running & Debugging:
 You can run your data loader script during development by appending the following
@@ -153,7 +153,7 @@ Once this is done, please also check if your dataloader satisfies our unit tests
 python -m tests.test_bigbio examples/<dataset_name>.py [--data_dir /path/to/local/data]
 ```
 
-Your particulr dataset may require use of some of the other command line args in the test script.
+Your particular dataset may require use of some of the other command line args in the test script.
 To view full usage instructions you can use the `--help` command,
 
 ```bash
