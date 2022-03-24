@@ -116,6 +116,23 @@ Please refer to the [Task Schemas Document](task_schemas.md) to find the correct
 ##### Example scripts:
 To help you implement a dataset, we offer a template and example scripts.
 
+#### Running & Debugging:
+You can run your data loader script during development by appending the following
+statement to your code ([templates/template.py](templates/template.py) already includes this):
+
+```python
+import datasets
+
+if __name__ == "__main__":
+    datasets.load_dataset(__file__)
+```
+
+If you want to use an interactive debugger during development, you will have to use
+`breakpoint()` instead of setting breakpoints directly in your IDE. Most IDEs will 
+recognize the `breakpoint()` statement and pause there during debugging. If your prefered
+IDE doesn't support this, you can always run the script in your terminal and debug with 
+`pdb`.
+
 
 ### 4. Check if your dataloader works
 
