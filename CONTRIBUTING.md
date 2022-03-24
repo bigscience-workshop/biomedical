@@ -194,4 +194,4 @@ Push these changes to **your fork** with the following command:
 
 ### 7. **Make a pull request**
 
-Make a PR to implement your changes on the main repository [here](https://github.com/huggingface/datasets/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
+Make a PR to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
