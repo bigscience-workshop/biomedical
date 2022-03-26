@@ -60,23 +60,30 @@ for your account on the Data Portal, but your original DUA will be retained."
 
 """
 
-from collections import defaultdict
 import os
 import re
 import tarfile
-from typing import Dict, List, Match, Tuple
 import zipfile
-import datasets
+from collections import defaultdict
 from dataclasses import dataclass
-from datasets import Features, Sequence, Value
+from typing import Dict, List, Match, Tuple
 
+import datasets
+from datasets import Features, Value
 
 _DATASETNAME = "n2c2_2011"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
 _CITATION = """\
 @article{,
-    author = {Uzuner, Ozlem and Bodnari, Andreea and Shen, Shuying and Forbush, Tyler and Pestian, John and South, Brett R},
+    author = {
+        Uzuner, Ozlem and
+        Bodnari, Andreea and
+        Shen, Shuying and
+        Forbush, Tyler and
+        Pestian, John and
+        South, Brett R
+    },
     title = "{Evaluating the state of the art in coreference resolution for electronic medical records}",
     journal = {Journal of the American Medical Informatics Association},
     volume = {19},
@@ -271,6 +278,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids, split):
 
     return corefs
 
+
 def _get_entities_from_sample(sample_id, sample, split):
     """Parse the lines of a *.con concept file into entity objects
 
@@ -348,7 +356,7 @@ def _get_entities_from_sample(sample_id, sample, split):
             # or taking the text from the offsets. the differences are
             # almost all casing with some small number of new line characters
             # making up the rest
-            #"text": [cp["text"]],
+            # "text": [cp["text"]],
             "text": [text_slice],
             "type": cp["type"],
             "normalized": [],
@@ -378,6 +386,7 @@ def _get_entities_from_sample(sample_id, sample, split):
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
+
     name: str = None
     version: str = None
     description: str = None
@@ -405,7 +414,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             description="n2c2_2011 BigBio schema",
             schema="bigbio_kb",
             subset_id="n2c2_2011",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "n2c2_2011_source"
@@ -486,8 +495,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         )
 
         """
-
-        data_dir = self.config.data_dir
 
         return [
             datasets.SplitGenerator(
