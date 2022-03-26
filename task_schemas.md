@@ -104,10 +104,28 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ### Events
-- Examples: [MLEE]()
+- Examples: [MLEE](examples/mlee.py)
 
 ```
-TBD
+"events": [
+    {
+        "id": "3",
+        "type": "Reaction",
+        "trigger": {
+            "offsets": [[0,6]],
+            "text": ["reacts"]
+        },
+        "arguments": [
+            {
+                "role": "theme",
+                "ref_id": "5",
+            }
+            ...
+        ],
+    }
+    ...
+],
+
 ```
 
 ### Coreferences

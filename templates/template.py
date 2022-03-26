@@ -34,6 +34,8 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 """
 
 import os
+from typing import List
+
 import datasets
 from dataclasses import dataclass
 
@@ -65,6 +67,9 @@ This dataset is designed for XXX NLP task.
 _HOMEPAGE = ""
 
 # TODO: Add the licence for the dataset here (if possible)
+# Note that this doesn't have to be a common open source license.
+# Some datasets have custom licenses. In this case, simply put the full license terms
+# into `_LICENSE`
 _LICENSE = ""
 
 # TODO: Add links to the urls needed to download your dataset files.
@@ -81,7 +86,9 @@ _URLS = {
 # TODO: add supported task by dataset. One dataset may support multiple tasks
 _SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
 
-# TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
+# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
+# this version doesn't have to be consistent with semantic versioning. Anything that is
+# provided by the original dataset as a version goes.
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
@@ -139,7 +146,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "[dataset_name]_source"
 
-    def _info(self):
+    def _info(self) -> datasets.DatasetInfo:
 
         # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
 
@@ -183,7 +190,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager):
+    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
         # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
@@ -234,7 +241,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, filepath, split) -> (int, dict):
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
@@ -254,3 +261,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
 # This template is based on the following template from the datasets package:
 # https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
+
+
+# This allows you to run your dataloader with `python [dataset_name].py` during development
+# TODO: Remove this before making your PR
+if __name__ == "__main__":
+    datasets.load_dataset(__file__)

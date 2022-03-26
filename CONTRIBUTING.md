@@ -114,7 +114,24 @@ Please refer to the [Task Schemas Document](task_schemas.md) to find the correct
 
 
 ##### Example scripts:
-To help you implement a dataset, we offer a template and example scripts.
+To help you implement a dataset, we offer a [template](templates/template.py) and [example scripts](examples/).
+
+#### Running & Debugging:
+You can run your data loader script during development by appending the following
+statement to your code ([templates/template.py](templates/template.py) already includes this):
+
+```python
+import datasets
+
+if __name__ == "__main__":
+    datasets.load_dataset(__file__)
+```
+
+If you want to use an interactive debugger during development, you will have to use
+`breakpoint()` instead of setting breakpoints directly in your IDE. Most IDEs will 
+recognize the `breakpoint()` statement and pause there during debugging. If your prefered
+IDE doesn't support this, you can always run the script in your terminal and debug with 
+`pdb`.
 
 
 ### 4. Check if your dataloader works
@@ -136,7 +153,7 @@ Once this is done, please also check if your dataloader satisfies our unit tests
 python -m tests.test_bigbio examples/<dataset_name>.py [--data_dir /path/to/local/data]
 ```
 
-Your particulr dataset may require use of some of the other command line args in the test script.
+Your particular dataset may require use of some of the other command line args in the test script.
 To view full usage instructions you can use the `--help` command,
 
 ```bash
@@ -177,4 +194,4 @@ Push these changes to **your fork** with the following command:
 
 ### 7. **Make a pull request**
 
-Make a PR to implement your changes on the main repository [here](https://github.com/huggingface/datasets/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
+Make a PR to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
