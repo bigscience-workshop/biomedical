@@ -111,10 +111,10 @@ Yes! Some datasets are easier to write dataloader scripts for than others. If yo
 
 ## Thank you!
 
-We greatly appreciate your help - as a token or our gratitude, contributors can get the following rewards:
+We greatly appreciate your help! 
 
-* **Authorship on a paper**; we are submitting this work to various venues centered on programmatic access to biomedical literature
+The artifacts of this hackathon will be described in a forthcoming academic paper targeting a machine learning or NLP audience. Implementing 3 or more dataset loaders will guarantee authorship. We recognize that some datasets require more effort than others, so please reach out if you have questions. Our goal is to be inclusive with credit!
 
-* **Recognition as an official contributor** if your script is accepted, you will be an official author on the **BigScience Biomedical library** from Huggingface.
+## Acknowledgements
 
-The hackathon guide is heavily inspired from [here](https://github.com/bigscience-workshop/data_tooling/wiki/datasets-hackathon).
+This hackathon guide was heavily inspired by [the BigScience Datasets Hackathon](https://github.com/bigscience-workshop/data_tooling/wiki/datasets-hackathon).
