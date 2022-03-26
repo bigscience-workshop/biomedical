@@ -3,4 +3,4 @@ dependencies:
   - python>=3.6
   
   - pip:
-    - -r file:requirements.txt
+    - -r requirements.txt
