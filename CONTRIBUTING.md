@@ -94,7 +94,7 @@ To implement your dataset, there are three key methods that are important:<br>
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
   * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
 
-To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<dataset_name>` directory with the name <dataset_name>.py. Within this file, fill out all the TODOs.
+To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<dataset_name>` directory with the name `<dataset_name>.py`. Within this file, fill out all the TODOs.
 
     cp templates/template.py biodatasets/<dataset_name>/<dataset_name>.py
 
