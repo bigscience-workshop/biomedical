@@ -34,8 +34,10 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 """
 
 import os
-import datasets
+from typing import List
 
+import datasets
+from dataclasses import dataclass
 
 # TODO: Add BibTeX citation
 _CITATION = """\
@@ -65,6 +67,9 @@ This dataset is designed for XXX NLP task.
 _HOMEPAGE = ""
 
 # TODO: Add the licence for the dataset here (if possible)
+# Note that this doesn't have to be a common open source license.
+# Some datasets have custom licenses. In this case, simply put the full license terms
+# into `_LICENSE`
 _LICENSE = ""
 
 # TODO: Add links to the urls needed to download your dataset files.
@@ -78,16 +83,31 @@ _URLS = {
     _DATASETNAME: "url or list of urls or ... ",
 }
 
-# TODO: set this to a version that is associated with the dataset. if none exists use 1.0.0
+# TODO: add supported task by dataset. One dataset may support multiple tasks
+_SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
+
+# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
+# this version doesn't have to be consistent with semantic versioning. Anything that is
+# provided by the original dataset as a version goes.
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
+
+
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 class NewDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
-    VERSION = datasets.Version(_SOURCE_VERSION)
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     # You will be able to load the "source" or "bigbio" configurations with
@@ -99,27 +119,41 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
     # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
+    # TODO: For each dataset, implement Config for Source and BigBio;
+    #  if dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them. Each of them should contain:
+    #  name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbioschema_name]
+    #  version: option = (SOURCE_VERSION |BIGBIO_VERSION)
+    #  description: one line description for the dataset
+    #  schema: options = (source|bigbio_[schema_name]) [schema_name] =(kb,pairs, qa, text, test_to_text, entailment)
+    #  subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
+
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source", version=VERSION, description="Source schema"
+        BigBioConfig(
+            name="[dataset_name]_source",
+            version=SOURCE_VERSION,
+            description="[dataset_name] source schema",
+            schema="source",
+            subset_id="[dataset_name]",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="[dataset_name]_bigbio_[schema_name]",
             version=BIGBIO_VERSION,
-            description="BigScience Biomedical schema",
-        ),
+            description="[dataset_name] BigBio schema",
+            schema="bigbio_[bigbio_schema_name]",
+            subset_id="[dataset_name]",
+        )
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "[dataset_name]_source"
 
-    def _info(self):
+    def _info(self) -> datasets.DatasetInfo:
 
         # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
 
         # You can arbitrarily nest lists and dictionaries.
         # For iterables, use lists over tuples or `datasets.Sequence`
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # TODO: Create your source schema here
             raise NotImplementedError()
 
@@ -144,7 +178,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # In rare cases you may get a dataset that supports multiple tasks. In that case you can define multiple bigbio configs with a bigbio-<task> format.
 
         # For example bigbio-translation, bigbio-ner
-        elif self.config.name == "bigbio":
+        elif self.config.schema =="bigbio_[bigbio_schema_name]":
             # TODO: Implement your big-bio schema here
             raise NotImplementedError()
 
@@ -156,7 +190,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager):
+    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
         # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
@@ -207,7 +241,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, filepath, split) -> (int, dict):
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
@@ -227,3 +261,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
 # This template is based on the following template from the datasets package:
 # https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
+
+
+# This allows you to run your dataloader with `python [dataset_name].py` during development
+# TODO: Remove this before making your PR
+if __name__ == "__main__":
+    datasets.load_dataset(__file__)

@@ -1,22 +1,20 @@
-***Update 2022.02.21: We're close to launch! We're excited to have you!***
+***Update 2022.03.26: We're close to launch! Hackathon is scheduled for April 2nd - April 15th. We're excited to have you!***
 
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
 <!--- @Natasha From the Data_sourcing wiki  --->
 
-We are running a **Biomedical Datasets hackathon** to centralize many NLP datasets in the biological and medical space. Biological data is often diverse, so a unified location that joins multiple sources while preserving the data closest to the original form can greatly help accessbility.
+We are running a **Biomedical Datasets hackathon** to centralize many NLP datasets in the biological and medical space. Biological data is diverse, so a unified location that joins multiple sources while preserving the data closest to the original form can greatly help accessbility.
 
 ## Goals of this hackathon
 
 Our goal is to **enable easy programatic access to these datasets** using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/). To do this, we propose a unified schema for dataset extraction, with the intention of implementing as many biomedical datasets as possible to enable **reproducibility in data processing**. 
 
-We are leveraging the 🤗 **Community Hub** in order to centralize these scripts so that practioners and researchers have easy access to these tools with a simple API.
+There are two broad licensing categories for biomedical datasets:
 
-There are two broad categories of biomedical datasets:
-
-##### 1. Publically licensed data
-##### 2. Externally licensed data
+##### 1. Public Data (Public Domain, Creative Commons, Apache 2.0, etc.)
+##### 2. External Data Use Agreements (PhysioNet, i2b2/n2c2, etc.)
 
 We will accept data-loading scripts for either type; please see the [FAQs](#FAQs) for more explicit details on what we propose.
 
@@ -29,23 +27,17 @@ Our unified schema allows researchers and practioners to **access the same type 
 
 ## Contribution Guidelines
 
-To be considered a contributor, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 1 dataset**. 
+To be considered a contributor, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 3 datasets**. 
 
-Explicit instructions are found in [Get started](#Get-started), but the overall criteria to get accepted is as follows: <br>
+Explicit instructions are found in the next section, but the steps for getting a data-loading script accepted are as follows: <br>
 
-- Write a data-loading script for a dataset in a new branch
-- PR your branch to the `bigscience-biomedical` repo and ping the admins
-- If an admin approves the PR, follow the instructions on [uploading to the hub](UPLOADING.md).
+- Fork this repo and write a data-loading script in a new branch
+- PR your branch back to this repo and ping the admins
+- An admin will review and approve your PR or ping you for changes
 
 Details for contributor acknowledgements and rewards can be found [here](#Thank-you)
 
 ## Get started!
-
-Please make a github account prior to implement a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
-
-You will also need at least Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. **We strongly recommend Python 3.8+ for stability**. 
-
-All commands in the guide provided are done through terminal access. If you need help, please [reach out to an admin](#Community-channels).
 
 ### 1. Choose a dataset to implement
 
@@ -56,7 +48,7 @@ There are two options to choose a dataset to implement; you can choose either op
 
 - Assign yourself an issue by clicking the dataset in the project list, and comment `#self-assign` under the issue. **Please assign yourself to issues with no other collaborators assigned**. You should see your GitHub username associated to the issue within 1-2 minutes of making a comment.
 
-- Search to see if the dataset exists in the 🤗 [Hub](https://huggingface.co/datasets). If it exists, please comment on the original issue with the link and choose another dataset to implement.
+- Search to see if the dataset exists in the 🤗 [Hub](https://huggingface.co/datasets). If it exists, please use the current implementation as the `source` and focus on implementing the task-specific `bigbio` schema. 
 
 **Option B: Implement a new dataset not on the list**
 
@@ -64,19 +56,11 @@ If you have a biomedical or clinical dataset you would like to propose in this c
 
 If an admin approves it, then you are welcome to implement this dataset and it will count toward contribution credit.
 
-### 2. Implement the dataloader for your dataset
+### 2. Implement the data-loading script for your dataset and create a PR
 
-[Check out our step-by-step guide to implementing a dataloader with the big-bio schema](CONTRIBUTING.md).
+[Check out our step-by-step guide to implementing a dataloader with the bigbio schema](CONTRIBUTING.md).
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
-
-### 3. Make a pull-request (PR) for your dataloader!
-
-Before your data-loading script is accepted, you will need to make a PR to the big-science biomedical repo. Explicit instructions on how to PR a dataloader are found [here](CONTRIBUTING.md). 
-
-Once you do, an admin will code-review your changes. Admins may propose changes before acceptance, or accept as-is. Please feel free to reach out to get your PRs accepted!
-
-Once the PR is accepted, please follow the instructions to upload the dataset into the [Hub](UPLOADING.md).
 
 ## Community channels
 
@@ -99,10 +83,6 @@ You are welcome to use any of the above resources as necessary.
 
 We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local/private dataset specific instructions in  [template](templates/template.py).
 
-#### What if my dataset does not have a public license?
-
-We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has the dataset file(s) stored locally. You can find an example [here](examples/cellfinder.py).
-
 #### What types of libraries can we import?
 
 Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. 
@@ -115,9 +95,9 @@ No. Please do not upload your dataset directly. This is not the goal of the hack
 
 #### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
 
-In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `text_to_text` schema) and a named entity recognition task (supported by the `kb` schema). In this case, please implement one config for each task and name the config `bigbio-<task>`. In the `muchmore` example, this would mean one config called `bigbio-translation` and one config called `bigbio-ner`.  
+In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `Text to Text (T2T)` schema) and a named entity recognition task (supported by the `Knowledge Base (KB)` schema). In this case, please implement one config for each supported schema and name the config `<datasetname>_bigbio_<schema>`. In the `muchmore` example, this would mean one config called `muchmore_bigbio_t2t` and one config called `muchmore_bigbio_kb`.  
 
-#### How should I handle offsets and text in the bigbio kb schema?
+#### How should I handle offsets and text in the bigbio schema?
 
 Full details on how to handle offsets and text in the bigbio kb schema can be found in the [schema documentation](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md).
 
