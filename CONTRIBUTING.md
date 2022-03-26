@@ -44,7 +44,7 @@ Provided you have no *merge conflicts*, this will ensure the library stays up-to
 
 You can make a new branch as such:
 
-    git checkout -b <name_of_my_dataset_branch>
+    git checkout -b <dataset_name>
 
 <p style="color:red"> <b> Please do not make changes on the master branch! </b></p>
 
@@ -86,8 +86,7 @@ Make sure your `pip` package points to your environment's source.
 
 Make a new directory within the `biomedical/biodatasets` folder as such: <br>
 
-    mkdir biodatasets/<name_of_my_dataset>
-    cd biodatasets/<name_of_my_dataset>
+    mkdir biodatasets/<dataset_name>
 
 To implement your dataset, there are three key methods that are important:<br>
 
@@ -95,9 +94,9 @@ To implement your dataset, there are three key methods that are important:<br>
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
   * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
 
-To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<name_of_my_dataset>` directory with the name <name_of_my_dataset>.py. Within this file, fill out all the TODOs.
+To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<dataset_name>` directory with the name <dataset_name>.py. Within this file, fill out all the TODOs.
 
-    cp templates/template.py biodatasets/<name_of_my_dataset>/<name_of_my_dataset>.py
+    cp templates/template.py biodatasets/<dataset_name>/<dataset_name>.py
 
 For the `_info_` function, you will need to define `features` for your
 `DatasetInfo` object. For the `bigbio` config, copy the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](https://github.com/bigscience-workshop/biomedical/tree/master/schemas).
@@ -115,7 +114,7 @@ Please refer to the [Task Schemas Document](task_schemas.md) to find the correct
 
 
 ##### Example scripts:
-To help you implement a dataset, we offer a [template](templates/template.py) and [example scripts](examples/).
+To help you implement a dataset, we offer [example scripts](examples/).
 
 #### Running & Debugging:
 You can run your data loader script during development by appending the following
