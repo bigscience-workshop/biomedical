@@ -1,5 +1,8 @@
 # makefile from the huggingface promptsource repository
 # https://github.com/bigscience-workshop/promptsource/blob/main/Makefile
+#
+# run this Makefile on your dataset loader script,
+# > make check_file=biodatasets/<dataset_name>/<dataset_name>.py
 
 .PHONY: quality style
 
@@ -8,9 +11,6 @@ datasets_dir := biodatasets
 # Check that source code meets quality standards (one file)
 
 quality:
-	ifndef check_file
-	$(error check_file is not set)
-	endif
 	black --check --line-length 119 --target-version py38 $(check_file)
 	isort --check-only $(check_file)
 	flake8 $(check_file) --max-line-length 119
