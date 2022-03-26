@@ -1,4 +1,4 @@
-***Update 2022.02.21: We're close to launch! We're excited to have you!***
+***Update 2022.03.26: We're close to launch! Hackathon is scheduled for April 2nd - April 15th. We're excited to have you!***
 
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
@@ -38,12 +38,6 @@ Explicit instructions are found in the next section, but the steps for getting a
 Details for contributor acknowledgements and rewards can be found [here](#Thank-you)
 
 ## Get started!
-
-Please make a github account prior to implement a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). 
-
-You will also need at least Python 3.6+. If you are installing python, we recommend downloading [anaconda](https://docs.anaconda.com/anaconda/install/index.html) to curate a python environment with necessary packages. **We strongly recommend Python 3.8+ for stability**. 
-
-All commands in the guide provided are done through terminal access. If you need help, please [reach out to an admin](#Community-channels).
 
 ### 1. Choose a dataset to implement
 
