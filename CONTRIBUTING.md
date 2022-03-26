@@ -84,10 +84,10 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `biomedical/datasets` folder as such: <br>
+Make a new directory within the `biomedical/biodatasets` folder as such: <br>
 
-    mkdir datasets/<name_of_my_dataset>
-    cd datasets/<name_of_my_dataset>
+    mkdir biodatasets/<name_of_my_dataset>
+    cd biodatasets/<name_of_my_dataset>
 
 To implement your dataset, there are three key methods that are important:<br>
 
@@ -95,8 +95,9 @@ To implement your dataset, there are three key methods that are important:<br>
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
   * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
 
-To start, copy [templates/template.py](templates/template.py) to your in `biomedical/datasets/<name_of_my_dataset>` with the name <name_of_my_dataset>.py. Within this file, fill out all the TODOs.
+To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<name_of_my_dataset>` directory with the name <name_of_my_dataset>.py. Within this file, fill out all the TODOs.
 
+    cp templates/template.py biodatasets/<name_of_my_dataset>/<name_of_my_dataset>.py
 
 For the `_info_` function, you will need to define `features` for your
 `DatasetInfo` object. For the `bigbio` config, copy the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](https://github.com/bigscience-workshop/biomedical/tree/master/schemas).
@@ -121,8 +122,6 @@ You can run your data loader script during development by appending the followin
 statement to your code ([templates/template.py](templates/template.py) already includes this):
 
 ```python
-import datasets
-
 if __name__ == "__main__":
     datasets.load_dataset(__file__)
 ```
@@ -142,15 +141,15 @@ Make sure your dataset is implemented correctly by checking in python the follow
 import datasets
 from datasets import load_dataset
 
-data = load_dataset('examples/<dataset_name>'.py, name="<dataset_name>_bigbio_<schema>")
+data = load_dataset('biodatasets/<dataset_name>/<dataset_name>'.py, name="<dataset_name>_bigbio_<schema>")
 ```
 
-Run these commands within the `biomedical` repo, not in `biomedical/examples` as the relative path will not work.
+Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).
 
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio examples/<dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
 ```
 
 Your particular dataset may require use of some of the other command line args in the test script.
@@ -162,11 +161,9 @@ python -m tests.test_bigbio --help
 
 ### 5. Format your code
 
-Return to the main directory (assuming you are in your dataset-specific folder) via the following commands:
+From the main directory, run the Makefile via the following command:
 
-    cd ../../  # return to the datasets main location
-    make style
-    make quality
+    make check_file=biodatasets/<dataset_name>/<dataset_name>.py
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
@@ -174,10 +171,8 @@ This runs the black formatter, isort, and lints to ensure that the code is reada
 
 First, commit your changes to the branch to "add" the work:
 
-    git add examples/<dataset_name>.py
-    git commit
-
-*Ideally, run* `git commit -m "A message of your commits"`
+    git add biodatasets/<dataset_name>/<dataset_name>.py
+    git commit -m "A message describing your commits"
 
 Then, run the following commands to incorporate any new changes in the master branch of datasets as follows:
 
@@ -189,8 +184,6 @@ Then, run the following commands to incorporate any new changes in the master br
 Push these changes to **your fork** with the following command:
 
     git push -u origin <name_of_my_dataset_branch>
-
-**[Optional Step]** Add unit-tests and meta data by following instructions [here](https://huggingface.co/docs/datasets/share_dataset.html#adding-tests).
 
 ### 7. **Make a pull request**
 
