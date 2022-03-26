@@ -182,7 +182,7 @@ Then, run the following commands to incorporate any new changes in the master br
 
 Push these changes to **your fork** with the following command:
 
-    git push -u origin <name_of_my_dataset_branch>
+    git push -u origin <dataset_name>
 
 ### 7. **Make a pull request**
 
