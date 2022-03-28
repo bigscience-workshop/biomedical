@@ -18,14 +18,12 @@ MLEE is an event extraction corpus consisting of manually annotated abstracts of
 on angiogenesis. It contains annotations for entities, relations, events and coreferences
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
-from collections import defaultdict
 from pathlib import Path
 import datasets
-from typing import Iterable, Dict, List
+from typing import List
 from dataclasses import dataclass
 
-from examples import utils
-
+from biodatasets import utils
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
