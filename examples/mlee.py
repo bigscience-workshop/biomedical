@@ -24,7 +24,7 @@ import datasets
 from typing import Iterable, Dict, List
 from dataclasses import dataclass
 
-from examples import utils
+from biodatasets import utils
 
 
 _DATASETNAME = "mlee"
