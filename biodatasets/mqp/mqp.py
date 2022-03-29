@@ -24,6 +24,8 @@ import csv
 from datasets import load_dataset
 from dataclasses import dataclass
 
+from utils import schemas
+
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
@@ -105,15 +107,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
 
         # Using in pairs schema
         elif self.config.schema == "bigbio_pairs":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string")
-                }
-            )
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

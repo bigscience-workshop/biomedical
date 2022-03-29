@@ -17,6 +17,7 @@ import glob
 import datasets
 from dataclasses import dataclass
 
+from utils import schemas
 
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -124,14 +125,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_text":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("int32"),
-                    "document_id": datasets.Value("string"),
-                    "text": datasets.Value("string"),
-                    "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
-                }
-            )
+            features = schemas.text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

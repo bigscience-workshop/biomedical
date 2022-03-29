@@ -22,14 +22,14 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 
 -- 'Overview of the BioCreative V Chemical Disease Relation (CDR) Task'
 """
-import csv
-import json
 import os
 import itertools
 import collections
 import bioc
 import datasets
 from dataclasses import dataclass
+
+from utils import schemas
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -151,48 +151,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -366,6 +325,8 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     "passages": [],
                     "entities": [],
                     "relations": [],
+                    "events": [],
+                    "coreferences": [],
                 }
                 uid += 1
                 doc_text = self._get_document_text(xdoc)

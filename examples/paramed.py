@@ -24,6 +24,8 @@ from typing import Dict, Iterable, List
 from dataclasses import dataclass
 import datasets
 
+from utils import schemas
+
 logger = datasets.logging.get_logger(__name__)
 
 
@@ -109,16 +111,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "text_1_name": datasets.Value("string"),
-                    "text_2_name": datasets.Value("string")
-                }
-            )
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.

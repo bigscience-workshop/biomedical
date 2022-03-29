@@ -20,6 +20,8 @@ from typing import Dict, Iterator, List, Tuple
 import bioc
 import datasets
 
+from utils import schemas
+
 _CITATION = """\
 @Article{islamaj2021nlm,
 title={NLM-Chem, a new resource for chemical entity recognition in PubMed full text literature},
@@ -123,34 +125,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -355,4 +330,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     "document_id": doc.id,
                     "passages": passages,
                     "entities": entities,
+                    "events": [],
+                    "coreferences": [],
+                    "relations": []
                 }

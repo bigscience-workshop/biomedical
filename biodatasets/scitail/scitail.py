@@ -29,6 +29,8 @@ from dataclasses import dataclass
 import datasets
 import pandas as pd
 
+from utils import schemas
+
 _CITATION = """\
 @inproceedings{scitail,
     author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
@@ -114,14 +116,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "premise": datasets.Value("string"),
-                    "hypothesis": datasets.Value("string"),
-                    "label": datasets.Value("string"),
-                }
-            )
+            features = schemas.entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

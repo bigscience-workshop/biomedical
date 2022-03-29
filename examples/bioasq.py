@@ -30,6 +30,8 @@ import glob
 import datasets
 from dataclasses import dataclass
 
+from utils import schemas
+
 
 _CITATION = """\
 @article{tsatsaronis2015overview,
@@ -452,17 +454,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             )
         # simplified schema for QA tasks
         elif self.config.schema == "bigbio_qa":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "question_id": datasets.Value("string"),
-                    "question": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "context": datasets.Value("string"),
-                    "answer": datasets.Sequence(datasets.Value("string")),
-                }
-            )
+            features = schemas.qa_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION[self.config.subset_id],
