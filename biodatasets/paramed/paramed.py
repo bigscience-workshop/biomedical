@@ -25,6 +25,8 @@ from dataclasses import dataclass
 import datasets
 
 from utils import schemas
+from utils.constants import Tasks
+
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -57,7 +59,7 @@ _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
     "bigbio_t2t": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
 }
-_SUPPORTED_TASKS = ["TRANSL"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

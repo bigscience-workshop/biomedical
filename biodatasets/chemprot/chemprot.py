@@ -24,6 +24,8 @@ from dataclasses import dataclass
 import datasets
 
 from utils import schemas
+from utils.constants import Tasks
+
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -49,7 +51,8 @@ _LICENSE = "Public Domain Mark 1.0"
 _URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
          "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
-_SUPPORTED_TASKS = ["RE", "NER", "NED"]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

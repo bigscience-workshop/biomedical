@@ -18,6 +18,8 @@ import datasets
 from dataclasses import dataclass
 
 from utils import schemas
+from utils.constants import Tasks
+
 
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -61,7 +63,7 @@ _URLs = {
     "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = ["TXTCLASS"]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

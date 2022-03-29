@@ -25,6 +25,8 @@ from datasets import load_dataset
 from dataclasses import dataclass
 
 from utils import schemas
+from utils.constants import Tasks
+
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -55,7 +57,7 @@ _LICENSE = ""
 _URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
          "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
 
-_SUPPORTED_TASKS = ["STS"]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

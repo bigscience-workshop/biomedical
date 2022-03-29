@@ -68,6 +68,9 @@ from xml.etree.ElementTree import Element
 import datasets
 from datasets import Features, Value
 
+from utils.constants import Tasks
+
+
 
 
 # TODO: home page has a list of publications but its not clear which to choose
@@ -140,7 +143,7 @@ _URLs = {
 # took version from annotated file names
 _SOURCE_VERSION = "4.2.0"
 _BIGBIO_VERSION = "1.0.0"
-_SUPPORTED_TASKS = ["TRANSL", "NER"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
 
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
