@@ -31,7 +31,7 @@ import datasets
 from dataclasses import dataclass
 
 from utils import schemas
-
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{tsatsaronis2015overview,
@@ -372,7 +372,7 @@ _URLs = {
     "bioasq2b": ["BioASQ-trainingDataset2b.zip", "Task2BGoldenEnriched.zip"],
 }
 
-_SUPPORTED_TASKS = ["QA"]
+_SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

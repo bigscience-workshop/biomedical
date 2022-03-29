@@ -30,6 +30,7 @@ import datasets
 import pandas as pd
 
 from utils import schemas
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{scitail,
@@ -60,7 +61,7 @@ _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-_SUPPORTED_TASKS = ["TE"]
+_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 
 _SOURCE_VERSION = "1.1.0"
 

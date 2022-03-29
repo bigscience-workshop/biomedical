@@ -72,6 +72,7 @@ import datasets
 from datasets import Features, Value
 
 from utils import schemas
+from utils.constants import Tasks
 
 _DATASETNAME = "n2c2_2011"
 
@@ -123,7 +124,7 @@ _LICENSE = "Data User Agreement"
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["COREF"]
+_SUPPORTED_TASKS = [Tasks.COREFERENCE_RESOLUTION]
 
 
 def _read_tar_gz(file_path, samples=None):

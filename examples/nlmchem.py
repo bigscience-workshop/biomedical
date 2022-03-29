@@ -21,6 +21,7 @@ import bioc
 import datasets
 
 from utils import schemas
+from utils.constants import Tasks
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -52,7 +53,7 @@ _URLs = {
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
     "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
-_SUPPORTED_TASKS = ["NER", "NED"]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

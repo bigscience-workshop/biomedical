@@ -28,7 +28,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 from utils import schemas
-
+from utils.constants import Tasks
 
 _DATASETNAME = "biosses"
 
@@ -63,7 +63,7 @@ _URLs = {
     "bigbio_pairs": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
 }
 
-_SUPPORTED_TASKS = ["STS"]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
