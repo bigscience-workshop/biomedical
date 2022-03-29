@@ -18,14 +18,12 @@ MLEE is an event extraction corpus consisting of manually annotated abstracts of
 on angiogenesis. It contains annotations for entities, relations, events and coreferences
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
-from collections import defaultdict
 from pathlib import Path
 import datasets
-from typing import Iterable, Dict, List
+from typing import List
 from dataclasses import dataclass
 
-from biodatasets import utils
-
+from utils import parsing
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
@@ -331,14 +329,14 @@ class MLEE(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                example = utils.parse_brat_file(txt_file)
+                example = parsing.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
         elif self.config.schema == "bigbio_kb":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                example = utils.brat_parse_to_bigbio_kb(
-                    utils.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                example = parsing.brat_parse_to_bigbio_kb(
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
