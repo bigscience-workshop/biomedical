@@ -5,18 +5,15 @@ import argparse
 import importlib
 import sys
 import unittest
-import warnings
 from collections import defaultdict
-from difflib import ndiff
 from pathlib import Path
-from pprint import pformat
 from typing import Iterable, Iterator, List, Optional, Union
 
 import datasets
-from datasets import DatasetDict, Features, load_dataset
+from datasets import DatasetDict, Features
 
-from schemas import (entailment_features, kb_features, pairs_features,
-                     qa_features, text2text_features, text_features)
+from utils.schemas import (entailment_features, kb_features, pairs_features,
+                           qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
