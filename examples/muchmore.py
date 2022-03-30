@@ -56,7 +56,6 @@ Notes
 """
 
 from collections import defaultdict
-from dataclasses import dataclass
 import itertools
 import os
 import re
@@ -68,6 +67,7 @@ from xml.etree.ElementTree import Element
 import datasets
 from datasets import Features, Value
 
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -148,17 +148,6 @@ _SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
 LANG_MAP = {"eng": "en", "ger": "de"}
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class MuchMoreDataset(datasets.GeneratorBasedBuilder):

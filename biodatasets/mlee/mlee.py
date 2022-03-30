@@ -21,9 +21,9 @@ The annotations span molecular, cellular, tissue, and organ-level processes.
 from pathlib import Path
 import datasets
 from typing import List
-from dataclasses import dataclass
 
 from utils import parsing, schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -63,14 +63,6 @@ _SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class MLEE(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
