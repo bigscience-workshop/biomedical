@@ -103,6 +103,12 @@ No. Please do not upload your dataset directly. This is not the goal of the hack
 
 In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `Text to Text (T2T)` schema) and a named entity recognition task (supported by the `Knowledge Base (KB)` schema). In this case, please implement one config for each supported schema and name the config `<datasetname>_bigbio_<schema>`. In the `muchmore` example, this would mean one config called `muchmore_bigbio_t2t` and one config called `muchmore_bigbio_kb`.  
 
+#### My dataset comes with multiple annotations per text and no/multiple harmonizations. How should I proceed?
+
+Please implement all different annotations and harmonizations as `source` versions (see [examples/bioasq.py](examples/bioasq.py) for an example).
+If the authors suggest a preferred harmonization, use that for the `bigbio` version.
+Otherwise use the harmonization that you think is best.
+
 #### How should I handle offsets and text in the bigbio schema?
 
 Full details on how to handle offsets and text in the bigbio kb schema can be found in the [schema documentation](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md).
