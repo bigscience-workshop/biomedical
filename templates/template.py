@@ -17,7 +17,7 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo. 
+This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
 
 When modifying it for your dataset, look for TODO items that offer specific instructions.
 
@@ -206,13 +206,16 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
 
         # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-        
+
         # TODO: KEEP if your dataset is PUBLIC; REMOVE if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
         # TODO: KEEP if your dataset is LOCAL; remove if NOT
-        data_dir = self.config.data_dir
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+        else:
+            data_dir = self.config.data_dir
 
         # Not all datasets have predefined canonical train/val/test splits. If your dataset does not have any splits, you can omit any missing splits.
 
@@ -250,7 +253,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
 
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files 
+        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
 
         if self.config.name == "source":
             # TODO: yield (key, example) tuples in the original dataset schema
