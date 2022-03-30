@@ -1,30 +1,39 @@
 # BigBio Schema Documentation
 We have defined a set of lightwieght, task-specific schema to help simplify programmatic access to common biomedical datasets. This schema should be implemented for each dataset in addition to a schema that preserves the original dataset format.
 
-### Example Schemas by Task
-- [Information Extraction](#information-extraction)
+### Example Schema and Associated Tasks
+
+- [Knowledge Base (KB)](#knowledge-base)
   - Named entity recognition (NER)
   - Named entity disambiguation/normalization/linking (NED)
-  - Event extraction
+  - Event extraction (EE)
   - Relation extraction (RE)
-  - Coreference resolution
-- [Textual Entailment](#textual-entailment)
-- [Question Answering](#question-answering)
-- [Paraphasing, Translation, Summarization](#translation,-paraphasing,-summarization)
-- [Semantic Similarity](#semantic-similarity)
-- [Text Classification](#text-classification)
+  - Coreference resolution (COREF)
+- [Question Answering (QA)](#question-answering)
+  - Question answering (QA)
+- [Textual Entailment (TE)](#textual-entailment)
+  - Textual entailment (TE)
+- [Text Pairs (PAIRS)](#text-pairs)
+  - Semantic Similarity (STS)
+- [Text to Text (T2T)](#text-to-text)
+  - Paraphasing (PARA)
+  - Translation (TRANSL)
+  - Summarization (SUM)
+- [Text (TEXT)](#text)
+  - Text classification (TXTCLASS)
 
-## Information Extraction
 
-[Schema Template](schemas/kb.py)
+## Knowledge Base
 
-This is a simple container format with minimal nesting that supports a range of common information extraction/knowledge base construction tasks.
+[Schema Template](utils/schemas/kb.py)
+
+This is a simple container format with minimal nesting that supports a range of common knowledge base construction / information extraction tasks.
 
 - Named entity recognition (NER)
 - Named entity disambiguation/normalization/linking (NED)
-- Event extraction
+- Event extraction (EE)
 - Relation extraction (RE)
-- Coreference resolution
+- Coreference resolution (COREF)
 
 ```
 {
@@ -42,12 +51,12 @@ This is a simple container format with minimal nesting that supports a range of 
 
 **Schema Notes**
 
-- `id` fields appear at the top (i.e. document) level and in every sub-component (`passages`, `entities`, `events`, `coreferences`, `relations`). They can be set in any fashion that makes every `id` field in a dataset unique.
+- `id` fields appear at the top (i.e. document) level and in every sub-component (`passages`, `entities`, `events`, `coreferences`, `relations`). They can be set in any fashion that makes every `id` field in a dataset unique (including `id` fields in different splits like train/validation/test).
 - `document_id` should be a dataset provided document id. If not provided in the dataset, it can be set equal to the top level `id`.
 - `offsets` contain character offsets into the string that would be created from `" ".join([passage["text"] for passage in passages])`
 - `offsets` and `text` are always lists to support discontinous spans. For continuous spans, they will have the form `offsets=[(lo,hi)], text=["text span"]`. For discontinuous spans, they will have the form `offsets=[(lo1,hi1), (lo2,hi2), ...], text=["text span 1", "text span 2", ...]`
 - `normalized` sub-component may contain 1 or more normalized links to database entity identifiers.
-- `passages` captures document structure such as named sections. 
+- `passages` captures document structure such as named sections.
 - `entities`,`events`,`coreferences`,`relations` may be empty fields depending on the dataset and specific task.
 
 
@@ -95,15 +104,33 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ### Events
-- Examples: [MLEE]()
+- Examples: [MLEE](examples/mlee.py)
 
 ```
-TBD
+"events": [
+    {
+        "id": "3",
+        "type": "Reaction",
+        "trigger": {
+            "offsets": [[0,6]],
+            "text": ["reacts"]
+        },
+        "arguments": [
+            {
+                "role": "theme",
+                "ref_id": "5",
+            }
+            ...
+        ],
+    }
+    ...
+],
+
 ```
 
 ### Coreferences
 
-- Examples: [n2c2 2011: Coreference Challenge](examples/n2c2_2011_coref.py)
+- Examples: [n2c2 2011: Coreference Challenge](examples/n2c2_2011.py)
 
 ```
 "coreferences": [
@@ -131,7 +158,7 @@ TBD
 ```
 
 ## Question Answering
-- [Schema Template](schemas/qa.py)
+- [Schema Template](utils/schemas/qa.py)
 - Examples: [BioASQ9 Task B](examples/bioasq9b.py)
 
 ```
@@ -148,7 +175,7 @@ TBD
 
 ## Textual Entailment
 
-- [Schema Template](schemas/entailment.py)
+- [Schema Template](utils/schemas/entailment.py)
 - Examples: [SciTail](examples/scitail.py)
 
 ```
@@ -161,9 +188,25 @@ TBD
 }
 ```
 
-## Translation, Paraphasing, Summarization
+## Text Pairs
 
-- [Schema Template](schema/text_to_text.py)
+- [Schema Template](utils/schemas/pairs.py)
+- Examples: [MQP](examples/mqp.py)
+
+```
+{
+	"id": "0",
+	"document_id": "NULL",
+	"text_1": "Am I over weight (192.9) for my age (39)?",
+	"text_2": "I am a 39 y/o male currently weighing about 193 lbs. Do you think I am overweight?",
+	"label": 1,
+}
+```
+
+
+## Text to Text
+
+- [Schema Template](utils/schemas/text_to_text.py)
 - Examples: [ParaMed](examples/paramed.py)
 
 ```
@@ -178,22 +221,8 @@ TBD
 ```
 
 
-## Semantic Similarity
-- [Schema Template](schema/pairs.py)
-- Examples: [MQP](examples/mqp.py)
-
-```
-{
-	"id": "0",
-	"document_id": "NULL",
-	"text_1": "Am I over weight (192.9) for my age (39)?",
-	"text_2": "I am a 39 y/o male currently weighing about 193 lbs. Do you think I am overweight?",
-	"label": 1,
-}
-```
-
-## Text Classification
-- [Schema Template](schema/text.py)
+## Text
+- [Schema Template](utils/schemas/text.py)
 
 ```
 {

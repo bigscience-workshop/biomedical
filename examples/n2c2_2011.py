@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Gabriel Altay
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,46 +48,6 @@ n2c2_2011_coref
 ├── Task_1C_Test_groundtruth.zip
 └── Task_1C.zip
 
-The following commands can be used to load the dataset
-
-```
-ds_orig = load_dataset("n2c2_2011_coref.py", name="source", data_dir="/path/to/n2c2_2011_coref")
-ds_bb = load_dataset("n2c2_2011_coref.py", name="bigbio", data_dir="/path/to/n2c2_2011_coref")
-```
-
-Schema
-
-One sample of the n2c2_2011_coref bigbio schema (e.g. ds_bb['train'][0]) looks like this,
-
-{
-    "id": "clinical-103",
-    "document_id": "clinical-103",
-    "passages": [
-        {
-            "id": "clinical-103-passage-0",
-            "type": "discharge summary",
-            "text": ["......"],
-            "offsets": [[0, 5005]],
-        }
-    ],
-    "entities": [
-        {
-            "id": "clinical-103-entity-12-0-12-0",
-            "type": "person",
-            "text": ["patient"],
-            "offsets": [[128, 135]],
-            "normalized": [],
-        },
-        ...
-    ],
-    "coreferences": [
-        {
-            "id": "clinical-103-coref-0",
-            "entity_ids": ["clinical-103-entity-12-0-12-0", ...],
-        }
-    ]
-}
-
 
 Data Access
 
@@ -100,23 +60,35 @@ for your account on the Data Portal, but your original DUA will be retained."
 
 """
 
-from collections import defaultdict
 import os
 import re
 import tarfile
-from typing import Dict, List, Match, Tuple
 import zipfile
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Dict, List, Match, Tuple
 
 import datasets
-from datasets import Features, Sequence, Value
+from datasets import Features, Value
+
+from utils import schemas
+from utils.constants import Tasks
 
 
-_DATASETNAME = "n2c2_2011_coref"
+
+_DATASETNAME = "n2c2_2011"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
 _CITATION = """\
 @article{,
-    author = {Uzuner, Ozlem and Bodnari, Andreea and Shen, Shuying and Forbush, Tyler and Pestian, John and South, Brett R},
+    author = {
+        Uzuner, Ozlem and
+        Bodnari, Andreea and
+        Shen, Shuying and
+        Forbush, Tyler and
+        Pestian, John and
+        South, Brett R
+    },
     title = "{Evaluating the state of the art in coreference resolution for electronic medical records}",
     journal = {Journal of the American Medical Informatics Association},
     volume = {19},
@@ -154,7 +126,7 @@ _LICENSE = "Data User Agreement"
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["coref"]
+_SUPPORTED_TASKS = [Tasks.COREFERENCE_RESOLUTION]
 
 
 def _read_tar_gz(file_path, samples=None):
@@ -267,9 +239,10 @@ def _tokoff_from_line(text: str) -> List[Tuple[int, int]]:
     return tokoff
 
 
-def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
-    return "{}-entity-{}-{}-{}-{}".format(
+def _form_entity_id(sample_id, split, start_line, start_token, end_line, end_token):
+    return "{}-entity-{}-{}-{}-{}-{}".format(
         sample_id,
+        split,
         start_line,
         start_token,
         end_line,
@@ -277,7 +250,7 @@ def _form_entity_id(sample_id, start_line, start_token, end_line, end_token):
     )
 
 
-def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
+def _get_corefs_from_sample(sample_id, sample, sample_entity_ids, split):
     """Parse the lines of a *.chains file into coreference objects
 
     A small number of concepts from the *.con files could not be
@@ -293,6 +266,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
         coref_entity_ids = [
             _form_entity_id(
                 sample_id,
+                split,
                 entity["start_line"],
                 entity["start_token"],
                 entity["end_line"],
@@ -310,7 +284,7 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids):
     return corefs
 
 
-def _get_entities_from_sample(sample_id, sample):
+def _get_entities_from_sample(sample_id, sample, split):
     """Parse the lines of a *.con concept file into entity objects
 
     Here we parse the *.con files and form entities. For a small
@@ -374,6 +348,7 @@ def _get_entities_from_sample(sample_id, sample):
 
         entity_id = _form_entity_id(
             sample_id,
+            split,
             cp["start_line"],
             cp["start_token"],
             cp["end_line"],
@@ -382,13 +357,46 @@ def _get_entities_from_sample(sample_id, sample):
         entity = {
             "id": entity_id,
             "offsets": [(start_off, end_off)],
-            "text": [cp["text"]],
+            # this is the difference between taking text from the entity
+            # or taking the text from the offsets. the differences are
+            # almost all casing with some small number of new line characters
+            # making up the rest
+            # "text": [cp["text"]],
+            "text": [text_slice],
             "type": cp["type"],
             "normalized": [],
         }
         entities.append(entity)
 
-    return entities
+    # IDs are constructed such that duplicate IDs indicate duplicate (i.e. redundant) entities
+    # In practive this removes one duplicate sample from the test set
+    # {
+    #    'id': 'clinical-627-entity-test-122-9-122-9',
+    #    'offsets': [(5600, 5603)],
+    #    'text': ['her'],
+    #    'type': 'person'
+    # }
+    dedupe_entities = []
+    dedupe_entity_ids = set()
+    for entity in entities:
+        if entity["id"] in dedupe_entity_ids:
+            continue
+        else:
+            dedupe_entity_ids.add(entity["id"])
+            dedupe_entities.append(entity)
+
+    return dedupe_entities
+
+
+@dataclass
+class BigBioConfig(datasets.BuilderConfig):
+    """BuilderConfig for BigBio."""
+
+    name: str = None
+    version: str = None
+    description: str = None
+    schema: str = None
+    subset_id: str = None
 
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
@@ -398,23 +406,27 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        datasets.BuilderConfig(
-            name="source",
+        BigBioConfig(
+            name="n2c2_2011_source",
             version=SOURCE_VERSION,
-            description="Source format",
+            description="n2c2_2011 source schema",
+            schema="source",
+            subset_id="n2c2_2011",
         ),
-        datasets.BuilderConfig(
-            name="bigbio",
+        BigBioConfig(
+            name="n2c2_2011_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="BigScience biomedical hackathon schema",
+            description="n2c2_2011 BigBio schema",
+            schema="bigbio_kb",
+            subset_id="n2c2_2011",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "source"
+    DEFAULT_CONFIG_NAME = "n2c2_2011_source"
 
     def _info(self):
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             features = Features(
                 {
                     "sample_id": Value("string"),
@@ -431,41 +443,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.name == "bigbio":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                            "normalized": [
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "coreferences": [
-                        {
-                            "id": Value("string"),
-                            "entity_ids": [Value("string")],
-                        }
-                    ],
-                }
-            )
+        elif self.config.schema == "bigbio_kb":
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -477,31 +456,25 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
-        """
-        self.config.data_dir and self.config.data_files can be made available by
-        passing the `data_dir` and/or `data_files` kwargs to `load_dataset`.
 
-        dataset = datasets.load_dataset(
-            "n2c2_2011_coref.py",
-            name="source",
-            data_dir="path/to/n2c2_2011_coref/data"
-        )
-
-        """
-
-        data_dir = self.config.data_dir
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+        else:
+            data_dir = self.config.data_dir
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "split": "train",
+                    "data_dir": data_dir,
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "split": "test",
+                    "data_dir": data_dir,
                 },
             ),
         ]
@@ -523,12 +496,12 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         }
 
     @staticmethod
-    def _get_coref_sample(sample_id, sample):
+    def _get_coref_sample(sample_id, sample, split):
 
         passage_text = sample.get("txt", "")
-        entities = _get_entities_from_sample(sample_id, sample)
+        entities = _get_entities_from_sample(sample_id, sample, split)
         entity_ids = set([entity["id"] for entity in entities])
-        coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids)
+        coreferences = _get_corefs_from_sample(sample_id, sample, entity_ids, split)
         return {
             "id": sample_id,
             "document_id": sample_id,
@@ -541,10 +514,13 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             ],
             "entities": entities,
+            "relations": [],
+            "events": [],
             "coreferences": coreferences,
         }
 
-    def _generate_examples(self, split):
+
+    def _generate_examples(self, split, data_dir):
         """Generate samples using the info passed in from _split_generators."""
 
         if split == "train":
@@ -552,16 +528,16 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             # These files have complete sample info
             # (so we get a fresh `samples` defaultdict from each)
             paths = [
-                os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
+                os.path.join(data_dir, "i2b2_Beth_Train_Release.tar.gz"),
+                os.path.join(data_dir, "i2b2_Partners_Train_Release.tar.gz"),
             ]
             for path in paths:
                 samples = _read_tar_gz(path)
                 for sample_id, sample in samples.items():
-                    if self.config.name == "source":
+                    if self.config.schema == "source":
                         yield _id, self._get_source_sample(sample_id, sample)
-                    elif self.config.name == "bigbio":
-                        yield _id, self._get_coref_sample(sample_id, sample)
+                    elif self.config.schema == "bigbio_kb":
+                        yield _id, self._get_coref_sample(sample_id, sample, split)
                     _id += 1
 
         elif split == "test":
@@ -569,16 +545,16 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             # Information from these files has to be combined to create a full sample
             # (so we pass the `samples` defaultdict back to the `_read_zip` method)
             paths = [
-                os.path.join(self.config.data_dir, "Task_1C.zip"),
-                os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
+                os.path.join(data_dir, "Task_1C.zip"),
+                os.path.join(data_dir, "Task_1C_Test_groundtruth.zip"),
             ]
             samples = defaultdict(dict)
             for path in paths:
                 samples = _read_zip(path, samples=samples)
 
             for sample_id, sample in samples.items():
-                if self.config.name == "source":
+                if self.config.schema == "source":
                     yield _id, self._get_source_sample(sample_id, sample)
-                elif self.config.name == "bigbio":
-                    yield _id, self._get_coref_sample(sample_id, sample)
+                elif self.config.schema == "bigbio_kb":
+                    yield _id, self._get_coref_sample(sample_id, sample, split)
                 _id += 1
