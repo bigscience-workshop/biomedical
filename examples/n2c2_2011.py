@@ -518,8 +518,11 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             ],
             "entities": entities,
+            "relations": [],
+            "events": [],
             "coreferences": coreferences,
         }
+
 
     def _generate_examples(self, split):
         """Generate samples using the info passed in from _split_generators."""
