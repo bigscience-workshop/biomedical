@@ -25,7 +25,7 @@ We have defined a set of lightwieght, task-specific schema to help simplify prog
 
 ## Knowledge Base
 
-[Schema Template](schemas/kb.py)
+[Schema Template](utils/schemas/kb.py)
 
 This is a simple container format with minimal nesting that supports a range of common knowledge base construction / information extraction tasks.
 
@@ -158,7 +158,7 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ## Question Answering
-- [Schema Template](schemas/qa.py)
+- [Schema Template](utils/schemas/qa.py)
 - Examples: [BioASQ9 Task B](examples/bioasq9b.py)
 
 ```
@@ -175,7 +175,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Textual Entailment
 
-- [Schema Template](schemas/entailment.py)
+- [Schema Template](utils/schemas/entailment.py)
 - Examples: [SciTail](examples/scitail.py)
 
 ```
@@ -190,7 +190,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Text Pairs
 
-- [Schema Template](schema/pairs.py)
+- [Schema Template](utils/schemas/pairs.py)
 - Examples: [MQP](examples/mqp.py)
 
 ```
@@ -206,7 +206,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Text to Text
 
-- [Schema Template](schema/text_to_text.py)
+- [Schema Template](utils/schemas/text_to_text.py)
 - Examples: [ParaMed](examples/paramed.py)
 
 ```
@@ -222,7 +222,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 
 ## Text
-- [Schema Template](schema/text.py)
+- [Schema Template](utils/schemas/text.py)
 
 ```
 {

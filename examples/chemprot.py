@@ -23,6 +23,10 @@ from typing import Dict, Tuple
 from dataclasses import dataclass
 import datasets
 
+from utils import schemas
+from utils.constants import Tasks
+
+
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
@@ -47,7 +51,8 @@ _LICENSE = "Public Domain Mark 1.0"
 _URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
          "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
 
-_SUPPORTED_TASKS = ["RE", "NER", "NED"]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -113,49 +118,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -260,6 +223,8 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "passages": [],
                     "entities": [],
                     "relations": [],
+                    "events": [],
+                    "coreferences": []
                 }
                 uid += 1
 

@@ -27,6 +27,10 @@ import datasets
 import pandas as pd
 from dataclasses import dataclass
 
+from utils import schemas
+from utils.constants import Tasks
+
+
 
 _DATASETNAME = "biosses"
 
@@ -61,7 +65,7 @@ _URLs = {
     "bigbio_pairs": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
 }
 
-_SUPPORTED_TASKS = ["STS"]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -118,15 +122,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.name == "biosses_bigbio_pairs":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string"),
-                }
-            )
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

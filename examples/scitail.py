@@ -29,6 +29,10 @@ from dataclasses import dataclass
 import datasets
 import pandas as pd
 
+from utils import schemas
+from utils.constants import Tasks
+
+
 _CITATION = """\
 @inproceedings{scitail,
     author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
@@ -58,7 +62,7 @@ _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-_SUPPORTED_TASKS = ["TE"]
+_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 
 _SOURCE_VERSION = "1.1.0"
 
@@ -114,14 +118,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "premise": datasets.Value("string"),
-                    "hypothesis": datasets.Value("string"),
-                    "label": datasets.Value("string"),
-                }
-            )
+            features = schemas.entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

@@ -39,6 +39,9 @@ from typing import List
 import datasets
 from dataclasses import dataclass
 
+from utils import schemas
+from utils.constants import Tasks
+
 # TODO: Add BibTeX citation
 _CITATION = """\
 @article{,
@@ -173,13 +176,14 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             #    }
             #)
 
-        # Choose the appropriate bigbio schema for your task and copy it here. You can find the big-bio schemas here: https://github.com/bigscience-workshop/biomedical/tree/master/schemas or in the CONTRIBUTING guide.
+        # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
 
-        # In rare cases you may get a dataset that supports multiple tasks. In that case you can define multiple bigbio configs with a bigbio-<task> format.
+        # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
 
-        # For example bigbio-translation, bigbio-ner
+        # For example bigbio_kb, bigbio_t2t
         elif self.config.schema =="bigbio_[bigbio_schema_name]":
-            # TODO: Implement your big-bio schema here
+            # e.g. features = schemas.kb_features
+            # TODO: Choose your big-bio schema here
             raise NotImplementedError()
 
         return datasets.DatasetInfo(

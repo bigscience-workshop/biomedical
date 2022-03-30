@@ -5,18 +5,17 @@ import argparse
 import importlib
 import sys
 import unittest
-import warnings
 from collections import defaultdict
-from difflib import ndiff
 from pathlib import Path
-from pprint import pformat
 from typing import Iterable, Iterator, List, Optional, Union
 
 import datasets
-from datasets import DatasetDict, Features, load_dataset
+from aiohttp.hdrs import TE
+from datasets import DatasetDict, Features
 
-from schemas import (entailment_features, kb_features, pairs_features,
-                     qa_features, text2text_features, text_features)
+from utils.constants import Tasks
+from utils.schemas import (entailment_features, kb_features, pairs_features,
+                           qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -26,18 +25,18 @@ logger = logging.getLogger(__name__)
 
 
 _TASK_TO_SCHEMA = {
-    "NER": "KB",
-    "NED": "KB",
-    "EE": "KB",
-    "RE": "KB",
-    "COREF": "KB",
-    "QA": "QA",
-    "TE": "TE",
-    "STS": "PAIRS",
-    "PARA": "T2T",
-    "TRANSL": "T2T",
-    "SUM": "T2T",
-    "TXTCLASS": "TEXT",
+    Tasks.NAMED_ENTITY_RECOGNITION: "KB",
+    Tasks.NAMED_ENTITY_DISAMBIGUATION: "KB",
+    Tasks.EVENT_EXTRACTION: "KB",
+    Tasks.RELATION_EXTRACTION: "KB",
+    Tasks.COREFERENCE_RESOLUTION: "KB",
+    Tasks.QUESTION_ANSWERING: "QA",
+    Tasks.TEXTUAL_ENTAILMENT: "TE",
+    Tasks.SEMANTIC_SIMILARITY: "PAIRS",
+    Tasks.PARAPHRASING: "T2T",
+    Tasks.TRANSLATION: "T2T",
+    Tasks.SUMMARIZATION: "T2T",
+    Tasks.TEXT_CLASSIFICATION: "TEXT",
 }
 
 _VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
@@ -500,18 +499,16 @@ class TestDataLoader(unittest.TestCase):
             needed_keys = [key for key in features.keys() if key not in opt_keys]
 
             sub_keys = []
-            if "NER" in self._SUPPORTED_TASKS:
+            if Tasks.NAMED_ENTITY_RECOGNITION in self._SUPPORTED_TASKS:
                 sub_keys += ["entities"]
-            elif "RE" in self._SUPPORTED_TASKS:
+            elif Tasks.RELATION_EXTRACTION in self._SUPPORTED_TASKS:
                 sub_keys += ["entities", "relations"]
-            elif "NED" in self._SUPPORTED_TASKS:
+            elif Tasks.NAMED_ENTITY_DISAMBIGUATION in self._SUPPORTED_TASKS:
                 sub_keys = ["entities"]
-            elif "COREF" in self._SUPPORTED_TASKS:
+            elif Tasks.COREFERENCE_RESOLUTION in self._SUPPORTED_TASKS:
                 sub_keys = ["entities", "coreferences"]
-            elif "EE" in self._SUPPORTED_TASKS:
+            elif Tasks.EVENT_EXTRACTION in self._SUPPORTED_TASKS:
                 sub_keys = ["events"]
-            else:
-                raise ValueError(f"Task {task} not recognized")
 
             logger.info(f"needed_keys: {needed_keys}")
             logger.info(f"sub_keys: {sub_keys}")

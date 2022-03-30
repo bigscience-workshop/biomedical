@@ -68,12 +68,16 @@ from xml.etree.ElementTree import Element
 import datasets
 from datasets import Features, Value
 
+from utils.constants import Tasks
+
+
 
 
 # TODO: home page has a list of publications but its not clear which to choose
 # https://muchmore.dfki.de/papers1.htm
 # to start, chose the one below.
 # Buitelaar, Paul / Declerck, Thierry / Sacaleanu, Bogdan / Vintar, Spela / Raileanu, Diana / Crispi, Claudia: A Multi-Layered, XML-Based Approach to the Integration of Linguistic and Semantic Annotations. In: Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML’03), Budapest, Hungary, April 2003.
+from utils import schemas
 
 _CITATION = """\
 @inproceedings{,
@@ -139,7 +143,7 @@ _URLs = {
 # took version from annotated file names
 _SOURCE_VERSION = "4.2.0"
 _BIGBIO_VERSION = "1.0.0"
-_SUPPORTED_TASKS = ["TRANSL", "NER"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
 
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
@@ -293,34 +297,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": Value("string"),
-                            "offsets": [[Value("int32")]],
-                            "text": [Value("string")],
-                            "type": Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         elif self.config.name in ("plain", "plain_en", "plain_de"):
             features = Features(
@@ -333,16 +310,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "text_1": Value("string"),
-                    "text_2": Value("string"),
-                    "text_1_name": Value("string"),
-                    "text_2_name": Value("string"),
-                }
-            )
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -607,6 +575,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 "document_id": xroot.get("id"),
                 "passages": passages,
                 "entities": entities,
+                "coreferences": [],
+                "events": [],
+                "relations": []
             }
 
     def _generate_plain_examples(self, file_names_and_pointers):

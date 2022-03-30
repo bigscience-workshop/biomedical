@@ -17,6 +17,9 @@ import glob
 import datasets
 from dataclasses import dataclass
 
+from utils import schemas
+from utils.constants import Tasks
+
 
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -60,7 +63,7 @@ _URLs = {
     "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = ["TXTCLASS"]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -124,14 +127,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_text":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("int32"),
-                    "document_id": datasets.Value("string"),
-                    "text": datasets.Value("string"),
-                    "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
-                }
-            )
+            features = schemas.text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

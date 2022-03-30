@@ -18,13 +18,13 @@ MLEE is an event extraction corpus consisting of manually annotated abstracts of
 on angiogenesis. It contains annotations for entities, relations, events and coreferences
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
-from collections import defaultdict
 from pathlib import Path
 import datasets
-from typing import Iterable, Dict, List
+from typing import List
 from dataclasses import dataclass
 
-from examples import utils
+from utils import parsing, schemas
+from utils.constants import Tasks
 
 
 _DATASETNAME = "mlee"
@@ -58,7 +58,8 @@ _LICENSE = "CC BY-NC-SA 3.0"
 _URLs = {"source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
          "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",}
 
-_SUPPORTED_TASKS = ["EE", "NER", "RE", "COREF"]
+_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.RELATION_EXTRACTION, Tasks.COREFERENCE_RESOLUTION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -200,71 +201,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 },
             )
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "events": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            # refers to the text_bound_annotation of the trigger
-                            "trigger": {
-                                "offsets": datasets.Sequence([datasets.Value("int32")]),
-                                "text": datasets.Sequence(datasets.Value("string"))
-                            },
-                            "arguments": [
-                                {
-                                    "role": datasets.Value("string"),
-                                    "ref_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "coreferences": [
-                        {
-                            "id": datasets.Value("string"),
-                            "entity_ids": datasets.Sequence(datasets.Value("string")),
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -327,14 +264,14 @@ class MLEE(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                example = utils.parse_brat_file(txt_file)
+                example = parsing.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
         elif self.config.schema == "bigbio_kb":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
-                example = utils.brat_parse_to_bigbio_kb(
-                    utils.parse_brat_file(txt_file),
+                example = parsing.brat_parse_to_bigbio_kb(
+                    parsing.parse_brat_file(txt_file),
                     entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)

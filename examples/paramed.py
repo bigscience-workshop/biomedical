@@ -24,6 +24,10 @@ from typing import Dict, Iterable, List
 from dataclasses import dataclass
 import datasets
 
+from utils import schemas
+from utils.constants import Tasks
+
+
 logger = datasets.logging.get_logger(__name__)
 
 
@@ -55,7 +59,7 @@ _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
     "bigbio_t2t": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
 }
-_SUPPORTED_TASKS = ["TRANSL"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -109,16 +113,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "text_1_name": datasets.Value("string"),
-                    "text_2_name": datasets.Value("string")
-                }
-            )
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.

@@ -22,14 +22,15 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 
 -- 'Overview of the BioCreative V Chemical Disease Relation (CDR) Task'
 """
-import csv
-import json
 import os
 import itertools
 import collections
 import bioc
 import datasets
 from dataclasses import dataclass
+
+from utils import schemas
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -70,7 +71,8 @@ _URLs = {
     "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-_SUPPORTED_TASKS = ["NER", "NED", "RE"]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION,
+                    Tasks.RELATION_EXTRACTION]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -151,48 +153,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -366,6 +327,8 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     "passages": [],
                     "entities": [],
                     "relations": [],
+                    "events": [],
+                    "coreferences": [],
                 }
                 uid += 1
                 doc_text = self._get_document_text(xdoc)
