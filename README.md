@@ -45,10 +45,14 @@ There are two options to choose a dataset to implement; you can choose either op
 
 **Option A: Assign yourself a dataset from our curated list**
 - Choose a dataset from the [list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/). 
-<img src="./docs/_static/img/select-task.jpg" style="width: 50%; border-radius: 5px; border: 1p solid #ddd;"/>
+<p align="center">
+    <img src="./docs/_static/img/select-task.jpg" style="width: 75%; border-radius: 5px; border: 1p solid #ddd;"/>
+</p>
 
 - Assign yourself an issue by clicking the dataset in the project list, and comment `#self-assign` under the issue. **Please assign yourself to issues with no other collaborators assigned**. You should see your GitHub username associated to the issue within 1-2 minutes of making a comment.
-<img src="./docs/_static/img/self-assign.jpg" style="width: 50%; border-radius: 5px; border: 1p solid #ddd;"/>
+<p align="center">
+    <img src="./docs/_static/img/self-assign.jpg" style="width: 75%; border-radius: 5px; border: 1p solid #ddd;"/>
+</p>
 
 - Search to see if the dataset exists in the 🤗 [Hub](https://huggingface.co/datasets). If it exists, please use the current implementation as the `source` and focus on implementing the [task-specific `bigbio` schema](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md). 
 
