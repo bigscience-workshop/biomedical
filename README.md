@@ -68,6 +68,11 @@ If an admin approves it, then you are welcome to implement this dataset and it w
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
 
+As soon as you have opened a PR, the dataset will be marked as `In Progress` in the
+[list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/).
+When an admin accepts the PR and closes the corresponding issue, the dataset will be
+marked as `Done`.
+
 ## Community channels
 
 We welcome contributions from a wide variety of backgrounds; we are more than happy to guide you through the process. For instructions on how to get involved or ask for help, check out the following options:
