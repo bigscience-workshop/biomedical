@@ -15,9 +15,9 @@
 import os
 import glob
 import datasets
-from dataclasses import dataclass
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -81,15 +81,6 @@ _CLASS_NAMES = [
     "Tumor promoting inflammation",
 ]
 
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""

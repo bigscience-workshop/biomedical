@@ -25,9 +25,9 @@ loader uses a version that privides the same data in text format.
 """
 import datasets
 import pandas as pd
-from dataclasses import dataclass
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -68,17 +68,6 @@ _URLs = {
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class Biosses(datasets.GeneratorBasedBuilder):

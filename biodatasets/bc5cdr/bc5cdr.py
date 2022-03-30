@@ -27,9 +27,9 @@ import itertools
 import collections
 import bioc
 import datasets
-from dataclasses import dataclass
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
@@ -75,17 +75,6 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGU
                     Tasks.RELATION_EXTRACTION]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):

@@ -20,10 +20,10 @@ The script loads dataset in bigbio schema (using knowledgebase schema: schemas/k
 """
 import os
 from typing import Dict, Tuple
-from dataclasses import dataclass
 import datasets
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -55,15 +55,6 @@ _SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
                     Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
