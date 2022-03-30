@@ -255,12 +255,12 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # TODO: yield (key, example) tuples in the original dataset schema
             for key, example in thing:
                 yield key, example
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio":
             # TODO: yield (key, example) tuples in the bigbio schema
             for key, example in thing:
                 yield key, example
