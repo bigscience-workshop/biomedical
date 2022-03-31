@@ -31,7 +31,6 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
-
 _DATASETNAME = "biosses"
 
 _CITATION = """
@@ -130,7 +129,10 @@ class Biosses(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": dl_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": dl_dir,
+                    "split": "train",
+                },
             )
         ]
 
@@ -170,4 +172,3 @@ class Biosses(datasets.GeneratorBasedBuilder):
                         / 5
                     ),
                 }
-

@@ -55,11 +55,17 @@ _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 
 _LICENSE = "CC BY-NC-SA 3.0"
 
-_URLs = {"source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
-         "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",}
+_URLs = {
+    "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+    "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.RELATION_EXTRACTION, Tasks.COREFERENCE_RESOLUTION]
+_SUPPORTED_TASKS = [
+    Tasks.EVENT_EXTRACTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.RELATION_EXTRACTION,
+    Tasks.COREFERENCE_RESOLUTION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -133,9 +139,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -179,12 +183,8 @@ class MLEE(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -211,9 +211,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-            self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """
         Create the three splits provided by MLEE: train, validation and test.
 
@@ -224,11 +222,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir
-                     / "MLEE-1.0.2-rev1"
-                     / "standoff"
-                     / "development"
-                     / "train",
+            "train": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "train",
             "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
             "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
         }
@@ -263,12 +257,9 @@ class MLEE(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-
-

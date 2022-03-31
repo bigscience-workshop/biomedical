@@ -71,8 +71,7 @@ _URLs = {
     "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION,
-                    Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.RELATION_EXTRACTION]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -162,9 +161,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"),
                     "split": "train",
                 },
             ),
@@ -172,9 +169,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"),
                     "split": "test",
                 },
             ),
@@ -192,7 +187,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _get_bioc_entity(self, span, doc_text, db_id_key="MESH"):
-        """Parse BioC entity annotation.  
+        """Parse BioC entity annotation.
 
         Parameters
         ----------
@@ -275,7 +270,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         filepath,
         split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
-        """ Yields examples as (key, example) tuples. """
+        """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
 
@@ -287,10 +282,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [
-                                self._get_bioc_entity(span, doc_text)
-                                for span in passage.annotations
-                            ],
+                            "entities": [self._get_bioc_entity(span, doc_text) for span in passage.annotations],
                             "relations": [
                                 {
                                     "id": rel.id,

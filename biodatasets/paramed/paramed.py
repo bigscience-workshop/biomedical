@@ -31,7 +31,6 @@ from utils.constants import Tasks
 logger = datasets.logging.get_logger(__name__)
 
 
-
 _CITATION = """\
 @article{,
   author    = {Liu, Boxiang and Huang, Liang},
@@ -86,7 +85,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             description="Paramed BigBio schema",
             schema="bigbio_t2t",
             subset_id="paramed",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "paramed_source"
@@ -100,7 +99,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
                     "text_1_name": datasets.Value("string"),
-                    "text_2_name": datasets.Value("string")
+                    "text_2_name": datasets.Value("string"),
                 }
             )
 
@@ -116,9 +115,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)
@@ -154,11 +151,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self,
-                           filepath,
-                           zh_file,
-                           en_file,
-                           split):
+    def _generate_examples(self, filepath, zh_file, en_file, split):
 
         logger.info("generating examples from = %s", filepath)
         zh_file = open(zh_file, "r")

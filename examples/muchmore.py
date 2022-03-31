@@ -71,8 +71,6 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
-
-
 # TODO: home page has a list of publications but its not clear which to choose
 # https://muchmore.dfki.de/papers1.htm
 # to start, chose the one below.
@@ -186,21 +184,21 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_kb",
             subset_id="muchmore_de",
         ),
-#        datasets.BuilderConfig(
-#            name="plain",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (en & de)",
-#        ),
-#        datasets.BuilderConfig(
-#            name="plain_en",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (en only)",
-#        ),
-#        datasets.BuilderConfig(
-#            name="plain_de",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (de only)",
-#        ),
+        #        datasets.BuilderConfig(
+        #            name="plain",
+        #            version=BIGBIO_VERSION,
+        #            description="muchmore: plaintext of abstracts (en & de)",
+        #        ),
+        #        datasets.BuilderConfig(
+        #            name="plain_en",
+        #            version=BIGBIO_VERSION,
+        #            description="muchmore: plaintext of abstracts (en only)",
+        #        ),
+        #        datasets.BuilderConfig(
+        #            name="plain_de",
+        #            version=BIGBIO_VERSION,
+        #            description="muchmore: plaintext of abstracts (de only)",
+        #        ),
         BigBioConfig(
             name="muchmore_bigbio_t2t",
             version=BIGBIO_VERSION,
@@ -566,7 +564,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 "entities": entities,
                 "coreferences": [],
                 "events": [],
-                "relations": []
+                "relations": [],
             }
 
     def _generate_plain_examples(self, file_names_and_pointers):

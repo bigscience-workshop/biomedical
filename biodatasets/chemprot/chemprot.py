@@ -48,11 +48,12 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 
 _LICENSE = "Public Domain Mark 1.0"
 
-_URLs = {"source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
-         "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip"}
+_URLs = {
+    "source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
+    "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
+}
 
-_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -77,7 +78,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             description="chemprot BigBio schema",
             schema="bigbio_kb",
             subset_id="chemprot",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "chemprot_source"
@@ -95,7 +96,6 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                             "type": datasets.Value("string"),
                             "text": datasets.Value("string"),
                             "offsets": datasets.Sequence(datasets.Value("int64")),
-
                         }
                     ),
                     "relations": datasets.Sequence(
@@ -215,7 +215,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "entities": [],
                     "relations": [],
                     "events": [],
-                    "coreferences": []
+                    "coreferences": [],
                 }
                 uid += 1
 
@@ -235,10 +235,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
-                    entity.update({"normalized":
-                                       [{"db_name": "Pubmed",
-                                         "db_id": str(pmid)}]
-                                   })
+                    entity.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
                     data["entities"].append(entity)
                     uid += 1
 
@@ -253,10 +250,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     relation["arg1_id"] = relation.pop("arg1")
                     relation["arg2_id"] = relation.pop("arg2")
                     relation.update({"id": str(uid)})
-                    relation.update({"normalized":
-                                       [{"db_name": "Pubmed",
-                                         "db_id": str(pmid)}]
-                                   })
+                    relation.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
                     data["relations"].append(relation)
                     uid += 1
 
@@ -364,6 +358,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
 if __name__ == "__main__":
     from datasets import load_dataset
+
     # ds = load_dataset(__file__)
     ds = load_dataset(__file__)
     print(ds)

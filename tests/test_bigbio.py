@@ -14,8 +14,14 @@ from aiohttp.hdrs import TE
 from datasets import DatasetDict, Features
 
 from utils.constants import Tasks
-from utils.schemas import (entailment_features, kb_features, pairs_features,
-                           qa_features, text2text_features, text_features)
+from utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -143,13 +149,9 @@ class TestDataLoader(unittest.TestCase):
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
         if len(invalid_tasks) > 0:
-            raise ValueError(
-                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
-            )
+            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
 
-        self._MAPPED_SCHEMAS = set(
-            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
-        )
+        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
         config_name = f"{self.SUBSET_ID}_source"
@@ -289,15 +291,15 @@ class TestDataLoader(unittest.TestCase):
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event":
-                        if not (
-                                (ref_id, "entity") in existing_ids
-                                or (ref_id, "event") in existing_ids
-                        ):
-                            logger.warning(f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
+                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
+                            logger.warning(
+                                f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                            )
                     else:
                         if not (ref_id, ref_type) in referenced_ids:
-                            logger.warning(f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
-
+                            logger.warning(
+                                f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                            )
 
     def test_passages_offsets(self, dataset_bigbio: DatasetDict):
         """
@@ -320,9 +322,7 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(
-                            msg="Text in passages must be a list", field=text
-                        )
+                        self._test_is_list(msg="Text in passages must be a list", field=text)
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -415,9 +415,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(
-                                f"Example:{example_id} - entity:{entity_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -451,9 +449,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(
-                                f"Example:{example_id} - event:{event_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -557,9 +553,7 @@ class TestDataLoader(unittest.TestCase):
             self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
 
         else:
-            raise ValueError(
-                f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
-            )
+            raise ValueError(f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}")
 
     @staticmethod
     def _check_subkey(inp, attrs):
@@ -576,9 +570,7 @@ class TestDataLoader(unittest.TestCase):
             mandatory_keys = all([key in example for key in features.keys()])
             self.assertTrue(
                 mandatory_keys,
-                "/".join(features.keys())
-                + " keys missing from bigbio view for schema_type = "
-                + schema_name,
+                "/".join(features.keys()) + " keys missing from bigbio view for schema_type = " + schema_name,
             )
 
     def _test_is_list(self, msg: str, field: list):
@@ -603,9 +595,7 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument(
-        "path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)"
-    )
+    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
     parser.add_argument(
         "--schema",
         type=str,

@@ -136,7 +136,10 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": data_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "split": "train",
+                },
             )
         ]
 
