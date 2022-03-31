@@ -59,23 +59,18 @@ _HOMEPAGE = "https://github.com/Markus-Zlabinger/pico-annotation"
 
 _LICENSE = "Unknown"
 
-# TODO: Add links to the urls needed to download your dataset files.
-# For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _DATA_PATH = (
     "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
 )
 _URLS = {
-    _DATASETNAME: [
-        f"{_DATA_PATH}/sentences.json",
-        f"{_DATA_PATH}/annotations/interventions_expert.json",
-        f"{_DATA_PATH}/annotations/outcomes_expert.json",
-        f"{_DATA_PATH}/annotations/participants_expert.json",
-    ],
+    _DATASETNAME: {
+        "sentence_file": f"{_DATA_PATH}/sentences.json",
+        "annotation_files": {
+            "intervention": f"{_DATA_PATH}/annotations/interventions_expert.json",
+            "outcome": f"{_DATA_PATH}/annotations/outcomes_expert.json",
+            "participant": f"{_DATA_PATH}/annotations/participants_expert.json",
+        },
+    }
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
@@ -184,7 +179,6 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": [
                         {
-                            "entity_id": datasets.Value("string"),
                             "text": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "start": datasets.Value("int64"),
@@ -216,12 +210,8 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "split": "train",
-                    "sentence_file": data_dir[0],
-                    "annotation_files": {
-                        "intervention": data_dir[1],
-                        "outcome": data_dir[2],
-                        "participant": data_dir[3],
-                    },
+                    "sentence_file": data_dir["sentence_file"],
+                    "annotation_files": data_dir["annotation_files"],
                 },
             ),
         ]
@@ -243,7 +233,6 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
                     "text": sentence,
                     "entities": [
                         {
-                            "entity_id": None,
                             "text": ent["annotation_text"],
                             "type": ent["annotation_type"],
                             "start": ent["char_start"],
