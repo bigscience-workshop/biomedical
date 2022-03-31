@@ -12,12 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Parallel corpus of full-text articles in Portuguese, English and Spanish from SciELO.
 """
-
-from typing import List, Optional
+from typing import IO, Any, Generator, List, Optional, Tuple
 
 import datasets
 from utils import schemas
@@ -63,8 +61,11 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # NOTE: bigbio_t2t schema doesn't allow only for more than two texts in text to text schema.
+    # NOTE: bigbio_t2t schema doesn't allow only for more than two texts in text-to-text schema.
     #  en-pt-es translation is not implemented using the bigbio schema
+
+    # NOTE2: unit tests fail due to the problems with BigBioConfig.name values
+    #  it is not possible to create one BigBioConfig for all source versions
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="scielo_source_en-es",
@@ -90,14 +91,14 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="scielo_bigbio_t2t_en-es",
             version=BIGBIO_VERSION,
-            description="scielo BigBio schema",
+            description="scielo BigBio schema English-Spanish",
             schema="bigbio_t2t",
             subset_id="scielo",
         ),
         BigBioConfig(
             name="scielo_bigbio_t2t_en-pt",
             version=BIGBIO_VERSION,
-            description="scielo BigBio schema",
+            description="scielo BigBio schema English-Portuguese",
             schema="bigbio_t2t",
             subset_id="scielo",
         ),
@@ -163,12 +164,11 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
         split: str,
         source_file: str,
         target_file: str,
-        files,
+        files: Generator[Tuple[str, IO[bytes]], Any, None],
         target_file_2: Optional[str] = None,
-    ) -> (int, dict):
-        # breakpoint()
-        if self.config.schema == "source":
+    ) -> Tuple[int, dict]:
 
+        if self.config.schema == "source":
             for path, f in files:
                 if path == source_file:
                     source_sentences = f.read().decode("utf-8").split("\n")
