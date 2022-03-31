@@ -68,6 +68,11 @@ If an admin approves it, then you are welcome to implement this dataset and it w
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
 
+As soon as you have opened a PR, the dataset will be marked as `In Progress` in the
+[list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/).
+When an admin accepts the PR and closes the corresponding issue, the dataset will be
+marked as `Done`.
+
 ## Community channels
 
 We welcome contributions from a wide variety of backgrounds; we are more than happy to guide you through the process. For instructions on how to get involved or ask for help, check out the following options:
@@ -102,6 +107,12 @@ No. Please do not upload your dataset directly. This is not the goal of the hack
 #### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
 
 In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `Text to Text (T2T)` schema) and a named entity recognition task (supported by the `Knowledge Base (KB)` schema). In this case, please implement one config for each supported schema and name the config `<datasetname>_bigbio_<schema>`. In the `muchmore` example, this would mean one config called `muchmore_bigbio_t2t` and one config called `muchmore_bigbio_kb`.  
+
+#### My dataset comes with multiple annotations per text and no/multiple harmonizations. How should I proceed?
+
+Please implement all different annotations and harmonizations as `source` versions (see [examples/bioasq.py](examples/bioasq.py) for an example).
+If the authors suggest a preferred harmonization, use that for the `bigbio` version.
+Otherwise use the harmonization that you think is best.
 
 #### How should I handle offsets and text in the bigbio schema?
 
