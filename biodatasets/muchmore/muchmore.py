@@ -181,21 +181,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_kb",
             subset_id="muchmore_de",
         ),
-        #        datasets.BuilderConfig(
-        #            name="plain",
-        #            version=BIGBIO_VERSION,
-        #            description="muchmore: plaintext of abstracts (en & de)",
-        #        ),
-        #        datasets.BuilderConfig(
-        #            name="plain_en",
-        #            version=BIGBIO_VERSION,
-        #            description="muchmore: plaintext of abstracts (en only)",
-        #        ),
-        #        datasets.BuilderConfig(
-        #            name="plain_de",
-        #            version=BIGBIO_VERSION,
-        #            description="muchmore: plaintext of abstracts (de only)",
-        #        ),
         BigBioConfig(
             name="muchmore_bigbio_t2t",
             version=BIGBIO_VERSION,

@@ -68,7 +68,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class Biosses(datasets.GeneratorBasedBuilder):
+class BiossesDataset(datasets.GeneratorBasedBuilder):
     """BIOSSES : Biomedical Semantic Similarity Estimation System"""
 
     DEFAULT_CONFIG_NAME = "biosses_source"

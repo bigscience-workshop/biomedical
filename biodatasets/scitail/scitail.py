@@ -68,7 +68,7 @@ _SOURCE_VERSION = "1.1.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class SciTail(datasets.GeneratorBasedBuilder):
+class SciTailDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)

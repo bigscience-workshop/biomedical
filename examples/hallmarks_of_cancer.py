@@ -81,7 +81,7 @@ _CLASS_NAMES = [
 ]
 
 
-class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
+class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
