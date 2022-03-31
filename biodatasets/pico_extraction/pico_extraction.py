@@ -23,11 +23,10 @@ import json
 from typing import List, Dict, Tuple, Union
 
 import datasets
-from dataclasses import dataclass
-
 import numpy as np
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
@@ -148,17 +147,6 @@ def _get_entities_pico(
 
                 ents.append(ent)
     return ents
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
