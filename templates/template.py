@@ -35,7 +35,7 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 """
 
 import os
-from typing import List
+from typing import List, Tuple, Dict
 
 import datasets
 from utils import schemas
@@ -119,7 +119,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
     #  Each of them should contain:
     #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION |BIGBIO_VERSION)
+    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
     #   - description: one line description for the dataset
     #   - schema: options = (source|bigbio_[bigbio_schema_name])
     #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
@@ -190,6 +190,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
+        """Returns SplitGenerators."""
         # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
         # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
@@ -244,7 +245,8 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
-    def _generate_examples(self, filepath, split) -> (int, dict):
+    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+        """Yields examples as (key, example) tuples."""
         # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
