@@ -69,12 +69,9 @@ from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
-
 
 _DATASETNAME = "n2c2_2011"
 
@@ -507,7 +504,6 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             "events": [],
             "coreferences": coreferences,
         }
-
 
     def _generate_examples(self, split, data_dir):
         """Generate samples using the info passed in from _split_generators."""

@@ -12,14 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import glob
-import datasets
+import os
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -82,7 +81,7 @@ _CLASS_NAMES = [
 ]
 
 
-class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
+class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -136,7 +135,10 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": data_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "split": "train",
+                },
             )
         ]
 

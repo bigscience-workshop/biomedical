@@ -23,12 +23,12 @@ as exact and 'ideal' answers.
 Fore more information about the challenge, the organisers and the relevant
 publications please visit: http://bioasq.org/
 """
+import glob
 import json
 import os
 import re
-import glob
-import datasets
 
+import datasets
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -388,7 +388,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     # BioASQ2 through BioASQ10
     BUILDER_CONFIGS = []
-    for version in range(2,11):
+    for version in range(2, 11):
         BUILDER_CONFIGS.append(
             BigBioConfig(
                 name=f"bioasq{version}b_source",
@@ -470,9 +470,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         We combine these files into a single test set file 9Bx_golden.json
         """
         version = re.search(r"bioasq([0-9]+)b", self.config.subset_id).group(1)
-        gold_fpath = os.path.join(
-            data_dir, f"Task{version}BGoldenEnriched/bx_golden.json"
-        )
+        gold_fpath = os.path.join(data_dir, f"Task{version}BGoldenEnriched/bx_golden.json")
 
         if not os.path.exists(gold_fpath):
             # combine all gold json files
@@ -489,10 +487,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        train_dir, test_dir = dl_manager.download_and_extract([
-            os.path.join(self.config.data_dir, _url)
-            for _url in _URLs[self.config.subset_id]
-        ])
+        train_dir, test_dir = dl_manager.download_and_extract(
+            [os.path.join(self.config.data_dir, _url) for _url in _URLs[self.config.subset_id]]
+        )
         gold_fpath = self._dump_gold_json(test_dir)
 
         # older versions of bioasq have different folder formats
@@ -512,9 +509,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        train_dir, train_fpaths[self.config.subset_id]
-                    ),
+                    "filepath": os.path.join(train_dir, train_fpaths[self.config.subset_id]),
                     "split": "train",
                 },
             ),
@@ -536,9 +531,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             # summary question types only have an ideal answer, so use that for bigbio
             if self.config.schema == "bigbio_qa":
                 exact_answer = (
-                    record["ideal_answer"]
-                    if isinstance(record["ideal_answer"], list)
-                    else [record["ideal_answer"]]
+                    record["ideal_answer"] if isinstance(record["ideal_answer"], list) else [record["ideal_answer"]]
                 )
 
         elif record["type"] == "list":
@@ -546,9 +539,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         elif record["type"] == "factoid":
             # older version of bioasq sometimes represent this as as string
             exact_answer = (
-                record["exact_answer"]
-                if isinstance(record["exact_answer"], list)
-                else [record["exact_answer"]]
+                record["exact_answer"] if isinstance(record["exact_answer"], list) else [record["exact_answer"]]
             )
         return exact_answer
 

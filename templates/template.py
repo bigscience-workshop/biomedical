@@ -213,7 +213,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         else:
             data_dir = self.config.data_dir
 
-        # Not all datasets have predefined canonical train/val/test splits. If your dataset does not have any splits, you can omit any missing splits.
+        # Not all datasets have predefined canonical train/val/test splits.
         # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
 
         return [
