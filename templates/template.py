@@ -37,7 +37,6 @@ import os
 from typing import List
 
 import datasets
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -87,7 +86,7 @@ _URLS = {
 }
 
 # TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
+_SUPPORTED_TASKS = []  # example: ["NER", "NED", "RE"]
 
 # TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
 # this version doesn't have to be consistent with semantic versioning. Anything that is
@@ -95,8 +94,6 @@ _SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
-
-
 
 
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
@@ -137,7 +134,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             description="[dataset_name] BigBio schema",
             schema="bigbio_[bigbio_schema_name]",
             subset_id="[dataset_name]",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "[dataset_name]_source"
@@ -154,7 +151,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             raise NotImplementedError()
 
             # EX: Arbitrary NER type dataset
-            #features = datasets.Features(
+            # features = datasets.Features(
             #    {
             #        "doc_id": datasets.Value("string"),
             #        "text": datasets.Value("string"),
@@ -167,14 +164,14 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             #            }
             #        ],
             #    }
-            #)
+            # )
 
         # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
 
         # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
 
         # For example bigbio_kb, bigbio_t2t
-        elif self.config.schema =="bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_[bigbio_schema_name]":
             # e.g. features = schemas.kb_features
             # TODO: Choose your big-bio schema here
             raise NotImplementedError()

@@ -23,14 +23,12 @@ score.
 Note: The original files are Word documents, compressed using RAR. This data
 loader uses a version that privides the same data in text format.
 """
-import datasets
 import pandas as pd
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
-
 
 _DATASETNAME = "biosses"
 
@@ -70,7 +68,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class Biosses(datasets.GeneratorBasedBuilder):
+class BiossesDataset(datasets.GeneratorBasedBuilder):
     """BIOSSES : Biomedical Semantic Similarity Estimation System"""
 
     DEFAULT_CONFIG_NAME = "biosses_source"
@@ -130,7 +128,10 @@ class Biosses(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": dl_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": dl_dir,
+                    "split": "train",
+                },
             )
         ]
 
@@ -170,4 +171,3 @@ class Biosses(datasets.GeneratorBasedBuilder):
                         / 5
                     ),
                 }
-
