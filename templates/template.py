@@ -31,13 +31,13 @@ To create a dataset loading script you will create a class and implement 3 metho
 
 TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
 
+[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
 """
 
 import os
 from typing import List
 
 import datasets
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -58,7 +58,8 @@ _CITATION = """\
 """
 
 # TODO: create a module level variable with your dataset name (should match script name)
-_DATASETNAME = "dataset_name"
+#  E.g. Hallmarks of Cancer: [dataset_name] --> hallmarks_of_cancer
+_DATASETNAME = "[dataset_name]"
 
 # TODO: Add description of the dataset here
 # You can copy an official description
@@ -76,7 +77,7 @@ _HOMEPAGE = ""
 _LICENSE = ""
 
 # TODO: Add links to the urls needed to download your dataset files.
-# For local datasets, this variable can be an empty dictionary.
+#  For local datasets, this variable can be an empty dictionary.
 
 # For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
 # In most cases the URLs will be the same for the source and bigbio config.
@@ -87,19 +88,18 @@ _URLS = {
 }
 
 # TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = [] # example: ["NER", "NED", "RE"]
+_SUPPORTED_TASKS = []  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 # TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
-# this version doesn't have to be consistent with semantic versioning. Anything that is
-# provided by the original dataset as a version goes.
+#  This version doesn't have to be consistent with semantic versioning. Anything that is
+#  provided by the original dataset as a version goes.
 _SOURCE_VERSION = ""
 
 _BIGBIO_VERSION = "1.0.0"
 
 
-
-
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
+#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
 class NewDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
@@ -116,12 +116,14 @@ class NewDataset(datasets.GeneratorBasedBuilder):
     # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
     # TODO: For each dataset, implement Config for Source and BigBio;
-    #  if dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them. Each of them should contain:
-    #  name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbioschema_name]
-    #  version: option = (SOURCE_VERSION |BIGBIO_VERSION)
-    #  description: one line description for the dataset
-    #  schema: options = (source|bigbio_[schema_name]) [schema_name] =(kb,pairs, qa, text, test_to_text, entailment)
-    #  subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
+    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
+    #  Each of them should contain:
+    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
+    #   - version: option = (SOURCE_VERSION |BIGBIO_VERSION)
+    #   - description: one line description for the dataset
+    #   - schema: options = (source|bigbio_[bigbio_schema_name])
+    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
+    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -132,12 +134,12 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             subset_id="[dataset_name]",
         ),
         BigBioConfig(
-            name="[dataset_name]_bigbio_[schema_name]",
+            name="[dataset_name]_bigbio_[bigbio_schema_name]",
             version=BIGBIO_VERSION,
             description="[dataset_name] BigBio schema",
             schema="bigbio_[bigbio_schema_name]",
             subset_id="[dataset_name]",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "[dataset_name]_source"
@@ -154,7 +156,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             raise NotImplementedError()
 
             # EX: Arbitrary NER type dataset
-            #features = datasets.Features(
+            # features = datasets.Features(
             #    {
             #        "doc_id": datasets.Value("string"),
             #        "text": datasets.Value("string"),
@@ -167,14 +169,14 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             #            }
             #        ],
             #    }
-            #)
+            # )
 
         # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
 
         # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
 
         # For example bigbio_kb, bigbio_t2t
-        elif self.config.schema =="bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_[bigbio_schema_name]":
             # e.g. features = schemas.kb_features
             # TODO: Choose your big-bio schema here
             raise NotImplementedError()
@@ -200,7 +202,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
 
-        # TODO: KEEP if your dataset is PUBLIC; REMOVE if not
+        # TODO: KEEP if your dataset is PUBLIC; remove if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
@@ -253,7 +255,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             for key, example in thing:
                 yield key, example
 
-        elif self.config.schema == "bigbio":
+        elif self.config.schema == "bigbio_[bigbio_schema_name]":
             # TODO: yield (key, example) tuples in the bigbio schema
             for key, example in thing:
                 yield key, example
