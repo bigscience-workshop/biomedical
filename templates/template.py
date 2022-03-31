@@ -37,9 +37,9 @@ import os
 from typing import List
 
 import datasets
-from dataclasses import dataclass
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 # TODO: Add BibTeX citation
@@ -97,14 +97,7 @@ _SOURCE_VERSION = ""
 _BIGBIO_VERSION = "1.0.0"
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
+
 
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 class NewDataset(datasets.GeneratorBasedBuilder):
@@ -255,12 +248,12 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
 
-        if self.config.name == "source":
+        if self.config.schema == "source":
             # TODO: yield (key, example) tuples in the original dataset schema
             for key, example in thing:
                 yield key, example
 
-        elif self.config.name == "bigbio":
+        elif self.config.schema == "bigbio":
             # TODO: yield (key, example) tuples in the bigbio schema
             for key, example in thing:
                 yield key, example

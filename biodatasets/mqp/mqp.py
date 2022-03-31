@@ -22,9 +22,9 @@ from typing import Dict, Tuple
 import datasets
 import csv
 from datasets import load_dataset
-from dataclasses import dataclass
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -61,14 +61,6 @@ _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
     """Medical Question Pairing dataset"""

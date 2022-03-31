@@ -136,10 +136,9 @@ IDE doesn't support this, you can always run the script in your terminal and deb
 Make sure your dataset is implemented correctly by checking in python the following commands:
 
 ```python
-import datasets
 from datasets import load_dataset
 
-data = load_dataset('biodatasets/<dataset_name>/<dataset_name>'.py, name="<dataset_name>_bigbio_<schema>")
+data = load_dataset("biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
 ```
 
 Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).

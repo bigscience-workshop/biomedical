@@ -21,10 +21,10 @@ The script loads dataset in bigbio schema (using schemas/text-to-text) AND/OR so
 """
 import os  # useful for paths
 from typing import Dict, Iterable, List
-from dataclasses import dataclass
 import datasets
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -65,14 +65,6 @@ _BIGBIO_VERSION = "1.0.0"
 
 _DATA_DIR = "./processed_data/open_access/open_access"
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class ParamedDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""

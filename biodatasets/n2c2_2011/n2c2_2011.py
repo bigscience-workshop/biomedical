@@ -65,13 +65,13 @@ import re
 import tarfile
 import zipfile
 from collections import defaultdict
-from dataclasses import dataclass
 from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 
@@ -386,17 +386,6 @@ def _get_entities_from_sample(sample_id, sample, split):
             dedupe_entities.append(entity)
 
     return dedupe_entities
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
