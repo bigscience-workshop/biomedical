@@ -23,12 +23,12 @@ as exact and 'ideal' answers.
 Fore more information about the challenge, the organisers and the relevant
 publications please visit: http://bioasq.org/
 """
+import glob
 import json
 import os
 import re
-import glob
-import datasets
 
+import datasets
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 

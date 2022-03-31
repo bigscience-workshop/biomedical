@@ -9,19 +9,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Iterable, Iterator, List, Optional, Union
 
-import datasets
 from aiohttp.hdrs import TE
-from datasets import DatasetDict, Features
 
+import datasets
+from datasets import DatasetDict, Features
 from utils.constants import Tasks
-from utils.schemas import (
-    entailment_features,
-    kb_features,
-    pairs_features,
-    qa_features,
-    text2text_features,
-    text_features,
-)
+from utils.schemas import (entailment_features, kb_features, pairs_features,
+                           qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
 

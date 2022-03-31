@@ -55,27 +55,24 @@ Notes
 
 """
 
-from collections import defaultdict
 import itertools
 import os
 import re
 import tarfile
-from typing import Dict, List
 import xml.etree.ElementTree as ET
+from collections import defaultdict
+from typing import Dict, List
 from xml.etree.ElementTree import Element
 
 import datasets
 from datasets import Features, Value
-
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
-
-
 # TODO: home page has a list of publications but its not clear which to choose
 # https://muchmore.dfki.de/papers1.htm
 # to start, chose the one below.
 # Buitelaar, Paul / Declerck, Thierry / Sacaleanu, Bogdan / Vintar, Spela / Raileanu, Diana / Crispi, Claudia: A Multi-Layered, XML-Based Approach to the Integration of Linguistic and Semantic Annotations. In: Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML’03), Budapest, Hungary, April 2003.
 from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{,

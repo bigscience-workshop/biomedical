@@ -19,13 +19,12 @@ on angiogenesis. It contains annotations for entities, relations, events and cor
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
 from pathlib import Path
-import datasets
 from typing import List
 
+import datasets
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"

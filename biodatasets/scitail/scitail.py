@@ -25,13 +25,12 @@ entails label and 16,925 examples with neutral label.
 
 import os
 
-import datasets
 import pandas as pd
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _CITATION = """\
 @inproceedings{scitail,

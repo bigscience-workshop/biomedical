@@ -21,12 +21,11 @@ The script loads dataset in bigbio schema (using schemas/text-to-text) AND/OR so
 """
 import os  # useful for paths
 from typing import Dict, Iterable, List
-import datasets
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 logger = datasets.logging.get_logger(__name__)
 

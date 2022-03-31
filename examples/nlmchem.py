@@ -17,12 +17,11 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-import datasets
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _CITATION = """\
 @Article{islamaj2021nlm,

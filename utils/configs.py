@@ -1,5 +1,6 @@
-import datasets
 from dataclasses import dataclass
+
+import datasets
 
 
 @dataclass

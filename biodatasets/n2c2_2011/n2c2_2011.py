@@ -69,11 +69,9 @@ from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _DATASETNAME = "n2c2_2011"
 

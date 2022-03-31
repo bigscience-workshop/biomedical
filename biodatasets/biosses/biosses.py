@@ -23,13 +23,12 @@ score.
 Note: The original files are Word documents, compressed using RAR. This data
 loader uses a version that privides the same data in text format.
 """
-import datasets
 import pandas as pd
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _DATASETNAME = "biosses"
 

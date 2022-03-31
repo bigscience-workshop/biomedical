@@ -20,12 +20,11 @@ The script loads dataset in bigbio schema (using knowledgebase schema: schemas/k
 """
 import os
 from typing import Dict, Tuple
-import datasets
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,

@@ -17,16 +17,15 @@ Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medica
 the question prepared by medical professional.
 """
 
+import csv
 import os
 from typing import Dict, Tuple
-import datasets
-import csv
-from datasets import load_dataset
 
+import datasets
+from datasets import load_dataset
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,

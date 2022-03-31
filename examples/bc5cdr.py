@@ -22,12 +22,13 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 
 -- 'Overview of the BioCreative V Chemical Disease Relation (CDR) Task'
 """
-import os
-import itertools
 import collections
-import bioc
-import datasets
+import itertools
+import os
 
+import bioc
+
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
