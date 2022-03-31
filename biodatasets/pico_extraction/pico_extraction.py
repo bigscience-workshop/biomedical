@@ -20,11 +20,11 @@ To get the final annotations, we perform the majority voting.
 The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema
 """
 import json
-from typing import List, Dict, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
-import datasets
 import numpy as np
 
+import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -59,9 +59,7 @@ _HOMEPAGE = "https://github.com/Markus-Zlabinger/pico-annotation"
 
 _LICENSE = "Unknown"
 
-_DATA_PATH = (
-    "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
-)
+_DATA_PATH = "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
 _URLS = {
     _DATASETNAME: {
         "sentence_file": f"{_DATA_PATH}/sentences.json",
@@ -112,9 +110,7 @@ def _get_entities_pico(
     ents = []
     for annotation_type, annotations in annotation_dict.items():
         # get indices from three annotators by majority voting
-        indices = np.where(
-            np.round(np.mean(annotations[sentence_id]["annotations"], axis=0)) == 1
-        )[0]
+        indices = np.where(np.round(np.mean(annotations[sentence_id]["annotations"], axis=0)) == 1)[0]
 
         if len(indices) > 0:  # if annotations exist for this sentence
             split_indices = []
