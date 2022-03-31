@@ -14,24 +14,9 @@
 # limitations under the License.
 
 """
-Parallel corpus of full-text articles in Portuguese, English and Spanish from SciELO
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
+Parallel corpus of full-text articles in Portuguese, English and Spanish from SciELO.
 """
 
-import os
 from typing import List, Optional
 
 import datasets
@@ -78,7 +63,8 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-
+    # NOTE: bigbio_t2t schema doesn't allow only for more than two texts in text to text schema.
+    #  en-pt-es translation is not implemented using the bigbio schema
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="scielo_source_en-es",
@@ -123,9 +109,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             lang_list: List[str] = self.config.name.split("_")[-1].split("-")
-            features = datasets.Features(
-                    {"translation": datasets.features.Translation(languages=lang_list)}
-                )
+            features = datasets.Features({"translation": datasets.features.Translation(languages=lang_list)})
 
         elif self.config.schema == "bigbio_t2t":
             features = schemas.text2text_features
@@ -173,8 +157,15 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
                 ),
             ]
 
-
-    def _generate_examples(self, languages: str, split: str, source_file:str, target_file:str, files, target_file_2: Optional[str]=None) -> (int, dict):
+    def _generate_examples(
+        self,
+        languages: str,
+        split: str,
+        source_file: str,
+        target_file: str,
+        files,
+        target_file_2: Optional[str] = None,
+    ) -> (int, dict):
         # breakpoint()
         if self.config.schema == "source":
 
@@ -216,14 +207,3 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
                     "text_1_name": source,
                     "text_2_name": target,
                 }
-
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python scielo.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
