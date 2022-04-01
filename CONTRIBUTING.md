@@ -186,4 +186,4 @@ Push these changes to **your fork** with the following command:
 
 Make a Pull Request to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
 
-When opening a PR, try to link a corresponding [issue](https://github.com/bigscience-workshop/biomedical/issues) using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description, e.g. `resolves #17`.
+When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description, e.g. `resolves #17`.
