@@ -64,39 +64,37 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
     # NOTE: bigbio_t2t schema doesn't allow only for more than two texts in text-to-text schema.
     #  en-pt-es translation is not implemented using the bigbio schema
 
-    # NOTE2: unit tests fail due to the problems with BigBioConfig.name values
-    #  it is not possible to create one BigBioConfig for all source versions
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="scielo_source_en-es",
+            name="scielo_en-es_source",
             version=SOURCE_VERSION,
             description="English-Spanish",
             schema="source",
-            subset_id="scielo",
+            subset_id="scielo_en-es",
         ),
         BigBioConfig(
-            name="scielo_source_en-pt",
+            name="scielo_en-pt_source",
             version=SOURCE_VERSION,
             description="English-Portuguese",
             schema="source",
-            subset_id="scielo",
+            subset_id="scielo_en-pt",
         ),
         BigBioConfig(
-            name="scielo_source_en-pt-es",
+            name="scielo_en-pt-es_source",
             version=SOURCE_VERSION,
             description="English-Portuguese-Spanish",
             schema="source",
-            subset_id="scielo",
+            subset_id="scielo_en-pt-es",
         ),
         BigBioConfig(
-            name="scielo_bigbio_t2t_en-es",
+            name="scielo_en-es_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="scielo BigBio schema English-Spanish",
             schema="bigbio_t2t",
             subset_id="scielo",
         ),
         BigBioConfig(
-            name="scielo_bigbio_t2t_en-pt",
+            name="scielo_en-pt_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="scielo BigBio schema English-Portuguese",
             schema="bigbio_t2t",
@@ -109,7 +107,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
-            lang_list: List[str] = self.config.name.split("_")[-1].split("-")
+            lang_list: List[str] = self.config.name.split("_")[1].split("-")
             features = datasets.Features({"translation": datasets.features.Translation(languages=lang_list)})
 
         elif self.config.schema == "bigbio_t2t":
@@ -125,7 +123,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        languages: str = self.config.name.split("_")[-1]
+        languages: str = self.config.name.split("_")[1]
         archive = dl_manager.download(_URLS[languages])
         lang_list: List[str] = languages.split("-")
         fname = languages.replace("-", "_")
