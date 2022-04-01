@@ -159,7 +159,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Question Answering
 - [Schema Template](utils/schemas/qa.py)
-- Examples: [BioASQ9 Task B](examples/bioasq9b.py)
+- Examples: [BioASQ9 Task B](examples/bioasq.py)
 
 ```
 {
