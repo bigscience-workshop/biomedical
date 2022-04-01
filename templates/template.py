@@ -1,8 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and
-#
-# TODO: fill out the line below
-# * <append your name and optionally your github handle here>
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
