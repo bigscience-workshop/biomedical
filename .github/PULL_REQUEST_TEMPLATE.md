@@ -1,3 +1,7 @@
+Please name your PR after the issue it closes. You can use the following line: "Closes #ISSUE-NUMBER" where you replace the ISSUE-NUMBER with the one corresponding to your dataset.
+
+If the following information is NOT present in the issue, please populate:
+
 - **Name:** *name of the dataset*
 - **Description:** *short description of the dataset (or link to social media or blog post)*
 - **Paper:** *link to the dataset paper if available*
