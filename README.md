@@ -138,7 +138,7 @@ Yes! Some datasets are easier to write dataloader scripts for than others. If yo
 
 #### Can I change the Big-Bio schema?
 
-The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. **Please do not modify the Big-Bio Schema**. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config, like `source` or `Big-Bio`. 
+The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. **Please do not modify the Big-Bio Schema**. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config.
 
 ## Thank you!
 
