@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Samuele Garda.
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -123,7 +123,7 @@ entity mention (SACEM) class: abbreviation, family, formula, identifier, multipl
 """
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/resources/biocreative-iv/chemdner-corpus/"
-_LICENSE = " CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
+_LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLs = {
     "source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2014/chemdner_corpus.tar.gz",
