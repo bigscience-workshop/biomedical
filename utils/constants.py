@@ -19,6 +19,3 @@ class Tasks(Enum):
     SUMMARIZATION = "SUM"
 
     TEXT_CLASSIFICATION = "TXTCLASS"
-
-
-

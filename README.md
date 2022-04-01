@@ -68,6 +68,11 @@ If an admin approves it, then you are welcome to implement this dataset and it w
 
 **Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
 
+As soon as you have opened a PR, the dataset will be marked as `In Progress` in the
+[list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/).
+When an admin accepts the PR and closes the corresponding issue, the dataset will be
+marked as `Done`.
+
 ## Community channels
 
 We welcome contributions from a wide variety of backgrounds; we are more than happy to guide you through the process. For instructions on how to get involved or ask for help, check out the following options:
@@ -85,9 +90,21 @@ You are welcome to use any of the above resources as necessary.
 
 ## FAQs
 
-#### What if my dataset does not have a public license?
+#### How can I find the appropriate license for my dataset?
 
-We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local/private dataset specific instructions in  [template](templates/template.py).
+The license for a dataset is not always obvious. Here are some strategies to try in your search,
+
+* check the `Experiment A: Annotated Datasets` tab of the [google sheet](https://docs.google.com/spreadsheets/d/1eOa9NhNmgGLByWKZ9ioKmNErq824dGA-nV5WpRWZ4a8/edit?usp=sharing) we used while planning the hackathon 
+* check for files such as README or LICENSE that may be distributed with the dataset itself
+* check the dataset webpage
+* check publications that announce the release of the dataset
+* check the website of the organization providing the dataset
+
+If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE="Unknown"` in your dataset script.   
+
+#### What if my dataset is not publicly available?
+
+We understand that some biomedical datasets are not publicly available due to data usage agreements or licensing. For these datasets, we recommend implementing a dataloader script that references a local directory containing the dataset. You can find examples in the [n2c2_2011](examples/n2c2_2011.py) and [bioasq](examples/bioasq.py) implementations. There are also local dataset specific instructions in  [template](templates/template.py).
 
 #### What types of libraries can we import?
 
@@ -95,13 +112,19 @@ Eventually, your dataloader script will need to run using only the packages supp
 
 We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
 
-#### Can I upload the dataset directly?
+#### Can I upload my dataset anywhere?
 
-No. Please do not upload your dataset directly. This is not the goal of the hackathon and many datasets have external licensing agreements. If the dataset is public (i.e. can be downloaded without credentials or signed data user agreement), include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. You can see examples of both in the [examples](https://github.com/bigscience-workshop/biomedical/tree/master/examples) directory. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
+No. Please don't upload the dataset you're working on to the huggingface hub or anywhere else.  This is not the goal of the hackathon and some datasets have licensing agreements that prevent redistribution. If the dataset is public, include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
 
 #### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
 
 In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `Text to Text (T2T)` schema) and a named entity recognition task (supported by the `Knowledge Base (KB)` schema). In this case, please implement one config for each supported schema and name the config `<datasetname>_bigbio_<schema>`. In the `muchmore` example, this would mean one config called `muchmore_bigbio_t2t` and one config called `muchmore_bigbio_kb`.  
+
+#### My dataset comes with multiple annotations per text and no/multiple harmonizations. How should I proceed?
+
+Please implement all different annotations and harmonizations as `source` versions (see [examples/bioasq.py](examples/bioasq.py) for an example).
+If the authors suggest a preferred harmonization, use that for the `bigbio` version.
+Otherwise use the harmonization that you think is best.
 
 #### How should I handle offsets and text in the bigbio schema?
 
