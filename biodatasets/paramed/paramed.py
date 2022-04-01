@@ -21,11 +21,13 @@ The script loads dataset in bigbio schema (using schemas/text-to-text) AND/OR so
 """
 import os  # useful for paths
 from typing import Dict, Iterable, List
-from dataclasses import dataclass
+
 import datasets
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 logger = datasets.logging.get_logger(__name__)
-
 
 
 _CITATION = """\
@@ -55,20 +57,12 @@ _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
     "bigbio_t2t": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
 }
-_SUPPORTED_TASKS = ["TRANSL"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _DATA_DIR = "./processed_data/open_access/open_access"
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class ParamedDataset(datasets.GeneratorBasedBuilder):
     """Write a short docstring documenting what this dataset is"""
@@ -90,7 +84,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             description="Paramed BigBio schema",
             schema="bigbio_t2t",
             subset_id="paramed",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "paramed_source"
@@ -104,21 +98,12 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
                     "text_1_name": datasets.Value("string"),
-                    "text_2_name": datasets.Value("string")
+                    "text_2_name": datasets.Value("string"),
                 }
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "text_1_name": datasets.Value("string"),
-                    "text_2_name": datasets.Value("string")
-                }
-            )
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -129,9 +114,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)
@@ -167,11 +150,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self,
-                           filepath,
-                           zh_file,
-                           en_file,
-                           split):
+    def _generate_examples(self, filepath, zh_file, en_file, split):
 
         logger.info("generating examples from = %s", filepath)
         zh_file = open(zh_file, "r")

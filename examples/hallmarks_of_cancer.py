@@ -12,11 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import glob
-import datasets
-from dataclasses import dataclass
+import os
 
+import datasets
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -60,7 +62,7 @@ _URLs = {
     "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = ["TXTCLASS"]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -79,16 +81,7 @@ _CLASS_NAMES = [
 ]
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
+class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
     """Hallmarks Of Cancer Dataset"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -124,14 +117,7 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_text":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("int32"),
-                    "document_id": datasets.Value("string"),
-                    "text": datasets.Value("string"),
-                    "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
-                }
-            )
+            features = schemas.text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -149,7 +135,10 @@ class Hallmarks_Of_Cancer(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": data_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": data_dir,
+                    "split": "train",
+                },
             )
         ]
 

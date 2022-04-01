@@ -99,7 +99,7 @@ To start, copy [templates/template.py](templates/template.py) to your `biomedica
     cp templates/template.py biodatasets/<dataset_name>/<dataset_name>.py
 
 For the `_info_` function, you will need to define `features` for your
-`DatasetInfo` object. For the `bigbio` config, copy the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](https://github.com/bigscience-workshop/biomedical/tree/master/schemas).
+`DatasetInfo` object. For the `bigbio` config, choose the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](utils/schemas/).
 
 You will use this schema in the `_generate_examples` return value.
 
@@ -107,10 +107,9 @@ Populate the information in the dataset according to this schema; some fields ma
 
 To enable quality control, please add the following line in your file before the class definition:
 ```python
-_SUPPORTED_TASKS = ["task1", "task2", ...]
+from utils.constants import Tasks
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 ```
-
-Please refer to the [Task Schemas Document](task_schemas.md) to find the correct task identifier.
 
 
 ##### Example scripts:
@@ -137,10 +136,9 @@ IDE doesn't support this, you can always run the script in your terminal and deb
 Make sure your dataset is implemented correctly by checking in python the following commands:
 
 ```python
-import datasets
 from datasets import load_dataset
 
-data = load_dataset('biodatasets/<dataset_name>/<dataset_name>'.py, name="<dataset_name>_bigbio_<schema>")
+data = load_dataset("biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
 ```
 
 Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).

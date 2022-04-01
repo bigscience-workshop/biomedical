@@ -5,7 +5,7 @@ from typing import Dict, Iterable
 
 def remove_prefix(a: str, prefix: str) -> str:
     if a.startswith(prefix):
-        a = a[len(prefix):]
+        a = a[len(prefix) :]
     return a
 
 
@@ -311,8 +311,6 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
-            unified_example["coreferences"].append(
-                {"id": id_prefix + str(i), "entity_ids": entity_ids}
-            )
+            unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
 
     return unified_example

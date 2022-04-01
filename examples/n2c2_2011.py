@@ -65,11 +65,13 @@ import re
 import tarfile
 import zipfile
 from collections import defaultdict
-from dataclasses import dataclass
 from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _DATASETNAME = "n2c2_2011"
 
@@ -121,7 +123,7 @@ _LICENSE = "Data User Agreement"
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_SUPPORTED_TASKS = ["COREF"]
+_SUPPORTED_TASKS = [Tasks.COREFERENCE_RESOLUTION]
 
 
 def _read_tar_gz(file_path, samples=None):
@@ -383,17 +385,6 @@ def _get_entities_from_sample(sample_id, sample, split):
     return dedupe_entities
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-
 class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
     """n2c2 2011 coreference task"""
 
@@ -439,40 +430,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                            "normalized": [
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "coreferences": [
-                        {
-                            "id": Value("string"),
-                            "entity_ids": [Value("string")],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -484,29 +442,25 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
-        """
-        self.config.data_dir and self.config.data_files can be made available by
-        passing the `data_dir` and/or `data_files` kwargs to `load_dataset`.
 
-        dataset = datasets.load_dataset(
-            "n2c2_2011_coref.py",
-            name="source",
-            data_dir="path/to/n2c2_2011_coref/data"
-        )
-
-        """
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+        else:
+            data_dir = self.config.data_dir
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "split": "train",
+                    "data_dir": data_dir,
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "split": "test",
+                    "data_dir": data_dir,
                 },
             ),
         ]
@@ -546,10 +500,12 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
                 }
             ],
             "entities": entities,
+            "relations": [],
+            "events": [],
             "coreferences": coreferences,
         }
 
-    def _generate_examples(self, split):
+    def _generate_examples(self, split, data_dir):
         """Generate samples using the info passed in from _split_generators."""
 
         if split == "train":
@@ -557,8 +513,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             # These files have complete sample info
             # (so we get a fresh `samples` defaultdict from each)
             paths = [
-                os.path.join(self.config.data_dir, "i2b2_Beth_Train_Release.tar.gz"),
-                os.path.join(self.config.data_dir, "i2b2_Partners_Train_Release.tar.gz"),
+                os.path.join(data_dir, "i2b2_Beth_Train_Release.tar.gz"),
+                os.path.join(data_dir, "i2b2_Partners_Train_Release.tar.gz"),
             ]
             for path in paths:
                 samples = _read_tar_gz(path)
@@ -574,8 +530,8 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             # Information from these files has to be combined to create a full sample
             # (so we pass the `samples` defaultdict back to the `_read_zip` method)
             paths = [
-                os.path.join(self.config.data_dir, "Task_1C.zip"),
-                os.path.join(self.config.data_dir, "Task_1C_Test_groundtruth.zip"),
+                os.path.join(data_dir, "Task_1C.zip"),
+                os.path.join(data_dir, "Task_1C_Test_groundtruth.zip"),
             ]
             samples = defaultdict(dict)
             for path in paths:

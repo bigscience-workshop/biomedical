@@ -17,12 +17,15 @@ Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medica
 the question prepared by medical professional.
 """
 
+import csv
 import os
 from typing import Dict, Tuple
+
 import datasets
-import csv
 from datasets import load_dataset
-from dataclasses import dataclass
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -50,21 +53,15 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/tr
 
 _LICENSE = ""
 
-_URLs = {"source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
-         "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv"}
+_URLs = {
+    "source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
+    "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
+}
 
-_SUPPORTED_TASKS = ["STS"]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 class MQPDataset(datasets.GeneratorBasedBuilder):
     """Medical Question Pairing dataset"""
@@ -86,7 +83,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             description="MQP BigBio schema",
             schema="bigbio_pairs",
             subset_id="mqp",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "mqp_source"
@@ -99,21 +96,13 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                     "document_id": datasets.Value("string"),
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string")
+                    "label": datasets.Value("string"),
                 }
             )
 
         # Using in pairs schema
         elif self.config.schema == "bigbio_pairs":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string")
-                }
-            )
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -123,8 +112,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self,
-                          dl_manager):
+    def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
@@ -135,23 +123,18 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepath": data_dir,
                     "split": "train",
-                }
+                },
             )
         ]
 
-    def _generate_examples(self,
-                           filepath,
-                           split):
+    def _generate_examples(self, filepath, split):
         """Yields examples as (key, example) tuples."""
 
-        if split == "train": #There's only training dataset available atm
+        if split == "train":  # There's only training dataset available atm
             with open(filepath, encoding="utf-8") as csv_file:
                 csv_reader = csv.reader(
-                    csv_file,
-                    quotechar='"',
-                    delimiter=",",
-                    quoting=csv.QUOTE_ALL,
-                    skipinitialspace=True)
+                    csv_file, quotechar='"', delimiter=",", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                )
 
                 if self.config.schema == "source":
                     for id_, row in enumerate(csv_reader):
@@ -170,7 +153,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
                         uid += 1
                         document_id, text_1, text_2, label = row
                         yield id_, {
-                            "id": uid, #uid is an unique identifier for every record that starts from 1
+                            "id": uid,  # uid is an unique identifier for every record that starts from 1
                             "document_id": document_id,
                             "text_1": text_1,
                             "text_2": text_2,
