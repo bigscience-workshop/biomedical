@@ -1,5 +1,3 @@
-***Update 2022.03.26: We're close to launch! Hackathon is scheduled for April 2nd - April 15th. We're excited to have you!***
-
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
@@ -137,6 +135,10 @@ Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/
 #### My dataset is too complicated, can I switch?
 
 Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
+
+#### Can I change the Big-Bio schema?
+
+The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. **Please do not modify the Big-Bio Schema**. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config, like `source` or `Big-Bio`. 
 
 ## Thank you!
 
