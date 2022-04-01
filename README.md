@@ -92,13 +92,15 @@ You are welcome to use any of the above resources as necessary.
 
 #### How can I find the appropriate license for my dataset?
 
-The license for a dataset is not always obvious. Here are some strategies to try in your search, 
+The license for a dataset is not always obvious. Here are some strategies to try in your search,
+
+* check the `Experiment A: Annotated Datasets` tab of the [google sheet](https://docs.google.com/spreadsheets/d/1eOa9NhNmgGLByWKZ9ioKmNErq824dGA-nV5WpRWZ4a8/edit?usp=sharing) we used while planning the hackathon 
 * check for files such as README or LICENSE that may be distributed with the dataset itself
 * check the dataset webpage
 * check publications that announce the release of the dataset
 * check the website of the organization providing the dataset
 
-If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE=Unknown` in your dataset script.   
+If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE="Unknown"` in your dataset script.   
 
 #### What if my dataset is not publicly available?
 
