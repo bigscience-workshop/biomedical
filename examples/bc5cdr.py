@@ -58,8 +58,10 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "bc5cdr"
+
 _DESCRIPTION = """\
-The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of 
+The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of
 human annotations of all chemicals, diseases and their interactions in 1,500 PubMed articles.
 """
 

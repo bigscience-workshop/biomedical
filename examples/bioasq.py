@@ -53,6 +53,8 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "bioasq"
+
 _BIOASQ_10B_DESCRIPTION = """\
 The data are intended to be used as training and development data for BioASQ
 10, which will take place during 2022. There is one file containing the data:
