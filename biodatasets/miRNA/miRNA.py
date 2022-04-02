@@ -76,13 +76,13 @@ language={eng}
 }
 """
 
+_DATASETNAME = "mirna"
+
 _DESCRIPTION = """\
-MicroRNAs (miRNAs) have demonstrated their potential as post-transcriptional gene expression
-regulators, participating in a wide spectrum of regulatory events such as apoptosis,
-differentiation, and stress response. Apart from the role of miRNAs in normal physiology,
-their dysregulation is implicated in a vast array of diseases. Dissection of miRNA-related
-associations are valuable for contemplating their mechanism in diseases, leading to the
-discovery of novel miRNAs for disease prognosis, diagnosis, and therapy.
+The corpus consists of 301 Medline citations. The documents were screened for
+mentions of miRNA in the abstract text. Gene, disease and miRNA entities were manually
+annotated. The corpus comprises of two separate files, a train and a test set, coming
+from 201 and 100 documents respectively. 
 """
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/download-mirna-test-corpus.html"
@@ -107,29 +107,29 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class miRNADataset(datasets.GeneratorBasedBuilder):
-    """miRNA"""
+    """mirna"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="miRNA_source",
+            name="mirna_source",
             version=SOURCE_VERSION,
-            description="miRNA source schema",
+            description="mirna source schema",
             schema="source",
-            subset_id="miRNA",
+            subset_id="mirna",
         ),
         BigBioConfig(
-            name="miRNA_bigbio_kb",
+            name="mirna_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="miRNA BigBio schema",
+            description="mirna BigBio schema",
             schema="bigbio_kb",
-            subset_id="miRNA",
+            subset_id="mirna",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "miRNA_source"
+    DEFAULT_CONFIG_NAME = "mirna_source"
 
     def _info(self):
 
