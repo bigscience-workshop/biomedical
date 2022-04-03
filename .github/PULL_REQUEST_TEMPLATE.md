@@ -13,4 +13,5 @@ If the following information is NOT present in the issue, please populate:
 - [ ] Provide values for the `_CITATION`, `_DATASETNAME`, `_DESCRIPTION`, `_HOMEPAGE`, `_LICENSE`, `_URLs`, `_SUPPORTED_TASKS`, `_SOURCE_VERSION`, and `_BIGBIO_VERSION` variables.
 - [ ] Implement `_info()`, `_split_generators()` and `_generate_examples()` in dataloader script.
 - [ ] Make sure that the `BUILDER_CONFIGS` class attribute is a list with at least one `BigBioConfig` for the source schema and one for a bigbio schema.
+- [ ] Confirm dataloader script works with `datasets.load_dataset` function
 - [ ] Confirm that your dataloader script passes the test suite run with `python -m tests.test_bigbio biodatasets/my_dataset/my_dataset.py`
