@@ -32,8 +32,11 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 
 """
 
+import json
 import os
 import sys
+
+import bioc
 sys.path.append("/Users/patrickhaller/Projects/biomedical/")
 from typing import List
 
@@ -117,7 +120,8 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
 
 
     def _info(self) -> datasets.DatasetInfo:
-        
+       
+        print(self.config)
         # BioASQ Task C source schema
         if self.config.schema == "source":
             features = datasets.Features(
@@ -138,10 +142,8 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
         # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
 
         # For example bigbio_kb, bigbio_t2t
-        elif self.config.schema =="bigbio_[bigbio_schema_name]":
-            # e.g. features = schemas.kb_features
-            # TODO: Choose your big-bio schema here
-            raise NotImplementedError()
+        elif self.config.schema =="bigbio_kb":
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -164,11 +166,10 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
 
         # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
 
-        # TODO: KEEP if your dataset is PUBLIC; REMOVE if not
-        urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
+        # # TODO: KEEP if your dataset is PUBLIC; REMOVE if not
+        # urls = _URLS[_DATASETNAME]
+        # data_dir = dl_manager.download_and_extract(urls)
 
-        # TODO: KEEP if your dataset is LOCAL; remove if NOT
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
@@ -180,9 +181,9 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "train.jsonl"),
+                    "filepath": os.path.join(data_dir, "taskCTrainingData2017.json"),
+                    "filespath": os.path.join(data_dir, "Train_Text"),
                     "split": "train",
                 },
             ),
@@ -204,18 +205,25 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-
-    def _generate_examples(self, filepath, split) -> (int, dict):
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
+    def _generate_examples(self, filepath, filespath, split) -> (int, dict):
 
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
+        
+        for file in os.listdir(filespath):
+            train_file = os.path.join(filespath, file)
+            print(train_file)
+            with open(train_file) as fp:
+                print(fp.read())
+                content = bioc.load(fp)
+            print(content)
+            exit()
+
 
         if self.config.schema == "source":
             # TODO: yield (key, example) tuples in the original dataset schema
-            for key, example in thing:
+            for key, example in file_content["articles"]:
                 yield key, example
 
         elif self.config.schema == "bigbio":
@@ -224,11 +232,7 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
                 yield key, example
 
 
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
 # This allows you to run your dataloader with `python [dataset_name].py` during development
 # TODO: Remove this before making your PR
 if __name__ == "__main__":
-    datasets.load_dataset(__file__)
+    datasets.load_dataset(__file__, name="bioasq_task_c_2017_source", data_dir="/Users/patrickhaller/Projects/biomedical/data")
