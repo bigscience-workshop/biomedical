@@ -84,11 +84,12 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `biomedical/biodatasets` folder as such: <br>
+Make a new directory within the `biomedical/biodatasets` directory:
 
     mkdir biodatasets/<dataset_name>
 
-To implement your dataset, there are three key methods that are important:<br>
+Please use lowercase letters and underscores when choosing a `<dataset_name>`. 
+To implement your dataset, there are three key methods that are important:
 
   * `_info`: Specifies the schema of the expected dataloader
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
