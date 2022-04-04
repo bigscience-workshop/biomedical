@@ -74,7 +74,7 @@ _LICENSE = "UNKNOWN"
 
 _URLS = {
     "diannibereval_en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip",
-    "diannibereval_sp": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip",
+    "diannibereval_es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]  # TODO: also for translation?
@@ -90,7 +90,7 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = []
-    for language in ["en", "sp"]:
+    for language in ["en", "es"]:
         BUILDER_CONFIGS.append(
             BigBioConfig(
                 name=f"diannibereval_{language}_source",
@@ -162,7 +162,7 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
         data_dir = Path(dl_manager.download_and_extract(urls))
         studies_path = {
             "diannibereval_en": "English",
-            "diannibereval_sp": "Spanish",
+            "diannibereval_es": "Spanish",
         }
 
         study_path = studies_path[self.config.subset_id]
