@@ -19,13 +19,13 @@ entities. Each annotation is assigned one of 12 granularity-based types such as 
 component, Tissue and Organ, defined with reference to the Common Anatomy Reference Ontology
 (see https://bioportal.bioontology.org/ontologies/CARO).
 """
+import datasets
+import utils.parsing as parsing
+import utils.schemas as schemas
+
 from pathlib import Path
 from typing import Dict, Iterator, List, Tuple
 
-import datasets
-
-import utils.parsing as parsing
-import utils.schemas as schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -130,11 +130,25 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             subset_id="chia",
         ),
         BigBioConfig(
+            name="chia_fixed_source",
+            version=SOURCE_VERSION,
+            description="Chia source schema (with fixed entity offsets)",
+            schema="source",
+            subset_id="chia_fixed",
+        ),
+        BigBioConfig(
             name="chia_without_scope_source",
             version=SOURCE_VERSION,
             description="Chia without scope source schema",
             schema="source",
             subset_id="chia_without_scope",
+        ),
+        BigBioConfig(
+            name="chia_without_scope_fixed_source",
+            version=SOURCE_VERSION,
+            description="Chia without scope source schema (with fixed entity offsets)",
+            schema="source",
+            subset_id="chia_without_scope_fixed",
         ),
         BigBioConfig(
             name="chia_bigbio_kb",
@@ -200,7 +214,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         url_key = _DATASETNAME
 
-        if self.config.subset_id == "chia_without_scope":
+        if self.config.subset_id.startswith("chia_without_scope"):
             url_key += "_wo_scope"
 
         urls = _URLS[url_key]
@@ -215,12 +229,14 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
+            fix_offsets = "fixed" in self.config.subset_id
+
             for file in data_dir.iterdir():
                 if not file.name.endswith(".txt"):
                     continue
 
                 brat_example = parse_brat_file(file, [".ann"])
-                source_example = self._to_source_example(file, brat_example)
+                source_example = self._to_source_example(file, brat_example, fix_offsets)
                 yield source_example["id"], source_example
 
         elif self.config.schema == "bigbio_kb":
@@ -229,7 +245,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 brat_example = parse_brat_file(file, [".ann"])
-                source_example = self._to_source_example(file, brat_example)
+                source_example = self._to_source_example(file, brat_example, True)
 
                 bigbio_example = {
                     "id": source_example["id"],
@@ -250,7 +266,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
                 yield bigbio_example["id"], bigbio_example
 
-    def _to_source_example(self, input_file: Path, brat_example: Dict) -> Dict:
+    def _to_source_example(self, input_file: Path, brat_example: Dict, fix_offsets: bool) -> Dict:
         """
         Converts the generic brat example to the source schema format.
         """
@@ -278,18 +294,19 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             entity_ann = tb_annotation.copy()
             entity_ann["id"] = example_prefix + entity_ann["id"]
 
-            if len(entity_ann["offsets"]) > 1:
-                entity_ann["text"] = self._get_texts_for_multiple_offsets(text, entity_ann["offsets"])
+            if fix_offsets:
+                if len(entity_ann["offsets"]) > 1:
+                    entity_ann["text"] = self._get_texts_for_multiple_offsets(text, entity_ann["offsets"])
 
-            fixed_offsets = []
-            fixed_texts = []
-            for entity_text, offsets in zip(entity_ann["text"], entity_ann["offsets"]):
-                fixed_offset = self._fix_entity_offsets(text, entity_text, offsets)
-                fixed_offsets.append(fixed_offset)
-                fixed_texts.append(text[fixed_offset[0] : fixed_offset[1]])
+                fixed_offsets = []
+                fixed_texts = []
+                for entity_text, offsets in zip(entity_ann["text"], entity_ann["offsets"]):
+                    fixed_offset = self._fix_entity_offsets(text, entity_text, offsets)
+                    fixed_offsets.append(fixed_offset)
+                    fixed_texts.append(text[fixed_offset[0] : fixed_offset[1]])
 
-            entity_ann["offsets"] = fixed_offsets
-            entity_ann["text"] = fixed_texts
+                entity_ann["offsets"] = fixed_offsets
+                entity_ann["text"] = fixed_texts
 
             entity_ann["normalized"] = []
             source_example["entities"].append(entity_ann)
