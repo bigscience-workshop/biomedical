@@ -366,7 +366,6 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                 }
 
     def _generate_bigbio_kb_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
-        print("ok")
         _id = -1
         for lang_code, root_dir in root_dirs.items():
             language = _CODE2LANG[lang_code]
