@@ -78,8 +78,8 @@ Clinical Trial[ptyp] AND “loattrfree full text”[sb] AND “spanish”[la].
 """
 
 _DESCRIPTION = {
-    "ctebmspabstracts": _ABSTRACTS_DESCRIPTION,
-    "ctebmspeudract": _EUDRACT_DESCRIPTION,
+    "ctebmsp_abstracts": _ABSTRACTS_DESCRIPTION,
+    "ctebmsp_eudract": _EUDRACT_DESCRIPTION,
 }
 
 _HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
@@ -106,25 +106,25 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
     for study in ["abstracts", "eudract"]:
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"ctebmsp{study}_source",
+                name=f"ctebmsp_{study}_source",
                 version=SOURCE_VERSION,
                 description=f"CT-EBM-SP {study.capitalize()} source schema",
                 schema="source",
-                subset_id=f"ctebmsp{study}",
+                subset_id=f"ctebmsp_{study}",
             )
         )
 
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"ctebmsp{study}_bigbio_kb",
+                name=f"ctebmsp_{study}_bigbio_kb",
                 version=BIGBIO_VERSION,
                 description=f"CT-EBM-SP {study.capitalize()} BigBio schema",
                 schema="bigbio_kb",
-                subset_id=f"ctebmsp{study}",
+                subset_id=f"ctebmsp_{study}",
             ),
         )
 
-    DEFAULT_CONFIG_NAME = "ctebmspabstracts_source"
+    DEFAULT_CONFIG_NAME = "ctebmsp_abstracts_source"
 
     # Entities from the Unified Medical Language System (UMLS) semantic groups
     _ENTITY_TYPES = {
@@ -226,8 +226,8 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
         urls = _URLS[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(urls))
         studies_path = {
-            "ctebmspabstracts": "abstracts",
-            "ctebmspeudract": "eudract",
+            "ctebmsp_abstracts": "abstracts",
+            "ctebmsp_eudract": "eudract",
         }
 
         study_path = studies_path[self.config.subset_id]
