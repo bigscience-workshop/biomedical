@@ -119,9 +119,19 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
     example["equivalences"] = []
     example["attributes"] = []
     example["normalizations"] = []
+
+    prev_tb_annotation = None
+
     for line in ann_lines:
+        orig_line = line
         line = line.strip()
         if not line:
+            continue
+
+        # If an (entity) annotation spans multiple lines, this will result in multiple
+        # lines also in the annotation file
+        if "\t" not in line and prev_tb_annotation is not None:
+            prev_tb_annotation["text"][0] += "\n" + orig_line[:-1]
             continue
 
         if line.startswith("T"):  # Text bound
@@ -138,6 +148,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
                 ann["offsets"].append([int(start), int(end)])
 
             example["text_bound_annotations"].append(ann)
+            prev_tb_annotation = ann
 
         elif line.startswith("E"):
             ann = {}
@@ -156,6 +167,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
                 ann["arguments"].append(argument)
 
             example["events"].append(ann)
+            prev_tb_annotation = None
 
         elif line.startswith("R"):
             ann = {}
@@ -174,6 +186,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
             }
 
             example["relations"].append(ann)
+            prev_tb_annotation = None
 
         # '*' seems to be the legacy way to mark equivalences,
         # but I couldn't find any info on the current way
@@ -187,6 +200,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
             ann["ref_ids"] = fields[1].split()[1:]
 
             example["equivalences"].append(ann)
+            prev_tb_annotation = None
 
         elif line.startswith("A") or line.startswith("M"):
             ann = {}
@@ -204,6 +218,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
                 ann["value"] = ""
 
             example["attributes"].append(ann)
+            prev_tb_annotation = None
 
         elif line.startswith("N"):
             ann = {}
@@ -218,7 +233,9 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
             ann["ref_id"] = info[1]
             ann["resource_name"] = info[2].split(":")[0]
             ann["cuid"] = info[2].split(":")[1]
+
             example["normalizations"].append(ann)
+            prev_tb_annotation = None
 
     return example
 
