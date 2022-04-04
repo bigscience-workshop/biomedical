@@ -219,7 +219,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
                 if not file.name.endswith(".txt"):
                     continue
 
-                brat_example = parsing.parse_brat_file(file, [".ann"])
+                brat_example = parse_brat_file(file, [".ann"])
                 source_example = self._to_source_example(file, brat_example)
                 yield source_example["id"], source_example
 
@@ -228,7 +228,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
                 if not file.name.endswith(".txt"):
                     continue
 
-                brat_example = parsing.parse_brat_file(file, [".ann"])
+                brat_example = parse_brat_file(file, [".ann"])
                 source_example = self._to_source_example(file, brat_example)
 
                 bigbio_example = {
@@ -360,3 +360,233 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
         for offset in offsets:
             texts.append(document_text[offset[0] : offset[1]])
         return texts
+
+def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) -> Dict:
+    """
+    Parse a brat file into the schema defined below.
+    `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
+    Assumes that the annotations are contained in one or more of the corresponding '.a1', '.a2' or '.ann' files,
+    e.g. 'data/1234.ann' or 'data/1234.a1' and 'data/1234.a2'.
+
+    Schema of the parse:
+       features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                    "text_bound_annotations": [  # T line in brat, e.g. type or event trigger
+                        {
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "type": datasets.Value("string"),
+                            "id": datasets.Value("string"),
+                        }
+                    ],
+                    "events": [  # E line in brat
+                        {
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "arguments": datasets.Sequence(
+                                {
+                                    "role": datasets.Value("string"),
+                                    "ref_id": datasets.Value("string"),
+                                }
+                            ),
+                        }
+                    ],
+                    "relations": [  # R line in brat
+                        {
+                            "id": datasets.Value("string"),
+                            "head": {
+                                "ref_id": datasets.Value("string"),
+                                "role": datasets.Value("string"),
+                            },
+                            "tail": {
+                                "ref_id": datasets.Value("string"),
+                                "role": datasets.Value("string"),
+                            },
+                            "type": datasets.Value("string"),
+                        }
+                    ],
+                    "equivalences": [  # Equiv line in brat
+                        {
+                            "id": datasets.Value("string"),
+                            "ref_ids": datasets.Sequence(datasets.Value("string")),
+                        }
+                    ],
+                    "attributes": [  # M or A lines in brat
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "ref_id": datasets.Value("string"),
+                            "value": datasets.Value("string"),
+                        }
+                    ],
+                    "normalizations": [  # N lines in brat
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "ref_id": datasets.Value("string"),
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
+                            "text": datasets.Value(
+                                "string"
+                            ),  # Human readable description/name of the entity, e.g. "Barack Obama"
+                        }
+                    ],
+                },
+            )
+    """
+
+    example = {}
+    example["document_id"] = txt_file.with_suffix("").name
+    with txt_file.open() as f:
+        example["text"] = f.read()
+
+    # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
+    # for event extraction
+    if annotation_file_suffixes is None:
+        annotation_file_suffixes = [".a1", ".a2", ".ann"]
+
+    if len(annotation_file_suffixes) == 0:
+        raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
+
+    ann_lines = []
+    for suffix in annotation_file_suffixes:
+        annotation_file = txt_file.with_suffix(suffix)
+        if annotation_file.exists():
+            with annotation_file.open() as f:
+                ann_lines.extend(f.readlines())
+
+    example["text_bound_annotations"] = []
+    example["events"] = []
+    example["relations"] = []
+    example["equivalences"] = []
+    example["attributes"] = []
+    example["normalizations"] = []
+
+    prev_tb_annotation = None
+
+    for line in ann_lines:
+        orig_line = line
+        line = line.strip()
+        if not line:
+            continue
+
+        # If an (entity) annotation spans multiple lines, this will result in multiple
+        # lines also in the annotation file
+        if "\t" not in line and prev_tb_annotation is not None:
+            prev_tb_annotation["text"][0] += "\n" + orig_line[:-1]
+            continue
+
+        if line.startswith("T"):  # Text bound
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+            ann["text"] = [fields[2]]
+            ann["type"] = fields[1].split()[0]
+            ann["offsets"] = []
+            span_str = parsing.remove_prefix(fields[1], (ann["type"] + " "))
+            for span in span_str.split(";"):
+                start, end = span.split()
+                ann["offsets"].append([int(start), int(end)])
+
+            example["text_bound_annotations"].append(ann)
+            prev_tb_annotation = ann
+
+        elif line.startswith("E"):
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+
+            ann["type"], ann["trigger"] = fields[1].split()[0].split(":")
+
+            ann["arguments"] = []
+            for role_ref_id in fields[1].split()[1:]:
+                argument = {
+                    "role": (role_ref_id.split(":"))[0],
+                    "ref_id": (role_ref_id.split(":"))[1],
+                }
+                ann["arguments"].append(argument)
+
+            example["events"].append(ann)
+            prev_tb_annotation = None
+
+        elif line.startswith("R"):
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+            ann["type"] = fields[1].split()[0]
+
+            ann["head"] = {
+                "role": fields[1].split()[1].split(":")[0],
+                "ref_id": fields[1].split()[1].split(":")[1],
+            }
+            ann["tail"] = {
+                "role": fields[1].split()[2].split(":")[0],
+                "ref_id": fields[1].split()[2].split(":")[1],
+            }
+
+            example["relations"].append(ann)
+            prev_tb_annotation = None
+
+        # '*' seems to be the legacy way to mark equivalences,
+        # but I couldn't find any info on the current way
+        # this might have to be adapted dependent on the brat version
+        # of the annotation
+        elif line.startswith("*"):
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+            ann["ref_ids"] = fields[1].split()[1:]
+
+            example["equivalences"].append(ann)
+            prev_tb_annotation = None
+
+        elif line.startswith("A") or line.startswith("M"):
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+
+            info = fields[1].split()
+            ann["type"] = info[0]
+            ann["ref_id"] = info[1]
+
+            if len(info) > 2:
+                ann["value"] = info[2]
+            else:
+                ann["value"] = ""
+
+            example["attributes"].append(ann)
+            prev_tb_annotation = None
+
+        elif line.startswith("N"):
+            ann = {}
+            fields = line.split("\t")
+
+            ann["id"] = fields[0]
+            ann["text"] = fields[2]
+
+            info = fields[1].split()
+
+            ann["type"] = info[0]
+            ann["ref_id"] = info[1]
+            ann["resource_name"] = info[2].split(":")[0]
+            ann["cuid"] = info[2].split(":")[1]
+
+            example["normalizations"].append(ann)
+            prev_tb_annotation = None
+
+    return example
