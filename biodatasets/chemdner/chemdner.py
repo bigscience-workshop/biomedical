@@ -325,6 +325,7 @@ class CHEMDNERDataset(datasets.GeneratorBasedBuilder):
 
         else:
 
+            # No normalization
             normalized = []
 
         return normalized
