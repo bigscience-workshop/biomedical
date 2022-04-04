@@ -98,10 +98,7 @@ _URLS = {
     ],
 }
 
-# TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = [
-    Tasks.NAMED_ENTITY_DISAMBIGUATION
-]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -185,7 +182,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
         urls = _URLS[self.config.subset_id]
-        corpus_path, pmids_train, pmids_test, pmids_dev = dl_manager.download_and_extract(urls)
+        corpus_path, pmids_train, pmids_dev, pmids_test = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
@@ -271,13 +268,3 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
             entities.append(entity)
 
         return {"pmid": int(pmid), "entities": entities, "passages": passages}
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
