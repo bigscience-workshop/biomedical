@@ -1,3 +1,5 @@
+### Stay tuned - we'll have a "Meet the Team" call on Wednesday April 6, (8 AM PST/ 11 AM EST/ 5 PM CET). Zoom link TBA.
+
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
 ![progress claimed](https://progress-bar.dev/74/?title=datasets%20claimed)
