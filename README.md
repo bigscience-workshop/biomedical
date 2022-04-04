@@ -1,4 +1,4 @@
-### Stay tuned - we'll have a "Meet the Team" call on Wednesday April 6, (8 AM PST/ 11 AM EST/ 5 PM CET). Access the [zoom link here](https://virginia.zoom.us/j/98183290572?pwd=RzJHeStvbkJvM3UvRVdvenV1anA3QT09)
+### Stay tuned - we'll have a "Meet the Team" call on Wednesday April 6, (8 AM PST/ 11 AM EST/ 5 PM CET). Access the [zoom registration here](https://virginia.zoom.us/meeting/register/tJwsf-qqpzsvHdbe6tWsAmRjEvf1yIvZ8ODL)
 
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
