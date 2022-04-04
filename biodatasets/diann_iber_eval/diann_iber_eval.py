@@ -19,6 +19,7 @@ related to the biomedical domain, where both Spanish and English versions are av
 with annotations for disabilities appearing in these abstracts.
 """
 
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -73,14 +74,25 @@ _HOMEPAGE = "http://nlp.uned.es/diann/"
 _LICENSE = "UNKNOWN"
 
 _URLS = {
-    "diannibereval_en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip",
-    "diannibereval_es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip",
+    "diannibereval_en": {
+        "en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip"
+    },
+    "diannibereval_es": {
+        "es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip"
+    },
+    "diannibereval": {
+        "es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip",
+        "en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip",
+    },
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]  # TODO: also for translation?
+_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
+_LANG2CODE = {"English": "en", "Spanish": "es"}
+_CODE2LANG = {"en": "English", "es": "Spanish"}
 
 
 class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
@@ -90,25 +102,56 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = []
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
+            name="diannibereval_source",
+            version=SOURCE_VERSION,
+            description="DIANN Iber Eval source schema",
+            schema="source",
+            subset_id="diannibereval",
+        ),
+    )
+
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
+            name="diannibereval_bigbio_kb",
+            version=SOURCE_VERSION,
+            description="DIANN Iber Eval BigBio schema",
+            schema="bigbio_kb",
+            subset_id="diannibereval",
+        ),
+    )
+
     for language in ["en", "es"]:
         BUILDER_CONFIGS.append(
             BigBioConfig(
                 name=f"diannibereval_{language}_source",
                 version=SOURCE_VERSION,
-                description=f"DIANN Iber Eval {language.capitalize()} source schema",
+                description=f"DIANN Iber Eval {_CODE2LANG[language]} source schema",
                 schema="source",
                 subset_id=f"diannibereval_{language}",
-            )
+            ),
         )
+
         BUILDER_CONFIGS.append(
             BigBioConfig(
                 name=f"diannibereval_{language}_bigbio_kb",
                 version=BIGBIO_VERSION,
-                description=f"DIANN Iber Eval {language.capitalize()} BigBio schema",
+                description=f"DIANN Iber Eval {_CODE2LANG[language]} BigBio schema",
                 schema="bigbio_kb",
                 subset_id=f"diannibereval_{language}",
             ),
         )
+
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
+            name="diannibereval_bigbio_t2t",
+            version=BIGBIO_VERSION,
+            description="DIANN Iber Eval BigBio translation schema",
+            schema="bigbio_t2t",
+            subset_id="diannibereval",
+        ),
+    )
 
     DEFAULT_CONFIG_NAME = "diannibereval_en_source"
 
@@ -116,6 +159,12 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
         "Disability",
         "Neg",
         "Scope",
+    }
+
+    _STUDIES_PATH = {
+        "diannibereval_en": ["English"],
+        "diannibereval_es": ["Spanish"],
+        "diannibereval": ["English", "Spanish"],
     }
 
     def _info(self) -> datasets.DatasetInfo:
@@ -137,6 +186,7 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                         }
                     ],
+                    "language": datasets.Value("string"),
                     "XML_annotation": datasets.Value("string"),
                     "metadata": {
                         "title": datasets.Value("string"),
@@ -147,6 +197,9 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
+
+        elif self.config.schema == "bigbio_t2t":
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -159,22 +212,16 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         urls = _URLS[self.config.subset_id]
-        data_dir = Path(dl_manager.download_and_extract(urls))
-        studies_path = {
-            "diannibereval_en": "English",
-            "diannibereval_es": "Spanish",
-        }
-
-        study_path = studies_path[self.config.subset_id]
+        root_dirs = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"dir_files": data_dir / study_path / f"{study_path}_Training"},
+                gen_kwargs={"root_dirs": root_dirs, "split": "Training"},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"dir_files": data_dir / study_path / f"{study_path}_Test"},
+                gen_kwargs={"root_dirs": root_dirs, "split": "Test"},
             ),
         ]
 
@@ -290,32 +337,54 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
 
         return {"title": title_str, "keywords": keyword_list}
 
-    def _generate_examples(self, dir_files) -> Tuple[int, Dict]:
-        """Yields examples as (key, example) tuples."""
+    def _generate_source_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+        _id = -1
+        for lang_code, root_dir in root_dirs.items():
+            print(lang_code, root_dir)
+            language = _CODE2LANG[lang_code]
 
-        raw_dir = dir_files / "Raw"
-        raw_files = list(raw_dir.glob("*txt"))
+            dir_files = Path(root_dir) / language / f"{language}_{split}"
+            raw_dir = Path(root_dir) / language / f"{language}_{split}" / "Raw"
+            raw_files = list(raw_dir.glob("*txt"))
 
-        for idx, raw_file in enumerate(raw_files):
-            raw_text = raw_file.read_text()
-            uid = raw_file.stem
+            for raw_file in raw_files:
+                raw_text = raw_file.read_text()
+                uid = raw_file.stem
 
-            xml_annotation, entities = self._get_annotations_from_uid(dir_files, uid)
-            metadata = self._get_metadata_from_uid(dir_files, uid)
+                xml_annotation, entities = self._get_annotations_from_uid(dir_files, uid)
+                metadata = self._get_metadata_from_uid(dir_files, uid)
+                _id += 1
 
-            if self.config.schema == "source":
-                yield idx, {
-                    "id": idx,
+                yield _id, {
+                    "id": _id,
                     "doc_id": uid,
                     "text": raw_text,
                     "entities": entities,
+                    "language": _LANG2CODE[language],
                     "XML_annotation": xml_annotation,
                     "metadata": metadata,
                 }
-            elif self.config.schema == "bigbio_kb":
+
+    def _generate_bigbio_kb_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+        print("ok")
+        _id = -1
+        for lang_code, root_dir in root_dirs.items():
+            language = _CODE2LANG[lang_code]
+
+            dir_files = Path(root_dir) / language / f"{language}_{split}"
+            raw_dir = Path(root_dir) / language / f"{language}_{split}" / "Raw"
+            raw_files = list(raw_dir.glob("*txt"))
+
+            for raw_file in raw_files:
+                raw_text = raw_file.read_text()
+                uid = raw_file.stem
+
+                _, entities = self._get_annotations_from_uid(dir_files, uid)
+                _id += 1
+
                 example = parsing.brat_parse_to_bigbio_kb(
                     {
-                        "document_id": uid,
+                        "document_id": f"{uid}_{lang_code}",
                         "text": raw_text,
                         "text_bound_annotations": entities,
                         "normalizations": [],
@@ -326,5 +395,48 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                     },
                     entity_types=self._ENTITY_TYPES,
                 )
-                example["id"] = idx
-                yield idx, example
+
+                example["id"] = _id
+                yield _id, example
+
+    def _generate_bigbio_t2t_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+        sample_map = defaultdict(list)
+        for lang_code, root_dir in root_dirs.items():
+            language = _CODE2LANG[lang_code]
+            raw_dir = Path(root_dir) / language / f"{language}_{split}" / "Raw"
+            raw_files = list(raw_dir.glob("*txt"))
+
+            for raw_file in raw_files:
+                raw_text = raw_file.read_text()
+                uid = raw_file.stem
+                sample_map[uid].append({"language": lang_code, "text": raw_text})
+
+        _id = -1
+        for sample_id_prefix, sample_pair in sample_map.items():
+            if len(sample_pair) != 2:
+                continue
+            en_idx = 0 if sample_pair[0]["language"] == "en" else 1
+            es_idx = 0 if en_idx == 1 else 1
+
+            _id += 1
+            yield _id, {
+                "id": sample_id_prefix,
+                "document_id": sample_id_prefix,
+                "text_1": sample_pair[en_idx]["text"],
+                "text_2": sample_pair[es_idx]["text"],
+                "text_1_name": "en",
+                "text_2_name": "es",
+            }
+
+    def _generate_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+        """Yields examples as (key, example) tuples."""
+
+        if self.config.schema == "source":
+            examples = self._generate_source_examples(root_dirs, split)
+        elif self.config.schema == "bigbio_kb":
+            examples = self._generate_bigbio_kb_examples(root_dirs, split)
+        elif self.config.schema == "bigbio_t2t":
+            examples = self._generate_bigbio_t2t_examples(root_dirs, split)
+
+        for _id, sample in examples:
+            yield _id, sample
