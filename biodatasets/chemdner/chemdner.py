@@ -325,7 +325,7 @@ class CHEMDNERDataset(datasets.GeneratorBasedBuilder):
 
         else:
 
-            normalized = [{"db_name": "-1", "db_id": "-1"}]
+            normalized = []
 
         return normalized
 
