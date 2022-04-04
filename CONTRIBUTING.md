@@ -84,11 +84,12 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `biomedical/biodatasets` folder as such: <br>
+Make a new directory within the `biomedical/biodatasets` directory:
 
     mkdir biodatasets/<dataset_name>
 
-To implement your dataset, there are three key methods that are important:<br>
+Please use lowercase letters and underscores when choosing a `<dataset_name>`. 
+To implement your dataset, there are three key methods that are important:
 
   * `_info`: Specifies the schema of the expected dataloader
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
@@ -110,6 +111,12 @@ To enable quality control, please add the following line in your file before the
 from utils.constants import Tasks
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 ```
+
+If your dataset is in a standard format, please use a recommended parser if available:
+- BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
+- BRAT: Use [our custom brat parser](utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+
+If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
 
 
 ##### Example scripts:
@@ -184,4 +191,6 @@ Push these changes to **your fork** with the following command:
 
 ### 7. **Make a pull request**
 
-Make a PR to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
+Make a Pull Request to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
+
+When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description, e.g. `resolves #17`.

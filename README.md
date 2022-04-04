@@ -1,6 +1,7 @@
-***Update 2022.03.26: We're close to launch! Hackathon is scheduled for April 2nd - April 15th. We're excited to have you!***
-
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
+
+![progress claimed](https://progress-bar.dev/74/?title=datasets%20claimed)
+![progress done](https://progress-bar.dev/11/?title=datasets%20done)
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
 <!--- @Natasha From the Data_sourcing wiki  --->
@@ -92,17 +93,30 @@ You are welcome to use any of the above resources as necessary.
 
 #### How can I find the appropriate license for my dataset?
 
-The license for a dataset is not always obvious. Here are some strategies to try in your search, 
+The license for a dataset is not always obvious. Here are some strategies to try in your search,
+
+* check the `Experiment A: Annotated Datasets` tab of the [google sheet](https://docs.google.com/spreadsheets/d/1eOa9NhNmgGLByWKZ9ioKmNErq824dGA-nV5WpRWZ4a8/edit?usp=sharing) we used while planning the hackathon 
 * check for files such as README or LICENSE that may be distributed with the dataset itself
 * check the dataset webpage
 * check publications that announce the release of the dataset
 * check the website of the organization providing the dataset
 
-If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE=Unknown` in your dataset script.   
+If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE="Unknown"` in your dataset script.   
 
 #### What if my dataset is not publicly available?
 
 We understand that some biomedical datasets are not publicly available due to data usage agreements or licensing. For these datasets, we recommend implementing a dataloader script that references a local directory containing the dataset. You can find examples in the [n2c2_2011](examples/n2c2_2011.py) and [bioasq](examples/bioasq.py) implementations. There are also local dataset specific instructions in  [template](templates/template.py).
+
+
+#### My dataset is in a standard format (e.g. BRAT, BioC). Do I have to write my own parser?
+
+If your dataset is in a standard format, please use a recommended parser if available:
+- BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
+- BRAT: Use [our custom brat parser](utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+
+If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
+
+
 
 #### What types of libraries can we import?
 
@@ -135,6 +149,10 @@ Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/
 #### My dataset is too complicated, can I switch?
 
 Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
+
+#### Can I change the Big-Bio schema?
+
+**No, please do not modify the Big-Bio Schema.** The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config.
 
 ## Thank you!
 
