@@ -515,7 +515,8 @@ class TestDataLoader(unittest.TestCase):
 
                 for key in sub_keys:
                     for attrs in features[key]:
-                        self.assertTrue(self._check_subkey(example[key][0], attrs))
+                        if example[key]:
+                            self.assertTrue(self._check_subkey(example[key][0], attrs))
 
                 # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
                 extra_keys = set(example.keys()) - set(needed_keys) - set(sub_keys)
