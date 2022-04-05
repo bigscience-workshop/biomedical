@@ -219,16 +219,15 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                     entities_ = []
                     for entity in document["entities"]:
                         for type in entity["semantic_type_id"]:
-                            entities_.append({
-                                "id": next(uid),
-                                "type": type,
-                                "text": entity["text"],
-                                "offsets": entity["offsets"],
-                                "normalized": [{
-                                    "db_name": "UMLS", 
-                                    "db_id": entity["concept_id"]
-                                }]
-                            })
+                            entities_.append(
+                                {
+                                    "id": next(uid),
+                                    "type": type,
+                                    "text": entity["text"],
+                                    "offsets": entity["offsets"],
+                                    "normalized": [{"db_name": "UMLS", "db_id": entity["concept_id"]}],
+                                }
+                            )
                     document["entities"] = entities_
 
                     for passage in document["passages"]:
