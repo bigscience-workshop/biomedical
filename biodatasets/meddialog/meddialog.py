@@ -16,7 +16,6 @@
 import json
 import re
 import datasets
-from pathlib import Path
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
