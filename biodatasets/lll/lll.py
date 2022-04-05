@@ -35,17 +35,17 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
-@misc{mohan2019medmentions,
-      title={MedMentions: A Large Biomedical Corpus Annotated with UMLS Concepts},
-      author={Sunil Mohan and Donghui Li},
-      year={2019},
-      eprint={1902.09476},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+    @article{article,
+    author = {Nédellec, C.},
+    year = {2005},
+    month = {01},
+    pages = {},
+    title = {Learning Language in Logic - Genic Interaction Extraction Challenge},
+    journal = {Proceedings of the Learning Language in Logic 2005 Workshop at the International Conference on Machine Learning}
 }
 """
 
-_DATASETNAME = "medmentions"
+_DATASETNAME = "lll"
 
 _DESCRIPTION = """\
 The LLL05 challenge task is to learn rules to extract protein/gene interactions from biology abstracts from the Medline
