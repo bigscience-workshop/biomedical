@@ -54,7 +54,7 @@ which permits unrestricted use, distribution, and reproduction in any medium,
 provided the original work is properly cited (Furlong et al, BMC Bioinformatics 2008, 9:84).
 """
 
-_HOMEPAGE = "https://github.com/rockt/SETH/tree/master/resources/OSIRIS"
+_HOMEPAGE = "https://sites.google.com/site/laurafurlongweb/databases-and-tools/corpora/"
 
 
 _LICENSE = "Creative Commons Attribution 3.0 Unported License"
@@ -129,6 +129,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
                         {
                             "v_id": datasets.Value("string"),
                             "v_lex": datasets.Value("string"),
+                            "v_norm": datasets.Value("string"),
                             "offsets": [[datasets.Value("int32")]]
                         }
                     ]
@@ -190,7 +191,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
 
             for c in child:
                 c_dict = c.attrib
-                c_dict["offsets"] = self._get_offsets(child, c)
+                c_dict["offsets"] = self._get_offsets(elem, c)
                 elem_d[c.tag].append(c.attrib)
 
         return elem_d
@@ -199,6 +200,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
         '''
         If variant is not present in the row this function adds one variant 
         with no data (to make looping though items possible) and returns the new row.
+        These mocked variants will be romoved after parsing.
         Otherwise returns unchanged row.
         '''
 
@@ -207,6 +209,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
                 {
                     "v_id": "",
                     "v_lex": "",
+                    "v_norm": "",
                     "offsets": [0, 0]
                 }
             ]
@@ -221,19 +224,20 @@ class Osiris(datasets.GeneratorBasedBuilder):
             {
                 "id": str(uuid.uuid4()),
                 "offsets": [gene["offsets"]],
-                "text": [" ".join([gene["g_id"], gene["g_lex"]])],
+                "text": [gene["g_lex"]],
                 "type": "gene",
-                "normalized": []
+                "normalized":  [{"db_name": "NCBI Gene", "db_id": gene["g_id"]}]
             } for gene in row["gene"]
         ]
+
         variants = [
             {
                 "id": str(uuid.uuid4()),
                 "offsets": [variant["offsets"]],
-                "text": [" ".join([variant["v_id"], variant["v_lex"]])],
+                "text": [variant["v_lex"]],
                 "type": "variant",
-                "normalized": []
-            } for variant in row["variant"]
+                "normalized":  [{"db_name": "dbSNP" if variant["v_id"] == "No" else "NCBI Gene", "db_id": variant["v_norm"] if variant["v_id"] == "No" else variant["v_id"]}]
+            } for variant in row["variant"] if variant['v_id'] != ""
         ]
         return list(itertools.chain(genes, variants))
 
@@ -266,6 +270,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
                     "variants": [{
                         "v_id": variant["v_id"],
                         "v_lex": variant["v_lex"],
+                        "v_norm": variant["v_norm"],
                         "offsets": [variant["offsets"]]
                     } for variant in row["variant"]]
                 }
