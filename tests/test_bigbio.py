@@ -102,14 +102,7 @@ class TestDataLoader(unittest.TestCase):
         """  # noqa
         self.setUp()
 
-        # check the schemas implied by _SUPPORTED_TASKS
-        if self.SCHEMA is None:
-            schemas_to_check = self._MAPPED_SCHEMAS
-        # check the schema forced in unit test args
-        else:
-            schemas_to_check = [self.SCHEMA]
-
-        for schema in schemas_to_check:
+        for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
             with self.subTest("IDs globally unique"):
                 self.test_are_ids_globally_unique(dataset_bigbio)
@@ -160,6 +153,14 @@ class TestDataLoader(unittest.TestCase):
         self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
+        # check the schemas implied by _SUPPORTED_TASKS
+        if self.SCHEMA is None:
+            self.schemas_to_check = self._MAPPED_SCHEMAS
+        # check the schema forced in unit test args
+        else:
+            self.schemas_to_check = [self.SCHEMA]
+        logger.info(f"schemas_to_check: {self.schemas_to_check}")
+
         config_name = f"{self.SUBSET_ID}_source"
         logger.info(f"Checking load_dataset with config name {config_name}")
         self.dataset_source = datasets.load_dataset(
@@ -170,7 +171,7 @@ class TestDataLoader(unittest.TestCase):
         )
 
         self.datasets_bigbio = {}
-        for schema in self._MAPPED_SCHEMAS:
+        for schema in self.schemas_to_check:
             config_name = f"{self.SUBSET_ID}_bigbio_{schema.lower()}"
             logger.info(f"Checking load_dataset with config name {config_name}")
             self.datasets_bigbio[schema] = datasets.load_dataset(
