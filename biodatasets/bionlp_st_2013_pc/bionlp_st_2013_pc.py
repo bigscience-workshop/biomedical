@@ -17,11 +17,10 @@ from pathlib import Path
 from typing import List
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
-
 
 _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigscience"
@@ -50,19 +49,21 @@ _CITATION = """\
 
 _DESCRIPTION = """\
 the Pathway Curation (PC) task is a main event extraction task of the BioNLP shared task (ST) 2013.
-The PC task concerns the automatic extraction of biomolecular reactions from text. 
-The task setting, representation and semantics are defined with respect to pathway 
-model standards and ontologies (SBML, BioPAX, SBO) and documents selected by relevance 
-to specific model reactions. Two BioNLP ST 2013 participants successfully completed 
-the PC task. The highest achieved F-score, 52.8%, indicates that event extraction is 
-a promising approach to supporting pathway curation efforts. 
+The PC task concerns the automatic extraction of biomolecular reactions from text.
+The task setting, representation and semantics are defined with respect to pathway
+model standards and ontologies (SBML, BioPAX, SBO) and documents selected by relevance
+to specific model reactions. Two BioNLP ST 2013 participants successfully completed
+the PC task. The highest achieved F-score, 52.8%, indicates that event extraction is
+a promising approach to supporting pathway curation efforts.
 """
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-pc"
 
 _LICENSE = "CC BY-SA 3.0"
 
-_URLs = {"bionlp_st_2013_pc": "https://github.com/openbiocorpora/bionlp-st-2013-pc/archive/refs/heads/master.zip",}
+_URLs = {
+    "bionlp_st_2013_pc": "https://github.com/openbiocorpora/bionlp-st-2013-pc/archive/refs/heads/master.zip",
+}
 
 _SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION]
 _SOURCE_VERSION = "1.0.0"
@@ -80,26 +81,20 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
             name="bionlp_st_2013_pc_source",
             version=SOURCE_VERSION,
             description=_DESCRIPTION,
-            schema='source',
+            schema="source",
         ),
         BigBioConfig(
             name="bionlp_st_2013_pc_bigbio_kb",
             version=BIGBIO_VERSION,
             description=_DESCRIPTION,
             schema="bigbio_kb",
-            subset_id="bionlp_st_2013_pc"
+            subset_id="bionlp_st_2013_pc",
         ),
     ]
 
-
     DEFAULT_CONFIG_NAME = _DATASETNAME
 
-    _ENTITY_TYPES = {
-        "Simple_chemical",
-        "Gene_or_gene_product",
-        "Complex",
-        "Cellular_component"
-    }
+    _ENTITY_TYPES = {"Simple_chemical", "Gene_or_gene_product", "Complex", "Cellular_component"}
 
     def _info(self):
         """
@@ -124,9 +119,7 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -170,12 +163,8 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -202,15 +191,13 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         my_urls = _URLs[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / f'bionlp-st-2013-pc-master' / "original-data" / "train",
-            "dev": data_dir / f'bionlp-st-2013-pc-master' / "original-data" / "devel",
-            "test": data_dir / f'bionlp-st-2013-pc-master' / "original-data" / "test",
+            "train": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "test",
         }
 
         return [
@@ -239,8 +226,7 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
