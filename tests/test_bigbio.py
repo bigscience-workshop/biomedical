@@ -158,7 +158,7 @@ class TestDataLoader(unittest.TestCase):
         )
 
         self.datasets_bigbio = {}
-        for schema in self._MAPPED_SCHEMAS:
+        for schema in self.schemas_to_check:
             config_name = f"{self.SUBSET_ID}_bigbio_{schema.lower()}"
             logger.info(f"Checking load_dataset with config name {config_name}")
             self.datasets_bigbio[schema] = datasets.load_dataset(
