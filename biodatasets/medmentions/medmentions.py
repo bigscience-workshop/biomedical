@@ -215,11 +215,22 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                 for document in self._generate_parsed_documents(corpus, pmids):
                     document["id"] = next(uid)
                     document["document_id"] = document.pop("pmid")
+
+                    entities_ = []
                     for entity in document["entities"]:
-                        entity["id"] = next(uid)
-                        entity["type"] = ",".join(entity.pop("semantic_type_id"))
-                        concept_id = entity.pop("concept_id")
-                        entity["normalized"] = [{"db_name": "UMLS", "db_id": concept_id}]
+                        for type in entity["semantic_type_id"]:
+                            entities_.append({
+                                "id": next(uid),
+                                "type": type,
+                                "text": entity["text"],
+                                "offsets": entity["offsets"],
+                                "normalized": [{
+                                    "db_name": "UMLS", 
+                                    "db_id": entity["concept_id"]
+                                }]
+                            })
+                    document["entities"] = entities_
+
                     for passage in document["passages"]:
                         passage["id"] = next(uid)
                     document["relations"] = []
