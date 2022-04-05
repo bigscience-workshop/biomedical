@@ -162,6 +162,15 @@ In many of our schemas, we have a 1:1 mapping between a key and its label (i.e. 
 
 So for instance if the dataset has an entity "copper" with the  types "Pharmacologic Substance" and "Biologically Active", please create one entity with type "Pharmacologic Substance" and an associated unique id *and* another entity with type "Biologically Active" with a different unique id. The rest of the inputs (text, offsets, and normalization) of both entities will be identical.
 
+#### What happens after I claim a dataset?
+In order to keep turnaround time reasonable, and ensure datasets are being completed, we propose a few notes on claiming a dataset:
+
+* Please claim a dataset only if you intend to work on it. We'll try to check in within 3 days to ensure you have the help you need. Don't hesitate to contact the admins! We are ready to help 💪!
+
+* If you have already claimed a dataset prior to (2022/04/05), we will check in on Friday (2022/04/08). If we do not hear back via GitHub issues OR a message to the Discord admins on general, we will make the dataset open for other participants by **Saturday (2022/04/09)**.
+
+* If things are taking longer than expected - that is totally ok! Please let us know via GitHub issues (preferred) or by pinging the @admins channel on Discord.
+
 ## Thank you!
 
 We greatly appreciate your help! 
