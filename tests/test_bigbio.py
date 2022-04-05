@@ -486,19 +486,20 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
+        task_to_features = {
+            Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
+            Tasks.RELATION_EXTRACTION: {"relations", "entities"},
+            Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities"},
+            Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
+            Tasks.EVENT_EXTRACTION: {"events"}
+        }
+
         non_empty_features = set()
         if schema == "KB":
             features = kb_features
-            if Tasks.NAMED_ENTITY_RECOGNITION in self._SUPPORTED_TASKS:
-                non_empty_features.add("entities")
-            if Tasks.RELATION_EXTRACTION in self._SUPPORTED_TASKS:
-                non_empty_features.update(["entities", "relations"])
-            if Tasks.NAMED_ENTITY_DISAMBIGUATION in self._SUPPORTED_TASKS:
-                non_empty_features.add("entities")
-            if Tasks.COREFERENCE_RESOLUTION in self._SUPPORTED_TASKS:
-                non_empty_features.update("entities", "coreferences")
-            if Tasks.EVENT_EXTRACTION in self._SUPPORTED_TASKS:
-                non_empty_features.add("events")
+            for task in self._SUPPORTED_TASKS:
+                if task in task_to_features:
+                    non_empty_features.update(task_to_features[task])
         else:
             features = _SCHEMA_TO_FEAUTURES[schema]
 
@@ -508,6 +509,10 @@ class TestDataLoader(unittest.TestCase):
             for non_empty_feature in non_empty_features:
                 if split_to_feature_counts[split_name][non_empty_feature] == 0:
                     raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
+
+            for feature, count in split_to_feature_counts[split_name].items():
+                if count > 0 and feature not in non_empty_features and feature in set().union(*task_to_features.values()):
+                    logger.warning(f"Found {feature} but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
 
 
 
