@@ -101,7 +101,7 @@ class MedDialog(datasets.GeneratorBasedBuilder):
             version=SOURCE_VERSION,
             description="MedDialog source schema",
             schema="source",
-            subset_id="meddialog",
+            subset_id="meddialog_zh",
         ),
         # TODO - BigBio schemas: text classification
         # BigBioConfig(
