@@ -9,8 +9,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Iterable, Iterator, List, Optional, Union, Dict
 
-from aiohttp.hdrs import TE
-
 import datasets
 from datasets import DatasetDict, Features
 from utils.constants import Tasks
@@ -42,13 +40,21 @@ _TASK_TO_SCHEMA = {
 _VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
 _VALID_SCHEMAS = set(_TASK_TO_SCHEMA.values())
 
-_SCHEMA_TO_FEAUTURES = {
+_SCHEMA_TO_FEATURES = {
     "KB": kb_features,
     "QA": qa_features,
     "TE": entailment_features,
     "T2T": text2text_features,
     "TEXT": text_features,
     "PAIRS": pairs_features,
+}
+
+_TASK_TO_FEATURES = {
+    Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
+    Tasks.RELATION_EXTRACTION: {"relations", "entities"},
+    Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
+    Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
+    Tasks.EVENT_EXTRACTION: {"events"}
 }
 
 
@@ -108,7 +114,7 @@ class TestDataLoader(unittest.TestCase):
             with self.subTest("Check schema validity"):
                 self.test_schema(schema)
 
-            mapped_features = _SCHEMA_TO_FEAUTURES[schema]
+            mapped_features = _SCHEMA_TO_FEATURES[schema]
             split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
             for split_name, split in self.datasets_bigbio[schema].items():
                 print(split_name)
@@ -489,22 +495,15 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
-        task_to_features = {
-            Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
-            Tasks.RELATION_EXTRACTION: {"relations", "entities"},
-            Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
-            Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-            Tasks.EVENT_EXTRACTION: {"events"}
-        }
 
         non_empty_features = set()
         if schema == "KB":
             features = kb_features
             for task in self._SUPPORTED_TASKS:
-                if task in task_to_features:
-                    non_empty_features.update(task_to_features[task])
+                if task in _TASK_TO_FEATURES:
+                    non_empty_features.update(_TASK_TO_FEATURES[task])
         else:
-            features = _SCHEMA_TO_FEAUTURES[schema]
+            features = _SCHEMA_TO_FEATURES[schema]
 
         split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
         for split_name, split in self.datasets_bigbio[schema].items():
@@ -514,8 +513,8 @@ class TestDataLoader(unittest.TestCase):
                     raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
 
             for feature, count in split_to_feature_counts[split_name].items():
-                if count > 0 and feature not in non_empty_features and feature in set().union(*task_to_features.values()):
-                    logger.warning(f"Found {feature} but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
+                if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
+                    logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
 
 
 
