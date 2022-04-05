@@ -114,7 +114,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                         {
                             "id": datasets.Value("string"),
                             "text": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "offsets": datasets.Sequence(datasets.Value("int32")),
                         }
                     ],
                     "genic_interactions": [
@@ -202,13 +202,8 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "id": f"{document_['id']}-{word['id']}",
                                 "type": None,
                                 "text": [word["text"]],
-                                "offsets": [word["offsets"]],
-                                "normalized": [
-                                    {
-                                        "db_name": None,
-                                        "db_id": None,
-                                    }
-                                ],
+                                "offsets": [[word["offsets"][0], word["offsets"][1]+1]],
+                                "normalized": [],
                             }
                             for word in document["words"]
                         ]
@@ -278,7 +273,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         # Sorry for that abomination, parses the arguments from atoms like rel(arg1, ..., argn)
         args = atom.split("(", 1)[1][:-1].split(",")
         if type == "words":
-            return {"id": args[0], "text": args[1].strip("'"), "offsets": [args[2], args[3]]}
+            return {"id": args[0], "text": args[1].strip("'"), "offsets": [int(args[2]), int(args[3])]}
         elif type == "genic_interactions":
             return {"ref_id1": args[0], "ref_id2": args[1]}
         elif type == "agents":
@@ -286,6 +281,6 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         elif type == "targets":
             return {"ref_id": args[0]}
         elif type == "lemmas":
-            return {"ref_id": args[0], "lemma": args[1]}
+            return {"ref_id": args[0], "lemma": args[1].strip("'")}
         elif type == "syntactic_relations":
-            return {"type": args[0], "ref_id1": args[1], "ref_id2": args[2]}
+            return {"type": args[0].strip("'"), "ref_id1": args[1], "ref_id2": args[2]}
