@@ -7,7 +7,7 @@ import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Union, Dict
 
 from aiohttp.hdrs import TE
 
@@ -110,20 +110,32 @@ class TestDataLoader(unittest.TestCase):
             schemas_to_check = [self.SCHEMA]
 
         for schema in schemas_to_check:
-
             dataset_bigbio = self.datasets_bigbio[schema]
-            self.test_are_ids_globally_unique(dataset_bigbio)
-            self.test_schema(schema)
+            with self.subTest("IDs globally unique"):
+                self.test_are_ids_globally_unique(dataset_bigbio)
+            with self.subTest("Check schema validity"):
+                self.test_schema(schema)
 
             mapped_features = _SCHEMA_TO_FEAUTURES[schema]
-            self.print_statistics(mapped_features, schema)
+            split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
+            for split_name, split in self.datasets_bigbio[schema].items():
+                print(split_name)
+                print("=" * 10)
+                for k, v in split_to_feature_statistics[split_name].items():
+                    print(f"{k}: {v}")
+                print()
 
             if schema == "KB":
-                self.test_do_all_referenced_ids_exist(dataset_bigbio)
-                self.test_passages_offsets(dataset_bigbio)
-                self.test_entities_offsets(dataset_bigbio)
-                self.test_events_offsets(dataset_bigbio)
-                self.test_coref_ids(dataset_bigbio)
+                with self.subTest("Check referenced ids"):
+                    self.test_do_all_referenced_ids_exist(dataset_bigbio)
+                with self.subTest("Check passage offsets"):
+                    self.test_passages_offsets(dataset_bigbio)
+                with self.subTest("Check entity offsets"):
+                    self.test_entities_offsets(dataset_bigbio)
+                with self.subTest("Check events offsets"):
+                    self.test_events_offsets(dataset_bigbio)
+                with self.subTest("Check coref offsets"):
+                    self.test_coref_ids(dataset_bigbio)
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
@@ -168,7 +180,7 @@ class TestDataLoader(unittest.TestCase):
                 use_auth_token=self.USE_AUTH_TOKEN,
             )
 
-    def print_statistics(self, features: Features, schema: str):
+    def get_feature_statistics(self, features: Features, schema: str) -> Dict:
         """
         Gets sample statistics, for each split and sample of the number of
         features in the schema present; only works for the big-bio schema.
@@ -176,9 +188,8 @@ class TestDataLoader(unittest.TestCase):
         :param schema_type: Type of schema to reference features from
         """  # noqa
         logger.info("Gathering schema statistics")
+        all_counters = {}
         for split_name, split in self.datasets_bigbio[schema].items():
-            print(split_name)
-            print("=" * 10)
 
             counter = defaultdict(int)
             for example in split:
@@ -190,9 +201,10 @@ class TestDataLoader(unittest.TestCase):
                         else:
                             counter[feature_name] += len(example[feature_name])
 
-            for k, v in counter.items():
-                print(f"{k}: {v}")
-            print()
+
+            all_counters[split_name] = counter
+
+        return all_counters
 
     def _assert_ids_globally_unique(
         self,
@@ -473,99 +485,30 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
+        non_empty_features = set()
         if schema == "KB":
-
             features = kb_features
-            logger.info(f"all feature names: {set(features.keys())}")
-
-            # construct task specific required keys
-            opt_keys = [
-                "entities",
-                "events",
-                "coreferences",
-                "relations",
-            ]
-
-            needed_keys = [key for key in features.keys() if key not in opt_keys]
-
-            sub_keys = []
             if Tasks.NAMED_ENTITY_RECOGNITION in self._SUPPORTED_TASKS:
-                sub_keys += ["entities"]
-            elif Tasks.RELATION_EXTRACTION in self._SUPPORTED_TASKS:
-                sub_keys += ["entities", "relations"]
-            elif Tasks.NAMED_ENTITY_DISAMBIGUATION in self._SUPPORTED_TASKS:
-                sub_keys = ["entities"]
-            elif Tasks.COREFERENCE_RESOLUTION in self._SUPPORTED_TASKS:
-                sub_keys = ["entities", "coreferences"]
-            elif Tasks.EVENT_EXTRACTION in self._SUPPORTED_TASKS:
-                sub_keys = ["events"]
-
-            logger.info(f"needed_keys: {needed_keys}")
-            logger.info(f"sub_keys: {sub_keys}")
-
-            for split in self.datasets_bigbio[schema].keys():
-                example = self.datasets_bigbio[schema][split][0]
-
-                # Check for mandatory keys
-                missing_keys = set(needed_keys) - set(example.keys())
-                self.assertTrue(
-                    len(missing_keys) == 0,
-                    f"{missing_keys} are missing from bigbio view",
-                )
-
-                for key in sub_keys:
-                    for attrs in features[key]:
-                        self.assertTrue(self._check_subkey(example[key][0], attrs))
-
-                # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
-                extra_keys = set(example.keys()) - set(needed_keys) - set(sub_keys)
-                logger.info(f"extra_keys in {split}: {extra_keys}")
-                for key in extra_keys:
-                    if key in features.keys():
-                        for attrs in features[key]:
-                            if example[key]:
-                                self.assertTrue(self._check_subkey(example[key][0], attrs))
-
-        elif schema == "QA":
-            logger.info("Question-Answering Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "TE":
-            logger.info("Textual Entailment Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "T2T":
-            logger.info("Text to Text Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "TEXT":
-            logger.info("Text Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "PAIRS":
-            logger.info("Text Pair Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
+                non_empty_features.add("entities")
+            if Tasks.RELATION_EXTRACTION in self._SUPPORTED_TASKS:
+                non_empty_features.update(["entities", "relations"])
+            if Tasks.NAMED_ENTITY_DISAMBIGUATION in self._SUPPORTED_TASKS:
+                non_empty_features.add("entities")
+            if Tasks.COREFERENCE_RESOLUTION in self._SUPPORTED_TASKS:
+                non_empty_features.update("entities", "coreferences")
+            if Tasks.EVENT_EXTRACTION in self._SUPPORTED_TASKS:
+                non_empty_features.add("events")
         else:
-            raise ValueError(f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}")
+            features = _SCHEMA_TO_FEAUTURES[schema]
 
-    @staticmethod
-    def _check_subkey(inp, attrs):
-        """Checks if subkeys (esp. in KB) have necessary criteria"""
-        return all([k in inp for k in attrs.keys()])
+        split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
+        for split_name, split in self.datasets_bigbio[schema].items():
+            self.assertEqual(split.info.features, features)
+            for non_empty_feature in non_empty_features:
+                if split_to_feature_counts[split_name][non_empty_feature] == 0:
+                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
 
-    def _check_keys(self, features: Features, schema_name: str):
-        """Check if necessary keys are present in a given schema"""
-        dataset_bigbio = self.datasets_bigbio[schema_name]
-        for split in dataset_bigbio.keys():
-            example = dataset_bigbio[split][0]
 
-            # Check for mandatory keys
-            mandatory_keys = all([key in example for key in features.keys()])
-            self.assertTrue(
-                mandatory_keys,
-                "/".join(features.keys()) + " keys missing from bigbio view for schema_type = " + schema_name,
-            )
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
