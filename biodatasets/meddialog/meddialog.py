@@ -103,21 +103,21 @@ class MedDialog(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="meddialog_zh",
         ),
-        # TODO - BigBio schemas: text classification
-        # BigBioConfig(
-        #    name="meddialog_en_bigbio_text",
-        #    version=BIGBIO_VERSION,
-        #    description="MedDialog simplified BigBio schema",
-        #    schema="bigbio_text",
-        #    subset_id="meddialog_en",
-        # ),
-        # BigBioConfig(
-        #    name="meddialog_zh_bigbio_text",
-        #    version=BIGBIO_VERSION,
-        #    description="MedDialog simplified BigBio schema",
-        #    schema="bigbio_text",
-        #    subset_id="meddialog_zh",
-        # ),
+        # BigBio schema: text classification
+        BigBioConfig(
+            name="meddialog_en_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="MedDialog simplified BigBio schema",
+            schema="bigbio_text",
+            subset_id="meddialog_en",
+        ),
+        BigBioConfig(
+            name="meddialog_zh_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="MedDialog simplified BigBio schema",
+            schema="bigbio_text",
+            subset_id="meddialog_zh",
+        ),
     ]
 
     def _get_gdrive_url(self, url):
@@ -153,8 +153,8 @@ class MedDialog(datasets.GeneratorBasedBuilder):
                         ),
                     }
                 )
-        # elif self.config.schema == "bigbio_text":
-        #    features = schemas.text_features
+        elif self.config.schema == "bigbio_text":
+            features = schemas.text_features
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
