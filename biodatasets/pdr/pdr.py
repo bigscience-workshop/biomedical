@@ -15,6 +15,9 @@
 """
 The corpus of plant-disease relation consists of plants and diseases and their relation to PubMed abstract.
 The corpus consists of about 2400 plant and disease entities and 300 annotated relations from 179 abstracts.
+
+The big-bio and source version of this script are made by merging the 2 provided annotations on locations they intersected.
+Both annotations (1, 2) are provided as separate source schemas.
 """
 from collections import defaultdict
 from pathlib import Path
