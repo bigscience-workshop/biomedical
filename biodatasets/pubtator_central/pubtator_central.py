@@ -130,6 +130,7 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
         "Disease": "mesh",
         "Mutation": "ncbi_dbsnp",
         "CellLine": "cellosaurus",
+        # TODO: I don't know what this is being grounded to. It's not documented anywhere AFAICT.
         "ProteinMutation": "-1",
     }
 
@@ -189,7 +190,7 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
                 yield kb_example["id"], kb_example
 
     @staticmethod
-    def _parse_pubtator_file(filepath: str) -> Dict:
+    def _parse_pubtator_file(filepath: str) -> Iterator[Dict]:
         with open(filepath, "r") as f:
             line = f.readline().strip()
             while line != "":
@@ -204,8 +205,11 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
                         if len(split_line) == 6:
                             _, start, end, text, type_, concept_id = split_line
                         # This entity is not grounded.
-                        else:
+                        elif len(split_line) == 5:
                             _, start, end, text, type_, concept_id = *split_line, None
+                        # This entity is not grounded and has no type.
+                        else:
+                            _, start, end, text, type_, concept_id = *split_line, None, None
 
                         mentions.append(
                             {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
