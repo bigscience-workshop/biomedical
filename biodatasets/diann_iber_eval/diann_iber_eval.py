@@ -74,13 +74,13 @@ _HOMEPAGE = "http://nlp.uned.es/diann/"
 _LICENSE = "UNKNOWN"
 
 _URLS = {
-    "diannibereval_en": {
+    "diann_iber_eval_en": {
         "en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip"
     },
-    "diannibereval_es": {
+    "diann_iber_eval_es": {
         "es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip"
     },
-    "diannibereval": {
+    "diann_iber_eval": {
         "es": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/spanish.zip",
         "en": "https://github.com/gildofabregat/DIANN-IBEREVAL-2018/raw/master/DIANN_CORPUS/english.zip",
     },
@@ -104,56 +104,56 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = []
     BUILDER_CONFIGS.append(
         BigBioConfig(
-            name="diannibereval_source",
+            name="diann_iber_eval_source",
             version=SOURCE_VERSION,
             description="DIANN Iber Eval source schema",
             schema="source",
-            subset_id="diannibereval",
+            subset_id="diann_iber_eval",
         ),
     )
 
     BUILDER_CONFIGS.append(
         BigBioConfig(
-            name="diannibereval_bigbio_kb",
+            name="diann_iber_eval_bigbio_kb",
             version=SOURCE_VERSION,
             description="DIANN Iber Eval BigBio schema",
             schema="bigbio_kb",
-            subset_id="diannibereval",
+            subset_id="diann_iber_eval",
         ),
     )
 
     for language in ["en", "es"]:
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"diannibereval_{language}_source",
+                name=f"diann_iber_eval_{language}_source",
                 version=SOURCE_VERSION,
                 description=f"DIANN Iber Eval {_CODE2LANG[language]} source schema",
                 schema="source",
-                subset_id=f"diannibereval_{language}",
+                subset_id=f"diann_iber_eval_{language}",
             ),
         )
 
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"diannibereval_{language}_bigbio_kb",
+                name=f"diann_iber_eval_{language}_bigbio_kb",
                 version=BIGBIO_VERSION,
                 description=f"DIANN Iber Eval {_CODE2LANG[language]} BigBio schema",
                 schema="bigbio_kb",
-                subset_id=f"diannibereval_{language}",
+                subset_id=f"diann_iber_eval_{language}",
             ),
         )
 
     BUILDER_CONFIGS.append(
         BigBioConfig(
-            name="diannibereval_bigbio_t2t",
+            name="diann_iber_eval_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="DIANN Iber Eval BigBio translation schema",
             schema="bigbio_t2t",
-            subset_id="diannibereval",
+            subset_id="diann_iber_eval",
         ),
     )
 
-    DEFAULT_CONFIG_NAME = "diannibereval_en_source"
+    DEFAULT_CONFIG_NAME = "diann_iber_eval_en_source"
 
     _ENTITY_TYPES = {
         "Disability",
@@ -162,9 +162,9 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
     }
 
     _STUDIES_PATH = {
-        "diannibereval_en": ["English"],
-        "diannibereval_es": ["Spanish"],
-        "diannibereval": ["English", "Spanish"],
+        "diann_iber_eval_en": ["English"],
+        "diann_iber_eval_es": ["Spanish"],
+        "diann_iber_eval": ["English", "Spanish"],
     }
 
     def _info(self) -> datasets.DatasetInfo:
