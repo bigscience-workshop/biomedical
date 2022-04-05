@@ -100,7 +100,6 @@ class TestDataLoader(unittest.TestCase):
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
-        self.setUp()
 
         for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
