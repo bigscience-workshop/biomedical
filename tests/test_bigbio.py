@@ -202,6 +202,10 @@ class TestDataLoader(unittest.TestCase):
                         else:
                             counter[feature_name] += len(example[feature_name])
 
+                            # TODO do proper recursion here
+                            if feature_name == "entities":
+                                for entity in example["entities"]:
+                                    counter["normalized"] += len(entity["normalized"])
 
             all_counters[split_name] = counter
 
@@ -489,7 +493,7 @@ class TestDataLoader(unittest.TestCase):
         task_to_features = {
             Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
             Tasks.RELATION_EXTRACTION: {"relations", "entities"},
-            Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities"},
+            Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
             Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
             Tasks.EVENT_EXTRACTION: {"events"}
         }
