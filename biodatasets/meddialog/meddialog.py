@@ -173,44 +173,45 @@ class MedDialog(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=split,
-                gen_kwargs={
-                    "filepath": dl_dir[split],
-                },
+                gen_kwargs={"filepath": dl_dir[split], "split": split, "lang": lang},
             )
             for split in _URLs[lang]
         ]
 
-    def _generate_examples(self, filepath):
+    def _generate_examples(self, filepath, split, lang):
         with open(filepath, "r") as f:
             data = json.load(f)
-            # delimiter symbol differs by language
-            lang = self.config.name.split("_")[1]
-            delimiter = "：" if lang == "zh" else ":"
 
-        for _id, d in enumerate(data):
+        # delimiter symbol differs by language
+        delimiter = "：" if lang == "zh" else ":"
+        document_id = f"{lang}_{split}"
+
+        for i, d in enumerate(data):
             out_utterances = []
             utterances = d["utterances"] if lang == "en" else d
-            for utt in utterances:
+            for j, utt in enumerate(utterances):
                 elements = utt.strip().split(delimiter)
                 speaker = elements[0]
                 text = delimiter.join(elements[1:]).strip()
                 if self.config.schema == "bigbio_text":
                     # TODO - this ignores description
-                    yield _id, {
-                        "id": str(_id),
-                        "document_id": Path(filepath).name,
+                    id = f"{document_id}_{i}_{j}"
+                    yield id, {
+                        "id": id,
+                        "document_id": document_id,
                         "text": text,
                         "label": speaker,
                     }
                 else:
                     out_utterances.append({"speaker": speaker, "utterance": text})
             if self.config.schema == "source":
+                id = f"{document_id}_{i}"
                 if lang == "en":
-                    yield _id, {
+                    yield id, {
                         "description": d["description"],
                         "utterances": out_utterances,
                     }
                 else:
-                    yield _id, {
+                    yield id, {
                         "utterances": out_utterances,
                     }
