@@ -90,7 +90,7 @@ _URLS = {
     _DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.COREFERENCE_RESOLUTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "2022.01.08"
 
@@ -167,8 +167,6 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
         filepath = dl_manager.download_and_extract(urls)
-
-        print("filepath: ", filepath)
 
         return [
             datasets.SplitGenerator(
