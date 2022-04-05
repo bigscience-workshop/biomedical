@@ -17,7 +17,6 @@ import os
 import re
 import datasets
 import glob
-from pathlib import Path
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -113,6 +112,7 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
                     "filepaths": glob.glob(
                         os.path.join(dataset_dir, f"AskAPatient.fold-*.{split}.txt")
                     ),
+                    "split": split
                 },
             )
             for split in [
@@ -122,11 +122,11 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
             ]
         ]
 
-    def _generate_examples(self, filepaths):
+    def _generate_examples(self, filepaths, split):
         for filepath in filepaths:
             fold_id = re.search("AskAPatient\.fold-(\d)\.", filepath).group(1)
-            document_id = Path(filepath).name
             with open(filepath, "r", encoding="latin-1") as f:
+                document_id = f"{split}_{fold_id}"
                 for i, line in enumerate(f):
                     id = f"{document_id}_{i}"
                     cui, medical_concept, social_media_text = line.strip().split("\t")
@@ -141,7 +141,7 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
                         # TODO - how to include CUI?
                         yield id, {
                             "id": id, 
-                            "document_id": Path(filepath).name,
+                            "document_id": document_id,
                             "text_1": medical_concept,
                             "text_2": social_media_text,
                             "text_1_name": "medical_concept",
