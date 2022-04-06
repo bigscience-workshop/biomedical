@@ -1,4 +1,9 @@
+### Stay tuned - we'll have a "Meet the Team" call on Wednesday April 6, (8 AM PST/ 11 AM EST/ 5 PM CET). Access the [zoom registration here](https://virginia.zoom.us/meeting/register/tJwsf-qqpzsvHdbe6tWsAmRjEvf1yIvZ8ODL)
+
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
+
+![progress claimed](https://progress-bar.dev/89/?title=datasets%20claimed)
+![progress done](https://progress-bar.dev/15/?title=datasets%20done)
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
 <!--- @Natasha From the Data_sourcing wiki  --->
@@ -104,6 +109,17 @@ If no official license is listed anywhere, but you find a webpage that describes
 
 We understand that some biomedical datasets are not publicly available due to data usage agreements or licensing. For these datasets, we recommend implementing a dataloader script that references a local directory containing the dataset. You can find examples in the [n2c2_2011](examples/n2c2_2011.py) and [bioasq](examples/bioasq.py) implementations. There are also local dataset specific instructions in  [template](templates/template.py).
 
+
+#### My dataset is in a standard format (e.g. BRAT, BioC). Do I have to write my own parser?
+
+If your dataset is in a standard format, please use a recommended parser if available:
+- BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
+- BRAT: Use [our custom brat parser](utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+
+If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
+
+
+
 #### What types of libraries can we import?
 
 Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. 
@@ -139,6 +155,21 @@ Yes! Some datasets are easier to write dataloader scripts for than others. If yo
 #### Can I change the Big-Bio schema?
 
 **No, please do not modify the Big-Bio Schema.** The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config.
+
+#### My dataset has multiple labels for a span of text - what do I do?
+
+In many of our schemas, we have a 1:1 mapping between a key and its label (i.e. in KB, entity and label). In some datasets, we've noticed that there are multiple labels assigned to a text entity. Generally speaking, if a big-bio key has multiple labels associated with it, please populate the list with multiple instances of (key, label) according to each label that correspond to it. 
+
+So for instance if the dataset has an entity "copper" with the  types "Pharmacologic Substance" and "Biologically Active", please create one entity with type "Pharmacologic Substance" and an associated unique id *and* another entity with type "Biologically Active" with a different unique id. The rest of the inputs (text, offsets, and normalization) of both entities will be identical.
+
+#### What happens after I claim a dataset?
+In order to keep turnaround time reasonable, and ensure datasets are being completed, we propose a few notes on claiming a dataset:
+
+* Please claim a dataset only if you intend to work on it. We'll try to check in within 3 days to ensure you have the help you need. Don't hesitate to contact the admins! We are ready to help 💪!
+
+* If you have already claimed a dataset prior to (2022/04/05), we will check in on Friday (2022/04/08). If we do not hear back via GitHub issues OR a message to the Discord admins on general, we will make the dataset open for other participants by **Saturday (2022/04/09)**.
+
+* If things are taking longer than expected - that is totally ok! Please let us know via GitHub issues (preferred) or by pinging the @admins channel on Discord.
 
 ## Thank you!
 
