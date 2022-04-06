@@ -29,6 +29,7 @@ import os
 import re
 
 import datasets
+from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -344,33 +345,33 @@ _BIOASQ_3B_DESCRIPTION = """No README provided."""
 _BIOASQ_2B_DESCRIPTION = """No README provided."""
 
 _DESCRIPTION = {
-    "bioasq10b": _BIOASQ_10B_DESCRIPTION,
-    "bioasq9b": _BIOASQ_9B_DESCRIPTION,
-    "bioasq8b": _BIOASQ_8B_DESCRIPTION,
-    "bioasq7b": _BIOASQ_7B_DESCRIPTION,
-    "bioasq6b": _BIOASQ_6B_DESCRIPTION,
-    "bioasq5b": _BIOASQ_5B_DESCRIPTION,
-    "bioasq4b": _BIOASQ_4B_DESCRIPTION,
-    "bioasq3b": _BIOASQ_3B_DESCRIPTION,
-    "bioasq2b": _BIOASQ_2B_DESCRIPTION,
+    "bioasq_10b": _BIOASQ_10B_DESCRIPTION,
+    "bioasq_9b": _BIOASQ_9B_DESCRIPTION,
+    "bioasq_8b": _BIOASQ_8B_DESCRIPTION,
+    "bioasq_7b": _BIOASQ_7B_DESCRIPTION,
+    "bioasq_6b": _BIOASQ_6B_DESCRIPTION,
+    "bioasq_5b": _BIOASQ_5B_DESCRIPTION,
+    "bioasq_4b": _BIOASQ_4B_DESCRIPTION,
+    "bioasq_3b": _BIOASQ_3B_DESCRIPTION,
+    "bioasq_2b": _BIOASQ_2B_DESCRIPTION,
 }
 
 _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 
 # Data access reqires registering with BioASQ.
 # See http://participants-area.bioasq.org/accounts/register/
-_LICENSE = ""
+_LICENSE = "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html"
 
 _URLs = {
-    "bioasq10b": ["BioASQ-training10b.zip", None],
-    "bioasq9b": ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"],
-    "bioasq8b": ["BioASQ-training8b.zip", "Task8BGoldenEnriched.zip"],
-    "bioasq7b": ["BioASQ-training7b.zip", "Task7BGoldenEnriched.zip"],
-    "bioasq6b": ["BioASQ-training6b.zip", "Task6BGoldenEnriched.zip"],
-    "bioasq5b": ["BioASQ-training5b.zip", "Task5BGoldenEnriched.zip"],
-    "bioasq4b": ["BioASQ-training4b.zip", "Task4BGoldenEnriched.zip"],
-    "bioasq3b": ["BioASQ-trainingDataset3b.zip", "Task3BGoldenEnriched.zip"],
-    "bioasq2b": ["BioASQ-trainingDataset2b.zip", "Task2BGoldenEnriched.zip"],
+    "bioasq_10b": ["BioASQ-training10b.zip", None],
+    "bioasq_9b": ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"],
+    "bioasq_8b": ["BioASQ-training8b.zip", "Task8BGoldenEnriched.zip"],
+    "bioasq_7b": ["BioASQ-training7b.zip", "Task7BGoldenEnriched.zip"],
+    "bioasq_6b": ["BioASQ-training6b.zip", "Task6BGoldenEnriched.zip"],
+    "bioasq_5b": ["BioASQ-training5b.zip", "Task5BGoldenEnriched.zip"],
+    "bioasq_4b": ["BioASQ-training4b.zip", "Task4BGoldenEnriched.zip"],
+    "bioasq_3b": ["BioASQ-trainingDataset3b.zip", "Task3BGoldenEnriched.zip"],
+    "bioasq_2b": ["BioASQ-trainingDataset2b.zip", "Task2BGoldenEnriched.zip"],
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
@@ -384,7 +385,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     Creates configs for BioASQ2 through BioASQ10.
     """
 
-    DEFAULT_CONFIG_NAME = "bioasq9b_source"
+    DEFAULT_CONFIG_NAME = "bioasq_9b_source"
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
@@ -393,21 +394,21 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
     for version in range(2, 11):
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"bioasq{version}b_source",
+                name=f"bioasq_{version}b_source",
                 version=SOURCE_VERSION,
                 description=f"bioasq{version} Task B source schema",
                 schema="source",
-                subset_id=f"bioasq{version}b",
+                subset_id=f"bioasq_{version}b",
             )
         )
 
         BUILDER_CONFIGS.append(
             BigBioConfig(
-                name=f"bioasq{version}b_bigbio_qa",
+                name=f"bioasq_{version}b_bigbio_qa",
                 version=BIGBIO_VERSION,
                 description=f"bioasq{version} Task B in simplified BigBio schema",
                 schema="bigbio_qa",
-                subset_id=f"bioasq{version}b",
+                subset_id=f"bioasq_{version}b",
             )
         )
 
@@ -445,17 +446,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             )
         # simplified schema for QA tasks
         elif self.config.schema == "bigbio_qa":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "question_id": datasets.Value("string"),
-                    "question": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "context": datasets.Value("string"),
-                    "answer": datasets.Sequence(datasets.Value("string")),
-                }
-            )
+            features = schemas.qa_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION[self.config.subset_id],
@@ -471,7 +462,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         BioASQ test data is split into multiple records {9B1_golden.json,...,9B5_golden.json}
         We combine these files into a single test set file 9Bx_golden.json
         """
-        version = re.search(r"bioasq([0-9]+)b", self.config.subset_id).group(1)
+        version = re.search(r"bioasq_([0-9]+)b", self.config.subset_id).group(1)
         gold_fpath = os.path.join(data_dir, f"Task{version}BGoldenEnriched/bx_golden.json")
 
         if not os.path.exists(gold_fpath):
@@ -489,6 +480,10 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
+
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+
         train_dir, test_dir = dl_manager.download_and_extract(
             [os.path.join(self.config.data_dir, _url) for _url in _URLs[self.config.subset_id]]
         )
@@ -496,15 +491,15 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
         # older versions of bioasq have different folder formats
         train_fpaths = {
-            "bioasq2b": "BioASQ_2013_TaskB/BioASQ-trainingDataset2b.json",
-            "bioasq3b": "BioASQ-trainingDataset3b.json",
-            "bioasq4b": "BioASQ-training4b/BioASQ-trainingDataset4b.json",
-            "bioasq5b": "BioASQ-training5b/BioASQ-trainingDataset5b.json",
-            "bioasq6b": "BioASQ-training6b/BioASQ-trainingDataset6b.json",
-            "bioasq7b": "BioASQ-training7b/trainining7b.json",
-            "bioasq8b": "training8b.json",  # HACK - this zipfile strips the dirname
-            "bioasq9b": "BioASQ-training9b/training9b.json",
-            "bioasq10b": "BioASQ-training10b/training10b.json",
+            "bioasq_2b": "BioASQ_2013_TaskB/BioASQ-trainingDataset2b.json",
+            "bioasq_3b": "BioASQ-trainingDataset3b.json",
+            "bioasq_4b": "BioASQ-training4b/BioASQ-trainingDataset4b.json",
+            "bioasq_5b": "BioASQ-training5b/BioASQ-trainingDataset5b.json",
+            "bioasq_6b": "BioASQ-training6b/BioASQ-trainingDataset6b.json",
+            "bioasq_7b": "BioASQ-training7b/trainining7b.json",
+            "bioasq_8b": "training8b.json",  # HACK - this zipfile strips the dirname
+            "bioasq_9b": "BioASQ-training9b/training9b.json",
+            "bioasq_10b": "BioASQ-training10b/training10b.json",
         }
 
         return [
