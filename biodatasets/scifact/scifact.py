@@ -163,7 +163,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
             else:
                 raise NotImplementedError(f"{self.config.subset_id} config not implemented")
 
-        elif self.config.schema == "bigbio_entailment":
+        elif self.config.schema == "bigbio_te":
             features = schemas.entailment.features
 
         else:
