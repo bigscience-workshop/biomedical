@@ -114,29 +114,10 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "body": datasets.Value("string"),
-                    "documents": datasets.Sequence(datasets.Value("string")),
-                    "concepts": datasets.Sequence(datasets.Value("string")),
-                    "ideal_answer": datasets.Sequence(datasets.Value("string")),
-                    "exact_answer": datasets.Sequence(datasets.Value("string")),
-                    "triples": [
-                        {
-                            "p": datasets.Value("string"),
-                            "s": datasets.Value("string"),
-                            "o": datasets.Value("string"),
-                        }
-                    ],
-                    "snippets": [
-                        {
-                            "offsetInBeginSection": datasets.Value("int32"),
-                            "offsetInEndSection": datasets.Value("int32"),
-                            "text": datasets.Value("string"),
-                            "beginSection": datasets.Value("string"),
-                            "endSection": datasets.Value("string"),
-                            "document": datasets.Value("string"),
-                        }
-                    ],
+                    "candidates": datasets.Sequence(datasets.Value("string")),
+                    "answer": datasets.Value("string"),
+                    "supports": datasets.Sequence(datasets.Value("string")),
+                    "query": datasets.Value("string"),
                 }
             )
 
@@ -191,18 +172,12 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
 
                 for i, record in enumerate(data):
 
-                    record["type"] = "summary"
-
                     yield i, {
                         "id": record["id"],
-                        "type": record["type"],
-                        "body": record["query"],
-                        "documents": record["supports"],
-                        "concepts": record["concepts"] if "concepts" in record else [],
-                        "triples": record["triples"] if "triples" in record else [],
-                        "ideal_answer": [record["answer"]],
-                        "exact_answer": [record["answer"]],
-                        "snippets": record["snippets"] if "snippets" in record else [],
+                        "candidates": record["candidates"],
+                        "answer": record["answer"],
+                        "supports": record["supports"],
+                        "query": record["query"],
                     }
 
                     uid += 1
