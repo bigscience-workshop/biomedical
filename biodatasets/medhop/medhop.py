@@ -192,7 +192,7 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
 
                 for record in data:
 
-                    record["type"] = "summary"
+                    record["type"] = "multiple_choice"
 
                     yield uid, {
                         "id": record["id"],
