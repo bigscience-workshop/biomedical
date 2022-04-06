@@ -5,7 +5,7 @@ from typing import Dict, Iterable, List
 
 def remove_prefix(a: str, prefix: str) -> str:
     if a.startswith(prefix):
-        a = a[len(prefix) :]
+        a = a[len(prefix):]
     return a
 
 
@@ -265,6 +265,8 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     id_to_event_trigger = {}
     for ann in brat_parse["text_bound_annotations"]:
         if ann["type"] in entity_types:
+            if len(brat_parse["events"]) > 0:
+                id_to_event_trigger[ann["id"]] = ann
             entity_ann = ann.copy()
             entity_ann["id"] = id_prefix + entity_ann["id"]
             entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
