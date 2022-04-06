@@ -23,7 +23,7 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _DATASETNAME = "bionlp_st_2013_pc"
-_UNIFIED_VIEW_NAME = "bigscience"
+_UNIFIED_VIEW_NAME = "bigbio"
 
 _CITATION = """\
 @inproceedings{ohta-etal-2013-overview,
