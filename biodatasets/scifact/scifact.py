@@ -64,7 +64,7 @@ _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION = """\
 _DESCRIPTION = {
     "scifact_corpus_source": _SOURCE_CORPUS_DESCRIPTION,
     "scifact_claims_source": _SOURCE_CLAIMS_DESCRIPTION,
-    "scifact_rationale_bigbio_entailment": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
+    "scifact_rationale_bigbio_te": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
     "scifact_labelprediction_bigbio_te": _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION,
 }
 
