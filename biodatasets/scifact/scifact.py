@@ -21,10 +21,10 @@ from typing import List, Tuple, Dict
 from itertools import chain
 
 import datasets
-from dataclasses import dataclass
 
 from utils import schemas
 from utils.constants import Tasks
+from utils.configs import BigBioConfig
 
 _CITATION = """\
 @article{,
@@ -64,10 +64,10 @@ _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION = """\
     """
 
 _DESCRIPTION = {
-    "scifactcorpus_source": _SOURCE_CORPUS_DESCRIPTION,
-    "scifactclaims_source": _SOURCE_CLAIMS_DESCRIPTION,
-    "scifactrationale_bigbio_entailment": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
-    "scifactlabelprediction_bigbio_entailment": _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION,
+    "scifact_corpus_source": _SOURCE_CORPUS_DESCRIPTION,
+    "scifact_claims_source": _SOURCE_CLAIMS_DESCRIPTION,
+    "scifact_rationale_bigbio_entailment": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
+    "scifact_labelprediction_bigbio_entailment": _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION,
 }
 
 _HOMEPAGE = "https://scifact.apps.allenai.org/"
@@ -86,17 +86,6 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-
 class SciFact(datasets.GeneratorBasedBuilder):
     """
     SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
@@ -107,43 +96,43 @@ class SciFact(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="scifactcorpus_source",
+            name="scifact_corpus_source",
             version=SOURCE_VERSION,
             description="scifact source schema for the corpus config",
             schema="source",
-            subset_id="scifact",
+            subset_id="scifact_corpus",
         ),
         BigBioConfig(
-            name="scifactclaims_source",
+            name="scifact_claims_source",
             version=SOURCE_VERSION,
             description="scifact source schema for the claims config",
             schema="source",
-            subset_id="scifact",
+            subset_id="scifact_claims",
         ),
         BigBioConfig(
-            name="scifactrationale_bigbio_entailment",
+            name="scifact_rationale_bigbio_entailment",
             version=BIGBIO_VERSION,
             description="scifact BigBio text entailment schema for rationale task",
             schema="bigbio_entailment",
-            subset_id="scifact",
+            subset_id="scifact_rationale",
         ),
         BigBioConfig(
-            name="scifactlabelprediction_bigbio_entailment",
+            name="scifact_labelprediction_bigbio_entailment",
             version=BIGBIO_VERSION,
             description="scifact BigBio text entailment schema for label prediction task",
             schema="bigbio_entailment",
-            subset_id="scifact",
+            subset_id="scifact_labelprediction",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "scifact_source"
+    DEFAULT_CONFIG_NAME = "scifact_claims_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
             # https://huggingface.co/datasets/scifact/blob/main/scifact.py#L50
 
-            if self.config.name == "scifactcorpus_source":
+            if self.config.subset_id == "scifact_corpus":
                 features = datasets.Features(
                     {
                         "doc_id": datasets.Value("int32"),  # The document's S2ORC ID.
@@ -156,7 +145,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                         ),  # Indicator for whether this is a structured abstract.
                     }
                 )
-            elif self.config.name == "scifactclaims_source":
+            elif self.config.subset_id == "scifact_claims":
                 features = datasets.Features(
                     {
                         "id": datasets.Value("int32"),  # An integer claim ID.
@@ -174,7 +163,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                     }
                 )
             else:
-                raise NotImplementedError(f"{self.config.name} config not implemented")
+                raise NotImplementedError(f"{self.config.subset_id} config not implemented")
 
         elif self.config.schema == "bigbio_entailment":
             features = schemas.entailment.features
@@ -194,7 +183,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
         urls = _URLS[_DATASETNAME]
         self.config.data_dir = dl_manager.download_and_extract(urls)
 
-        if self.config.name == "scifactcorpus_source":
+        if self.config.subset_id == "scifact_corpus":
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
@@ -242,14 +231,14 @@ class SciFact(datasets.GeneratorBasedBuilder):
         with open(filepath) as fp:
             for id_, row in enumerate(fp.readlines()):
                 data = json.loads(row)
-                if self.config.name == "scifactcorpus_source":
+                if self.config.subset_id == "scifact_corpus":
                     yield id_, {
                         "doc_id": int(data["doc_id"]),
                         "title": data["title"],
                         "abstract": data["abstract"],
                         "structured": data["structured"],
                     }
-                elif self.config.name == "scifactclaims_source":
+                elif self.config.subset_id == "scifact_claims":
                     if split == "test":
                         yield id_, {
                             "id": data["id"],
@@ -417,11 +406,11 @@ class SciFact(datasets.GeneratorBasedBuilder):
                 line = json.loads(line)
                 corpus_id2text[line["doc_id"]] = line["abstract"]
 
-        if self.config.name == "scifactrationale_bigbio_entailment":
+        if self.config.subset_id == "scifact_rationale":
             return self._bigbio_rationale_generate_examples(
                 filepath, split, corpus_id2text
             )
-        elif self.config.name == "scifactlabelprediction_bigbio_entailment":
+        elif self.config.subset_id == "scifact_labelprediction":
             return self._bigbio_labelprediction_generate_examples(
                 filepath, split, corpus_id2text
             )
