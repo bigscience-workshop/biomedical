@@ -154,6 +154,7 @@ class MedDialog(datasets.GeneratorBasedBuilder):
                 )
         elif self.config.schema == "bigbio_text":
             features = schemas.text_features
+
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -199,7 +200,7 @@ class MedDialog(datasets.GeneratorBasedBuilder):
                         "id": id,
                         "document_id": document_id,
                         "text": text,
-                        "label": speaker,
+                        "labels": [speaker],
                     }
                 else:
                     out_utterances.append({"speaker": speaker, "utterance": text})
