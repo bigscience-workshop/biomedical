@@ -84,7 +84,6 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "fold": datasets.Value("int32"),
                     "cui": datasets.Value("string"),
                     "medical_concept": datasets.Value("string"),
                     "social_media_text": datasets.Value("string"),
@@ -105,64 +104,65 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         dl_dir = dl_manager.download_and_extract(_URLs)
         dataset_dir = os.path.join(dl_dir, "datasets", "AskAPatient")
-        return [
-            datasets.SplitGenerator(
-                name=split,
-                gen_kwargs={
-                    "filepaths": glob.glob(
-                        os.path.join(dataset_dir, f"AskAPatient.fold-*.{split}.txt")
-                    ),
-                    "split": split
-                },
-            )
-            for split in [
-                datasets.Split.TRAIN,
-                datasets.Split.VALIDATION,
-                datasets.Split.TEST,
-            ]
-        ]
+        # dataset supports k-folds 
+        splits = []
+        for split_name in [
+            datasets.Split.TRAIN,
+            datasets.Split.VALIDATION,
+            datasets.Split.TEST,
+        ]:
+            for fold_filepath in glob.glob(
+                os.path.join(dataset_dir, f"AskAPatient.fold-*.{split_name}.txt")
+            ):
+                fold_id = re.search("AskAPatient\.fold-(\d)\.", fold_filepath).group(1)
+                document_id = f"{split_name}_{fold_id}"
+                split = datasets.SplitGenerator(
+                    name=f"{split_name}-{fold_id}",
+                    gen_kwargs={
+                        "filepath": fold_filepath,
+                        "document_id": document_id
+                    },
+                )
+                splits.append(split)    
+        return splits
 
-    def _generate_examples(self, filepaths, split):
-        for filepath in filepaths:
-            fold_id = re.search("AskAPatient\.fold-(\d)\.", filepath).group(1)
-            with open(filepath, "r", encoding="latin-1") as f:
-                document_id = f"{split}_{fold_id}"
-                for i, line in enumerate(f):
-                    id = f"{document_id}_{fold_id}_{i}"
-                    cui, medical_concept, social_media_text = line.strip().split("\t")
-                    if self.config.schema == "source":
-                        yield id, {
-                            "fold": int(fold_id),
-                            "cui": cui,
-                            "medical_concept": medical_concept,
-                            "social_media_text": social_media_text,
-                        }
-                    elif self.config.schema == "bigbio_kb":
-                        text_type = "social_media_text"
-                        offset = (0, len(social_media_text))
-                        yield id, {
-                            "id": id,
-                            "document_id": document_id,
-                            "passages": [ 
-                                {
-                                    "id": f"{id}_passage",
-                                    "type": text_type,
-                                    "text": [social_media_text],
-                                    "offsets" : [offset],
-                                }
-                            ],
-                            "entities": [ 
-                                {
-                                    "id": f"{id}_entity",
-                                    "type": text_type,
-                                    "text": [social_media_text],
-                                    "offsets" : [offset],
-                                    "normalized" : [
-                                        {"db_name" : "SNOMED-CT/AMT", "db_id" : cui}
-                                        ]
-                                }
-                            ],
-                            "events": [],
-                            "coreferences": [],
-                            "relations": [],
-                        }
+    def _generate_examples(self, filepath, document_id):
+        with open(filepath, "r", encoding="latin-1") as f:
+            for i, line in enumerate(f):
+                id = f"{document_id}_{i}"
+                cui, medical_concept, social_media_text = line.strip().split("\t")
+                if self.config.schema == "source":
+                    yield id, {
+                        "cui": cui,
+                        "medical_concept": medical_concept,
+                        "social_media_text": social_media_text,
+                    }
+                elif self.config.schema == "bigbio_kb":
+                    text_type = "social_media_text"
+                    offset = (0, len(social_media_text))
+                    yield id, {
+                        "id": id,
+                        "document_id": document_id,
+                        "passages": [ 
+                            {
+                                "id": f"{id}_passage",
+                                "type": text_type,
+                                "text": [social_media_text],
+                                "offsets" : [offset],
+                            }
+                        ],
+                        "entities": [ 
+                            {
+                                "id": f"{id}_entity",
+                                "type": text_type,
+                                "text": [social_media_text],
+                                "offsets" : [offset],
+                                "normalized" : [
+                                    {"db_name" : "SNOMED-CT/AMT", "db_id" : cui}
+                                    ]
+                            }
+                        ],
+                        "events": [],
+                        "coreferences": [],
+                        "relations": [],
+                    }
