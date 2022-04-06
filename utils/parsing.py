@@ -1,6 +1,8 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Iterator
+import io
+import re
 
 
 def remove_prefix(a: str, prefix: str) -> str:
@@ -311,5 +313,109 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
             unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
+
+    return unified_example
+
+
+def parse_pubtator_file(text_or_filepath: str, is_filepath: bool = True) -> Iterator[Dict]:
+    """Returns a generator that returns a dict for each entry in `text_or_filepath`. If
+    `is_filepath`, we assume this is a filepath to a text file in PubTator format. Otherwise,
+    We assume this is a string containing the text in PubTator format.
+    """
+    if is_filepath:
+        f = open(text_or_filepath, "r")
+    else:
+        f = io.StringIO(text_or_filepath)
+
+    line = f.readline().strip()
+    while line != "":
+        if re.search(r"\d+\|t\|", line) is not None:
+            pmid, title = line.split("|t|")
+            # The next line has to be the abstract.
+            abstract = f.readline().split("|a|")[-1].strip()
+            line = f.readline().strip()
+            mentions = []
+            while line != "":
+                split_line = line.split("\t")
+                if len(split_line) == 6:
+                    _, start, end, text, type_, concept_id = split_line
+                # This entity is not grounded.
+                elif len(split_line) == 5:
+                    _, start, end, text, type_, concept_id = *split_line, None
+                # This entity is not grounded and has no type.
+                elif len(split_line) == 4:
+                    _, start, end, text, type_, concept_id = *split_line, None, None
+                # This line just contains the start and end offsets.
+                elif len(split_line) == 3:
+                    _, start, end, text, type_, concept_id = *split_line, None, None, None
+
+                mentions.append(
+                    {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
+                )
+                line = f.readline().strip()
+            yield {"pmid": pmid, "title": title, "abstract": abstract, "mentions": mentions}
+            line = f.readline().strip()
+
+    f.close()
+
+def pubtator_parse_to_bigbio_kb(pubtator_parse: Dict, type_to_db_name: Dict) -> Dict:
+    """
+    Transform a PubTator parse (conforming to the standard PubTator schema) obtained with
+    `_parse_pubtator_file_file` into a dictionary conforming to the `bigbio-kb` schema
+    (as defined in ../schemas/kb.py)
+
+    :param pubtator_parse:
+    :param type_to_db_name: A dictionary mapping entity types to database names.
+    """
+
+    unified_example = {}
+
+    unified_example["id"] = pubtator_parse["pmid"]
+    unified_example["document_id"] = pubtator_parse["pmid"]
+
+    unified_example["passages"] = [
+        {
+            "id": pubtator_parse["pmid"] + "_title",
+            "type": "title",
+            "text": [pubtator_parse["title"]],
+            "offsets": [[0, len(pubtator_parse["title"])]],
+        },
+        {
+            "id": pubtator_parse["pmid"] + "_abstract",
+            "type": "abstract",
+            "text": [pubtator_parse["abstract"]],
+            "offsets": [
+                [
+                    # +1 assumes the title and abstract will be joined by a space.
+                    len(pubtator_parse["title"]) + 1,
+                    len(pubtator_parse["title"]) + 1 + len(pubtator_parse["abstract"]),
+                ]
+            ],
+        },
+    ]
+
+    unified_entities = {}
+    for entity in pubtator_parse["mentions"]:
+        # We use the entity type to convert to the unified db_name
+        db_name = type_to_db_name[entity["type"]] if entity["type"] else None
+        # PubTator prefixes MeSH IDs with "MESH:", so we strip it here.
+        db_id = entity["concept_id"].replace("MESH:", "") if entity["concept_id"] else None
+        if entity["concept_id"] not in unified_entities:
+            unified_entities[entity["concept_id"]] = {
+                "id": entity["concept_id"],
+                "type": entity["type"],
+                "text": [entity["text"]],
+                "offsets": [entity["offsets"]],
+                "normalized": [{"db_name": db_name, "db_id": db_id}],
+            }
+        else:
+            unified_entities[entity["concept_id"]]["text"].append(entity["text"])
+            unified_entities[entity["concept_id"]]["offsets"].append(entity["offsets"])
+            unified_entities[entity["concept_id"]]["normalized"].append({"db_name": db_name, "db_id": db_id})
+
+    unified_example["entities"] = list(unified_entities.values())
+    unified_example["events"] = []
+    unified_example["relations"] = []
+    unified_example["coreferences"] = []
 
     return unified_example
