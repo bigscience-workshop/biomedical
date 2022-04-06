@@ -91,6 +91,7 @@ _LICENSE = ""
 _URLS = {
     "api": "https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator",
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
+    "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
@@ -140,8 +141,11 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
         "Disease": "mesh",
         "Mutation": "ncbi_dbsnp",
         "CellLine": "cellosaurus",
-        # TODO: I don't know what this is being grounded to. It's not documented anywhere AFAICT.
-        "ProteinMutation": "-1",
+        "SNP": "ncbi_dbsnp",
+        # TODO: I don't know what these are being grounded to. It's not documented anywhere AFAICT.
+        "ProteinMutation": None,
+        "DNAMutation": None,
+        "DomainMotif": None,
     }
 
     def _info(self) -> datasets.DatasetInfo:
@@ -265,13 +269,13 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
             {
                 "id": pubtator_parse["pmid"] + "_title",
                 "type": "title",
-                "text": pubtator_parse["title"],
+                "text": [pubtator_parse["title"]],
                 "offsets": [[0, len(pubtator_parse["title"])]],
             },
             {
                 "id": pubtator_parse["pmid"] + "_abstract",
                 "type": "abstract",
-                "text": pubtator_parse["abstract"],
+                "text": [pubtator_parse["abstract"]],
                 "offsets": [
                     [
                         # +1 assumes the title and abstract will be joined by a space.
@@ -285,9 +289,9 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
         unified_entities = {}
         for entity in pubtator_parse["mentions"]:
             # We use the entity type to convert to the unified db_name
-            db_name = self.PUBTATOR_TYPE_TO_UNIFIED_DB_NAME[entity["type"]]
+            db_name = self.PUBTATOR_TYPE_TO_UNIFIED_DB_NAME[entity["type"]] if entity["type"] else None
             # PubTator prefixes MeSH IDs with "MESH:", so we strip it here.
-            db_id = entity["concept_id"].replace("MESH:", "")
+            db_id = entity["concept_id"].replace("MESH:", "") if entity["concept_id"] else None
             if entity["concept_id"] not in unified_entities:
                 unified_entities[entity["concept_id"]] = {
                     "id": entity["concept_id"],
@@ -300,5 +304,10 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
                 unified_entities[entity["concept_id"]]["text"].append(entity["text"])
                 unified_entities[entity["concept_id"]]["offsets"].append(entity["offsets"])
                 unified_entities[entity["concept_id"]]["normalized"].append({"db_name": db_name, "db_id": db_id})
+
+        unified_example["entities"] = list(unified_entities.values())
+        unified_example["events"] = []
+        unified_example["relations"] = []
+        unified_example["coreferences"] = []
 
         return unified_example
