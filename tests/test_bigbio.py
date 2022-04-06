@@ -7,12 +7,13 @@ import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
+from pprint import pprint
 from typing import Iterable, Iterator, List, Optional, Union, Dict
 
 import datasets
 from datasets import DatasetDict, Features
 from utils.constants import Tasks
-from utils.schemas import (entailment_features, kb_features, pairs_features,
+from utils.schemas import (entailment_features, kb_features, kb_features_v2, pairs_features,
                            qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -41,7 +42,7 @@ _VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
 _VALID_SCHEMAS = set(_TASK_TO_SCHEMA.values())
 
 _SCHEMA_TO_FEATURES = {
-    "KB": kb_features,
+    "KB": kb_features_v2,
     "QA": qa_features,
     "TE": entailment_features,
     "T2T": text2text_features,
@@ -54,7 +55,8 @@ _TASK_TO_FEATURES = {
     Tasks.RELATION_EXTRACTION: {"relations", "entities"},
     Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
     Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-    Tasks.EVENT_EXTRACTION: {"events"}
+    Tasks.EVENT_EXTRACTION: {"events"},
+    Tasks.N_ARY_RELATION_EXTRACTION: {"n_ary_relations"}
 }
 
 
@@ -498,7 +500,7 @@ class TestDataLoader(unittest.TestCase):
 
         non_empty_features = set()
         if schema == "KB":
-            features = kb_features
+            features = kb_features_v2
             for task in self._SUPPORTED_TASKS:
                 if task in _TASK_TO_FEATURES:
                     non_empty_features.update(_TASK_TO_FEATURES[task])

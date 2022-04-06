@@ -192,7 +192,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 },
             )
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = schemas.kb_features_v2
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.

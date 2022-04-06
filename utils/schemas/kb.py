@@ -81,3 +81,88 @@ features = datasets.Features(
         ],
     }
 )
+
+
+features_v2 = datasets.Features(
+    {
+        "id": datasets.Value("string"),
+        "document_id": datasets.Value("string"),
+        "passages": [
+            {
+                "id": datasets.Value("string"),
+                "type": datasets.Value("string"),
+                "text": datasets.Sequence(datasets.Value("string")),
+                "offsets": datasets.Sequence([datasets.Value("int32")]),
+            }
+        ],
+        "events": [
+            {
+                "id": datasets.Value("string"),
+                "type": datasets.Value("string"),
+                # refers to the text_bound_annotation of the trigger
+                "trigger": {
+                    "text": datasets.Sequence(datasets.Value("string")),
+                    "offsets": datasets.Sequence([datasets.Value("int32")]),
+                },
+                "arguments": [
+                    {
+                        "role": datasets.Value("string"),
+                        "ref_id": datasets.Value("string"),
+                    }
+                ],
+            }
+        ],
+        "coreferences": [
+            {
+                "id": datasets.Value("string"),
+                "entity_ids": datasets.Sequence(datasets.Value("string")),
+            }
+        ],
+        "entities": [
+            {
+                "id": datasets.Value("string"),
+                "type": datasets.Value("string"),
+                "text": datasets.Sequence(datasets.Value("string")),
+                "offsets": datasets.Sequence([datasets.Value("int32")]),
+                "normalized": [
+                    {
+                        "db_name": datasets.Value("string"),
+                        "db_id": datasets.Value("string"),
+                    }
+                ],
+            }
+        ],
+        "relations": [
+            {
+                "id": datasets.Value("string"),
+                "type": datasets.Value("string"),
+                "arg1_id": datasets.Value("string"),
+                "arg2_id": datasets.Value("string"),
+                "normalized": [
+                    {
+                        "db_name": datasets.Value("string"),
+                        "db_id": datasets.Value("string"),
+                    }
+                ],
+            }
+        ],
+        "n_ary_relations": [
+            {
+                "id": datasets.Value("string"),
+                "type": datasets.Value("string"),
+                "slots": [
+                    {
+                        "role": datasets.Value("string"),
+                        "filler_id": datasets.Value("string")
+                    }
+                ],
+                "normalized": [
+                    {
+                        "db_name": datasets.Value("string"),
+                        "db_id": datasets.Value("string"),
+                    }
+                ],
+            }
+        ],
+    }
+)
