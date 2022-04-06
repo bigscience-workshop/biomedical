@@ -5,7 +5,7 @@ from typing import Dict, Iterable, List
 
 def remove_prefix(a: str, prefix: str) -> str:
     if a.startswith(prefix):
-        a = a[len(prefix):]
+        a = a[len(prefix) :]
     return a
 
 

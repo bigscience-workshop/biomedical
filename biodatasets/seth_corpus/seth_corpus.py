@@ -21,7 +21,7 @@ on several evaluation corpora of PubMed abstracts. It is freely available and en
 isolated application and evaluation as well as a thorough documentation for integration into other applications.
 The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema """
 
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 from pathlib import Path
 
 import datasets
@@ -188,7 +188,7 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": data_dir/"SETH-master"/"resources"/"SETH-corpus",
+                    "filepath": data_dir / "SETH-master" / "resources" / "SETH-corpus",
                     "corpus_file": "corpus.txt",
                     "split": "train",
                 },
@@ -199,21 +199,23 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            with open(filepath/corpus_file, encoding='utf-8') as f:
+            with open(filepath / corpus_file, encoding='utf-8') as f:
                 contents = f.readlines()
             for guid, content in enumerate(contents):
                 file_name, text = content.split("\t")
-                example = parsing.parse_brat_file(filepath/"annotations"/f"{file_name}.ann")
+                example = parsing.parse_brat_file(filepath / "annotations" / f"{file_name}.ann")
                 example["id"] = str(guid)
                 example["text"] = text
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
-            with open(filepath/corpus_file, encoding='utf-8') as f:
+            with open(filepath / corpus_file, encoding='utf-8') as f:
                 contents = f.readlines()
             for guid, content in enumerate(contents):
                 file_name, text = content.split("\t")
                 example = parsing.parse_brat_file(filepath / "annotations" / f"{file_name}.ann")
+                events = [event for event in example["events"] if event['type'] not in self._ENTITY_TYPES]
+                example["events"] = events
                 example["text"] = text
                 example = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
                 example["id"] = str(guid)
