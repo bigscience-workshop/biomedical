@@ -207,18 +207,16 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
                 example["id"] = str(guid)
                 example["text"] = text
                 yield guid, example
+
         elif self.config.schema == "bigbio_kb":
             with open(filepath/corpus_file, encoding='utf-8') as f:
                 contents = f.readlines()
             for guid, content in enumerate(contents):
                 file_name, text = content.split("\t")
                 example = parsing.parse_brat_file(filepath / "annotations" / f"{file_name}.ann")
-                print(example)
                 example["text"] = text
-                example2 = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
-                print(example2)
-                example2["id"] = str(guid)
-                print(file_name)
-                yield guid, example2
+                example = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
+                example["id"] = str(guid)
+                yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
