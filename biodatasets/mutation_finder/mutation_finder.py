@@ -188,6 +188,7 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
                     identifier = values[0]
 
                     passages = []
+                    offset = 0
                     for p_text in values[1:]:
                         if p_text != 'null':
                             passages.append(
@@ -195,10 +196,11 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
                                     "id": uid,
                                     "type": "",
                                     "text": [p_text],
-                                    "offsets": [],
+                                    "offsets": [(offset, offset + len(p_text))],
                                 }
                             )
                             uid += 1
+                            offset += len(p_text) + 1
 
                     entities = []
                     for m_text in mutations[identifier]:
