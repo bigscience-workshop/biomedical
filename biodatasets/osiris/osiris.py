@@ -236,7 +236,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
                 "offsets": [variant["offsets"]],
                 "text": [variant["v_lex"]],
                 "type": "variant",
-                "normalized":  [{"db_name": "dbSNP" if variant["v_id"] == "No" else "NCBI Gene", "db_id": variant["v_norm"] if variant["v_id"] == "No" else variant["v_id"]}]
+                "normalized":  [{db_name": "HGVS-like" if variant["v_id"] == "No" else "dbSNP", "db_id": variant["v_norm"] if variant["v_id"] == "No" else variant["v_id"]}]
             } for variant in row["variant"] if variant['v_id'] != ""
         ]
         return list(itertools.chain(genes, variants))
