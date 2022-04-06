@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
-from typing import List, Tuple, Dict
+import os
 from itertools import chain
+from typing import Dict, List, Tuple
 
 import datasets
 
 from utils import schemas
-from utils.constants import Tasks
 from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{,
@@ -138,9 +138,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                         "abstract": datasets.features.Sequence(
                             datasets.Value("string")
                         ),  # The abstract, written as a list of sentences.
-                        "structured": datasets.Value(
-                            "bool"
-                        ),  # Indicator for whether this is a structured abstract.
+                        "structured": datasets.Value("bool"),  # Indicator for whether this is a structured abstract.
                     }
                 )
             elif self.config.subset_id == "scifact_claims":
@@ -149,9 +147,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                         "id": datasets.Value("int32"),  # An integer claim ID.
                         "claim": datasets.Value("string"),  # The text of the claim.
                         "evidence_doc_id": datasets.Value("string"),
-                        "evidence_label": datasets.Value(
-                            "string"
-                        ),  # Label for the rationale.
+                        "evidence_label": datasets.Value("string"),  # Label for the rationale.
                         "evidence_sentences": datasets.features.Sequence(
                             datasets.Value("int32")
                         ),  # Rationale sentences.
@@ -186,9 +182,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "filepath": os.path.join(
-                            self.config.data_dir, "data", "corpus.jsonl"
-                        ),
+                        "filepath": os.path.join(self.config.data_dir, "data", "corpus.jsonl"),
                         "split": "train",
                     },
                 ),
@@ -198,27 +192,21 @@ class SciFact(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_train.jsonl"
-                    ),
+                    "filepath": os.path.join(self.config.data_dir, "data", "claims_train.jsonl"),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_test.jsonl"
-                    ),
+                    "filepath": os.path.join(self.config.data_dir, "data", "claims_test.jsonl"),
                     "split": "test",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_dev.jsonl"
-                    ),
+                    "filepath": os.path.join(self.config.data_dir, "data", "claims_dev.jsonl"),
                     "split": "dev",
                 },
             ),
@@ -269,9 +257,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                                 "cited_doc_ids": data.get("cited_doc_ids", []),
                             }
 
-    def _bigbio_rationale_generate_examples(
-        self, filepath, split, corpus_id2text
-    ) -> Tuple[str, Dict[str, str]]:
+    def _bigbio_rationale_generate_examples(self, filepath, split, corpus_id2text) -> Tuple[str, Dict[str, str]]:
         """
         Given a claim and some rationales, decide if the claim is supported or contradicted
         """
@@ -301,26 +287,16 @@ class SciFact(datasets.GeneratorBasedBuilder):
                     if str(cited_doc_id) in evidence:
 
                         # this is a list of list of ints
-                        rationale_sentence_ids = [
-                            x["sentences"] for x in evidence[str(cited_doc_id)]
-                        ]
-                        rationale_sentence_ids = set(
-                            list(chain(*rationale_sentence_ids))
-                        )
+                        rationale_sentence_ids = [x["sentences"] for x in evidence[str(cited_doc_id)]]
+                        rationale_sentence_ids = set(list(chain(*rationale_sentence_ids)))
 
                     # Loop through each sentence in the cited doc
 
                     for id3, sentence in enumerate(corpus_id2text[cited_doc_id]):
-                        label = (
-                            "rationale"
-                            if id3 in rationale_sentence_ids
-                            else "not_rationale"
-                        )
+                        label = "rationale" if id3 in rationale_sentence_ids else "not_rationale"
 
                         # original line id, doc id, and sentence number
-                        unique_id = (
-                            f"{line_id.zfill(4)}_{cited_doc_id}_{str(id3).zfill(4)}"
-                        )
+                        unique_id = f"{line_id.zfill(4)}_{cited_doc_id}_{str(id3).zfill(4)}"
 
                         yield unique_id, {
                             "id": unique_id,
@@ -329,9 +305,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                             "label": label,
                         }
 
-    def _bigbio_labelprediction_generate_examples(
-        self, filepath, split, corpus_id2text
-    ) -> Tuple[str, Dict[str, str]]:
+    def _bigbio_labelprediction_generate_examples(self, filepath, split, corpus_id2text) -> Tuple[str, Dict[str, str]]:
         """
         Given a claim and sentence, decide if that sentence supports, contradicts, or has no info about the claim.
         """
@@ -373,9 +347,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                     label = evidence[str(cited_doc_id)][0]["label"]
 
                     # this is a list of list of ints
-                    rationale_sentence_ids = [
-                        x["sentences"] for x in evidence[str(cited_doc_id)]
-                    ]
+                    rationale_sentence_ids = [x["sentences"] for x in evidence[str(cited_doc_id)]]
                     rationale_sentence_ids = list(chain(*rationale_sentence_ids))
                     rationale_sentences = []
                     for idx, sentence in enumerate(corpus_id2text[cited_doc_id]):
@@ -392,26 +364,20 @@ class SciFact(datasets.GeneratorBasedBuilder):
     def _bigbio_generate_examples(self, filepath, split) -> Tuple[str, Dict[str, str]]:
         """
         This first converts the corpus into a dictionary with the abstracts as values and the doc id
-        as the key. Then it calls the appropriate _generate_examples function, return whatever is 
+        as the key. Then it calls the appropriate _generate_examples function, return whatever is
         yielded by that function.
         """
         corpus_id2text = {}
-        with open(
-            os.path.join(self.config.data_dir, "data", "corpus.jsonl")
-        ) as corpus_fp:
+        with open(os.path.join(self.config.data_dir, "data", "corpus.jsonl")) as corpus_fp:
 
             for line in corpus_fp.readlines():
                 line = json.loads(line)
                 corpus_id2text[line["doc_id"]] = line["abstract"]
 
         if self.config.subset_id == "scifact_rationale":
-            return self._bigbio_rationale_generate_examples(
-                filepath, split, corpus_id2text
-            )
+            return self._bigbio_rationale_generate_examples(filepath, split, corpus_id2text)
         elif self.config.subset_id == "scifact_labelprediction":
-            return self._bigbio_labelprediction_generate_examples(
-                filepath, split, corpus_id2text
-            )
+            return self._bigbio_labelprediction_generate_examples(filepath, split, corpus_id2text)
 
     def _generate_examples(self, filepath, split) -> Tuple[int, dict]:
 
@@ -420,7 +386,3 @@ class SciFact(datasets.GeneratorBasedBuilder):
 
         elif "bigbio" in self.config.name:
             return self._bigbio_generate_examples(filepath, split)
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
