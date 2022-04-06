@@ -160,57 +160,74 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, doc_collection_path, gold_std_path, split: str) -> Tuple[int, Dict]:
-            with open(doc_collection_path) as doc_collection, open(gold_std_path) as gold_std:
-                # First, parse doc_id -> mutations from the gold standard
-                # Required, because lines in the gold standard and doc collection file are out of order.
-                mutations = {}
-                for line in gold_std:
+        with open(doc_collection_path) as doc_collection, open(gold_std_path) as gold_std:
+            # First, parse doc_id -> mutations from the gold standard
+            # Required, because lines in the gold standard and doc collection file are out of order.
+            mutations = {}
+            for line in gold_std:
+                values = line.strip().split('\t')
+                identifier = values[0]
+                mutations[identifier] = values[1:] if len(values) > 1 else []
+
+            uid = 0
+            for idx, line in enumerate(doc_collection):
+                values = line.strip().split('\t')
+                identifier = values[0]
+
+                if self.config.schema == "source":
+                    # remove null values from the text
+                    text = '\t'.join(v for v in values[1:] if v != 'null')
+
+                    yield idx, {
+                        "identifier": identifier,
+                        "text": text,
+                        "mutations": [{'text': m} for m in mutations[identifier]]
+                    }
+                elif self.config.schema == "bigbio_kb":
                     values = line.strip().split('\t')
                     identifier = values[0]
-                    mutations[identifier] = values[1:] if len(values) > 1 else []
 
-                for idx, line in enumerate(doc_collection):
-                    values = line.strip().split('\t')
-                    identifier = values[0]
+                    passages = []
+                    for p_text in values[1:]:
+                        if p_text != 'null':
+                            passages.append(
+                                {
+                                    "id": uid,
+                                    "type": "",
+                                    "text": [p_text],
+                                    "offsets": [],
+                                }
+                            )
+                            uid += 1
 
-                    if self.config.schema == "source":
-                        # remove null values from the text
-                        text = '\t'.join(v for v in values[1:] if v != 'null')
-
-                        yield idx, {
-                            "identifier": identifier,
-                            "text": text,
-                            "mutations": [{'text': m} for m in mutations[identifier]]
-                        }
-                    elif self.config.schema == "bigbio_kb":
-                        values = line.strip().split('\t')
-                        identifier = values[0]
-                        passages = [
+                    entities = []
+                    for m_text in mutations[identifier]:
+                        entities.append(
                             {
-                                "id": i,
-                                "type": "",
-                                "text": [p_text],
-                                "offsets": [],
-                            } for i, p_text in enumerate(values[1:]) if p_text != 'null'
-                        ]
-                        entities = [
-                            {
-                                "id": i,
+                                "id": uid,
                                 "type": "",
                                 "text": [m_text],
                                 "offsets": [],
                                 "normalized": []
-                            } for i, m_text in enumerate(mutations[identifier])
-                        ]
+                            }
+                        )
+                        uid += 1
 
-                        yield identifier, {
-                            "id": identifier,
-                            "document_id": identifier,
-                            "passages": passages,
-                            "entities": entities,
-                            "events": [],
-                            "coreferences": [],
-                            "relations": []
-                        }
-                    else:
-                        raise NotImplementedError(self.config.schema)
+                    yield idx, {
+                        "id": uid,
+                        "document_id": identifier,
+                        "passages": passages,
+                        "entities": entities,
+                        "events": [],
+                        "coreferences": [],
+                        "relations": []
+                    }
+                    uid += 1
+                else:
+                    raise NotImplementedError(self.config.schema)
+
+
+# This allows you to run your dataloader with `python [dataset_name].py` during development
+# TODO: Remove this before making your PR
+if __name__ == "__main__":
+    dset = datasets.load_dataset(__file__, name='mutation_finder_bigbio_kb')
