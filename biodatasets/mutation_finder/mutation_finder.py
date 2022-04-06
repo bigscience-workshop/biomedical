@@ -14,16 +14,18 @@
 # limitations under the License.
 
 import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
 @article{Caporaso2007,
-author = {J. Gregory Caporaso and William A Baumgartner and David A Randolph and K. Bretonnel Cohen and Lawrence Hunter},
+author = {J. Gregory Caporaso and William A Baumgartner and David A Randolph and K. Bretonnel Cohen and
+Lawrence Hunter},
 title = {MutationFinder: a high-performance system for extracting point mutation mentions from text.},
 journal = {Bioinformatics},
 year = {2007},
@@ -41,9 +43,9 @@ url = {http://dx.doi.org/10.1093/bioinformatics/btm235}
 _DATASETNAME = "mutation_finder"
 
 _DESCRIPTION = """\
-Gold standard corpus for mutation extraction systems consisting of 1515 human-annotated mutation mentions in 813 MEDLINE
-abstracts. This corpus is divided into development and test subsets. Interannotator agreement on this corpus, judged on 
-fifty abstracts, was 94%. 
+Gold standard corpus for mutation extraction systems consisting of 1515 human-annotated mutation mentions in 813
+MEDLINE abstracts. This corpus is divided into development and test subsets. Interannotator agreement on this corpus,
+judged on fifty abstracts, was 94%.
 """
 
 _HOMEPAGE = "http://mutationfinder.sourceforge.net/"
@@ -74,7 +76,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 """
 
 _URLS = {
-    _DATASETNAME: "https://sourceforge.net/projects/mutationfinder/files/MutationFinder/MutationFinder-1.1/MutationFinder-1.1.tar.gz/download",
+    _DATASETNAME: "https://sourceforge.net/projects/mutationfinder/files/MutationFinder/MutationFinder-1.1/"
+    "MutationFinder-1.1.tar.gz/download",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
@@ -112,15 +115,15 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
             features = datasets.Features(
-               {
-                   "identifier": datasets.Value("string"),
-                   "text": datasets.Value("string"),
-                   "mutations": [
-                       {
-                           "text": datasets.Value("string"),
-                       }
-                   ],
-               }
+                {
+                    "identifier": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                    "mutations": [
+                        {
+                            "text": datasets.Value("string"),
+                        }
+                    ],
+                }
             )
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
@@ -165,32 +168,32 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
             # Required, because lines in the gold standard and doc collection file are out of order.
             mutations = {}
             for line in gold_std:
-                values = line.strip().split('\t')
+                values = line.strip().split("\t")
                 identifier = values[0]
                 mutations[identifier] = values[1:] if len(values) > 1 else []
 
             uid = 0
             for idx, line in enumerate(doc_collection):
-                values = line.strip().split('\t')
+                values = line.strip().split("\t")
                 identifier = values[0]
 
                 if self.config.schema == "source":
                     # remove null values from the text
-                    text = '\t'.join(v for v in values[1:] if v != 'null')
+                    text = "\t".join(v for v in values[1:] if v != "null")
 
                     yield idx, {
                         "identifier": identifier,
                         "text": text,
-                        "mutations": [{'text': m} for m in mutations[identifier]]
+                        "mutations": [{"text": m} for m in mutations[identifier]],
                     }
                 elif self.config.schema == "bigbio_kb":
-                    values = line.strip().split('\t')
+                    values = line.strip().split("\t")
                     identifier = values[0]
 
                     passages = []
                     offset = 0
                     for p_text in values[1:]:
-                        if p_text != 'null':
+                        if p_text != "null":
                             passages.append(
                                 {
                                     "id": uid,
@@ -204,15 +207,7 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
 
                     entities = []
                     for m_text in mutations[identifier]:
-                        entities.append(
-                            {
-                                "id": uid,
-                                "type": "",
-                                "text": [m_text],
-                                "offsets": [],
-                                "normalized": []
-                            }
-                        )
+                        entities.append({"id": uid, "type": "", "text": [m_text], "offsets": [], "normalized": []})
                         uid += 1
 
                     yield idx, {
@@ -222,14 +217,8 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
                         "entities": entities,
                         "events": [],
                         "coreferences": [],
-                        "relations": []
+                        "relations": [],
                     }
                     uid += 1
                 else:
                     raise NotImplementedError(self.config.schema)
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    dset = datasets.load_dataset(__file__, name='mutation_finder_bigbio_kb')
