@@ -205,8 +205,8 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
                 yield pubtator_example["pmid"], pubtator_example
 
         elif self.config.schema == "bigbio_kb":
-            for pubtator_example in self._parse_pubtator_file(content):
-                kb_example = self._pubtator_parse_to_bigbio_kb(pubtator_example, is_filepath=is_filepath)
+            for pubtator_example in self._parse_pubtator_file(content, is_filepath=is_filepath):
+                kb_example = self._pubtator_parse_to_bigbio_kb(pubtator_example)
                 yield kb_example["id"], kb_example
 
     @staticmethod
