@@ -55,25 +55,24 @@ Notes
 
 """
 
-from collections import defaultdict
-from dataclasses import dataclass
 import itertools
 import os
 import re
 import tarfile
-from typing import Dict, List
 import xml.etree.ElementTree as ET
+from collections import defaultdict
+from typing import Dict, List
 from xml.etree.ElementTree import Element
 
 import datasets
 from datasets import Features, Value
-
-
-
 # TODO: home page has a list of publications but its not clear which to choose
 # https://muchmore.dfki.de/papers1.htm
 # to start, chose the one below.
 # Buitelaar, Paul / Declerck, Thierry / Sacaleanu, Bogdan / Vintar, Spela / Raileanu, Diana / Crispi, Claudia: A Multi-Layered, XML-Based Approach to the Integration of Linguistic and Semantic Annotations. In: Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML’03), Budapest, Hungary, April 2003.
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{,
@@ -139,22 +138,11 @@ _URLs = {
 # took version from annotated file names
 _SOURCE_VERSION = "4.2.0"
 _BIGBIO_VERSION = "1.0.0"
-_SUPPORTED_TASKS = ["TRANSL", "NER"]
+_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
 
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
 LANG_MAP = {"eng": "en", "ger": "de"}
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class MuchMoreDataset(datasets.GeneratorBasedBuilder):
@@ -193,21 +181,6 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_kb",
             subset_id="muchmore_de",
         ),
-#        datasets.BuilderConfig(
-#            name="plain",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (en & de)",
-#        ),
-#        datasets.BuilderConfig(
-#            name="plain_en",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (en only)",
-#        ),
-#        datasets.BuilderConfig(
-#            name="plain_de",
-#            version=BIGBIO_VERSION,
-#            description="muchmore: plaintext of abstracts (de only)",
-#        ),
         BigBioConfig(
             name="muchmore_bigbio_t2t",
             version=BIGBIO_VERSION,
@@ -293,34 +266,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "passages": [
-                        {
-                            "id": Value("string"),
-                            "type": Value("string"),
-                            "text": [Value("string")],
-                            "offsets": [[Value("int32")]],
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": Value("string"),
-                            "offsets": [[Value("int32")]],
-                            "text": [Value("string")],
-                            "type": Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": Value("string"),
-                                    "db_id": Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         elif self.config.name in ("plain", "plain_en", "plain_de"):
             features = Features(
@@ -333,16 +279,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = Features(
-                {
-                    "id": Value("string"),
-                    "document_id": Value("string"),
-                    "text_1": Value("string"),
-                    "text_2": Value("string"),
-                    "text_1_name": Value("string"),
-                    "text_2_name": Value("string"),
-                }
-            )
+            features = schemas.text2text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -607,6 +544,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 "document_id": xroot.get("id"),
                 "passages": passages,
                 "entities": entities,
+                "coreferences": [],
+                "events": [],
+                "relations": [],
             }
 
     def _generate_plain_examples(self, file_names_and_pointers):

@@ -22,14 +22,16 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 
 -- 'Overview of the BioCreative V Chemical Disease Relation (CDR) Task'
 """
-import csv
-import json
-import os
-import itertools
 import collections
+import itertools
+import os
+
 import bioc
+
 import datasets
-from dataclasses import dataclass
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -56,8 +58,10 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "bc5cdr"
+
 _DESCRIPTION = """\
-The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of 
+The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of
 human annotations of all chemicals, diseases and their interactions in 1,500 PubMed articles.
 """
 
@@ -70,20 +74,9 @@ _URLs = {
     "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-_SUPPORTED_TASKS = ["NER", "NED", "RE"]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.RELATION_EXTRACTION]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
@@ -151,48 +144,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -212,9 +164,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"),
                     "split": "train",
                 },
             ),
@@ -222,9 +172,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"),
                     "split": "test",
                 },
             ),
@@ -242,7 +190,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _get_bioc_entity(self, span, doc_text, db_id_key="MESH"):
-        """Parse BioC entity annotation.  
+        """Parse BioC entity annotation.
 
         Parameters
         ----------
@@ -325,7 +273,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         filepath,
         split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
-        """ Yields examples as (key, example) tuples. """
+        """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
             reader = bioc.BioCXMLDocumentReader(str(filepath))
 
@@ -337,10 +285,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [
-                                self._get_bioc_entity(span, doc_text)
-                                for span in passage.annotations
-                            ],
+                            "entities": [self._get_bioc_entity(span, doc_text) for span in passage.annotations],
                             "relations": [
                                 {
                                     "id": rel.id,
@@ -366,6 +311,8 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                     "passages": [],
                     "entities": [],
                     "relations": [],
+                    "events": [],
+                    "coreferences": [],
                 }
                 uid += 1
                 doc_text = self._get_document_text(xdoc)

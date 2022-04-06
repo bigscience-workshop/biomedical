@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Simon Ott (nomisto)
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ entails label and 16,925 examples with neutral label.
 """
 
 import os
-from dataclasses import dataclass
+
+import pandas as pd
 
 import datasets
-import pandas as pd
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{scitail,
@@ -58,25 +61,14 @@ _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-_SUPPORTED_TASKS = ["TE"]
+_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 
 _SOURCE_VERSION = "1.1.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-
-class SciTail(datasets.GeneratorBasedBuilder):
+class SciTailDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -114,14 +106,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "premise": datasets.Value("string"),
-                    "hypothesis": datasets.Value("string"),
-                    "label": datasets.Value("string"),
-                }
-            )
+            features = schemas.entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -159,7 +144,7 @@ class SciTail(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath):
         # since examples can contain quotes mid text set quoting to QUOTE_NONE (3) when reading tsv
-        # e.g.: ... and apply specific "tools" to examples and ... 
+        # e.g.: ... and apply specific "tools" to examples and ...
         data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3)
         data["id"] = data.index
 

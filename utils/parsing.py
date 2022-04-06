@@ -1,15 +1,15 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 
 
 def remove_prefix(a: str, prefix: str) -> str:
     if a.startswith(prefix):
-        a = a[len(prefix):]
+        a = a[len(prefix) :]
     return a
 
 
-def parse_brat_file(txt_file: Path) -> Dict:
+def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
@@ -97,23 +97,21 @@ def parse_brat_file(txt_file: Path) -> Dict:
     example["document_id"] = txt_file.with_suffix("").name
     with txt_file.open() as f:
         example["text"] = f.read()
-    a1_file = txt_file.with_suffix(".a1")
-    a2_file = txt_file.with_suffix(".a2")
-    ann_file = txt_file.with_suffix(".ann")
+
+    # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
+    # for event extraction
+    if annotation_file_suffixes is None:
+        annotation_file_suffixes = [".a1", ".a2", ".ann"]
+
+    if len(annotation_file_suffixes) == 0:
+        raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
 
     ann_lines = []
-
-    if a1_file.exists():
-        with a1_file.open() as f:
-            ann_lines.extend(f.readlines())
-
-    if a2_file.exists():
-        with a2_file.open() as f:
-            ann_lines.extend(f.readlines())
-
-    if ann_file.exists():
-        with ann_file.open() as f:
-            ann_lines.extend(f.readlines())
+    for suffix in annotation_file_suffixes:
+        annotation_file = txt_file.with_suffix(suffix)
+        if annotation_file.exists():
+            with annotation_file.open() as f:
+                ann_lines.extend(f.readlines())
 
     example["text_bound_annotations"] = []
     example["events"] = []
@@ -231,7 +229,8 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     `parse_brat_file` into a dictionary conforming to the `bigbio-kb` schema (as defined in ../schemas/kb.py)
 
     :param brat_parse:
-    :param entity_types: Entity types of the dataset. This should include all types of `T` annotations that are not event triggers and will be different in different datasets.
+    :param entity_types: Entity types of the dataset. This should include all types of `T` annotations that are not
+                         event triggers and will be different in different datasets.
     """
 
     unified_example = {}
@@ -311,8 +310,6 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
-            unified_example["coreferences"].append(
-                {"id": id_prefix + str(i), "entity_ids": entity_ids}
-            )
+            unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
 
     return unified_example

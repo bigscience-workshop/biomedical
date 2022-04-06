@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Samuele Garda.
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,11 +14,14 @@
 
 import os
 import re
-from dataclasses import dataclass
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
+
 import datasets
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -50,20 +53,9 @@ _URLs = {
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
     "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
-_SUPPORTED_TASKS = ["NER", "NED"]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
-
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
 
 
 class NLMChemDataset(datasets.GeneratorBasedBuilder):
@@ -89,7 +81,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    DEFAULT_CONFIG_NAME = (
+        "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    )
 
     def _info(self):
 
@@ -123,34 +117,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "type": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
+            features = schemas.kb_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -184,9 +151,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"),
                     "split": "train",
                 },
             ),
@@ -194,9 +159,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"),
                     "split": "test",
                 },
             ),
@@ -204,17 +167,13 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"
-                    ),
+                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"),
                     "split": "dev",
                 },
             ),
         ]
 
-    def _get_passages_and_entities(
-        self, d: bioc.BioCDocument
-    ) -> Tuple[List[Dict], List[List[Dict]]]:
+    def _get_passages_and_entities(self, d: bioc.BioCDocument) -> Tuple[List[Dict], List[List[Dict]]]:
 
         passages: List[Dict] = []
         entities: List[List[Dict]] = []
@@ -291,9 +250,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
             normalized = [i.split(":") for i in identifiers]
 
-            normalized = [
-                {"db_name": elems[0], "db_id": elems[1]} for elems in normalized
-            ]
+            normalized = [{"db_name": elems[0], "db_id": elems[1]} for elems in normalized]
 
         else:
 
@@ -355,4 +312,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     "document_id": doc.id,
                     "passages": passages,
                     "entities": entities,
+                    "events": [],
+                    "coreferences": [],
+                    "relations": [],
                 }

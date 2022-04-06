@@ -5,18 +5,15 @@ import argparse
 import importlib
 import sys
 import unittest
-import warnings
 from collections import defaultdict
-from difflib import ndiff
 from pathlib import Path
-from pprint import pformat
-from typing import Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Union, Dict
 
 import datasets
-from datasets import DatasetDict, Features, load_dataset
-
-from schemas import (entailment_features, kb_features, pairs_features,
-                     qa_features, text2text_features, text_features)
+from datasets import DatasetDict, Features
+from utils.constants import Tasks
+from utils.schemas import (entailment_features, kb_features, pairs_features,
+                           qa_features, text2text_features, text_features)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -26,30 +23,38 @@ logger = logging.getLogger(__name__)
 
 
 _TASK_TO_SCHEMA = {
-    "NER": "KB",
-    "NED": "KB",
-    "EE": "KB",
-    "RE": "KB",
-    "COREF": "KB",
-    "QA": "QA",
-    "TE": "TE",
-    "STS": "PAIRS",
-    "PARA": "T2T",
-    "TRANSL": "T2T",
-    "SUM": "T2T",
-    "TXTCLASS": "TEXT",
+    Tasks.NAMED_ENTITY_RECOGNITION: "KB",
+    Tasks.NAMED_ENTITY_DISAMBIGUATION: "KB",
+    Tasks.EVENT_EXTRACTION: "KB",
+    Tasks.RELATION_EXTRACTION: "KB",
+    Tasks.COREFERENCE_RESOLUTION: "KB",
+    Tasks.QUESTION_ANSWERING: "QA",
+    Tasks.TEXTUAL_ENTAILMENT: "TE",
+    Tasks.SEMANTIC_SIMILARITY: "PAIRS",
+    Tasks.PARAPHRASING: "T2T",
+    Tasks.TRANSLATION: "T2T",
+    Tasks.SUMMARIZATION: "T2T",
+    Tasks.TEXT_CLASSIFICATION: "TEXT",
 }
 
 _VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
 _VALID_SCHEMAS = set(_TASK_TO_SCHEMA.values())
 
-_SCHEMA_TO_FEAUTURES = {
+_SCHEMA_TO_FEATURES = {
     "KB": kb_features,
     "QA": qa_features,
     "TE": entailment_features,
     "T2T": text2text_features,
     "TEXT": text_features,
     "PAIRS": pairs_features,
+}
+
+_TASK_TO_FEATURES = {
+    Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
+    Tasks.RELATION_EXTRACTION: {"relations", "entities"},
+    Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
+    Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
+    Tasks.EVENT_EXTRACTION: {"events"}
 }
 
 
@@ -101,30 +106,34 @@ class TestDataLoader(unittest.TestCase):
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
-        self.setUp()
 
-        # check the schemas implied by _SUPPORTED_TASKS
-        if self.SCHEMA is None:
-            schemas_to_check = self._MAPPED_SCHEMAS
-        # check the schema forced in unit test args
-        else:
-            schemas_to_check = [self.SCHEMA]
-
-        for schema in schemas_to_check:
-
+        for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
-            self.test_are_ids_globally_unique(dataset_bigbio)
-            self.test_schema(schema)
+            with self.subTest("IDs globally unique"):
+                self.test_are_ids_globally_unique(dataset_bigbio)
+            with self.subTest("Check schema validity"):
+                self.test_schema(schema)
 
-            mapped_features = _SCHEMA_TO_FEAUTURES[schema]
-            self.print_statistics(mapped_features, schema)
+            mapped_features = _SCHEMA_TO_FEATURES[schema]
+            split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
+            for split_name, split in self.datasets_bigbio[schema].items():
+                print(split_name)
+                print("=" * 10)
+                for k, v in split_to_feature_statistics[split_name].items():
+                    print(f"{k}: {v}")
+                print()
 
             if schema == "KB":
-                self.test_do_all_referenced_ids_exist(dataset_bigbio)
-                self.test_passages_offsets(dataset_bigbio)
-                self.test_entities_offsets(dataset_bigbio)
-                self.test_events_offsets(dataset_bigbio)
-                self.test_coref_ids(dataset_bigbio)
+                with self.subTest("Check referenced ids"):
+                    self.test_do_all_referenced_ids_exist(dataset_bigbio)
+                with self.subTest("Check passage offsets"):
+                    self.test_passages_offsets(dataset_bigbio)
+                with self.subTest("Check entity offsets"):
+                    self.test_entities_offsets(dataset_bigbio)
+                with self.subTest("Check events offsets"):
+                    self.test_events_offsets(dataset_bigbio)
+                with self.subTest("Check coref offsets"):
+                    self.test_coref_ids(dataset_bigbio)
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
@@ -144,14 +153,18 @@ class TestDataLoader(unittest.TestCase):
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
         if len(invalid_tasks) > 0:
-            raise ValueError(
-                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
-            )
+            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
 
-        self._MAPPED_SCHEMAS = set(
-            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
-        )
+        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
+
+        # check the schemas implied by _SUPPORTED_TASKS
+        if self.SCHEMA is None:
+            self.schemas_to_check = self._MAPPED_SCHEMAS
+        # check the schema forced in unit test args
+        else:
+            self.schemas_to_check = [self.SCHEMA]
+        logger.info(f"schemas_to_check: {self.schemas_to_check}")
 
         config_name = f"{self.SUBSET_ID}_source"
         logger.info(f"Checking load_dataset with config name {config_name}")
@@ -163,7 +176,7 @@ class TestDataLoader(unittest.TestCase):
         )
 
         self.datasets_bigbio = {}
-        for schema in self._MAPPED_SCHEMAS:
+        for schema in self.schemas_to_check:
             config_name = f"{self.SUBSET_ID}_bigbio_{schema.lower()}"
             logger.info(f"Checking load_dataset with config name {config_name}")
             self.datasets_bigbio[schema] = datasets.load_dataset(
@@ -173,7 +186,7 @@ class TestDataLoader(unittest.TestCase):
                 use_auth_token=self.USE_AUTH_TOKEN,
             )
 
-    def print_statistics(self, features: Features, schema: str):
+    def get_feature_statistics(self, features: Features, schema: str) -> Dict:
         """
         Gets sample statistics, for each split and sample of the number of
         features in the schema present; only works for the big-bio schema.
@@ -181,9 +194,8 @@ class TestDataLoader(unittest.TestCase):
         :param schema_type: Type of schema to reference features from
         """  # noqa
         logger.info("Gathering schema statistics")
+        all_counters = {}
         for split_name, split in self.datasets_bigbio[schema].items():
-            print(split_name)
-            print("=" * 10)
 
             counter = defaultdict(int)
             for example in split:
@@ -195,9 +207,14 @@ class TestDataLoader(unittest.TestCase):
                         else:
                             counter[feature_name] += len(example[feature_name])
 
-            for k, v in counter.items():
-                print(f"{k}: {v}")
-            print()
+                            # TODO do proper recursion here
+                            if feature_name == "entities":
+                                for entity in example["entities"]:
+                                    counter["normalized"] += len(entity["normalized"])
+
+            all_counters[split_name] = counter
+
+        return all_counters
 
     def _assert_ids_globally_unique(
         self,
@@ -290,15 +307,15 @@ class TestDataLoader(unittest.TestCase):
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event":
-                        if not (
-                                (ref_id, "entity") in existing_ids
-                                or (ref_id, "event") in existing_ids
-                        ):
-                            logger.warning(f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
+                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
+                            logger.warning(
+                                f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                            )
                     else:
                         if not (ref_id, ref_type) in referenced_ids:
-                            logger.warning(f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader.")
-
+                            logger.warning(
+                                f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                            )
 
     def test_passages_offsets(self, dataset_bigbio: DatasetDict):
         """
@@ -321,9 +338,7 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(
-                            msg="Text in passages must be a list", field=text
-                        )
+                        self._test_is_list(msg="Text in passages must be a list", field=text)
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -416,9 +431,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(
-                                f"Example:{example_id} - entity:{entity_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -452,9 +465,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(
-                                f"Example:{example_id} - event:{event_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -484,105 +495,28 @@ class TestDataLoader(unittest.TestCase):
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
 
+
+        non_empty_features = set()
         if schema == "KB":
-
             features = kb_features
-            logger.info(f"all feature names: {set(features.keys())}")
-
-            # construct task specific required keys
-            opt_keys = [
-                "entities",
-                "events",
-                "coreferences",
-                "relations",
-            ]
-
-            needed_keys = [key for key in features.keys() if key not in opt_keys]
-
-            sub_keys = []
-            if "NER" in self._SUPPORTED_TASKS:
-                sub_keys += ["entities"]
-            elif "RE" in self._SUPPORTED_TASKS:
-                sub_keys += ["entities", "relations"]
-            elif "NED" in self._SUPPORTED_TASKS:
-                sub_keys = ["entities"]
-            elif "COREF" in self._SUPPORTED_TASKS:
-                sub_keys = ["entities", "coreferences"]
-            elif "EE" in self._SUPPORTED_TASKS:
-                sub_keys = ["events"]
-            else:
-                raise ValueError(f"Task {task} not recognized")
-
-            logger.info(f"needed_keys: {needed_keys}")
-            logger.info(f"sub_keys: {sub_keys}")
-
-            for split in self.datasets_bigbio[schema].keys():
-                example = self.datasets_bigbio[schema][split][0]
-
-                # Check for mandatory keys
-                missing_keys = set(needed_keys) - set(example.keys())
-                self.assertTrue(
-                    len(missing_keys) == 0,
-                    f"{missing_keys} are missing from bigbio view",
-                )
-
-                for key in sub_keys:
-                    for attrs in features[key]:
-                        self.assertTrue(self._check_subkey(example[key][0], attrs))
-
-                # miscellaneous keys not affiliated with a type (ex: NER dataset with events)
-                extra_keys = set(example.keys()) - set(needed_keys) - set(sub_keys)
-                logger.info(f"extra_keys in {split}: {extra_keys}")
-                for key in extra_keys:
-                    if key in features.keys():
-                        for attrs in features[key]:
-                            if example[key]:
-                                self.assertTrue(self._check_subkey(example[key][0], attrs))
-
-        elif schema == "QA":
-            logger.info("Question-Answering Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "TE":
-            logger.info("Textual Entailment Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "T2T":
-            logger.info("Text to Text Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "TEXT":
-            logger.info("Text Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
-        elif schema == "PAIRS":
-            logger.info("Text Pair Schema")
-            self._check_keys(_SCHEMA_TO_FEAUTURES[schema], schema)
-
+            for task in self._SUPPORTED_TASKS:
+                if task in _TASK_TO_FEATURES:
+                    non_empty_features.update(_TASK_TO_FEATURES[task])
         else:
-            raise ValueError(
-                f"{schema} not recognized. must be one of {set(_TASK_TO_SCHEMA.values())}"
-            )
+            features = _SCHEMA_TO_FEATURES[schema]
 
-    @staticmethod
-    def _check_subkey(inp, attrs):
-        """Checks if subkeys (esp. in KB) have necessary criteria"""
-        return all([k in inp for k in attrs.keys()])
+        split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
+        for split_name, split in self.datasets_bigbio[schema].items():
+            self.assertEqual(split.info.features, features)
+            for non_empty_feature in non_empty_features:
+                if split_to_feature_counts[split_name][non_empty_feature] == 0:
+                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
 
-    def _check_keys(self, features: Features, schema_name: str):
-        """Check if necessary keys are present in a given schema"""
-        dataset_bigbio = self.datasets_bigbio[schema_name]
-        for split in dataset_bigbio.keys():
-            example = dataset_bigbio[split][0]
+            for feature, count in split_to_feature_counts[split_name].items():
+                if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
+                    logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
 
-            # Check for mandatory keys
-            mandatory_keys = all([key in example for key in features.keys()])
-            self.assertTrue(
-                mandatory_keys,
-                "/".join(features.keys())
-                + " keys missing from bigbio view for schema_type = "
-                + schema_name,
-            )
+
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
@@ -606,9 +540,7 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument(
-        "path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)"
-    )
+    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
     parser.add_argument(
         "--schema",
         type=str,

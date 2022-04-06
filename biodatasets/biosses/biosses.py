@@ -23,10 +23,12 @@ score.
 Note: The original files are Word documents, compressed using RAR. This data
 loader uses a version that privides the same data in text format.
 """
-import datasets
 import pandas as pd
-from dataclasses import dataclass
 
+import datasets
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _DATASETNAME = "biosses"
 
@@ -61,23 +63,12 @@ _URLs = {
     "bigbio_pairs": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
 }
 
-_SUPPORTED_TASKS = ["STS"]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: str = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-
-class Biosses(datasets.GeneratorBasedBuilder):
+class BiossesDataset(datasets.GeneratorBasedBuilder):
     """BIOSSES : Biomedical Semantic Similarity Estimation System"""
 
     DEFAULT_CONFIG_NAME = "biosses_source"
@@ -118,15 +109,7 @@ class Biosses(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.name == "biosses_bigbio_pairs":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string"),
-                }
-            )
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -145,7 +128,10 @@ class Biosses(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": dl_dir, "split": "train",},
+                gen_kwargs={
+                    "filepath": dl_dir,
+                    "split": "train",
+                },
             )
         ]
 
@@ -185,4 +171,3 @@ class Biosses(datasets.GeneratorBasedBuilder):
                         / 5
                     ),
                 }
-

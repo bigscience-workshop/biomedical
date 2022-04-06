@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,114 +14,131 @@
 # limitations under the License.
 
 """
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
+The Clinical Trials for Evidence-Based Medicine in Spanish (CT-EBM-SP) Corpus
+gathers 1200 texts about clinical trial studies for NER; this resource contains
+500 abstracts of journal articles about clinical trials and 700 announcements
+of trial protocols (292 173 tokens), with 46 699 annotated entities.
+
+Entities were annotated according to the Unified Medical Language System (UMLS)
+semantic groups: anatomy (ANAT), pharmacological and chemical substances (CHEM),
+pathologies (DISO), and lab tests, diagnostic or therapeutic procedures (PROC).
 """
+
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-_DATASETNAME = "mlee"
-_SOURCE_VIEW_NAME = "source"
-_UNIFIED_VIEW_NAME = "bigbio"
-
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
+@article{CampillosLlanos2021,
+  author    = {Leonardo Campillos-Llanos and
+               Ana Valverde-Mateos and
+               Adri{\'{a}}n Capllonch-Carri{\'{o}}n and
+               Antonio Moreno-Sandoval},
+  title     = {A clinical trials corpus annotated with {UMLS}
+               entities to enhance the access to evidence-based medicine},
+  journal   = {{BMC} Medical Informatics and Decision Making},
+  volume    = {21},
+  year      = {2021},
+  url       = {https://doi.org/10.1186/s12911-021-01395-z},
+  doi       = {10.1186/s12911-021-01395-z},
   biburl    = {},
   bibsource = {}
 }
 """
 
-_DESCRIPTION = """\
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
+_DATASETNAME = "ctebmsp"
+
+_ABSTRACTS_DESCRIPTION = """\
+The "abstracts" subset of the Clinical Trials for Evidence-Based Medicine in Spanish
+(CT-EBM-SP) corpus contains 500 abstracts of clinical trial studies in Spanish,
+published in journals with a Creative Commons license. Most were downloaded from
+the SciELO repository and free abstracts in PubMed.
+
+Abstracts were retrieved with the query:
+Clinical Trial[ptyp] AND “loattrfree full text”[sb] AND “spanish”[la].
+
+(Information collected from 10.1186/s12911-021-01395-z)
 """
 
-_HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
+_EUDRACT_DESCRIPTION = """\
+The "abstracts" subset of the Clinical Trials for Evidence-Based Medicine in Spanish
+(CT-EBM-SP) corpus contains 500 abstracts of clinical trial studies in Spanish,
+published in journals with a Creative Commons license. Most were downloaded from
+the SciELO repository and free abstracts in PubMed.
 
-_LICENSE = "CC BY-NC-SA 3.0"
+Abstracts were retrieved with the query:
+Clinical Trial[ptyp] AND “loattrfree full text”[sb] AND “spanish”[la].
 
-_URLs = {
-    "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
-    "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+(Information collected from 10.1186/s12911-021-01395-z)
+"""
+
+_DESCRIPTION = {
+    "ctebmsp_abstracts": _ABSTRACTS_DESCRIPTION,
+    "ctebmsp_eudract": _EUDRACT_DESCRIPTION,
 }
 
-_SUPPORTED_TASKS = [
-    Tasks.EVENT_EXTRACTION,
-    Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
-    Tasks.COREFERENCE_RESOLUTION,
-]
+_HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
+
+_LICENSE = "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
+
+_URLS = {
+    _DATASETNAME: "http://www.lllf.uam.es/ESP/nlpdata/wp2/CT-EBM-SP.zip",
+}
+
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MLEE(datasets.GeneratorBasedBuilder):
-    """Write a short docstring documenting what this dataset is"""
+class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
+    """A Spanish clinical trials corpus annotated with UMLS entities"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    BUILDER_CONFIGS = [
-        BigBioConfig(
-            name="mlee_source",
-            version=SOURCE_VERSION,
-            description="MLEE source schema",
-            schema="source",
-            subset_id="mlee",
-        ),
-        BigBioConfig(
-            name="mlee_bigbio_kb",
-            version=SOURCE_VERSION,
-            description="MLEE BigBio schema",
-            schema="bigbio_kb",
-            subset_id="mlee",
-        ),
-    ]
+    BUILDER_CONFIGS = []
 
-    DEFAULT_CONFIG_NAME = "mlee_source"
+    for study in ["abstracts", "eudract"]:
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"ctebmsp_{study}_source",
+                version=SOURCE_VERSION,
+                description=f"CT-EBM-SP {study.capitalize()} source schema",
+                schema="source",
+                subset_id=f"ctebmsp_{study}",
+            )
+        )
 
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"ctebmsp_{study}_bigbio_kb",
+                version=BIGBIO_VERSION,
+                description=f"CT-EBM-SP {study.capitalize()} BigBio schema",
+                schema="bigbio_kb",
+                subset_id=f"ctebmsp_{study}",
+            ),
+        )
+
+    DEFAULT_CONFIG_NAME = "ctebmsp_abstracts_source"
+
+    # Entities from the Unified Medical Language System (UMLS) semantic groups
     _ENTITY_TYPES = {
-        "Anatomical_system",
-        "Cell",
-        "Cellular_component",
-        "DNA_domain_or_region",
-        "Developing_anatomical_structure",
-        "Drug_or_compound",
-        "Gene_or_gene_product",
-        "Immaterial_anatomical_entity",
-        "Multi-tissue_structure",
-        "Organ",
-        "Organism",
-        "Organism_subdivision",
-        "Organism_substance",
-        "Pathological_formation",
-        "Protein_domain_or_region",
-        "Tissue",
+        "PROC",
+        "CHEM",
+        "DISO",
+        "ANAT",
     }
 
-    def _info(self):
+    def _info(self) -> datasets.DatasetInfo:
         """
-        Provide information about MLEE:
-        - `features` defines the schema of the parsed data set. The schema depends on the
-        chosen `config`: If it is `_SOURCE_VIEW_NAME` the schema is the schema of the
-        original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
-        canonical KB-task schema defined in `biomedical/schemas/kb.py`.
+        Provide information about CT-EBM-SP
+        """
 
-        """
         if self.config.schema == "source":
             features = datasets.Features(
                 {
@@ -191,69 +208,57 @@ class MLEE(datasets.GeneratorBasedBuilder):
                     ],
                 },
             )
+
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
-            description=_DESCRIPTION,
+            description=_DESCRIPTION[self.config.subset_id],
             features=features,
-            # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
-            # specify them. They'll be used if as_supervised=True in builder.as_dataset.
-            # This is not applicable for MLEE.
-            # supervised_keys=("sentence", "label"),
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
-        """
-        Create the three splits provided by MLEE: train, validation and test.
+    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
+        """Returns SplitGenerators."""
 
-        Each split is created by instantiating a `datasets.SplitGenerator`, which will
-        call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
-        """
-
-        my_urls = _URLs[self.config.schema]
-        data_dir = Path(dl_manager.download_and_extract(my_urls))
-        data_files = {
-            "train": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "train",
-            "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
-            "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
+        urls = _URLS[_DATASETNAME]
+        data_dir = Path(dl_manager.download_and_extract(urls))
+        studies_path = {
+            "ctebmsp_abstracts": "abstracts",
+            "ctebmsp_eudract": "eudract",
         }
+
+        study_path = studies_path[self.config.subset_id]
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_files": data_files["train"]},
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={"data_files": data_files["dev"]},
+                gen_kwargs={"dir_files": data_dir / "train" / study_path},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"data_files": data_files["test"]},
+                gen_kwargs={"dir_files": data_dir / "test" / study_path},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={"dir_files": data_dir / "dev" / study_path},
             ),
         ]
 
-    def _generate_examples(self, data_files: Path):
-        """
-        Yield one `(guid, example)` pair per abstract in MLEE.
-        The contents of `example` will depend on the chosen configuration.
-        """
+    def _generate_examples(self, dir_files) -> Tuple[int, Dict]:
+        """Yields examples as (key, example) tuples."""
+
+        txt_files = list(dir_files.glob("*txt"))
+
         if self.config.schema == "source":
-            txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
+
         elif self.config.schema == "bigbio_kb":
-            txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
                     parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
