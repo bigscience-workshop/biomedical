@@ -79,13 +79,6 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         # Source Schema
         BigBioConfig(
-            name="pubmed_qa_source",
-            version=SOURCE_VERSION,
-            description="Alias for PubmedQA labeled source schema",
-            schema="source",
-            subset_id="pqal",
-        ),
-        BigBioConfig(
             name="pqal_source",
             version=SOURCE_VERSION,
             description="PubmedQA labeled source schema",
@@ -107,13 +100,6 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             subset_id="pqau",
         ),
         # BigBio Schema
-        BigBioConfig(
-            name="pubmed_qa_bigbio_qa",
-            version=BIGBIO_VERSION,
-            description="Alias for PubmedQA labeled BigBio schema",
-            schema="bigbio_qa",
-            subset_id="pqal",
-        ),
         BigBioConfig(
             name="pqal_bigbio_qa",
             version=BIGBIO_VERSION,
@@ -214,6 +200,15 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             for id, row in data.items():
+                if self.config.subset_id == 'pqau':
+                    row["reasoning_required_pred"] = None
+                    row["reasoning_free_pred"] = None
+                    row["final_decision"] = None
+                elif self.config.subset_id == 'pqaa':
+                    row["YEAR"] = None
+                    row["reasoning_required_pred"] = None
+                    row["reasoning_free_pred"] = None
+                    
                 yield id, row
         elif self.config.schema == "bigbio_qa":
             for id, row in data.items():
@@ -230,5 +225,6 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "type": 'abstractive',
                     "context": ' '.join(row['CONTEXTS']),
                     "answer": answers,
-                }            
+                }         
+                
                 yield id, qa_row
