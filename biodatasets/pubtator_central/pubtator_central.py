@@ -215,6 +215,10 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _parse_pubtator_file(text_or_filepath: str, is_filepath: bool = True) -> Iterator[Dict]:
+        """Returns a generator that returns a dict for each entry in `text_or_filepath`. If
+        `is_filepath`, we assume this is a filepath to a text file in PubTator format. Otherwise,
+        We assume this is a string containing the text in PubTator format.
+        """
         if is_filepath:
             f = open(text_or_filepath, "r")
         else:
