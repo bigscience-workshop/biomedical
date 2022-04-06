@@ -45,7 +45,12 @@ _DATASETNAME = "scifact"
 
 _SOURCE_CORPUS_DESCRIPTION = """\
     SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    The task is to verify or refute claims using evidence from the abstracts.
+    This config has abstracts and document ids.
+    """
+
+_SOURCE_CLAIMS_DESCRIPTION = """\
+    SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
+    This config connects the claims to the evidence and doc ids.
     """
 
 _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION = """\
@@ -60,7 +65,7 @@ _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION = """\
 
 _DESCRIPTION = {
     "scifactcorpus_source": _SOURCE_CORPUS_DESCRIPTION,
-    "scifactclaims_source": _SOURCE_CORPUS_DESCRIPTION,
+    "scifactclaims_source": _SOURCE_CLAIMS_DESCRIPTION,
     "scifactrationale_bigbio_entailment": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
     "scifactlabelprediction_bigbio_entailment": _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION,
 }
