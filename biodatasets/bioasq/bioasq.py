@@ -480,6 +480,10 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
+
+        if self.config.data_dir is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+
         train_dir, test_dir = dl_manager.download_and_extract(
             [os.path.join(self.config.data_dir, _url) for _url in _URLs[self.config.subset_id]]
         )
