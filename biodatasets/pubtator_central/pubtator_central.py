@@ -40,10 +40,12 @@ REFERENCE:
     ClinVar for precision medicine", Bioinformatics,34(1): 80-87
 """
 
+import io
 import re
 from typing import Dict, Iterator, List, Tuple
 
 import datasets
+import requests
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -87,7 +89,8 @@ _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/pubtator/"
 _LICENSE = ""
 
 _URLS = {
-    _DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
+    "api": "https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator",
+    "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
@@ -104,6 +107,13 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
+        BigBioConfig(
+            name="pubtator_central_api",
+            version=SOURCE_VERSION,
+            description="PubTator Central API schema",
+            schema="api",
+            subset_id="pubtator_central",
+        ),
         BigBioConfig(
             name="pubtator_central_source",
             version=SOURCE_VERSION,
@@ -136,7 +146,7 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        if self.config.schema == "source":
+        if self.config.schema in ["api", "source"]:
             features = datasets.Features(
                 {
                     "pmid": datasets.Value("string"),
@@ -166,57 +176,76 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS[_DATASETNAME]
-        filepath = dl_manager.download_and_extract(urls)
+        urls = _URLS[self.config.schema]
+        if self.config.schema == "api":
+            blob = {
+                "pmids": ["27940449", "28058064", "28078498"],
+            }
+            res = requests.post(urls, json=blob)
+            content = res.content.decode("utf-8")
+            is_filepath = False
+        else:
+            content = dl_manager.download_and_extract(urls)
+            is_filepath = True
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": filepath,
+                    "content": content,
+                    "is_filepath": is_filepath,
                     "split": "train",
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
-        if self.config.schema == "source":
-            for pubtator_example in self._parse_pubtator_file(filepath):
+    def _generate_examples(self, content: str, split: str, is_filepath: bool) -> Iterator[Tuple[str, Dict]]:
+        if self.config.schema in ["api", "source"]:
+            for pubtator_example in self._parse_pubtator_file(content, is_filepath=is_filepath):
                 yield pubtator_example["pmid"], pubtator_example
 
         elif self.config.schema == "bigbio_kb":
-            for pubtator_example in self._parse_pubtator_file(filepath):
-                kb_example = self._pubtator_parse_to_bigbio_kb(pubtator_example)
+            for pubtator_example in self._parse_pubtator_file(content):
+                kb_example = self._pubtator_parse_to_bigbio_kb(pubtator_example, is_filepath=is_filepath)
                 yield kb_example["id"], kb_example
 
     @staticmethod
-    def _parse_pubtator_file(filepath: str) -> Iterator[Dict]:
-        with open(filepath, "r") as f:
-            line = f.readline().strip()
-            while line != "":
-                if re.search(r"\d+\|t\|", line) is not None:
-                    pmid, title = line.split("|t|")
-                    # The next line has to be the abstract.
-                    abstract = f.readline().split("|a|")[-1].strip()
-                    line = f.readline().strip()
-                    mentions = []
-                    while line != "":
-                        split_line = line.split("\t")
-                        if len(split_line) == 6:
-                            _, start, end, text, type_, concept_id = split_line
-                        # This entity is not grounded.
-                        elif len(split_line) == 5:
-                            _, start, end, text, type_, concept_id = *split_line, None
-                        # This entity is not grounded and has no type.
-                        else:
-                            _, start, end, text, type_, concept_id = *split_line, None, None
+    def _parse_pubtator_file(text_or_filepath: str, is_filepath: bool = True) -> Iterator[Dict]:
+        if is_filepath:
+            f = open(text_or_filepath, "r")
+        else:
+            f = io.StringIO(text_or_filepath)
 
-                        mentions.append(
-                            {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
-                        )
-                        line = f.readline().strip()
-                    yield {"pmid": pmid, "title": title, "abstract": abstract, "mentions": mentions}
+        line = f.readline().strip()
+        while line != "":
+            if re.search(r"\d+\|t\|", line) is not None:
+                pmid, title = line.split("|t|")
+                # The next line has to be the abstract.
+                abstract = f.readline().split("|a|")[-1].strip()
+                line = f.readline().strip()
+                mentions = []
+                while line != "":
+                    split_line = line.split("\t")
+                    if len(split_line) == 6:
+                        _, start, end, text, type_, concept_id = split_line
+                    # This entity is not grounded.
+                    elif len(split_line) == 5:
+                        _, start, end, text, type_, concept_id = *split_line, None
+                    # This entity is not grounded and has no type.
+                    elif len(split_line) == 4:
+                        _, start, end, text, type_, concept_id = *split_line, None, None
+                    # This line just contains the start and end offsets.
+                    elif len(split_line) == 3:
+                        _, start, end, text, type_, concept_id = *split_line, None, None, None
+
+                    mentions.append(
+                        {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
+                    )
                     line = f.readline().strip()
+                yield {"pmid": pmid, "title": title, "abstract": abstract, "mentions": mentions}
+                line = f.readline().strip()
+
+        f.close()
 
     def _pubtator_parse_to_bigbio_kb(self, pubtator_parse: Dict) -> Dict:
         """
