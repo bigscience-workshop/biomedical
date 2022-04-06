@@ -55,7 +55,7 @@ _SOURCE_CLAIMS_DESCRIPTION = """\
 
 _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION = """\
     SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    This task is the following: given a claim and an abstract, label that sentence with a 1/0 indicating if it is evidence (can be supporting or refuting). This corresponds to the second task outlined in Section 5 of the paper."
+    This task is the following: given a claim and an abstract, label that sentence with a rationale/not_rationale indicating if it is evidence (can be supporting or refuting). This corresponds to the second task outlined in Section 5 of the paper."
     """
 
 _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION = """\
