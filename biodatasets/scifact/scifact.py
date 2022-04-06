@@ -1,7 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and
-#
-# * Nicholas Broad (nbroad1881)
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -110,17 +108,17 @@ class SciFact(datasets.GeneratorBasedBuilder):
             subset_id="scifact_claims",
         ),
         BigBioConfig(
-            name="scifact_rationale_bigbio_entailment",
+            name="scifact_rationale_bigbio_te",
             version=BIGBIO_VERSION,
             description="scifact BigBio text entailment schema for rationale task",
-            schema="bigbio_entailment",
+            schema="bigbio_te",
             subset_id="scifact_rationale",
         ),
         BigBioConfig(
-            name="scifact_labelprediction_bigbio_entailment",
+            name="scifact_labelprediction_bigbio_te",
             version=BIGBIO_VERSION,
             description="scifact BigBio text entailment schema for label prediction task",
-            schema="bigbio_entailment",
+            schema="bigbio_te",
             subset_id="scifact_labelprediction",
         ),
     ]
