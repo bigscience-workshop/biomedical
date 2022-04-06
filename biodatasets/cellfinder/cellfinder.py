@@ -195,7 +195,3 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             source_example["entities"].append(entity_ann)
 
         return source_example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
