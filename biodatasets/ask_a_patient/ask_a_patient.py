@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cgitb import text
 import os
 import re
 import datasets
@@ -51,7 +52,7 @@ _LICENSE = "CC BY 4.0"
 
 _URLs = "https://zenodo.org/record/55013/files/datasets.zip"
 
-_SUPPORTED_TASKS = [Tasks.PARAPHRASING]  # TODO - (phrase) normalization
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -72,10 +73,10 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
             subset_id="ask_a_patient",
         ),
         BigBioConfig(
-            name="ask_a_patient_bigbio_t2t",
+            name="ask_a_patient_bigbio_kb",
             version=BIGBIO_VERSION,
             description="AskAPatient simplified BigBio schema",
-            schema="bigbio_t2t",
+            schema="bigbio_kb",
             subset_id="ask_a_patient",
         ),
     ]
@@ -90,8 +91,8 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
                     "social_media_text": datasets.Value("string"),
                 }
             )
-        elif self.config.schema == "bigbio_t2t":
-            features = schemas.text2text_features
+        elif self.config.schema == "bigbio_kb":
+            features = schemas.kb_features
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -128,7 +129,7 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
             with open(filepath, "r", encoding="latin-1") as f:
                 document_id = f"{split}_{fold_id}"
                 for i, line in enumerate(f):
-                    id = f"{document_id}_{i}"
+                    id = f"{document_id}_{fold_id}_{i}"
                     cui, medical_concept, social_media_text = line.strip().split("\t")
                     if self.config.schema == "source":
                         yield id, {
@@ -137,13 +138,32 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
                             "medical_concept": medical_concept,
                             "social_media_text": social_media_text,
                         }
-                    elif self.config.schema == "bigbio_t2t":
-                        # TODO - how to include CUI?
+                    elif self.config.schema == "bigbio_kb":
+                        text_type = "social_media_text"
+                        offset = (0, len(social_media_text))
                         yield id, {
-                            "id": id, 
+                            "id": id,
                             "document_id": document_id,
-                            "text_1": medical_concept,
-                            "text_2": social_media_text,
-                            "text_1_name": "medical_concept",
-                            "text_2_name": "social_media_text",
+                            "passages": [ 
+                                {
+                                    "id": f"{id}_passage",
+                                    "type": text_type,
+                                    "text": [social_media_text],
+                                    "offsets" : [offset],
+                                }
+                            ],
+                            "entities": [ 
+                                {
+                                    "id": f"{id}_entity",
+                                    "type": text_type,
+                                    "text": [social_media_text],
+                                    "offsets" : [offset],
+                                    "normalized" : [
+                                        {"db_name" : "SNOMED-CT/AMT", "db_id" : cui}
+                                        ]
+                                }
+                            ],
+                            "events": [],
+                            "coreferences": [],
+                            "relations": [],
                         }
