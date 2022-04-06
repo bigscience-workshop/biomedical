@@ -23,7 +23,7 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _DATASETNAME = "bionlp_st_2013_pc"
-_UNIFIED_VIEW_NAME = "bigscience"
+_UNIFIED_VIEW_NAME = "bigbio"
 
 _CITATION = """\
 @inproceedings{ohta-etal-2013-overview,
@@ -80,19 +80,20 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="bionlp_st_2013_pc_source",
             version=SOURCE_VERSION,
-            description=_DESCRIPTION,
+            description="bionlp_st_2013 source schema",
             schema="source",
+            subset_id="bionlp_st_2013_pc",
         ),
         BigBioConfig(
             name="bionlp_st_2013_pc_bigbio_kb",
             version=BIGBIO_VERSION,
-            description=_DESCRIPTION,
+            description="bionlp_st_2013_pc BigBio schema",
             schema="bigbio_kb",
             subset_id="bionlp_st_2013_pc",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME
+    DEFAULT_CONFIG_NAME = "bionlp_st_2013_pc_source"
 
     _ENTITY_TYPES = {"Simple_chemical", "Gene_or_gene_product", "Complex", "Cellular_component"}
 
