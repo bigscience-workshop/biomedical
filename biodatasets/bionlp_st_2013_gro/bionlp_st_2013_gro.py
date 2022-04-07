@@ -85,7 +85,7 @@ class bionlp_st_2013_gro(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME
+    DEFAULT_CONFIG_NAME = "bionlp_st_2013_gro_source"
 
     _ENTITY_TYPES = {
         "Anatomical_system",
