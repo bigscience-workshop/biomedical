@@ -168,6 +168,7 @@ Passages capture document structure, such as the title and abstact sections of a
 	"question_id": "55031181e9bde69634000014",
 	"question": "Is RANKL secreted from the cells?",
 	"type": "yesno",
+	"choices": [],
 	"context": "Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)",
 	"answer": ["yes"],
 }
