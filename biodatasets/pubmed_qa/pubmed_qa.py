@@ -213,7 +213,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_qa":
             for id, row in data.items():
                 if self.config.subset_id == 'pqau':
-                    answers =  [row['LONG_ANSWER']]
+                    answers =  ['maybe', row['LONG_ANSWER']]
                 else:
                     answers = [row['final_decision'], row['LONG_ANSWER']]
 
@@ -222,7 +222,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "question_id": id,
                     "document_id": id,
                     "question": row['QUESTION'],
-                    "type": 'abstractive',
+                    "type": 'yesnomaybe',
                     "context": ' '.join(row['CONTEXTS']),
                     "answer": answers,
                 }         
