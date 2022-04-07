@@ -124,14 +124,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                                         ],
                                     }
                                 ],
-                                "relations": [
-                                    {
-                                        "id": datasets.Value("string"),
-                                        "type": datasets.Value("string"),
-                                        "arg1_id": datasets.Value("string"),
-                                        "arg2_id": datasets.Value("string"),
-                                    }
-                                ],
                             }
                         ]
                     }
@@ -173,15 +165,19 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_bioc_entity(span, doc_text, db_id_key="NCBI Gene identifier") -> dict:
+    def _get_bioc_entity(span, doc_text, db_id_key="NCBI Gene identifier", splitters=",;|-") -> dict:
         """Parse BioC entity annotation."""
         offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
         texts = [doc_text[i:j] for i, j in offsets]
         db_ids = span.infons.get(db_id_key, "-1") if db_id_key else "-1"
+        # Find connector between db_ids for the normalization, if not found, use default
+        connector = "|"
+        for splitter in list(splitters):
+            if splitter in db_ids:
+                connector = splitter
         normalized = [
-            # some entities are linked to multiple normalized ids
             {"db_name": db_id_key, "db_id": db_id}
-            for db_id in db_ids.split("|")
+            for db_id in db_ids.split(connector)
         ]
 
         return {
@@ -191,36 +187,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             "type": span.infons["type"],
             "normalized": normalized,
         }
-
-    @staticmethod
-    def _get_relations(relations, entities) -> List[Dict]:
-        """Parse relation annotations."""
-        # index entities by normalized id
-        index = collections.defaultdict(list)
-        for ent in entities:
-            for norm in ent["normalized"]:
-                index[norm["db_id"]].append(ent)
-        index = dict(index)
-
-        # transform doc-level relations to mention-level
-        relation_mentions = []
-        for rela in relations:
-            arg1 = rela.infons["Chemical"]
-            arg2 = rela.infons["Disease"]
-            # all mention pairs
-            all_pairs = itertools.product(index[arg1], index[arg2])
-            for a, b in all_pairs:
-                # create relations linked by entity ids
-                relation_mentions.append(
-                    {
-                        "id": None,
-                        "type": rela.infons["relation"],
-                        "arg1_id": a["id"],
-                        "arg2_id": b["id"],
-                        "normalized": [],
-                    }
-                )
-        return relation_mentions
 
     @staticmethod
     def _get_document_text(xdoc) -> str:
@@ -250,15 +216,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                                 "type": passage.infons["type"],
                                 "text": passage.text,
                                 "entities": [self._get_bioc_entity(span, doc_text) for span in passage.annotations],
-                                "relations": [
-                                    {
-                                        "id": rel.id,
-                                        "type": rel.infons["relation"],
-                                        "arg1_id": rel.infons["Chemical"],
-                                        "arg2_id": rel.infons["Disease"],
-                                    }
-                                    for rel in xdoc.relations
-                                ],
                             }
                             for passage in xdoc.passages
                         ]
@@ -298,7 +255,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                             }
                         )
                         uid += 1
-
                     # entities
                     for passage in xdoc.passages:
                         for span in passage.annotations:
@@ -307,10 +263,4 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                             data["entities"].append(ent)
                             uid += 1
 
-                    # relations
-                    relations = self._get_relations(xdoc.relations, data["entities"])
-                    for rela in relations:
-                        rela["id"] = uid  # assign unique id
-                        data["relations"].append(rela)
-                        uid += 1
                 yield i, data
