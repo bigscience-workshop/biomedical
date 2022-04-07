@@ -114,19 +114,19 @@ class TwADRL(datasets.GeneratorBasedBuilder):
                 os.path.join(dataset_dir, f"TwADR-L.fold-*.{split_name}.txt")
             ):
                 fold_id = re.search("TwADR-L\.fold-(\d)\.", fold_filepath).group(1)
-                # format: <split>_kfold-<idx>
-                document_id = f"{split_name}_kfold-{fold_id}"
-                split = datasets.SplitGenerator(
-                    name=f"{split_name}_{fold_id}",
-                    gen_kwargs={"filepath": fold_filepath, "document_id": document_id},
+                split_id = f"{split_name}_{fold_id}"
+                splits.append(
+                    datasets.SplitGenerator(
+                        name=split_id,
+                        gen_kwargs={"filepath": fold_filepath, "split_id": split_id},
+                    )
                 )
-                splits.append(split)
         return splits
 
-    def _generate_examples(self, filepath, document_id):
+    def _generate_examples(self, filepath, split_id):
         with open(filepath, "r", encoding="latin-1") as f:
             for i, line in enumerate(f):
-                id = f"{document_id}_{i}"
+                id = f"{split_id}_{i}"
                 cui, medical_concept, social_media_text = line.strip().split("\t")
                 if self.config.schema == "source":
                     yield id, {
@@ -139,7 +139,7 @@ class TwADRL(datasets.GeneratorBasedBuilder):
                     offset = (0, len(social_media_text))
                     yield id, {
                         "id": id,
-                        "document_id": document_id,
+                        "document_id": id,
                         "passages": [
                             {
                                 "id": f"{id}_passage",
