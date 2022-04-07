@@ -1,6 +1,8 @@
+import io
+import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Callable, Dict, Iterable, Iterator, List
 
 
 def remove_prefix(a: str, prefix: str) -> str:
@@ -311,5 +313,119 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
             unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
+
+    return unified_example
+
+
+def parse_pubtator_file(text_or_filepath: str, is_filepath: bool = True) -> Iterator[Dict]:
+    """Returns a generator that returns a dict for each entry in `text_or_filepath`. If
+    `is_filepath`, we assume this is a filepath to a text file in PubTator format. Otherwise,
+    We assume this is a string containing the text in PubTator format.
+    """
+    if is_filepath:
+        f = open(text_or_filepath, "r")
+    else:
+        f = io.StringIO(text_or_filepath)
+
+    line = f.readline().strip()
+    while line != "":
+        if re.search(r"\d+\|t\|", line) is not None:
+            pmid, title = line.split("|t|")
+            # The next line has to be the abstract.
+            abstract = f.readline().split("|a|")[-1].strip()
+            line = f.readline().strip()
+            mentions = []
+            while line != "":
+                split_line = line.split("\t")
+                if len(split_line) == 6:
+                    _, start, end, text, type_, concept_id = split_line
+                # This entity is not grounded.
+                elif len(split_line) == 5:
+                    _, start, end, text, type_, concept_id = *split_line, None
+                # This entity is not grounded and has no type.
+                elif len(split_line) == 4:
+                    _, start, end, text, type_, concept_id = *split_line, None, None
+                # This line just contains the start and end offsets.
+                elif len(split_line) == 3:
+                    _, start, end, text, type_, concept_id = *split_line, None, None, None
+                else:
+                    # TODO (John): I think we should try to catch anything with less than three
+                    # columns as its not clear what this could be and is probably a mistake. Is
+                    # there a way the admins want to log this?
+                    print("A warning should be logged here!")
+
+                mentions.append(
+                    {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
+                )
+                line = f.readline().strip()
+            yield {"pmid": pmid, "title": title, "abstract": abstract, "mentions": mentions}
+            line = f.readline().strip()
+
+    f.close()
+
+
+def pubtator_parse_to_bigbio_kb(pubtator_parse: Dict, get_db_name: Callable[[Dict], str]) -> Dict:
+    """
+    Transform a PubTator parse (conforming to the standard PubTator schema) obtained with
+    `_parse_pubtator_file_file` into a dictionary conforming to the `bigbio-kb` schema
+    (as defined in ../schemas/kb.py)
+    :param pubtator_parse:
+    :param get_db_name: A callable that takes a dictionary representing a entity and returns the
+                        name of the database that the mention is grounded to. If not provided,
+                        `db_name` in the returned dictionary will be None for all entities.
+    """
+
+    unified_example = {}
+
+    unified_example["id"] = pubtator_parse["pmid"]
+    unified_example["document_id"] = pubtator_parse["pmid"]
+
+    unified_example["passages"] = [
+        {
+            "id": pubtator_parse["pmid"] + "_title",
+            "type": "title",
+            "text": [pubtator_parse["title"]],
+            "offsets": [[0, len(pubtator_parse["title"])]],
+        },
+        {
+            "id": pubtator_parse["pmid"] + "_abstract",
+            "type": "abstract",
+            "text": [pubtator_parse["abstract"]],
+            "offsets": [
+                [
+                    # +1 assumes the title and abstract will be joined by a space.
+                    len(pubtator_parse["title"]) + 1,
+                    len(pubtator_parse["title"]) + 1 + len(pubtator_parse["abstract"]),
+                ]
+            ],
+        },
+    ]
+
+    unified_entities = {}
+    for entity in pubtator_parse["mentions"]:
+        # TODO: It is possible that concept_id is None (like for some example in PubTator central. Unclear how to handle this)
+        # We need a unique identifier for this entity, so build it from the document id and entity id
+        unified_entity_id = pubtator_parse["pmid"] + "_" + entity["concept_id"]
+        # The user can provide a callable the returns the database name.
+        db_name = get_db_name(entity) if get_db_name is not None else None
+        if unified_entity_id not in unified_entities:
+            unified_entities[unified_entity_id] = {
+                "id": unified_entity_id,
+                "type": entity["type"],
+                "text": [entity["text"]],
+                "offsets": [entity["offsets"]],
+                "normalized": [{"db_name": db_name, "db_id": entity["concept_id"]}],
+            }
+        else:
+            unified_entities[unified_entity_id]["text"].append(entity["text"])
+            unified_entities[unified_entity_id]["offsets"].append(entity["offsets"])
+            unified_entities[unified_entity_id]["normalized"].append(
+                {"db_name": db_name, "db_id": entity["concept_id"]}
+            )
+
+    unified_example["entities"] = list(unified_entities.values())
+    unified_example["events"] = []
+    unified_example["relations"] = []
+    unified_example["coreferences"] = []
 
     return unified_example
