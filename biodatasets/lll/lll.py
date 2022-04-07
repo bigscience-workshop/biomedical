@@ -41,7 +41,8 @@ _CITATION = """\
     month = {01},
     pages = {},
     title = {Learning Language in Logic - Genic Interaction Extraction Challenge},
-    journal = {Proceedings of the Learning Language in Logic 2005 Workshop at the International Conference on Machine Learning}
+    journal = {Proceedings of the Learning Language in Logic 2005 Workshop at the \
+        International Conference on Machine Learning}
 }
 """
 
@@ -61,7 +62,7 @@ sentences.
 
 _HOMEPAGE = "http://genome.jouy.inra.fr/texte/LLLchallenge"
 
-_LICENSE = "?"
+_LICENSE = "Unknown"
 
 _URLS = {
     _DATASETNAME: [
@@ -79,7 +80,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class LLLDataset(datasets.GeneratorBasedBuilder):
-    """LLL dataset for gene interection extraction (RE)"""
+    """LLL dataset for gene interaction extraction (RE)"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -202,7 +203,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "id": f"{document_['id']}-{word['id']}",
                                 "type": None,
                                 "text": [word["text"]],
-                                "offsets": [[word["offsets"][0], word["offsets"][1]+1]],
+                                "offsets": [[word["offsets"][0], word["offsets"][1] + 1]],
                                 "normalized": [],
                             }
                             for word in document["words"]
