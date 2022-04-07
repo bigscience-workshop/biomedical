@@ -140,15 +140,21 @@ class SciQ(datasets.GeneratorBasedBuilder):
             for i, d in enumerate(data):
                 yield i, d
         elif self.config.schema == "bigbio_qa":
-            document_id = split
+            question_type = "multiple_choice"
             for i, d in enumerate(data):
                 id = f"{split}_{i}"
                 yield id, {
                     "id": id,
                     "question_id": id,
-                    "document_id": document_id,
+                    "document_id": id,
                     "question": d["question"],
-                    "type": "",  # TODO - not provided in original data
+                    "type": question_type,
                     "context": d["support"],
-                    "answer": [d["correct_answer"]],  # TODO - this ignores the distractors
+                    "answer": [d["correct_answer"]],
+                    "choices": [
+                        d["distractor1"],
+                        d["distractor2"],
+                        d["distractor3"],
+                        d["correct_answer"],
+                    ],
                 }
