@@ -101,7 +101,13 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "offsets": [[datasets.Value("int32")]],
                             "text": [datasets.Value("string")],
-                            "type": datasets.Value("string")
+                            "type": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
                         }
                     ],
                     "relations": [
@@ -110,6 +116,12 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
                             "type": datasets.Value("string"),
                             "arg1_id": datasets.Value("string"),
                             "arg2_id": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
                         }
                     ],
                 }
@@ -152,27 +164,28 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
         root = tree.getroot()
         if self.config.schema == "source":
             for guid, sentence in enumerate(root.iter("sentence")):
-                example = self._create_source_example(sentence)
+                example = self._create_example(sentence)
+                example["text"] = sentence.attrib["text"]
+                example["type"] = "Sentence"
                 yield guid, example
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_kb":
             for guid, sentence in enumerate(root.iter("sentence")):
-                example = self._create_source_example(sentence)
-                example["passages"] = {
+                example = self._create_example(sentence)
+                example["passages"] = [{
                     "id": f"{sentence.attrib['id']}__text",
                     "type": "Sentence",
                     "text": [sentence.attrib["text"]],
                     "offsets": [(0, len(sentence.attrib["text"]))],
-                }
+                }]
                 example["events"] = []
                 example["coreferences"] = []
+                example["id"] = guid
                 yield guid, example
 
-    def _create_source_example(self, sentence):
+    def _create_example(self, sentence):
         example = {}
-        example["text"] = sentence.attrib["text"]
         example["document_id"] = sentence.attrib["id"]
-        example["type"] = "Sentence"
         example["entities"] = []
         example["relations"] = []
         for tag in sentence:
@@ -184,17 +197,15 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
                 raise ValueError(f"unknown tags: {tag.tag}")
         return example
 
-    def _create_bigbio_kb_example(self):
-        pass
-
     @staticmethod
     def _add_entity(entity):
         offsets = [tuple([int(o) for o in offset.split("-")]) for offset in entity.attrib["charOffset"].split(",")]
         return {
             "id": entity.attrib["id"],
             "offsets": offsets,
-            "text": entity.attrib["text"],
-            "type": entity.attrib["type"]
+            "text": [entity.attrib["text"]],
+            "type": entity.attrib["type"],
+            "normalized": {}
         }
 
     @staticmethod
@@ -204,4 +215,5 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             "type": interaction.attrib["type"],
             "arg1_id": interaction.attrib["e1"],
             "arg2_id": interaction.attrib["e2"],
+            "normalized": {}
         }
