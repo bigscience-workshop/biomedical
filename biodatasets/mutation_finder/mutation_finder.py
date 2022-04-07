@@ -207,7 +207,15 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
 
                     entities = []
                     for m_text in mutations[identifier]:
-                        entities.append({"id": uid, "type": "", "text": [m_text], "offsets": [], "normalized": []})
+                        entities.append(
+                            {
+                                "id": uid,
+                                "type": "variant",
+                                "text": [m_text],
+                                "offsets": [(None, None)],
+                                "normalized": [],
+                            }
+                        )
                         uid += 1
 
                     yield idx, {
