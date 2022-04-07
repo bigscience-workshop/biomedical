@@ -157,7 +157,7 @@ class TwADRL(datasets.GeneratorBasedBuilder):
                                 "text": [social_media_text],
                                 "offsets" : [offset],
                                 "normalized" : [
-                                    {"db_name" : "SNOMED-CT/AMT", "db_id" : cui}
+                                    {"db_name" : "SNOMED-CT|AMT", "db_id" : cui}
                                     ]
                             }
                         ],
