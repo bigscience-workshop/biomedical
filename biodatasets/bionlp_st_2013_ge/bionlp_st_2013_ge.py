@@ -22,6 +22,7 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _DATASETNAME = "bionlp_st_2013_ge"
+_SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _CITATION = """\
@@ -49,7 +50,8 @@ _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-ge"
 
 _LICENSE = "DUA"
 
-_URLs = {"bionlp_st_2013_ge": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",}
+_URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",
+         "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",}
 
 _SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,]
 _SOURCE_VERSION = "1.0.0"
@@ -183,7 +185,7 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
 
-        my_urls = _URLs[_DATASETNAME]
+        my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
             "train": data_dir / f'bionlp-st-2013-ge-master' / "original-data" / "train",
