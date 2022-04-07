@@ -37,18 +37,15 @@ from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-# TODO: Add BibTeX citation
 _CITATION = """\
 @article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+  title={Cadec: A corpus of adverse drug event annotations},
+  author={Karimi, Sarvnaz and Metke-Jimenez, Alejandro and Kemp, Madonna and Wang, Chen},
+  journal={Journal of biomedical informatics},
+  volume={55},
+  pages={73--81},
+  year={2015},
+  publisher={Elsevier}
 }
 """
 
