@@ -142,35 +142,34 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, data_files: Path) -> Tuple[int, Dict]:
+        """Yields examples as (key, example) tuples."""
         data_path = Path(os.path.join(data_files, "txt"))
         tags_path = Path(os.path.join(data_files, "tags.tsv"))
         data_files = list(data_path.glob("*txt"))
         tags = self._load_tags(tags_path)
 
         if self.config.schema == "source":
-            for data_file in data_files:
+            for guid, data_file in enumerate(data_files):
                 document_key = data_file.stem
                 if document_key not in tags:
                     continue
                 example = self._create_source_example(data_file, tags.get(document_key))
                 example["document_id"] = str(document_key)
-                yield str(document_key), example
+                yield guid, example
 
         elif self.config.schema == "bigbio_kb":
-            for data_file in data_files:
+            for guid, data_file in enumerate(data_files):
                 document_key = data_file.stem
                 if document_key not in tags:
                     continue
                 example = self._create_kb_example(data_file, tags.get(document_key))
                 example["document_id"] = str(document_key)
-                example["id"] = str(document_key)
-                yield str(document_key), example
+                example["id"] = guid
+                yield guid, example
 
     @staticmethod
     def _load_tags(path: Path) -> Dict:
-        """
-        This method loads all tags into a dictionary with document ID as keys and all annotations to that file as values.
-        """
+        """Loads all tags into a dictionary with document ID as keys and all annotations to that file as values."""
         tags = {}
         document_id_col = 1
 
@@ -187,6 +186,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         return tags
 
     def _create_source_example(self, txt_file, tags) -> Dict:
+        """Creates example in source schema."""
         example = {}
         example["entities"] = []
         with open(txt_file, 'r') as file:
@@ -210,12 +210,13 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         return example
 
     def _create_kb_example(self, txt_file, tags) -> Dict:
+        """Creates example in BigBio KB schema."""
         example = {}
         with open(txt_file, 'r') as file:
             text = file.read()
         # Passages
         example["passages"] = [{
-            "id": txt_file.stem,
+            "id": f"{txt_file.stem}__text",
             "text": [text],
             "type": "Article",
             "offsets": [(0, len(text))]
@@ -226,7 +227,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             species_id, start, end, entity_text, _ = tag
             entity_type, db_name, db_id = species_id.split(":")
             entity = {
-                "id": str(tag_id),
+                "id": f"{txt_file.stem}__T{str(tag_id)}",
                 "type": entity_type,
                 "text": [entity_text],
                 "offsets": [(int(start), int(end))],
