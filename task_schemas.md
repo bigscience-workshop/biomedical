@@ -229,6 +229,6 @@ Passages capture document structure, such as the title and abstact sections of a
 	"id": "0",
 	"document_id": "NULL",
 	"text": "Am I over weight (192.9) for my age (39)?",
-	"label": "question",
+	"labels": ["question"],
 }
 ```
