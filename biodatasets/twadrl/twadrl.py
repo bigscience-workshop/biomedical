@@ -114,7 +114,8 @@ class TwADRL(datasets.GeneratorBasedBuilder):
                 os.path.join(dataset_dir, f"TwADR-L.fold-*.{split_name}.txt")
             ):
                 fold_id = re.search("TwADR-L\.fold-(\d)\.", fold_filepath).group(1)
-                document_id = f"{split_name}_{fold_id}"
+                # format: <split>_kfold-<idx>
+                document_id = f"{split_name}_kfold-{fold_id}"
                 split = datasets.SplitGenerator(
                     name=f"{split_name}_{fold_id}",
                     gen_kwargs={"filepath": fold_filepath, "document_id": document_id},
