@@ -192,12 +192,13 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
 
                     passages = []
                     offset = 0
-                    for p_text in values[1:]:
+                    for i, p_text in enumerate(values[1:]):
+                        _type = "title" if i == 0 else "abstract"
                         if p_text != "null":
                             passages.append(
                                 {
                                     "id": uid,
-                                    "type": "",
+                                    "type": _type,
                                     "text": [p_text],
                                     "offsets": [(offset, offset + len(p_text))],
                                 }
