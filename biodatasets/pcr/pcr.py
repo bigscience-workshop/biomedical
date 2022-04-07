@@ -14,7 +14,8 @@
 # limitations under the License.
 """
 A corpus for plant and chemical entities and for the relationships between them. The corpus contains 2218 plant
-and chemical entities and 600 plant-chemical relationships which are drawn from 1109 sentences in 245 PubMed abstracts.
+and chemical entities and 600 plant-chemical relationships which are drawn from 1109 sentences in 245 PubMed
+abstracts.
 """
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
