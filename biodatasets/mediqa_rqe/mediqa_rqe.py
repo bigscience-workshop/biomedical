@@ -49,10 +49,7 @@ _HOMEPAGE = "https://sites.google.com/view/mediqa2019"
 _LICENSE = "-"
 
 _URLS = {
-    _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip",
-#     "train": "https://github.com/abachaa/MEDIQA2019/blob/master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TrainingSet-AMIA2016.xml",
-#     "validation": "https://github.com/abachaa/MEDIQA2019/blob/master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-ValidationSet-AMIA2016.xml",
-#     "test": "https://github.com/abachaa/MEDIQA2019/blob/master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml"
+    _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip"
 }
 
 _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
