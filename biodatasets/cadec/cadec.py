@@ -15,23 +15,25 @@
 
 """
 The CADEC corpus (CSIRO Adverse Drug Event Corpus) is is a new rich annotated corpus of medical forum posts on patient-
-reported Adverse Drug Events (ADEs). The corpus is sourced from posts on social media, and contains text that is 
-largely written in colloquial language and often deviates from formal English grammar and punctuation rules. 
-Annotations contain mentions of concepts such as drugs, adverse events, symptoms, and diseases linked to their 
-corresponding concepts in controlled vocabularies, i.e., SNOMED Clinical Terms and MedDRA. The quality of the 
-annotations is ensured by annotation guidelines, multi-stage annotations, measuring inter-annotator agreement, and 
-final review of the annotations by a clinical terminologist. This corpus is useful for those studies in the area of 
-information extraction, or more generally text mining, from social media to detect possible adverse drug reactions from 
-direct patient reports. The dataset contains three views: original (entities annotated in the posts), meddra (entities 
+reported Adverse Drug Events (ADEs). The corpus is sourced from posts on social media, and contains text that is
+largely written in colloquial language and often deviates from formal English grammar and punctuation rules.
+Annotations contain mentions of concepts such as drugs, adverse events, symptoms, and diseases linked to their
+corresponding concepts in controlled vocabularies, i.e., SNOMED Clinical Terms and MedDRA. The quality of the
+annotations is ensured by annotation guidelines, multi-stage annotations, measuring inter-annotator agreement, and
+final review of the annotations by a clinical terminologist. This corpus is useful for those studies in the area of
+information extraction, or more generally text mining, from social media to detect possible adverse drug reactions from
+direct patient reports. The dataset contains three views: original (entities annotated in the posts), meddra (entities
 normalized with meddra codes), snomedct (entities normalized with SNOMED CT codes).
 """
 
 import os
+import re
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
-from utils import schemas, parsing
+
+from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -54,14 +56,14 @@ _DATASETNAME = "cadec"
 
 _DESCRIPTION = """\
 The CADEC corpus (CSIRO Adverse Drug Event Corpus) is is a new rich annotated corpus of medical forum posts on patient-
-reported Adverse Drug Events (ADEs). The corpus is sourced from posts on social media, and contains text that is 
-largely written in colloquial language and often deviates from formal English grammar and punctuation rules. 
-Annotations contain mentions of concepts such as drugs, adverse events, symptoms, and diseases linked to their 
-corresponding concepts in controlled vocabularies, i.e., SNOMED Clinical Terms and MedDRA. The quality of the 
-annotations is ensured by annotation guidelines, multi-stage annotations, measuring inter-annotator agreement, and 
-final review of the annotations by a clinical terminologist. This corpus is useful for those studies in the area of 
-information extraction, or more generally text mining, from social media to detect possible adverse drug reactions from 
-direct patient reports. The dataset contains three views: original (entities annotated in the posts), meddra (entities 
+reported Adverse Drug Events (ADEs). The corpus is sourced from posts on social media, and contains text that is
+largely written in colloquial language and often deviates from formal English grammar and punctuation rules.
+Annotations contain mentions of concepts such as drugs, adverse events, symptoms, and diseases linked to their
+corresponding concepts in controlled vocabularies, i.e., SNOMED Clinical Terms and MedDRA. The quality of the
+annotations is ensured by annotation guidelines, multi-stage annotations, measuring inter-annotator agreement, and
+final review of the annotations by a clinical terminologist. This corpus is useful for those studies in the area of
+information extraction, or more generally text mining, from social media to detect possible adverse drug reactions from
+direct patient reports. The dataset contains three views: original (entities annotated in the posts), meddra (entities
 normalized with meddra codes), sct (entities normalized with SNOMED CT codes).
 """
 
@@ -79,6 +81,7 @@ _SOURCE_VERSION = "2.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 class CadecDataset(datasets.GeneratorBasedBuilder):
     """CADEC is an annoted corpus of patient reported Adverse Drug Events."""
 
@@ -87,22 +90,24 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name=f"cadec_source",
+            name="cadec_source",
             version=SOURCE_VERSION,
-            description=f"CADEC source schema",
+            description="CADEC source schema",
             schema="source",
-            subset_id=f"cadec",
+            subset_id="cadec",
         ),
         BigBioConfig(
-            name=f"cadec_bigbio_kb",
+            name="cadec_bigbio_kb",
             version=BIGBIO_VERSION,
-            description=f"CADEC BigBio schema",
+            description="CADEC BigBio schema",
             schema="bigbio_kb",
-            subset_id=f"cadec",
-        )
+            subset_id="cadec",
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "cadec_source"
+
+    _ENTITY_TYPES = {"Symptom", "ADR", "Finding", "Disease", "Drug"}
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -127,9 +132,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                             "ref_id": datasets.Value("string"),
                             "resource_name": datasets.Value("string"),
                             "cuid": datasets.Value("string"),
-                            "text": datasets.Value(
-                                "string"
-                            ),
+                            "text": datasets.Value("string"),
                         }
                     ],
                 },
@@ -160,7 +163,10 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, corpus_path: str,) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self,
+        corpus_path: str,
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
@@ -169,16 +175,17 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                 yield guid, example
         elif self.config.schema == "bigbio_kb":
             for guid, example in self._parse_examples(corpus_path):
-                example = parsing.brat_parse_to_bigbio_kb(
-                    example, entity_types=self._ENTITY_TYPES
-                )
+                example["events"] = []
+                example["relations"] = []
+                example["equivalences"] = []
+                example = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
                 example["id"] = str(guid)
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
 
-
     def _parse_examples(self, corpus_path: Path) -> Dict:
+
         txt_files = list(Path(corpus_path, "text").glob("*txt"))
         for guid, txt_file in enumerate(txt_files):
             example = {}
@@ -193,30 +200,20 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                 self._populate_example(example, annotation, annotation_path)
             yield guid, example
 
-            
-
     def _populate_example(self, example, code_system: str, annotation_file: Path):
         ann_lines = []
-        print(annotation_file)
         if annotation_file.exists():
-            with annotation_file.open() as f:
+            with annotation_file.open(encoding="iso-8859-1") as f:
                 ann_lines.extend(f.readlines())
 
         for line in ann_lines:
             line = line.strip()
-            # some lines contain 4 or 5 spaces instead of tabs (f.e. /meddra/DICLOFENAC-SODIUM.7.ann)
-            line = line.replace("     ", "\t")
-            line = line.replace("    ", "\t")
+            # some lines contain 4 or 5 or even 7 spaces instead of tabs (f.e. /meddra/DICLOFENAC-SODIUM.7.ann)
+            line = re.sub(r"\s{4,}", "\t", line)
 
-            """
-            if "|+" in line:
-                print(annotation_file)
-                exit(-1)
-            """
-            print(line)
             if not line:
                 continue
-            elif line.startswith("TT"): # Normalization
+            elif line.startswith("TT"):  # Normalization
                 fields = line.split("\t")
                 ann = self._parse_normalization(fields, code_system)
                 example["normalizations"].extend(ann)
@@ -241,8 +238,8 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
         anns = []
         base_ann = {
             "id": code_system + "_" + fields[0],
-            "ref_id": fields[0][1:], # here TT1 -> Normalization of T1
-            "type": "Reference"
+            "ref_id": fields[0][1:],  # here TT1 -> Normalization of T1
+            "type": "Reference",
         }
 
         if "CONCEPT_LESS" in fields[1]:
@@ -252,38 +249,37 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             ann["resource_name"] = ""
             anns = [ann]
         elif code_system == "sct":
-            if "|" in fields[1]:
-                # some anns contain multiple normalizations, used seperator is very inconsistent
-                sep = None
-                if "|+" in fields[1]: # /sct/ARTHROTEC.112.ann
-                    sep = "|+"
-                elif "| +" in fields[1]: # /sct/ARTHROTEC.113.ann
-                    sep = "| +"
-                elif "| or" in fields[1]: # sct\ARTHROTEC.1.ann
-                    sep = "| or"
-                print(fields)
-                concepts, _ = fields[1].rsplit("|", maxsplit=1)
-                print(concepts)
-                print(sep)
-                if sep:
-                    concepts = concepts.split(sep)
-                else:
-                    concepts = [concepts]
-                print(concepts)
-                anns = []
-                for concept in concepts:
-                    concept = concept.strip()
-                    ann = base_ann.copy()
-                    print(concept)
+
+            concepts = re.sub(r"\s+", " ", fields[1])
+            # strip random amount of whitespace from seperator |
+            concepts = re.sub(r"(\s?\|\s?)", "|", concepts)
+            # remove all offsets, sometimes there is a | between normalization and offset, sometimes there is not
+            # f.e. TT9	21499005|Feeling agitated 232 249	Severe aggitation (LIPITOR.496.ann)
+            concepts = re.sub(r"(\s?\|?\s?([0-9]+)\s([0-9]+);?)+", "", concepts)
+            # TT7	2297011000036108 | magnesium | (substance) 186 195	magnesium (LIPITOR.598.ANN)
+            concepts = re.sub(r"(\s?\|\s?\(substance\))", " (substance)", concepts)
+            # separator for multiple normalizations can be '|+’ or ’|or’ with a random amount of whitespace
+            # see /sct/ARTHROTEC.112.ann, /sct/ARTHROTEC.113.ann, /sct/ARTHROTEC.1.ann
+            concepts = re.sub(r"(\s?\|\s?or\s?)", "|+", concepts)
+            concepts = re.sub(r"(\s?\|\s?\+\s?)", "|+", concepts)
+
+            concepts = concepts.split("|+")
+
+            anns = []
+            for concept in concepts:
+                concept = concept.strip()
+                ann = base_ann.copy()
+                if "|" in concept:
                     ann["cuid"], ann["text"] = concept.split("|")
-                    ann["cuid"] = ann["cuid"].strip()
-                    ann["text"] = ann["text"].strip()
-                    ann["resource_name"] = "Snomed CT"
-                    anns.append(ann)
-            elif "31460011000036109  (substance)" in fields[1]: # there is one dirty line 
-                pass
-            else:
-                raise ValueError("Invalid line: " + '\t'.join(fields))
+                else:
+                    # sometimes there is no | between cuid and label
+                    # TT2     76948002 | Severe pain | + 57676002 Arthralgia |  43 72 extreme pain \
+                    # in all my joints (LIPITOR.698.ann)
+                    ann["cuid"], ann["text"] = concept.split(" ")
+                ann["cuid"] = ann["cuid"].strip()
+                ann["text"] = ann["text"].strip()
+                ann["resource_name"] = "Snomed CT"
+                anns.append(ann)
         elif code_system == "meddra":
             ann = base_ann.copy()
             ann["cuid"], _ = fields[1].split(maxsplit=1)
@@ -291,5 +287,3 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             ann["resource_name"] = "Meddra"
             anns = [ann]
         return anns
-
-
