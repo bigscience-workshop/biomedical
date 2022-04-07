@@ -117,7 +117,7 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "identifier": datasets.Value("string"),
-                    "text": datasets.Value("string"),
+                    "text": datasets.Sequence(datasets.Value("string")),
                     "mutations": [
                         {
                             "text": datasets.Value("string"),
@@ -179,7 +179,7 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
 
                 if self.config.schema == "source":
                     # remove null values from the text
-                    text = "\t".join(v for v in values[1:] if v != "null")
+                    text = [v for v in values[1:] if v != "null"]
 
                     yield idx, {
                         "identifier": identifier,
