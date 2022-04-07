@@ -66,7 +66,7 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="mediqa_rqe_source",
             version=SOURCE_VERSION,
-            description="MediqaRQE source schema",
+            description="MEDIQA RQE source schema",
             schema="source",
             subset_id="mediqa_rqe_source",
         ),
@@ -74,7 +74,7 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="mediqa_rqe_bigbio_te",
             version=BIGBIO_VERSION,
-            description="MediqaRQE BigBio schema",
+            description="MEDIQA RQE BigBio schema",
             schema="bigbio_te",
             subset_id="mediqa_rqe_bigbio_te",
         )
