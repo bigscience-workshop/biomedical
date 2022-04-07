@@ -165,11 +165,11 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_bioc_entity(span, doc_text, db_id_key="NCBI Gene identifier", splitters=",;|-") -> dict:
+    def _get_bioc_entity(span, db_id_key="NCBI Gene identifier", splitters=",;|-") -> dict:
         """Parse BioC entity annotation."""
         offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        texts = [doc_text[i:j] for i, j in offsets]
-        db_ids = span.infons.get(db_id_key, "-1") if db_id_key else "-1"
+        texts = [span.text]  # be careful with the mismatch between text from span and text using offsets
+        db_ids = span.infons.get(db_id_key, "-1")
         # Find connector between db_ids for the normalization, if not found, use default
         connector = "|"
         for splitter in list(splitters):
@@ -188,15 +188,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             "normalized": normalized,
         }
 
-    @staticmethod
-    def _get_document_text(xdoc) -> str:
-        """Parse document text from BioC XML."""
-        text = ""
-        for passage in xdoc.passages:
-            pad = passage.offset - len(text)
-            text += (" " * pad) + passage.text
-        return text
-
     def _generate_examples(self, filepath: Path, file_name: str, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
@@ -208,18 +199,17 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                 file_path = filepath/"FINAL"/f"{file_id}.BioC.XML"
                 reader = bioc.BioCXMLDocumentReader(file_path.as_posix())
                 for xdoc in reader:
-                    doc_text = self._get_document_text(xdoc)
-                yield uid, {
-                        "passages": [
-                            {
-                                "document_id": xdoc.id,
-                                "type": passage.infons["type"],
-                                "text": passage.text,
-                                "entities": [self._get_bioc_entity(span, doc_text) for span in passage.annotations],
-                            }
-                            for passage in xdoc.passages
-                        ]
-                      }
+                    yield uid, {
+                            "passages": [
+                                {
+                                    "document_id": xdoc.id,
+                                    "type": passage.infons["type"],
+                                    "text": passage.text,
+                                    "entities": [self._get_bioc_entity(span) for span in passage.annotations],
+                                }
+                                for passage in xdoc.passages
+                            ]
+                          }
         elif self.config.schema == "bigbio_kb":
             with open(filepath/file_name, encoding='utf-8') as f:
                 contents = f.readlines()
@@ -239,7 +229,6 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                         "coreferences": [],
                     }
                     uid += 1
-                    doc_text = self._get_document_text(xdoc)
 
                     char_start = 0
                     # passages must not overlap and spans must cover the entire document
@@ -258,9 +247,9 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                     # entities
                     for passage in xdoc.passages:
                         for span in passage.annotations:
-                            ent = self._get_bioc_entity(span, doc_text, db_id_key="NCBI Gene identifier")
+                            ent = self._get_bioc_entity(span, db_id_key="NCBI Gene identifier")
                             ent["id"] = uid  # override BioC default id
                             data["entities"].append(ent)
                             uid += 1
 
-                yield i, data
+                    yield i, data
