@@ -205,14 +205,14 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
 
     def _fix_example(self, example: Dict) -> Dict:
         """
-            Fixes by the example by adapting the offsets of the trigger word of the first
-            event. In the official annotation data the end offset is incorrect (for 3 examples).
+        Fixes by the example by adapting the offsets of the trigger word of the first
+        event. In the official annotation data the end offset is incorrect (for 3 examples).
         """
         first_event = example["events"][0]
         trigger_text = first_event["trigger"]["text"][0]
         offsets = first_event["trigger"]["offsets"][0]
 
-        real_offsets = [offsets[0], offsets[0]+len(trigger_text)]
+        real_offsets = [offsets[0], offsets[0] + len(trigger_text)]
         example["events"][0]["trigger"]["offsets"] = [real_offsets]
 
         return example
