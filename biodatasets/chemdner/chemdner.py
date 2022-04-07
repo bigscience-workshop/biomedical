@@ -290,7 +290,7 @@ class CHEMDNERDataset(datasets.GeneratorBasedBuilder):
                 if self.config.schema == "bigbio_kb" and a_type == "MeSH_Indexing_Chemical":
                     continue
 
-                if a.text == None or a.text == "":
+                if (a.text == None or a.text == "") and self.config.schema == "bigbio_kb":
                     continue
 
                 da = {
