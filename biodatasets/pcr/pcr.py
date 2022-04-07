@@ -77,6 +77,13 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
             subset_id="pcr",
         ),
         BigBioConfig(
+            name="pcr_fixed_source",
+            version=SOURCE_VERSION,
+            description="PCR (with fixed offsets) source schema",
+            schema="source",
+            subset_id="pcr_fixed",
+        ),
+        BigBioConfig(
             name="pcr_bigbio_kb",
             version=BIGBIO_VERSION,
             description="PCR BigBio schema",
@@ -160,6 +167,10 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
                 example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
                 example = self._to_source_example(example)
 
+                # Three documents have incorrect offsets - fix them for fixed_source scheme
+                if self.config.subset_id == "pcr_fixed" and example["document_id"] in ["463", "509", "566"]:
+                    example = self._fix_example(example)
+
                 yield example["document_id"], example
 
         elif self.config.schema == "bigbio_kb":
@@ -169,7 +180,13 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
 
                 example = parsing.parse_brat_file(file)
                 example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
-                example["id"] = example["document_id"]
+
+                document_id = example["document_id"]
+                example["id"] = document_id
+
+                # Three documents have incorrect offsets - fix them for BigBio scheme
+                if document_id in ["463", "509", "566"]:
+                    example = self._fix_example(example)
 
                 yield example["id"], example
 
@@ -185,3 +202,17 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
         source_example.pop("coreferences", None)
 
         return source_example
+
+    def _fix_example(self, example: Dict) -> Dict:
+        """
+            Fixes by the example by adapting the offsets of the trigger word of the first
+            event. In the official annotation data the end offset is incorrect (for 3 examples).
+        """
+        first_event = example["events"][0]
+        trigger_text = first_event["trigger"]["text"][0]
+        offsets = first_event["trigger"]["offsets"][0]
+
+        real_offsets = [offsets[0], offsets[0]+len(trigger_text)]
+        example["events"][0]["trigger"]["offsets"] = [real_offsets]
+
+        return example
