@@ -23,12 +23,13 @@ Performance of species tagging by LINNAEUS on full-text articles is very good, w
 97.1% precision on mention level, and 98.1% recall and 90.4% precision on document level.
 """
 
-import os
 import csv
+import os
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -135,9 +136,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "data_files": os.path.join(data_dir, "manual-corpus-species-1.0")
-                },
+                gen_kwargs={"data_files": os.path.join(data_dir, "manual-corpus-species-1.0")},
             ),
         ]
 
@@ -189,7 +188,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         """Creates example in source schema."""
         example = {}
         example["entities"] = []
-        with open(txt_file, 'r') as file:
+        with open(txt_file, "r") as file:
             text = file.read()
         example["text"] = text
         example["document_type"] = "Article"
@@ -201,10 +200,12 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
                 "type": entity_type,
                 "text": [entity_text],
                 "offsets": [(int(start), int(end))],
-                "normalized": [{
-                    "db_name": db_name,
-                    "db_id": db_id,
-                }]
+                "normalized": [
+                    {
+                        "db_name": db_name,
+                        "db_id": db_id,
+                    }
+                ],
             }
             example["entities"].append(entity)
         return example
@@ -212,15 +213,12 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
     def _create_kb_example(self, txt_file, tags) -> Dict:
         """Creates example in BigBio KB schema."""
         example = {}
-        with open(txt_file, 'r') as file:
+        with open(txt_file, "r") as file:
             text = file.read()
         # Passages
-        example["passages"] = [{
-            "id": f"{txt_file.stem}__text",
-            "text": [text],
-            "type": "Article",
-            "offsets": [(0, len(text))]
-        }]
+        example["passages"] = [
+            {"id": f"{txt_file.stem}__text", "text": [text], "type": "Article", "offsets": [(0, len(text))]}
+        ]
         # Entities
         example["entities"] = []
         for tag_id, tag in enumerate(tags):
@@ -231,10 +229,12 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
                 "type": entity_type,
                 "text": [entity_text],
                 "offsets": [(int(start), int(end))],
-                "normalized": [{
-                    "db_name": db_name,
-                    "db_id": db_id,
-                }]
+                "normalized": [
+                    {
+                        "db_name": db_name,
+                        "db_id": db_id,
+                    }
+                ],
             }
             example["entities"].append(entity)
         example["events"] = []
