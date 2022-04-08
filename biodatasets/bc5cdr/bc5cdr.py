@@ -26,9 +26,9 @@ import collections
 import itertools
 import os
 
-import bioc
-
 import datasets
+from bioc import biocxml
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -275,7 +275,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
     ):
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
-            reader = bioc.BioCXMLDocumentReader(str(filepath))
+            reader = biocxml.BioCXMLDocumentReader(str(filepath))
 
             for uid, xdoc in enumerate(reader):
                 doc_text = self._get_document_text(xdoc)
@@ -301,7 +301,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 }
 
         elif self.config.schema == "bigbio_kb":
-            reader = bioc.BioCXMLDocumentReader(str(filepath))
+            reader = biocxml.BioCXMLDocumentReader(str(filepath))
             uid = 0  # global unique id
 
             for i, xdoc in enumerate(reader):
