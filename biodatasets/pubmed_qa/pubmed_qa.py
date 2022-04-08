@@ -236,7 +236,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "question_id": id,
                     "document_id": id,
                     "question": row['QUESTION'],
-                    "type": 'yesnomaybe',
+                    "type": 'yesno',
                     "choices": [],
                     "context": ' '.join(row['CONTEXTS']),
                     "answer": answers,
