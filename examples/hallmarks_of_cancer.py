@@ -29,7 +29,7 @@ _CITATION = """\
                Johan H{\"{o}}gberg and
                Ulla Stenius and
                Anna Korhonen},
-  title     = {Automatic semantic classification of scientific literature 
+  title     = {Automatic semantic classification of scientific literature
                according to the hallmarks of cancer},
   journal   = {Bioinform.},
   volume    = {32},
@@ -45,11 +45,11 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-The Hallmarks of Cancer (HOC) Corpus consists of 1852 PubMed publication 
-abstracts manually annotated by experts according to a taxonomy. The taxonomy 
-consists of 37 classes in a hierarchy. Zero or more class labels are assigned 
-to each sentence in the corpus. The labels are found under the "labels" 
-directory, while the tokenized text can be found under "text" directory. 
+The Hallmarks of Cancer (HOC) Corpus consists of 1852 PubMed publication
+abstracts manually annotated by experts according to a taxonomy. The taxonomy
+consists of 37 classes in a hierarchy. Zero or more class labels are assigned
+to each sentence in the corpus. The labels are found under the "labels"
+directory, while the tokenized text can be found under "text" directory.
 The filenames are the corresponding PubMed IDs (PMID).
 """
 
@@ -175,7 +175,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
                     "id": uid,
                     "document_id": filenname.split(".")[0],
                     "text": text_body,
-                    "label": label_body,
+                    "labels": [label_body],
                 }
 
                 uid += 1
