@@ -576,6 +576,7 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                             "question_id": record["id"],
                             "question": record["body"],
                             "type": record["type"],
+                            "choices": [],
                             "context": snippet["text"],
                             "answer": self._get_exact_answer(record),
                         }
