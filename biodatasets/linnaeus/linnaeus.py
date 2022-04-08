@@ -78,16 +78,30 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="linnaeus_source",
             version=SOURCE_VERSION,
-            description="linnaeus source schema",
+            description="Linnaeus source schema",
             schema="source",
             subset_id="linnaeus",
         ),
         BigBioConfig(
+            name="linnaeus_source_filtered",
+            version=SOURCE_VERSION,
+            description="Linnaeus source schema (filtered tags)",
+            schema="source",
+            subset_id="linnaeus_filtered",
+        ),
+        BigBioConfig(
             name="linnaeus_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="linnaeus BigBio schema",
+            description="Linnaeus BigBio schema",
             schema="bigbio_kb",
             subset_id="linnaeus",
+        ),
+        BigBioConfig(
+            name="linnaeus_bigbio_kb_filtered",
+            version=BIGBIO_VERSION,
+            description="Linnaeus BigBio schema (filtered tags)",
+            schema="bigbio_kb",
+            subset_id="linnaeus_filtered",
         ),
     ]
 
@@ -143,7 +157,10 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, data_files: Path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         data_path = Path(os.path.join(data_files, "txt"))
-        tags_path = Path(os.path.join(data_files, "tags.tsv"))
+        if self.config.subset_id.endswith("filtered"):
+            tags_path = Path(os.path.join(data_files, "filtered_tags.tsv"))
+        else:
+            tags_path = Path(os.path.join(data_files, "tags.tsv"))
         data_files = list(data_path.glob("*txt"))
         tags = self._load_tags(tags_path)
 
