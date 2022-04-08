@@ -51,7 +51,7 @@ of BioNLP Shared Task 2011.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-epi"
 
-_LICENSE = "DUA"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",
