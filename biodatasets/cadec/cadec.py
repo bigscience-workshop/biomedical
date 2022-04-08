@@ -218,12 +218,25 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                 ann = {}
                 fields = line.split("\t")
                 ann["id"] = fields[0]
-                ann["text"] = [fields[2]]
                 ann["type"], span_str = fields[1].split(maxsplit=1)
                 ann["offsets"] = []
                 for span in span_str.split(";"):
                     start, end = span.split()
                     ann["offsets"].append([int(start), int(end)])
+
+                text = fields[2]
+                # Heuristically split text of discontiguous entities into chunks
+                ann["text"] = []
+                if len(ann["offsets"]) > 1:
+                    i = 0
+                    for start, end in ann["offsets"]:
+                        chunk_len = end - start
+                        ann["text"].append(text[i:chunk_len+i])
+                        i += chunk_len
+                        while i < len(text) and text[i] == " ":
+                            i += 1
+                else:
+                    ann["text"] = [text]
                 example["text_bound_annotations"].append(ann)
             elif line.startswith("#"):
                 continue
