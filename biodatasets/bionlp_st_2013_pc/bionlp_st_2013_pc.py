@@ -59,7 +59,7 @@ a promising approach to supporting pathway curation efforts.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-pc"
 
-_LICENSE = "CC BY-SA 3.0"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC BY-SA 3.0"
 
 _URLs = {
     "bionlp_st_2013_pc": "https://github.com/openbiocorpora/bionlp-st-2013-pc/archive/refs/heads/master.zip",
