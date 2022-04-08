@@ -144,12 +144,12 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
 
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
+                name=datasets.Split.VALIDATION,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "doc_collection_path": os.path.join(data_dir, "MutationFinder/corpora/devo_set.txt"),
                     "gold_std_path": os.path.join(data_dir, "MutationFinder/corpora/devo_gold_std.txt"),
-                    "split": "train",
+                    "split": "dev",
                 },
             ),
             datasets.SplitGenerator(
