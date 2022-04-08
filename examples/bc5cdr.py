@@ -27,11 +27,12 @@ import itertools
 import os
 
 import bioc
-
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -74,7 +75,11 @@ _URLs = {
     "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.RELATION_EXTRACTION,
+]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -164,7 +169,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TrainingSet.BioC.xml"
+                    ),
                     "split": "train",
                 },
             ),
@@ -172,7 +179,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "CDR_Data/CDR.Corpus.v010516/CDR_TestSet.BioC.xml"
+                    ),
                     "split": "test",
                 },
             ),
@@ -206,8 +215,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         dict
             entity information
         """
-        offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        texts = [doc_text[i:j] for i, j in offsets]
+        # offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
+        # texts = [doc_text[i:j] for i, j in offsets]
+        offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons[db_id_key] if db_id_key else "-1"
         normalized = [
             # some entities are linked to multiple normalized ids
@@ -285,7 +295,10 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                             "document_id": xdoc.id,
                             "type": passage.infons["type"],
                             "text": passage.text,
-                            "entities": [self._get_bioc_entity(span, doc_text) for span in passage.annotations],
+                            "entities": [
+                                self._get_bioc_entity(span, doc_text)
+                                for span in passage.annotations
+                            ],
                             "relations": [
                                 {
                                     "id": rel.id,
