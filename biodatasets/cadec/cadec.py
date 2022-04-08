@@ -231,7 +231,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                     i = 0
                     for start, end in ann["offsets"]:
                         chunk_len = end - start
-                        ann["text"].append(text[i:chunk_len+i])
+                        ann["text"].append(text[i : chunk_len + i])
                         i += chunk_len
                         while i < len(text) and text[i] == " ":
                             i += 1
