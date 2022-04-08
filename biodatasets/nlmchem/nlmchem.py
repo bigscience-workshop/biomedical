@@ -22,6 +22,7 @@ import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -35,6 +36,8 @@ year={2021},
 publisher={Nature Publishing Group}
 }
 """
+
+_DATASETNAME = "nlmchem"
 
 _DESCRIPTION = """\
 NLM-Chem corpus consists of 150 full-text articles from the PubMed Central Open Access dataset,
@@ -252,16 +255,12 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 ):
                     continue
 
+                offsets, text = get_texts_and_offsets_from_bioc_ann(a)
+
                 da = {
                     "type": a_type,
-                    "offsets": [
-                        (
-                            loc.offset - eo,
-                            loc.offset + loc.length - eo,
-                        )
-                        for loc in a.locations
-                    ],
-                    "text": (a.text,),
+                    "offsets": [(start - eo, end - eo) for (start, end) in offsets],
+                    "text": text,
                     "id": a.id,
                     "normalized": self._get_normalized(a),
                 }
