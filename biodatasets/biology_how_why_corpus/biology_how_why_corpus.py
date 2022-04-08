@@ -125,7 +125,7 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "how_path": os.path.join(data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanHow.all.xml"),
+                    "how_path": os.path.join(data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanHOW.all.xml"),
                     "why_path": os.path.join(data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanWHY.all.xml"),
                 },
             ),
