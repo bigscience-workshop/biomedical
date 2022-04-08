@@ -83,7 +83,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             subset_id="linnaeus",
         ),
         BigBioConfig(
-            name="linnaeus_source_filtered",
+            name="linnaeus_filtered_source",
             version=SOURCE_VERSION,
             description="Linnaeus source schema (filtered tags)",
             schema="source",
@@ -97,7 +97,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             subset_id="linnaeus",
         ),
         BigBioConfig(
-            name="linnaeus_bigbio_kb_filtered",
+            name="linnaeus_filtered_bigbio_kb",
             version=BIGBIO_VERSION,
             description="Linnaeus BigBio schema (filtered tags)",
             schema="bigbio_kb",
