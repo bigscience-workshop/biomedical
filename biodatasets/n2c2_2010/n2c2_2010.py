@@ -16,34 +16,40 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
+A dataset loader for the n2c2 2010 relations dataset.
 
-When modifying it for your dataset, look for TODO items that offer specific instructions.
+https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
 
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
+The dataset consists of three archive files,
+├── concept_assertion_relation_training_data.tar.gz
+├── reference_standard_for_test_data.tar.gz
+└── test_data.tar.gz
 
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with
-  each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
+The individual data files (inside the zip and tar archives) come in 4 types,
 
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
+* docs (*.txt files): text of a patient record
+* concepts (*.con files): entities along with offsets used as input to a named entity recognition model
+* assertions (*.ast files): entities, offsets and their assertion used as input to a named entity recognition model
+* relations (*.rel files): pairs of entities related by relation type used as input to a relation extraction model
 
+
+The files comprising this dataset must be on the users local machine
+in a single directory that is passed to `datasets.load_datset` via
+the `data_dir` kwarg. This loader script will read the archive files
+directly (i.e. the user should not uncompress, untar or unzip any of
+the files).
+
+Data Access from https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
 """
 
 import os
 import re
 import tarfile
 from collections import defaultdict
-from typing import List, Match
+from dataclasses import dataclass
+from typing import List, Tuple
 
 import datasets
-from dataclasses import dataclass
-
-from typing import Tuple
-
 from datasets import Version
 
 from utils import schemas
@@ -93,7 +99,7 @@ Using this reference standard, 22 systems were developed for concept extraction,
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "Data User Agreement"
+_LICENSE = "External Data User Agreement"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
@@ -136,18 +142,6 @@ SOURCE = "source"
 BIGBIO_KB = "bigbio_kb"
 
 
-def _ct_match_to_dict(c_match: Match, t_match: Match) -> dict:
-    """Return a dictionary with groups from concept and type regex matches."""
-    return {
-        "text": c_match.group(1),
-        "start_line": int(c_match.group(2)),
-        "start_token": int(c_match.group(3)),
-        "end_line": int(c_match.group(4)),
-        "end_token": int(c_match.group(5)),
-        "type": t_match.group(1),
-    }
-
-
 def _parse_con_line(line: str) -> dict:
     """Parse one line from a *.con file.
 
@@ -167,7 +161,7 @@ def _parse_con_line(line: str) -> dict:
         "start_token": int(c_match.group(3)),
         "end_line": int(c_match.group(4)),
         "end_token": int(c_match.group(5)),
-        "type": t_match.group(1),
+        "concept": t_match.group(1),
     }
 
 
@@ -184,7 +178,11 @@ def _parse_rel_line(line: str) -> dict:
 
     """
     c1_part, r_part, c2_part = line.split(DELIMITER)
-    c1_match, r_match, c2_match = re.match(C_PATTERN, c1_part), re.match(R_PATTERN, r_part), re.match(C_PATTERN, c2_part)
+    c1_match, r_match, c2_match = (
+        re.match(C_PATTERN, c1_part),
+        re.match(R_PATTERN, r_part),
+        re.match(C_PATTERN, c2_part),
+    )
     return {
         "concept_1": {
             "text": c1_match.group(1),
@@ -223,7 +221,7 @@ def _parse_ast_line(line: str) -> dict:
         "start_token": int(c_match.group(3)),
         "end_line": int(c_match.group(4)),
         "end_token": int(c_match.group(5)),
-        "type": t_match.group(1),
+        "concept": t_match.group(1),
         "assertion": a_match.group(1),
     }
 
@@ -267,27 +265,34 @@ def _get_relations_from_sample(sample_id, sample, split):
 
     relations = []
     for i, rel_line in enumerate(rel_lines):
+        a = {}
         rel = _parse_rel_line(rel_line)
-        rel_id = _form_entity_id(sample_id, split,
-                                 rel['concept_1']['start_line'],
-                                 rel['concept_1']['start_token'],
-                                 rel['concept_1']['end_line'],
-                                 rel['concept_1']['end_token'])
-        rel_id += '-' + rel['relation'] + '-'
-        rel_id += _form_entity_id(sample_id, split,
-                                 rel['concept_2']['start_line'],
-                                 rel['concept_2']['start_token'],
-                                 rel['concept_2']['end_line'],
-                                 rel['concept_2']['end_token'])
-        rel.update({'id': rel_id})
-        relations.append(rel)
+        a['arg1_id'] = _form_entity_id(
+            sample_id,
+            split,
+            rel["concept_1"]["start_line"],
+            rel["concept_1"]["start_token"],
+            rel["concept_1"]["end_line"],
+            rel["concept_1"]["end_token"],
+        )
+        a['arg2_id'] = _form_entity_id(
+            sample_id,
+            split,
+            rel["concept_2"]["start_line"],
+            rel["concept_2"]["start_token"],
+            rel["concept_2"]["end_line"],
+            rel["concept_2"]["end_token"],
+        )
+        a['id'] = sample_id + '_' + a['arg1_id'] + '_' + rel['relation'] + '_' + a['arg2_id']
+        a['normalized'] = []
+        a['type'] = rel['relation']
+        relations.append(a)
 
     return relations
 
 
 def _get_entities_from_sample(sample_id, sample, split):
-    """Parse the lines of a *.con concept file into entity objects
-    """
+    """Parse the lines of a *.con concept file into entity objects"""
     con_lines = sample["con"].splitlines()
 
     text = sample["txt"]
@@ -359,7 +364,7 @@ def _get_entities_from_sample(sample_id, sample, split):
             # making up the rest
             # "text": [cp["text"]],
             "text": [text_slice],
-            "type": cp["type"],
+            "type": cp["concept"],
             "normalized": [],
         }
         entities.append(entity)
@@ -387,6 +392,7 @@ def _get_entities_from_sample(sample_id, sample, split):
 @dataclass
 class BigBioConfig(datasets.BuilderConfig):
     """BuilderConfig for BigBio."""
+
     name: str = None
     version: Version = None
     description: str = None
@@ -409,21 +415,24 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
     # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
     # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
+    _SOURCE_CONFIG_NAME = _DATASETNAME + "_" + SOURCE
+    _BIGBIO_CONFIG_NAME = _DATASETNAME + "_" + BIGBIO_KB
+
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name=SOURCE,
+            name=_SOURCE_CONFIG_NAME,
             version=SOURCE_VERSION,
             description=_DATASETNAME + " source schema",
             schema=SOURCE,
             subset_id=_DATASETNAME,
         ),
         BigBioConfig(
-            name=BIGBIO_KB,
+            name=_BIGBIO_CONFIG_NAME,
             version=BIGBIO_VERSION,
             description=_DATASETNAME + " BigBio schema",
             schema=BIGBIO_KB,
             subset_id=_DATASETNAME,
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = _DATASETNAME + "_" + SOURCE
@@ -435,25 +444,58 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                 {
                     "doc_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "entities": [
+                    "concepts": [
                         {
-                            "id": datasets.Value("string"),
-                            "offsets": [datasets.Value("int64")],
+                            "start_line": datasets.Value("int64"),
+                            "start_token": datasets.Value("int64"),
+                            "end_line": datasets.Value("int64"),
+                            "end_token": datasets.Value("int64"),
+                            "text": datasets.Value("string"),
+                            "concept": datasets.Value("string")
+                        }
+                    ],
+                    "assertions": [
+                        {
+                            "start_line": datasets.Value("int64"),
+                            "start_token": datasets.Value("int64"),
+                            "end_line": datasets.Value("int64"),
+                            "end_token": datasets.Value("int64"),
                             "text": datasets.Value("string"),
                             "concept": datasets.Value("string"),
-                            "assertion": datasets.Value("string")
+                            "assertion": datasets.Value("string"),
                         }
                     ],
                     "relations": [
                         {
-                            "id": datasets.Value("string"),
-                            "concept1_text": datasets.Value("string"),
-                            "concept1_offsets": [datasets.Value("int64")],
-                            "concept2_text": datasets.Value("string"),
-                            "concept2_offsets": [datasets.Value("int64")],
-                            "relation": datasets.Value("string")
+                            "concept_1": {
+                                "text": datasets.Value("string"),
+                                "start_line": datasets.Value("int64"),
+                                "start_token": datasets.Value("int64"),
+                                "end_line": datasets.Value("int64"),
+                                "end_token": datasets.Value("int64"),
+                            },
+                            "concept_2": {
+                                "text": datasets.Value("string"),
+                                "start_line": datasets.Value("int64"),
+                                "start_token": datasets.Value("int64"),
+                                "end_line": datasets.Value("int64"),
+                                "end_token": datasets.Value("int64"),
+                            },
+                            "relation": datasets.Value("string"),
                         }
-                    ]
+                    ],
+                    "unannotated": [
+                        {
+                            "text": datasets.Value("string"),
+                        }
+                    ],
+                    "metadata": {
+                        "txt_source": datasets.Value("string"),
+                        "con_source": datasets.Value("string"),
+                        "ast_source": datasets.Value("string"),
+                        "rel_source": datasets.Value("string"),
+                        "unannotated_source": datasets.Value("string")
+                    }
                 }
             )
 
@@ -490,22 +532,24 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                     "data_dir": data_dir,
                     "split": "test",
                 },
-            )
+            ),
         ]
 
     @staticmethod
     def _get_source_sample(sample_id, sample):
         return {
-            "sample_id": sample_id,
-            "txt": sample.get("txt", ""),
-            "con": sample.get("con", ""),
-            "ast": sample.get("ast", ""),
-            "rel": sample.get("rel", ""),
+            "doc_id": sample_id,
+            "text": sample.get("txt", ""),
+            "concepts": list(map(_parse_con_line, sample.get("con", "").splitlines())),
+            "assertions": list(map(_parse_ast_line, sample.get("ast", "").splitlines())),
+            "relations": list(map(_parse_rel_line, sample.get("rel", "").splitlines())),
+            "unannotated": sample.get("unannotated", ""),
             "metadata": {
                 "txt_source": sample.get("txt_source", ""),
                 "con_source": sample.get("con_source", ""),
                 "ast_source": sample.get("ast_source", ""),
                 "rel_source": sample.get("rel_source", ""),
+                "unannotated_source": sample.get("unannotated_source", ""),
             },
         }
 
@@ -514,8 +558,8 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
 
         passage_text = sample.get("txt", "")
         entities = _get_entities_from_sample(sample_id, sample, split)
-        entity_ids = set([entity["id"] for entity in entities])
-        relations = _get_relations_from_sample(sample_id, sample, entity_ids, split)
+        # entity_ids = set([entity["id"] for entity in entities])
+        relations = _get_relations_from_sample(sample_id, sample, split)
         return {
             "id": sample_id,
             "document_id": sample_id,
@@ -534,30 +578,24 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
         }
 
     def _generate_examples(self, data_dir, split) -> (int, dict):
-        if split == 'train':
+        if split == "train":
             samples = _read_tar_gz(os.path.join(data_dir, "concept_assertion_relation_training_data.tar.gz"))
-        elif split == 'test':
+        elif split == "test":
             # This file adds con, ast and rel
             samples = _read_tar_gz(os.path.join(data_dir, "reference_standard_for_test_data.tar.gz"))
             # This file adds txt to already existing samples
             samples = _read_tar_gz(os.path.join(data_dir, "test_data.tar.gz"), samples)
 
         _id = 0
+
         for sample_id, sample in samples.items():
 
-            if self.config.name == SOURCE:
+            if self.config.name == N2C22010RelationsDataset._SOURCE_CONFIG_NAME:
                 yield _id, self._get_source_sample(sample_id, sample)
-            elif self.config.name == BIGBIO_KB:
-                print(self._get_bigbio_sample(sample_id, sample, split))
-                yield _id, self._get_bigbio_sample(sample_id, sample, split)
+            elif self.config.name == N2C22010RelationsDataset._BIGBIO_CONFIG_NAME:
+                # This is to make sure unannotated data does not end up in big bio
+                if 'unannotated' not in sample['txt_source']:
+                    yield _id, self._get_bigbio_sample(sample_id, sample, split)
 
             _id += 1
 
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__,
-                          name='source',
-                          # name='bigbio_kb',
-                          data_dir="/Users/ayush.singh/workspace/data/Healthcare/i2b2_2010_Dataset/")
