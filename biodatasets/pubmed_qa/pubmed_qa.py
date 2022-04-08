@@ -223,6 +223,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "document_id": id,
                     "question": row['QUESTION'],
                     "type": 'yesnomaybe',
+                    "choices": [],
                     "context": ' '.join(row['CONTEXTS']),
                     "answer": answers,
                 }         
