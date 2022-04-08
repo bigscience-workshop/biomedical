@@ -1,6 +1,7 @@
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
 ![progress claimed](https://progress-bar.dev/93/?title=datasets%20claimed)
+
 ![tier1](https://progress-bar.dev/100/?title=Tier%201%20(30%20Datasets))
 ![tier2](https://progress-bar.dev/58/?title=Tier%202%20(60%20Datasets))
 ![tier3](https://progress-bar.dev/35/?title=Tier%203%20(100%20Datasets))
