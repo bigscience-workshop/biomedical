@@ -70,14 +70,14 @@ _LICENSE = "Unknown"
 _URLS = {
     "large": {
         "A": {
-            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train.json.gz",
-            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val.json.gz",
-            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test.json.gz",
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_train.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_val.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_test.json.gz",
         },
         "B": {
-            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_B.json.gz",
-            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_B.json.gz",
-            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_B.json.gz",
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_train_B.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_val_B.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_large/dataset_test_B.json.gz",
         },
     },
     "small": {
