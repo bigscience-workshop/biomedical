@@ -23,6 +23,7 @@ import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -167,8 +168,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
     @staticmethod
     def _get_bioc_entity(span, db_id_key="NCBI Gene identifier", splitters=",;|-") -> dict:
         """Parse BioC entity annotation."""
-        offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        texts = [span.text]  # be careful with the mismatch between text from span and text using offsets
+        offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons.get(db_id_key, "-1")
         # Find connector between db_ids for the normalization, if not found, use default
         connector = "|"
