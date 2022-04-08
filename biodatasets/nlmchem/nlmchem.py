@@ -17,8 +17,9 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-
 import datasets
+from bioc import biocxml
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -265,7 +266,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
     ) -> Iterator[Tuple[int, Dict]]:
         """Yields examples as (key, example) tuples."""
 
-        reader = bioc.BioCXMLDocumentReader(str(filepath))
+        reader = biocxml.BioCXMLDocumentReader(str(filepath))
 
         if self.config.schema == "source":
 
