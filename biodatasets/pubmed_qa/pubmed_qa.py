@@ -77,14 +77,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        # Source Schema
-        BigBioConfig(
-            name="pqal_source",
-            version=SOURCE_VERSION,
-            description="PubmedQA labeled source schema",
-            schema="source",
-            subset_id="pqal",
-        ),
+        # PQAU & PQAA Source
         BigBioConfig(
             name="pqaa_source",
             version=SOURCE_VERSION,
@@ -99,14 +92,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="pqau",
         ),
-        # BigBio Schema
-        BigBioConfig(
-            name="pqal_bigbio_qa",
-            version=BIGBIO_VERSION,
-            description="PubmedQA labeled BigBio schema",
-            schema="bigbio_qa",
-            subset_id="pqal",
-        ),
+        # PQAU & PQAA BigBio Schema
         BigBioConfig(
             name="pqaa_bigbio_qa",
             version=BIGBIO_VERSION,
@@ -121,9 +107,27 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_qa",
             subset_id="pqau",
         ),
+    ] + [
+        # PQAL Source Schema        
+        BigBioConfig(
+            name=f"pqal_fold{i}_source",
+            version=datasets.Version(_SOURCE_VERSION),
+            description="PubmedQA labeled source schema",
+            schema="source",
+            subset_id=f"pqal_fold{i}"
+        ) for i in range(10)
+    ] + [
+        # PQAL BigBio Schema
+        BigBioConfig(
+            name=f"pqal_fold{i}_bigbio_qa",
+            version=datasets.Version(_BIGBIO_VERSION),
+            description="PubmedQA labeled BigBio schema",
+            schema="bigbio_qa",
+            subset_id=f"pqal_fold{i}"
+        ) for i in range(10)
     ]
-    
-    DEFAULT_CONFIG_NAME = "pqal_source"
+
+    DEFAULT_CONFIG_NAME = "pqaa_source"
 
     def _info(self):
         if self.config.schema == "source":
@@ -152,15 +156,25 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        urls = _URLS[self.config.subset_id]
+        subset_id = self.config.subset_id
+        if 'pqal' in subset_id:
+            subset_id = 'pqal'
+
+        urls = _URLS[subset_id]
         data_dir = Path(dl_manager.download_and_extract(urls))
 
-        if self.config.subset_id == 'pqal':
+        if 'pqal' in self.config.subset_id:
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "filepath": data_dir / "pqal_train_dev_set.json"
+                        "filepath": data_dir / self.config.subset_id / "train_set.json"
+                    }
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.VALIDATION,
+                    gen_kwargs={
+                        "filepath": data_dir / self.config.subset_id / "dev_set.json"
                     }
                 ),
                 datasets.SplitGenerator(
@@ -213,9 +227,9 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_qa":
             for id, row in data.items():
                 if self.config.subset_id == 'pqau':
-                    answers =  ['maybe', row['LONG_ANSWER']]
+                    answers =  [None]
                 else:
-                    answers = [row['final_decision'], row['LONG_ANSWER']]
+                    answers = [row['final_decision']]
 
                 qa_row = {
                     "id": id,
