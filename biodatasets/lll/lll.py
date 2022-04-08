@@ -25,6 +25,10 @@ interaction means, extracting the agent (proteins) and the target (genes) of all
 sentences.
 """
 
+# Comment from author:
+# In the bigbio configuration off-by-one errors in the stop offsets of entities are fixed.
+# The offsets in the source configuration remain unchanged.
+
 import itertools as it
 from typing import List
 
@@ -203,6 +207,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "id": f"{document_['id']}-{word['id']}",
                                 "type": None,
                                 "text": [word["text"]],
+                                # fix offsets for bigbio schema
                                 "offsets": [[word["offsets"][0], word["offsets"][1] + 1]],
                                 "normalized": [],
                             }
