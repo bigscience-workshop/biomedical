@@ -188,7 +188,8 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "question_id": qid,
                     "document_id": qid,
                     "question": question_text,
-                    "type": 'abstractive',
+                    "type": 'factoid',
+                    "choices": [],
                     "context": '',
                     "answer": answer_texts,
                 }
