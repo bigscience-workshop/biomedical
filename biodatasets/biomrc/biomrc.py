@@ -14,22 +14,21 @@
 # limitations under the License.
 
 """
-We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the 
-previous BIOREAD dataset of Pappas et al. (2018). Experiments show that simple heuristics do not perform well on the 
-new dataset and that two neural MRC models that had been tested on BIOREAD perform much better on BIOMRC, indicating 
-that the new dataset is indeed less noisy or at least that its task is more feasible. Non-expert human performance is 
-also higher on the new dataset compared to BIOREAD, and biomedical experts perform even better. We also introduce a new 
-BERT-based MRC model, the best version of which substantially outperforms all other methods tested, reaching or 
-surpassing the accuracy of biomedical experts in some experiments. We make the new dataset available in three different 
+We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the
+previous BIOREAD dataset of Pappas et al. (2018). Experiments show that simple heuristics do not perform well on the
+new dataset and that two neural MRC models that had been tested on BIOREAD perform much better on BIOMRC, indicating
+that the new dataset is indeed less noisy or at least that its task is more feasible. Non-expert human performance is
+also higher on the new dataset compared to BIOREAD, and biomedical experts perform even better. We also introduce a new
+BERT-based MRC model, the best version of which substantially outperforms all other methods tested, reaching or
+surpassing the accuracy of biomedical experts in some experiments. We make the new dataset available in three different
 sizes, also releasing our code, and providing a leaderboard.
 """
 
 import itertools as it
 import json
-import os
-from typing import List, Tuple, Dict
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -48,20 +47,19 @@ _CITATION = """\
     publisher = "Association for Computational Linguistics",
     url = "https://www.aclweb.org/anthology/2020.bionlp-1.15",
     pages = "140--149",
-    abstract = "We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the previous BIOREAD dataset of Pappas et al. (2018). Experiments show that simple heuristics do not perform well on the new dataset and that two neural MRC models that had been tested on BIOREAD perform much better on BIOMRC, indicating that the new dataset is indeed less noisy or at least that its task is more feasible. Non-expert human performance is also higher on the new dataset compared to BIOREAD, and biomedical experts perform even better. We also introduce a new BERT-based MRC model, the best version of which substantially outperforms all other methods tested, reaching or surpassing the accuracy of biomedical experts in some experiments. We make the new dataset available in three different sizes, also releasing our code, and providing a leaderboard.",
 }
 """
 
 _DATASETNAME = "biomrc"
 
 _DESCRIPTION = """\
-We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the 
-previous BIOREAD dataset of Pappas et al. (2018). Experiments show that simple heuristics do not perform well on the 
-new dataset and that two neural MRC models that had been tested on BIOREAD perform much better on BIOMRC, indicating 
-that the new dataset is indeed less noisy or at least that its task is more feasible. Non-expert human performance is 
-also higher on the new dataset compared to BIOREAD, and biomedical experts perform even better. We also introduce a new 
-BERT-based MRC model, the best version of which substantially outperforms all other methods tested, reaching or 
-surpassing the accuracy of biomedical experts in some experiments. We make the new dataset available in three different 
+We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the
+previous BIOREAD dataset of Pappas et al. (2018). Experiments show that simple heuristics do not perform well on the
+new dataset and that two neural MRC models that had been tested on BIOREAD perform much better on BIOMRC, indicating
+that the new dataset is indeed less noisy or at least that its task is more feasible. Non-expert human performance is
+also higher on the new dataset compared to BIOREAD, and biomedical experts perform even better. We also introduce a new
+BERT-based MRC model, the best version of which substantially outperforms all other methods tested, reaching or
+surpassing the accuracy of biomedical experts in some experiments. We make the new dataset available in three different
 sizes, also releasing our code, and providing a leaderboard.
 """
 
@@ -70,38 +68,34 @@ _HOMEPAGE = "https://github.com/PetrosStav/BioMRC_code"
 _LICENSE = "Unknown"
 
 _URLS = {
-        "large": {
-            "A": {
-                "train": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train.json.gz",
-                "val": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val.json.gz",
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test.json.gz",
-            },
-            "B": {
-                "train": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_B.json.gz",
-                "val": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_B.json.gz",
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_B.json.gz",
-            }
+    "large": {
+        "A": {
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test.json.gz",
         },
-        "small": {
-            "A": {
-                "train": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_small.json.gz",
-                "val": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_small.json.gz",
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_small.json.gz",
-            },
-            "B": {
-                "train": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_small_B.json.gz",
-                "val": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_small_B.json.gz",
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_small_B.json.gz",
-            }
+        "B": {
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_B.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_B.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_B.json.gz",
         },
-        "tiny": {
-            "A": {
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny.json.gz"
-            },
-            "B": {
-                "test": f"https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny_B.json.gz"
-            }
+    },
+    "small": {
+        "A": {
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_small.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_small.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_small.json.gz",
         },
+        "B": {
+            "train": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_train_small_B.json.gz",
+            "val": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_val_small_B.json.gz",
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_small/dataset_test_small_B.json.gz",
+        },
+    },
+    "tiny": {
+        "A": {"test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny.json.gz"},
+        "B": {"test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny_B.json.gz"},
+    },
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
@@ -109,6 +103,7 @@ _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
 
 class BiomrcDataset(datasets.GeneratorBasedBuilder):
     """BioMRC: A Dataset for Biomedical Machine Reading Comprehension"""
@@ -139,12 +134,12 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
                     subset_id=subset_id,
                 )
             )
-        
+
     DEFAULT_CONFIG_NAME = "biomrc_large_B_source"
 
     def _info(self):
         if self.config.schema == "source":
-            features=datasets.Features(
+            features = datasets.Features(
                 {
                     "abstract": datasets.Value("string"),
                     "title": datasets.Value("string"),
@@ -152,18 +147,18 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
                         {
                             "pseudoidentifier": datasets.Value("string"),
                             "identifier": datasets.Value("string"),
-                            "synonyms": datasets.Value("string")
+                            "synonyms": datasets.Value("string"),
                         }
                     ),
                     "answer": {
                         "pseudoidentifier": datasets.Value("string"),
                         "identifier": datasets.Value("string"),
-                        "synonyms": datasets.Value("string")
+                        "synonyms": datasets.Value("string"),
                     },
                 }
             )
         elif self.config.schema == "bigbio_qa":
-            features=schemas.qa_features
+            features = schemas.qa_features
         else:
             raise NotImplementedError()
 
@@ -175,7 +170,6 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
 
@@ -184,25 +178,15 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
 
         if version == "tiny":
             return [
-                datasets.SplitGenerator(
-                    name=datasets.Split.TRAIN, 
-                    gen_kwargs={"filepath": downloaded_files["test"]}
-                ),
+                datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": downloaded_files["test"]}),
             ]
         else:
             return [
+                datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": downloaded_files["train"]}),
                 datasets.SplitGenerator(
-                    name=datasets.Split.TRAIN, 
-                    gen_kwargs={"filepath": downloaded_files["train"]}
+                    name=datasets.Split.VALIDATION, gen_kwargs={"filepath": downloaded_files["val"]}
                 ),
-                datasets.SplitGenerator(
-                    name=datasets.Split.VALIDATION, 
-                    gen_kwargs={"filepath": downloaded_files["val"]}
-                ),
-                datasets.SplitGenerator(
-                    name=datasets.Split.TEST, 
-                    gen_kwargs={"filepath": downloaded_files["test"]}
-                ),
+                datasets.SplitGenerator(name=datasets.Split.TEST, gen_kwargs={"filepath": downloaded_files["test"]}),
             ]
 
     def _generate_examples(self, filepath):
@@ -224,7 +208,7 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
                 for _id, (ab, ti, el, an) in enumerate(
                     zip(biomrc["abstracts"], biomrc["titles"], biomrc["entities_list"], biomrc["answers"])
                 ):
-                    # remove info such as code, label, synonyms from answer and choices 
+                    # remove info such as code, label, synonyms from answer and choices
                     # f.e. @entity1 :: ('9606', 'Species') :: ['patients', 'patient']"
                     example = {
                         "id": next(uid),
@@ -241,14 +225,6 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
     def _parse_dict_from_entity(self, entity):
         if "::" in entity:
             pseudoidentifier, identifier, synonyms = entity.split(" :: ")
-            return {
-                "pseudoidentifier": pseudoidentifier,
-                "identifier": identifier,
-                "synonyms": synonyms
-            }
+            return {"pseudoidentifier": pseudoidentifier, "identifier": identifier, "synonyms": synonyms}
         else:
-            return {
-                "pseudoidentifier": entity,
-                "identifier": "",
-                "synonyms": ""
-            }
+            return {"pseudoidentifier": entity, "identifier": "", "synonyms": ""}
