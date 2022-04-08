@@ -208,7 +208,71 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                 )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "passages": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                        }
+                    ],
+                    "entities": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Sequence(datasets.Value("string")),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                    "events": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            # refers to the text_bound_annotation of the trigger
+                            "trigger": {
+                                "text": datasets.Sequence(datasets.Value("string")),
+                                "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            },
+                            "arguments": [
+                                {
+                                    "role": datasets.Value("string"),
+                                    "ref_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                    "coreferences": [
+                        {
+                            "id": datasets.Value("string"),
+                            "entity_ids": datasets.Sequence(datasets.Value("string")),
+                        }
+                    ],
+                    "relations": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "arg1_id": datasets.Value("string"),
+                            "arg2_id": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                }
+            )
 
         else:
             raise NotImplementedError(f"{self.config.name} not a valid config name")
@@ -227,9 +291,9 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             # The download method may not be reliable, so if it fails
             try:
                 urls = {
-                        "ner": _URLS[_DATASETNAME]["ner"],
-                        "corpus": _URLS[_DATASETNAME]["corpus"],
-                    }
+                    "ner": _URLS[_DATASETNAME]["ner"],
+                    "corpus": _URLS[_DATASETNAME]["corpus"],
+                }
                 if self.config.subset_id == "cord_ner_ner":
                     del urls["corpus"]
                 elif self.config.subset_id == "cord_ner_corpus":
@@ -277,7 +341,9 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
 
         return doc2sents
 
-    def _generate_examples(self, ner_filepath, corpus_filepath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, ner_filepath, corpus_filepath, split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
@@ -285,22 +351,31 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                 filepath = ner_filepath
             else:
                 filepath = corpus_filepath
-                
+
             with open(filepath, "r") as fp:
                 for key, example in enumerate(fp.readlines()):
                     yield key, json.loads(example)
 
         elif self.config.schema == "bigbio_kb":
 
-            doc2sents = self._corpus_to_dict(corpus_filepath)
-            with open(ner_filepath, "r") as fp:
-                for key, line in enumerate(fp.readlines()):
-                    line = json.loads(line)
-                    corpus_sents = doc2sents[line["doc_id"]]
+            # doc2sents = self._corpus_to_dict(corpus_filepath)
+            with open(corpus_filepath, "r") as corpus_fp, open(
+                ner_filepath, "r"
+            ) as ner_fp:
+                for key, ner_line in enumerate(ner_fp.readlines()):
+                    ner_line = json.loads(ner_line)
+                    corpus_line = json.loads(corpus_fp.readline())
+                    while ner_line['doc_id'] != corpus_line["doc_id"]:
+                        corpus_line = json.loads(corpus_fp.readline())
+
+                    doc_id = str(corpus_line["doc_id"])
+                    doc_sents = corpus_line["sents"]
 
                     passage_offset_start = 0
                     passages = []
-                    for sent in corpus_sents:
+                    new_entities = []
+
+                    for sent_id, sent in enumerate(doc_sents):
 
                         text = " ".join(sent["sent_tokens"])
                         passage_offset_end = passage_offset_start + len(text)
@@ -310,41 +385,47 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                                 "id": str(sent["sent_id"]),
                                 "type": "",
                                 "text": [text],
-                                "offsets": [passage_offset_start, passage_offset_end],
-                            }
-                        )
-                        # add one to account for the space that is added when joining
-                        passage_offset_start = passage_offset_end+1
-
-                    new_entities = []
-                    for entity_sent in line["sents"]:
-                        entities = entity_sent["entities"]
-                        sent_id = entity_sent["sent_id"]
-                        sent_offsets, sent_types, sent_texts = [], [], []
-
-                        for entity in entities:
-                            sent_offsets.append([entity["start"], entity["end"]])
-                            sent_types.append(entity["type"])
-                            sent_texts.append(entity["text"])
-
-                        new_entities.append(
-                            {
-                                "id": sent_id,
-                                "type": sent_types,
-                                "text": sent_texts,
-                                "offsets": sent_offsets,
-                                "normalized": [
-                                    {
-                                        "db_name": "",
-                                        "db_id": "",
-                                    }
+                                "offsets": [
+                                    [
+                                        passage_offset_start,
+                                        passage_offset_end,
+                                    ]
                                 ],
                             }
                         )
+                        # add one to account for the space that is added when joining
+                        passage_offset_start = passage_offset_end + 1
+
+                        for entity_sent in ner_line["sents"]:
+                            if sent_id != entity_sent["sent_id"]:
+                                continue
+                            
+                            entities = entity_sent["entities"]
+                            sent_offsets, sent_types, sent_texts = [], [], []
+
+                            for entity in entities:
+                                sent_offsets.append([entity["start"], entity["end"]])
+                                sent_types.append(entity["type"])
+                                sent_texts.append(entity["text"])
+
+                            new_entities.append(
+                                {
+                                    "id": sent_id,
+                                    "type": sent_types,
+                                    "text": sent_texts,
+                                    "offsets": sent_offsets,
+                                    "normalized": [
+                                        {
+                                            "db_name": "",
+                                            "db_id": "",
+                                        }
+                                    ],
+                                }
+                            )
 
                     yield key, {
                         "id": str(key),
-                        "document_id": line["doc_id"],
+                        "document_id": doc_id,
                         "passages": passages,
                         "entities": new_entities,
                         "events": [],
