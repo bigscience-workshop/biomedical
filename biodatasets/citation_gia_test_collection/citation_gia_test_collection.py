@@ -21,7 +21,6 @@ import datasets
 import xml.etree.ElementTree as ET
 import uuid
 import html
-from xml.sax.saxutils import escape, unescape
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -44,15 +43,10 @@ _CITATION = """\
 _DATASETNAME = "citation_gia_test_collection"
 
 _DESCRIPTION = """\
-The BioCreative II GN corpus is a widely used data set for benchmarking GN tools
-    and includes document-level annotations for a total of 543 articles
-    (281 in its training set; and 262 in test). The Citation GIA Test Collection was recently
-    created for gene indexing at the NLM and includes 151 PubMed abstracts with both mention-level
-    and document-level annotations. They are selected because both have a focus on human genes.
-    For both corpora, we added annotations of gene families and protein domains.
-    For the BioCreative GN corpus, we also added mention-level gene annotations.
-    As a result, in our new corpus, there are a total of 694 PubMed articles.
-    PubTator was used as our annotation tool along with BioC formats.
+The Citation GIA Test Collection was recently created for gene 
+indexing at the NLM and includes 151 PubMed abstracts with both 
+mention-level and document-level annotations. 
+They are selected because both have a focus on human genes.
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
@@ -74,9 +68,9 @@ _BIGBIO_VERSION = "1.0.0"
 
 class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
     """
-    The BioCreative II GN corpus is a widely used data set for benchmarking GN tools
-    and includes document-level annotations for a total of 543 articles
-    (281 in its training set; and 262 in test).
+    The Citation GIA Test Collection was recently created for gene indexing at the NLM and includes 
+    151 PubMed abstracts with both mention-level and document-level annotations. 
+    They are selected because both have a focus on human genes.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -150,23 +144,9 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
 
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": os.path.join(data_dir[0]+"\GNormPlusCorpus", "BC2GNtest.BioC.xml"),
-                    "split": "train",
-                },
-            ),
-            datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir[0]+"\GNormPlusCorpus", "BC2GNtrain.BioC.xml"),
-                    "split": "test",
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={
-                    "filepath": os.path.join(data_dir[0]+"\GNormPlusCorpus", "NLMIAT.BioC.xml"),
+                    "filepath": os.path.join(data_dir[0], "GNormPlusCorpus/NLMIAT.BioC.xml"),
                     "split": "NLMIAT",
                 },
             ),
@@ -247,7 +227,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
         for child in elem:
             if child.tag == "passage":
                 elem_d[child.tag].append({c.tag: html.escape(" ".join(list(filter(
-                    lambda item: item, [t.strip('\n') for t in c.itertext()])))).replace("ü", "uu") for c in child})
+                    lambda item: item, [t.strip('\n') for t in c.itertext()])))) for c in child})
 
             elif child.tag == "id":
                 elem_d[child.tag] = html.escape(child.text)
