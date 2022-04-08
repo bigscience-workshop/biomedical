@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import List
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -28,7 +29,8 @@ _UNIFIED_VIEW_NAME = "bigbio"
 
 _CITATION = """\
 @inproceedings{ohta-etal-2011-overview,
-    title = "Overview of the Epigenetics and Post-translational Modifications ({EPI}) task of {B}io{NLP} Shared Task 2011",
+    title = "Overview of the Epigenetics and Post-translational
+    Modifications ({EPI}) task of {B}io{NLP} Shared Task 2011",
     author = "Ohta, Tomoko  and
       Pyysalo, Sampo  and
       Tsujii, Jun{'}ichi",
@@ -51,10 +53,14 @@ _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-epi"
 
 _LICENSE = "DUA"
 
-_URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",
-         "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",}
+_URLs = {
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",
+}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,]
+_SUPPORTED_TASKS = [
+    Tasks.EVENT_EXTRACTION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -83,14 +89,9 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_epi_source"
 
-
-    _ENTITY_TYPES = {
-        "Protein",
-        "Entity"
-    }
+    _ENTITY_TYPES = {"Protein", "Entity"}
 
     def _info(self):
         """
@@ -115,9 +116,7 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -161,12 +160,8 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -185,16 +180,14 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / f'bionlp-st-2011-epi-master' / "original-data" / "train",
-            "dev": data_dir / f'bionlp-st-2011-epi-master' / "original-data" / "devel",
-            "test": data_dir / f'bionlp-st-2011-epi-master' / "original-data" / "test",
+            "train": data_dir / f"bionlp-st-2011-epi-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-epi-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-epi-master" / "original-data" / "test",
         }
 
         return [
@@ -223,11 +216,9 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-
