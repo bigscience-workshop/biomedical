@@ -18,11 +18,11 @@ The authors present BioInfer (Bio Information Extraction Resource), a new public
 """
 
 import os
-from typing import List, Tuple, Dict
-
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -172,12 +172,14 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
             for guid, sentence in enumerate(root.iter("sentence")):
                 example = self._create_example(sentence)
-                example["passages"] = [{
-                    "id": f"{sentence.attrib['id']}__text",
-                    "type": "Sentence",
-                    "text": [sentence.attrib["text"]],
-                    "offsets": [(0, len(sentence.attrib["text"]))],
-                }]
+                example["passages"] = [
+                    {
+                        "id": f"{sentence.attrib['id']}__text",
+                        "type": "Sentence",
+                        "text": [sentence.attrib["text"]],
+                        "offsets": [(0, len(sentence.attrib["text"]))],
+                    }
+                ]
                 example["events"] = []
                 example["coreferences"] = []
                 example["id"] = guid
@@ -206,7 +208,7 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             i = 0
             for start, end in offsets:
                 chunk_len = end - start
-                text.append(entity.attrib["text"][i:chunk_len + i])
+                text.append(entity.attrib["text"][i : chunk_len + i])
                 i += chunk_len
                 while i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " ":
                     i += 1
@@ -217,7 +219,7 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             "offsets": offsets,
             "text": text,
             "type": entity.attrib["type"],
-            "normalized": {}
+            "normalized": {},
         }
 
     @staticmethod
@@ -227,5 +229,5 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             "type": interaction.attrib["type"],
             "arg1_id": interaction.attrib["e1"],
             "arg2_id": interaction.attrib["e2"],
-            "normalized": {}
+            "normalized": {},
         }
