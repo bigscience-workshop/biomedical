@@ -1,9 +1,8 @@
-### Stay tuned - we'll have a "Meet the Team" call on Wednesday April 6, (8 AM PST/ 11 AM EST/ 5 PM CET). Access the [zoom registration here](https://virginia.zoom.us/meeting/register/tJwsf-qqpzsvHdbe6tWsAmRjEvf1yIvZ8ODL)
-
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
-![progress claimed](https://progress-bar.dev/89/?title=datasets%20claimed)
-![progress done](https://progress-bar.dev/15/?title=datasets%20done)
+![progress claimed](https://progress-bar.dev/96/?title=datasets%20claimed)
+![progress done](https://progress-bar.dev/22/?title=datasets%20done)
+
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
 <!--- @Natasha From the Data_sourcing wiki  --->
