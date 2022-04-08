@@ -60,7 +60,9 @@ _LICENSE = "DUA"
 _URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
          "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,]
+_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
+                    Tasks.COREFERENCE_RESOLUTION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
