@@ -135,6 +135,11 @@ class TestDataLoader(unittest.TestCase):
                 with self.subTest("Check coref offsets"):
                     self.test_coref_ids(dataset_bigbio)
 
+            elif schema == "QA":
+                with self.subTest("Check multiple choice"):
+                    self.test_multiple_choice(dataset_bigbio)
+
+
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
 
@@ -491,6 +496,32 @@ class TestDataLoader(unittest.TestCase):
                             assert (
                                 entity_id in entity_lookup
                             ), f"Split:{split} - Example:{example_id} - Entity:{entity_id} not found!"
+
+
+    def test_multiple_choice(self, dataset_bigbio: DatasetDict):
+        """
+        Verify that each answer in a multiple choice Q/A task is in choices.
+        """  # noqa
+        logger.info("QA ONLY: Checking multiple choice")
+        for split in dataset_bigbio:
+
+            for example in dataset_bigbio[split]:
+
+                if len(example["choices"]) > 0:
+                    assert(
+                        example["type"] == "multiple_choice"  # can change this to "in" if we include ranking
+                    ), f"example has populated choices, but is not type 'multiple_choice' {example}"
+
+                if example["type"] == "multiple_choice":
+                    assert(
+                        len(example["choices"]) > 0
+                    ), f"example has type 'multiple_choice' but no values in 'choices' {example}"
+
+                    for answer in example["answer"]:
+                        assert(
+                            answer in example["choices"]
+                        ), f"example has an answer that is not present in 'choices' {example}"
+
 
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
