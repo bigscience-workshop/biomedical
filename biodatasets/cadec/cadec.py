@@ -234,19 +234,18 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
     def _parse_normalization(self, fields: List[str], code_system: str):
         anns = []
         base_ann = {
-            "id": code_system + "_" + fields[0],
             "ref_id": fields[0][1:],  # here TT1 -> Normalization of T1
             "type": "Reference",
         }
 
         if "CONCEPT_LESS" in fields[1]:
             ann = base_ann.copy()
+            ann["id"] = code_system + "_" + fields[0]
             ann["cuid"], _ = fields[1].split(maxsplit=1)
             ann["text"] = ""
             ann["resource_name"] = ""
             anns = [ann]
         elif code_system == "sct":
-
             concepts = re.sub(r"\s+", " ", fields[1])
             # strip random amount of whitespace from seperator |
             concepts = re.sub(r"(\s?\|\s?)", "|", concepts)
@@ -259,7 +258,6 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             # see /sct/ARTHROTEC.112.ann, /sct/ARTHROTEC.113.ann, /sct/ARTHROTEC.1.ann
             concepts = re.sub(r"(\s?\|\s?or\s?)", "|+", concepts)
             concepts = re.sub(r"(\s?\|\s?\+\s?)", "|+", concepts)
-
             concepts = concepts.split("|+")
 
             anns = []
@@ -273,14 +271,20 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                     # TT2     76948002 | Severe pain | + 57676002 Arthralgia |  43 72 extreme pain \
                     # in all my joints (LIPITOR.698.ann)
                     ann["cuid"], ann["text"] = concept.split(" ")
+                ann["id"] = f"{code_system}_{fields[0]}_{ann['cuid']}"
                 ann["cuid"] = ann["cuid"].strip()
                 ann["text"] = ann["text"].strip()
                 ann["resource_name"] = "Snomed CT"
                 anns.append(ann)
         elif code_system == "meddra":
-            ann = base_ann.copy()
-            ann["cuid"], _ = fields[1].split(maxsplit=1)
-            ann["text"] = ""
-            ann["resource_name"] = "Meddra"
-            anns = [ann]
+            # remove offsets
+            concepts = re.sub(r"( ([0-9]+) ([0-9]+))+$", "", fields[1])
+            concepts = concepts.split(" + ")
+            for concept in concepts:
+                ann = base_ann.copy()
+                ann["cuid"] = concept
+                ann["text"] = ""
+                ann["id"] = f"{code_system}_{fields[0]}_{ann['cuid']}"
+                ann["resource_name"] = "Meddra"
+                anns.append(ann)
         return anns
