@@ -51,10 +51,7 @@ relations. A data set from the bio NLP shared tasks competition from 2013
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-gro"
 
-_LICENSE = (
-    "GENIA Project License for Annotated Corpora:"
-    "https://github.com/openbiocorpora/bionlp-st-2011-epi/blob/master/LICENSE"
-)
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2013-gro/archive/refs/heads/master.zip",
