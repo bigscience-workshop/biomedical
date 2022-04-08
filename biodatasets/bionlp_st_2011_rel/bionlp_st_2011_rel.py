@@ -17,10 +17,10 @@ from pathlib import Path
 from typing import List
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _DATASETNAME = "bionlp_st_2011_rel"
 _SOURCE_VIEW_NAME = "source"
@@ -34,7 +34,16 @@ year = {2011},
 isbn = {9781937284091},
 publisher = {Association for Computational Linguistics},
 address = {USA},
-abstract = {This paper presents the Entity Relations (REL) task, a supporting task of the BioNLP Shared Task 2011. The task concerns the extraction of two types of part-of relations between a gene/protein and an associated entity. Four teams submitted final results for the REL task, with the highest-performing system achieving 57.7% F-score. While experiments suggest use of the data can help improve event extraction performance, the task data has so far received only limited use in support of event extraction. The REL task continues as an open challenge, with all resources available from the shared task website.},
+abstract = {This paper presents the Entity Relations (REL) task,
+a supporting task of the BioNLP Shared Task 2011. The task concerns
+the extraction of two types of part-of relations between a gene/protein
+and an associated entity. Four teams submitted final results for
+the REL task, with the highest-performing system achieving 57.7%
+F-score. While experiments suggest use of the data can help improve
+event extraction performance, the task data has so far received only
+limited use in support of event extraction. The REL task continues
+as an open challenge, with all resources available from the shared
+task website.},
 booktitle = {Proceedings of the BioNLP Shared Task 2011 Workshop},
 pages = {83–88},
 numpages = {6},
@@ -46,15 +55,17 @@ series = {BioNLP Shared Task '11}
 _DESCRIPTION = """\
 The Entity Relations (REL) task is a supporting task of the BioNLP Shared Task 2011.
 The task concerns the extraction of two types of part-of relations between a
-gene/protein and an associated entity. 
+gene/protein and an associated entity.
 """
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-rel"
 
 _LICENSE = "License Terms for BioNLP Shared Task 2011 Data"
 
-_URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",
-         "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",}
+_URLs = {
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",
+}
 
 _SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION]
 _SOURCE_VERSION = "1.0.0"
@@ -84,14 +95,13 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_rel_source"
 
     _ENTITY_TYPES = {
         "Entity",
     }
 
-    _FILE_SUFFIX = ['.a1', '.rel', '.ann']
+    _FILE_SUFFIX = [".a1", ".rel", ".ann"]
 
     def _info(self):
         """
@@ -116,9 +126,7 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -162,12 +170,8 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -186,16 +190,14 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / f'bionlp-st-2011-rel-master' / "original-data" / "train",
-            "dev": data_dir / f'bionlp-st-2011-rel-master' / "original-data" / "devel",
-            "test": data_dir / f'bionlp-st-2011-rel-master' / "original-data" / "test",
+            "train": data_dir / f"bionlp-st-2011-rel-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-rel-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-rel-master" / "original-data" / "test",
         }
 
         return [
@@ -224,8 +226,7 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file, self._FILE_SUFFIX),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file, self._FILE_SUFFIX), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
