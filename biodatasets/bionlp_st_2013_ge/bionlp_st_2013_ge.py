@@ -53,9 +53,14 @@ _LICENSE = "DUA"
 _URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",
          "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,]
+_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.RELATION_EXTRACTION,
+                    Tasks.COREFERENCE_RESOLUTION,
+                    ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
 
 class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
     """The BioNLP-ST GE task has been promoting development of fine-grained information extraction (IE) from biomedical
