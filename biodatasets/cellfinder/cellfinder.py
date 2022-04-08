@@ -56,9 +56,10 @@ The CellFinder project aims to create a stem cell data repository by linking inf
 _HOMEPAGE = "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
 _LICENSE = "CC BY-SA 3.0"
 
+_SOURCE_URL = "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
 _URLS = {
-    _DATASETNAME:
-        "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/cellfinder1_brat.tar.gz"
+    _DATASETNAME: _SOURCE_URL + "cellfinder1_brat.tar.gz",
+    _DATASETNAME + "_splits": _SOURCE_URL + "cellfinder1_brat_sections.tar.gz",
 }
 
 _SUPPORTED_TASKS = [
@@ -67,7 +68,6 @@ _SUPPORTED_TASKS = [
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
 
 _ENTITY_TYPES = [
     "Anatomy",
@@ -80,7 +80,7 @@ _ENTITY_TYPES = [
 
 
 class CellFinderDataset(datasets.GeneratorBasedBuilder):
-    """The extended Anatomical Entity Mention corpus (AnatEM)"""
+    """The CellFinder corpus."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -100,6 +100,20 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_kb",
             subset_id="cellfinder",
         ),
+        BigBioConfig(
+            name="cellfinder_source_splits",
+            version=SOURCE_VERSION,
+            description="CellFinder source schema",
+            schema="source",
+            subset_id="cellfinder_splits",
+        ),
+        BigBioConfig(
+            name="cellfinder_bigbio_kb_splits",
+            version=BIGBIO_VERSION,
+            description="CellFinder BigBio schema",
+            schema="bigbio_kb",
+            subset_id="cellfinder_splits",
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "cellfinder_source"
@@ -110,6 +124,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
                 {
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
+                    "type": datasets.Value("string"),
                     "entities": [
                         {
                             "entity_id": datasets.Value("string"),
@@ -134,6 +149,9 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         urls = _URLS[_DATASETNAME]
+        if self.config.subset_id.endswith("_splits"):
+            urls = _URLS[_DATASETNAME + "_splits"]
+
         data_dir = Path(dl_manager.download_and_extract(urls))
 
         return [
@@ -144,7 +162,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
-        if self.config.name == "cellfinder_source":
+        if self.config.schema == "source":
             for file in data_dir.iterdir():
                 # Ignore hidden files and annotation files - we just consider the brat text files
                 if file.name.startswith("._") or file.name.endswith(".ann"):
@@ -152,11 +170,11 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
                 # Read brat annotations for the given text file and convert example to the source format
                 brat_example = parsing.parse_brat_file(file)
-                source_example = self._to_source_example(brat_example)
+                source_example = self._to_source_example(file, brat_example)
 
                 yield source_example["document_id"], source_example
 
-        elif self.config.name == "cellfinder_bigbio_kb":
+        elif self.config.schema == "bigbio_kb":
             for file in data_dir.iterdir():
                 # Ignore hidden files and annotation files - we just consider the brat text files
                 if file.name.startswith("._") or file.name.endswith(".ann"):
@@ -168,19 +186,20 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
                 kb_example["id"] = kb_example["document_id"]
 
                 # Fix text type annotation for the converted example
-                kb_example["passages"][0]["type"] = "full_text"
+                kb_example["passages"][0]["type"] = self.get_text_type(file)
 
                 yield kb_example["id"], kb_example
 
-    def _to_source_example(self, brat_example: Dict) -> Dict:
+    def _to_source_example(self, input_file: Path, brat_example: Dict) -> Dict:
         """
         Converts an example extracted using the default brat parsing logic to the source format
         of the given corpus.
         """
-
+        text_type = self.get_text_type(input_file)
         source_example = {
             "document_id": brat_example["document_id"],
             "text": brat_example["text"],
+            "type": text_type,
         }
 
         id_prefix = brat_example["document_id"] + "_"
@@ -195,3 +214,13 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             source_example["entities"].append(entity_ann)
 
         return source_example
+
+    def get_text_type(self, input_file: Path) -> str:
+        """
+        Exctracts section name from filename, if absent return full_text
+        """
+
+        name_parts = str(input_file.stem).split("_")
+        if len(name_parts) == 3:
+            return name_parts[2]
+        return "full_text"
