@@ -17,10 +17,10 @@ from pathlib import Path
 from typing import List
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-
 
 _DATASETNAME = "bionlp_st_2011_id"
 _SOURCE_VIEW_NAME = "source"
@@ -57,12 +57,16 @@ _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-id"
 
 _LICENSE = "DUA"
 
-_URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
-         "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",}
+_URLs = {
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
+}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
-                    Tasks.COREFERENCE_RESOLUTION,
-                    Tasks.NAMED_ENTITY_RECOGNITION,]
+_SUPPORTED_TASKS = [
+    Tasks.EVENT_EXTRACTION,
+    Tasks.COREFERENCE_RESOLUTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -91,7 +95,6 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_id_source"
 
     _ENTITY_TYPES = {
@@ -101,7 +104,6 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
         "Two-component-system",
         "Regulon-operon",
         "Entity",
-
     }
 
     def _info(self):
@@ -127,9 +129,7 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -173,12 +173,8 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -197,16 +193,14 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / f'bionlp-st-2011-id-master' / "original-data" / "train",
-            "dev": data_dir / f'bionlp-st-2011-id-master' / "original-data" / "devel",
-            "test": data_dir / f'bionlp-st-2011-id-master' / "original-data" / "test",
+            "train": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "test",
         }
 
         return [
@@ -235,8 +229,7 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
