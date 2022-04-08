@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import List
 
 import datasets
+
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -33,7 +34,15 @@ year = {2011},
 isbn = {9781937284091},
 publisher = {Association for Computational Linguistics},
 address = {USA},
-abstract = {The Genia event task, a bio-molecular event extraction task, is arranged as one of the main tasks of BioNLP Shared Task 2011. As its second time to be arranged for community-wide focused efforts, it aimed to measure the advance of the community since 2009, and to evaluate generalization of the technology to full text papers. After a 3-month system development period, 15 teams submitted their performance results on test cases. The results show the community has made a significant advancement in terms of both performance improvement and generalization.},
+abstract = {The Genia event task, a bio-molecular event extraction task,
+is arranged as one of the main tasks of BioNLP Shared Task 2011.
+As its second time to be arranged for community-wide focused
+efforts, it aimed to measure the advance of the community since 2009,
+and to evaluate generalization of the technology to full text papers.
+After a 3-month system development period, 15 teams submitted their
+performance results on test cases. The results show the community has
+made a significant advancement in terms of both performance improvement
+and generalization.},
 booktitle = {Proceedings of the BioNLP Shared Task 2011 Workshop},
 pages = {7–15},
 numpages = {9},
@@ -43,7 +52,7 @@ series = {BioNLP Shared Task '11}
 """
 
 _DESCRIPTION = """\
-The BioNLP-ST GE task has been promoting development of fine-grained information extraction (IE) from biomedical 
+The BioNLP-ST GE task has been promoting development of fine-grained information extraction (IE) from biomedical
 documents, since 2009. Particularly, it has focused on the domain of NFkB as a model domain of Biomedical IE.
 The GENIA task aims at extracting events occurring upon genes or gene products, which are typed as "Protein"
 without differentiating genes from gene products. Other types of physical entities, e.g. cells, cell components,
@@ -54,12 +63,16 @@ _HOMEPAGE = "https://sites.google.com/site/bionlpst/bionlp-shared-task-2011/geni
 
 _LICENSE = "DUA"
 
-_URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
-         "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip"}
+_URLs = {
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
+}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
-                    Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.COREFERENCE_RESOLUTION,]
+_SUPPORTED_TASKS = [
+    Tasks.EVENT_EXTRACTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.COREFERENCE_RESOLUTION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -90,10 +103,7 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_ge_source"
 
-    _ENTITY_TYPES = {
-        "Protein",
-        "Entity"
-    }
+    _ENTITY_TYPES = {"Protein", "Entity"}
 
     def _info(self):
         """
@@ -118,9 +128,7 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -164,12 +172,8 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -188,16 +192,14 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / f'bionlp-st-2011-ge-master' / "original-data" / "train",
-            "dev": data_dir / f'bionlp-st-2011-ge-master' / "original-data" / "devel",
-            "test": data_dir / f'bionlp-st-2011-ge-master' / "original-data" / "test",
+            "train": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "test",
         }
 
         return [
@@ -226,8 +228,7 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file),
-                    entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
