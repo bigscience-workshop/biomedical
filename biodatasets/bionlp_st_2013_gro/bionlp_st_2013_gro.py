@@ -51,12 +51,16 @@ relations. A data set from the bio NLP shared tasks competition from 2013
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-gro"
 
-_LICENSE = "DUA"
+_LICENSE = "GENIA Project License for Annotated Corpora:" \
+           "https://github.com/openbiocorpora/bionlp-st-2011-epi/blob/master/LICENSE"
 
 _URLs = {"source": "https://github.com/openbiocorpora/bionlp-st-2013-gro/archive/refs/heads/master.zip",
          "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2013-gro/archive/refs/heads/master.zip",}
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,]
+_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.RELATION_EXTRACTION,
+                    ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
