@@ -101,14 +101,14 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             subset_id="cellfinder",
         ),
         BigBioConfig(
-            name="cellfinder_source_splits",
+            name="cellfinder_splits_source",
             version=SOURCE_VERSION,
             description="CellFinder source schema",
             schema="source",
             subset_id="cellfinder_splits",
         ),
         BigBioConfig(
-            name="cellfinder_bigbio_kb_splits",
+            name="cellfinder_splits_bigbio_kb",
             version=BIGBIO_VERSION,
             description="CellFinder BigBio schema",
             schema="bigbio_kb",
