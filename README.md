@@ -1,11 +1,12 @@
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
 
+
 ![progress claimed](https://progress-bar.dev/96/?title=Datasets%20Claimed)
 
-![tier1](https://progress-bar.dev/100/?title=Milestone%201%20(30%20Datasets%20Implemented))
-![tier2](https://progress-bar.dev/67/?title=Milestone%202%20(60%20Datasets%20Implemented))
-![tier3](https://progress-bar.dev/40/?title=Milestone%203%20(100%20Datasets%20Implemented))
-![tier4](https://progress-bar.dev/24/?title=Milestone%204%20(All%20Datasets%20Implemented))
+![tier1](https://progress-bar.dev/100/?title=Milestone%201%20(30%20Datasets%20Completed))
+![tier2](https://progress-bar.dev/67/?title=Milestone%202%20(60%20Datasets%20Completed))
+![tier3](https://progress-bar.dev/40/?title=Milestone%203%20(100%20Datasets%20Completed))
+![tier4](https://progress-bar.dev/24/?title=Milestone%204%20(All%20Datasets%20Completed))
 
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
