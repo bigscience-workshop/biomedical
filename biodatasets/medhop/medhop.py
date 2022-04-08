@@ -202,7 +202,7 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
                         "type": record["type"],
                         "context": " ".join(record["supports"]),
                         "answer": [record["answer"]],
-                        # "choices": record["candidates"],
+                        "choices": record["candidates"],
                     }
 
                     uid += 1
