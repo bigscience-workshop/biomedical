@@ -1,6 +1,29 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Tuple
+
+import bioc
+
+
+def get_texts_and_offsets_from_bioc_ann(ann: bioc.BioCAnnotation) -> Tuple:
+
+    offsets = [(loc.offset, loc.offset + loc.length) for loc in ann.locations]
+
+    text = ann.text
+
+    if len(offsets) > 1:
+        i = 0
+        texts = []
+        for start, end in offsets:
+            chunk_len = end - start
+            texts.append(text[i : chunk_len + i])
+            i += chunk_len
+            while i < len(text) and text[i] == " ":
+                i += 1
+    else:
+        texts = [text]
+
+    return offsets, texts
 
 
 def remove_prefix(a: str, prefix: str) -> str:
@@ -104,7 +127,9 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
         annotation_file_suffixes = [".a1", ".a2", ".ann"]
 
     if len(annotation_file_suffixes) == 0:
-        raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
+        raise AssertionError(
+            "At least one suffix for the to-be-read annotation files should be given!"
+        )
 
     ann_lines = []
     for suffix in annotation_file_suffixes:
@@ -310,6 +335,8 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
-            unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
+            unified_example["coreferences"].append(
+                {"id": id_prefix + str(i), "entity_ids": entity_ids}
+            )
 
     return unified_example

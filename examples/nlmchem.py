@@ -17,11 +17,12 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -81,9 +82,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    )
+    DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def _info(self):
 
@@ -151,7 +150,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"
+                    ),
                     "split": "train",
                 },
             ),
@@ -159,7 +160,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"
+                    ),
                     "split": "test",
                 },
             ),
@@ -167,13 +170,17 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"
+                    ),
                     "split": "dev",
                 },
             ),
         ]
 
-    def _get_passages_and_entities(self, d: bioc.BioCDocument) -> Tuple[List[Dict], List[List[Dict]]]:
+    def _get_passages_and_entities(
+        self, d: bioc.BioCDocument
+    ) -> Tuple[List[Dict], List[List[Dict]]]:
 
         passages: List[Dict] = []
         entities: List[List[Dict]] = []
@@ -215,16 +222,12 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 if a_type in ["MeSH_Indexing_Chemical", "OTHER"]:
                     continue
 
+                offsets, text = get_texts_and_offsets_from_bioc_ann(a)
+
                 da = {
                     "type": a_type,
-                    "offsets": [
-                        (
-                            loc.offset - eo,
-                            loc.offset + loc.length - eo,
-                        )
-                        for loc in a.locations
-                    ],
-                    "text": (a.text,),
+                    "offsets": [(start - eo, end - eo) for (start, end) in offsets],
+                    "text": text,
                     "id": a.id,
                     "normalized": self._get_normalized(a),
                 }
@@ -250,7 +253,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
             normalized = [i.split(":") for i in identifiers]
 
-            normalized = [{"db_name": elems[0], "db_id": elems[1]} for elems in normalized]
+            normalized = [
+                {"db_name": elems[0], "db_id": elems[1]} for elems in normalized
+            ]
 
         else:
 
