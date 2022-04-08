@@ -51,7 +51,7 @@ NFkB as a model domain of Biomedical IE
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-ge"
 
-_LICENSE = "DUA"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC BY 3.0"
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",
