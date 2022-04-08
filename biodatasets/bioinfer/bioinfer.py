@@ -200,10 +200,22 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
     @staticmethod
     def _add_entity(entity):
         offsets = [[int(o) for o in offset.split("-")] for offset in entity.attrib["charOffset"].split(",")]
+        # For multiple offsets, split entity text accordingly
+        if len(offsets) > 1:
+            text = []
+            i = 0
+            for start, end in offsets:
+                chunk_len = end - start
+                text.append(entity.attrib["text"][i:chunk_len + i])
+                i += chunk_len
+                while i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " ":
+                    i += 1
+        else:
+            text = [entity.attrib["text"]]
         return {
             "id": entity.attrib["id"],
             "offsets": offsets,
-            "text": [entity.attrib["text"]],
+            "text": text,
             "type": entity.attrib["type"],
             "normalized": {}
         }
