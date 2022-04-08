@@ -196,8 +196,9 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         "source": datasets.Value("string"),
                         "doi": datasets.Value("string"),
                         "pmcid": datasets.Value("string"),
+                        "pubmed_id": datasets.Value("string"),
                         "publish_time": datasets.Value("string"),
-                        "authros": datasets.Value("string"),
+                        "authors": datasets.Value("string"),
                         "journal": datasets.Value("string"),
                     }
                 )
@@ -225,42 +226,46 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             # The download method may not be reliable, so if it fails
             try:
+                urls = {
+                        "ner": _URLS[_DATASETNAME]["ner"],
+                        "corpus": _URLS[_DATASETNAME]["corpus"],
+                    }
                 if self.config.subset_id == "cord_ner_ner":
-                    urls = _URLS[_DATASETNAME]["ner"]
+                    del urls["corpus"]
                 elif self.config.subset_id == "cord_ner_corpus":
-                    urls = _URLS[_DATASETNAME]["corpus"]
-                elif self.config.name == "cord_ner_bigbio_kb":
-                    urls = [url for url in _URLS[_DATASETNAME].values()]
-
+                    del urls["ner"]
                 data_dir = dl_manager.download_and_extract(urls)
             except:
                 raise ConnectionError(
                     "The dataset could not be downloaded. Please download to local storage and pass the data_dir kwarg to load_dataset."
                 )
         else:
-            data_dir = self.config.data_dir
+            data_dir = {
+                "ner": os.path.join(self.config.data_dir, "CORD-NER-ner.json"),
+                "corpus": os.path.join(self.config.data_dir, "CORD-NER-corpus.json"),
+            }
 
-        if (
-            self.config.subset_id == "cord_ner_ner"
-            or self.config.name == "cord_ner_bigbio_kb"
-        ):
-            filepath = "CORD-NER-ner.json"
-        elif self.config.subset_id == "cord_ner_corpus":
-            filepath = "CORD-NER-corpus.json"
+            if self.config.subset_id == "cord_ner_ner":
+                del data_dir["corpus"]
+            elif self.config.subset_id == "cord_ner_corpus":
+                del data_dir["ner"]
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, filepath),
+                    "ner_filepath": data_dir.get("ner", None),
+                    "corpus_filepath": data_dir.get("corpus", None),
                     "split": "train",
                 },
             ),
         ]
 
-    def _corpus_to_dict(self):
+    def _corpus_to_dict(self, corpus_filepath) -> Dict:
+        """Loads corpus as dict object"""
 
         doc2sents = {}
-        with open(os.path.join(self.config.data_dir, "CORD-NER-corpus.json")) as fp:
+        with open(corpus_filepath) as fp:
             for line in fp.readlines():
                 line = json.loads(line)
                 doc_id = line["doc_id"]
@@ -272,18 +277,23 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
 
         return doc2sents
 
-    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, ner_filepath, corpus_filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
+            if self.config.subset_id == "cord_ner_ner":
+                filepath = ner_filepath
+            else:
+                filepath = corpus_filepath
+                
             with open(filepath, "r") as fp:
                 for key, example in enumerate(fp.readlines()):
                     yield key, json.loads(example)
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_kb":
 
-            doc2sents = self._corpus_to_dict()
-            with open(filepath, "r") as fp:
+            doc2sents = self._corpus_to_dict(corpus_filepath)
+            with open(ner_filepath, "r") as fp:
                 for key, line in enumerate(fp.readlines()):
                     line = json.loads(line)
                     corpus_sents = doc2sents[line["doc_id"]]
@@ -303,7 +313,8 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                                 "offsets": [passage_offset_start, passage_offset_end],
                             }
                         )
-                        passage_offset_start = passage_offset_end
+                        # add one to account for the space that is added when joining
+                        passage_offset_start = passage_offset_end+1
 
                     new_entities = []
                     for entity_sent in line["sents"]:
