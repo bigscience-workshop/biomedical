@@ -150,6 +150,7 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
                         "document_id": answer["docid"],
                         "question": question["text"],
                         "type": question["type"],
+                        "choices": [],
                         "context": "",
                         "answer": [answer["justification"]],
                     }
