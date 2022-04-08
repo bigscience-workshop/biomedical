@@ -199,7 +199,7 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _add_entity(entity):
-        offsets = [tuple([int(o) for o in offset.split("-")]) for offset in entity.attrib["charOffset"].split(",")]
+        offsets = [[int(o) for o in offset.split("-")] for offset in entity.attrib["charOffset"].split(",")]
         return {
             "id": entity.attrib["id"],
             "offsets": offsets,
