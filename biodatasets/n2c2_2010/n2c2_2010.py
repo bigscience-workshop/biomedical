@@ -86,14 +86,14 @@ Deaconess Medical Center, Partners Healthcare, and University of Pittsburgh Medi
 Center (UPMC). In addition, UPMC contributed de-identified progress notes to the
 i2b2/VA corpus. This dataset contains the records from Beth Israel and Partners.
 
-The 2010 i2b2/VA Workshop on Natural Language Processing Challenges for Clinical Records comprises three tasks: 
-1) a concept extraction task focused on the extraction of medical concepts from patient reports; 
-2) an assertion classification task focused on assigning assertion types for medical problem concepts; 
-3) a relation classification task focused on assigning relation types that hold between medical problems, 
-tests, and treatments. 
+The 2010 i2b2/VA Workshop on Natural Language Processing Challenges for Clinical Records comprises three tasks:
+1) a concept extraction task focused on the extraction of medical concepts from patient reports;
+2) an assertion classification task focused on assigning assertion types for medical problem concepts;
+3) a relation classification task focused on assigning relation types that hold between medical problems,
+tests, and treatments.
 
-i2b2 and the VA provided an annotated reference standard corpus for the three tasks. 
-Using this reference standard, 22 systems were developed for concept extraction, 
+i2b2 and the VA provided an annotated reference standard corpus for the three tasks.
+Using this reference standard, 22 systems were developed for concept extraction,
 21 for assertion classification, and 16 for relation classification.
 """
 
@@ -267,7 +267,7 @@ def _get_relations_from_sample(sample_id, sample, split):
     for i, rel_line in enumerate(rel_lines):
         a = {}
         rel = _parse_rel_line(rel_line)
-        a['arg1_id'] = _form_entity_id(
+        a["arg1_id"] = _form_entity_id(
             sample_id,
             split,
             rel["concept_1"]["start_line"],
@@ -275,7 +275,7 @@ def _get_relations_from_sample(sample_id, sample, split):
             rel["concept_1"]["end_line"],
             rel["concept_1"]["end_token"],
         )
-        a['arg2_id'] = _form_entity_id(
+        a["arg2_id"] = _form_entity_id(
             sample_id,
             split,
             rel["concept_2"]["start_line"],
@@ -283,9 +283,9 @@ def _get_relations_from_sample(sample_id, sample, split):
             rel["concept_2"]["end_line"],
             rel["concept_2"]["end_token"],
         )
-        a['id'] = sample_id + '_' + a['arg1_id'] + '_' + rel['relation'] + '_' + a['arg2_id']
-        a['normalized'] = []
-        a['type'] = rel['relation']
+        a["id"] = sample_id + "_" + a["arg1_id"] + "_" + rel["relation"] + "_" + a["arg2_id"]
+        a["normalized"] = []
+        a["type"] = rel["relation"]
         relations.append(a)
 
     return relations
@@ -451,7 +451,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                             "end_line": datasets.Value("int64"),
                             "end_token": datasets.Value("int64"),
                             "text": datasets.Value("string"),
-                            "concept": datasets.Value("string")
+                            "concept": datasets.Value("string"),
                         }
                     ],
                     "assertions": [
@@ -494,8 +494,8 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                         "con_source": datasets.Value("string"),
                         "ast_source": datasets.Value("string"),
                         "rel_source": datasets.Value("string"),
-                        "unannotated_source": datasets.Value("string")
-                    }
+                        "unannotated_source": datasets.Value("string"),
+                    },
                 }
             )
 
@@ -594,8 +594,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                 yield _id, self._get_source_sample(sample_id, sample)
             elif self.config.name == N2C22010RelationsDataset._BIGBIO_CONFIG_NAME:
                 # This is to make sure unannotated data does not end up in big bio
-                if 'unannotated' not in sample['txt_source']:
+                if "unannotated" not in sample["txt_source"]:
                     yield _id, self._get_bigbio_sample(sample_id, sample, split)
 
             _id += 1
-
