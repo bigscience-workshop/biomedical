@@ -12,8 +12,14 @@ from typing import Iterable, Iterator, List, Optional, Union, Dict
 import datasets
 from datasets import DatasetDict, Features
 from utils.constants import Tasks
-from utils.schemas import (entailment_features, kb_features, pairs_features,
-                           qa_features, text2text_features, text_features)
+from utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -54,7 +60,7 @@ _TASK_TO_FEATURES = {
     Tasks.RELATION_EXTRACTION: {"relations", "entities"},
     Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
     Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-    Tasks.EVENT_EXTRACTION: {"events"}
+    Tasks.EVENT_EXTRACTION: {"events"},
 }
 
 
@@ -85,8 +91,8 @@ class TestDataLoader(unittest.TestCase):
     :param SUBSET_ID: The explicit view/config to test BigBio on
     :param DATA_DIR: If local, the path to dataset files
     :param USE_AUTH_TOKEN: If private, an authentication token for loading data
-    :param BYPASS_SPLIT: If non-empty, splits in data to ignore testing
-    :param BYPASS_KEY: If non-empty, keys in data to ignore testing
+    :param BYPASS_SPLITS: If non-empty, splits in data to ignore testing
+    :param BYPASS_KEYS: If non-empty, keys in data to ignore testing
     """  # noqa
 
     PATH: str
@@ -94,8 +100,8 @@ class TestDataLoader(unittest.TestCase):
     SUBSET_ID: str
     DATA_DIR: Optional[str]
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
-    BYPASS_SPLIT: List[str]
-    BYPASS_KEY: List[str]
+    BYPASS_SPLITS: List[str]
+    BYPASS_KEYS: List[str]
 
     def runTest(self):
         """
@@ -117,18 +123,26 @@ class TestDataLoader(unittest.TestCase):
 
         """  # noqa
 
-        if len(self.BYPASS_SPLIT) > 0:
-            logger.warning("Splits ignored")
+        if len(self.BYPASS_SPLITS) > 0:
+            logger.warning("Splits ignored = " + str(self.BYPASS_SPLITS))
+
+        if len(self.BYPASS_KEYS) > 0:
+            logger.warning("Keys ignored = " + str(self.BYPASS_KEYS))
 
         for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
+
             with self.subTest("IDs globally unique"):
                 self.test_are_ids_globally_unique(dataset_bigbio)
+
             with self.subTest("Check schema validity"):
                 self.test_schema(schema)
 
             mapped_features = _SCHEMA_TO_FEATURES[schema]
-            split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
+            split_to_feature_statistics = self.get_feature_statistics(
+                mapped_features, schema
+            )
+
             for split_name, split in self.datasets_bigbio[schema].items():
                 print(split_name)
                 print("=" * 10)
@@ -152,7 +166,6 @@ class TestDataLoader(unittest.TestCase):
                 with self.subTest("Check multiple choice"):
                     self.test_multiple_choice(dataset_bigbio)
 
-
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
 
@@ -167,14 +180,22 @@ class TestDataLoader(unittest.TestCase):
         if module.endswith(".py"):
             module = module[:-3]
         module = module.replace("/", ".")
-        self._SUPPORTED_TASKS = importlib.import_module(module)._SUPPORTED_TASKS
+        self._SUPPORTED_TASKS = importlib.import_module(
+            module
+        )._SUPPORTED_TASKS
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
         if len(invalid_tasks) > 0:
-            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
+            raise ValueError(
+                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
+            )
 
-        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
-        logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
+        self._MAPPED_SCHEMAS = set(
+            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+        )
+        logger.info(
+            f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}"
+        )
 
         # check the schemas implied by _SUPPORTED_TASKS
         if self.SCHEMA is None:
@@ -196,7 +217,9 @@ class TestDataLoader(unittest.TestCase):
         self.datasets_bigbio = {}
         for schema in self.schemas_to_check:
             config_name = f"{self.SUBSET_ID}_bigbio_{schema.lower()}"
-            logger.info(f"Checking load_dataset with config name {config_name}")
+            logger.info(
+                f"Checking load_dataset with config name {config_name}"
+            )
             self.datasets_bigbio[schema] = datasets.load_dataset(
                 self.PATH,
                 name=config_name,
@@ -204,7 +227,9 @@ class TestDataLoader(unittest.TestCase):
                 use_auth_token=self.USE_AUTH_TOKEN,
             )
 
-    def get_feature_statistics(self, features: Features, schema: str) -> Dict:
+    def get_feature_statistics(
+        self, features: Features, schema: str
+    ) -> Dict:
         """
         Gets sample statistics, for each split and sample of the number of
         features in the schema present; only works for the big-bio schema.
@@ -223,12 +248,16 @@ class TestDataLoader(unittest.TestCase):
                             if example[feature_name]:
                                 counter[feature_name] += 1
                         else:
-                            counter[feature_name] += len(example[feature_name])
+                            counter[feature_name] += len(
+                                example[feature_name]
+                            )
 
                             # TODO do proper recursion here
                             if feature_name == "entities":
                                 for entity in example["entities"]:
-                                    counter["normalized"] += len(entity["normalized"])
+                                    counter["normalized"] += len(
+                                        entity["normalized"]
+                                    )
 
             all_counters[split_name] = counter
 
@@ -321,11 +350,16 @@ class TestDataLoader(unittest.TestCase):
                 existing_ids = set()
 
                 referenced_ids.update(self._get_referenced_ids(example))
-                existing_ids.update(self._get_existing_referable_ids(example))
+                existing_ids.update(
+                    self._get_existing_referable_ids(example)
+                )
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event":
-                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
+                        if not (
+                            (ref_id, "entity") in existing_ids
+                            or (ref_id, "event") in existing_ids
+                        ):
                             logger.warning(
                                 f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
                             )
@@ -356,7 +390,9 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(msg="Text in passages must be a list", field=text)
+                        self._test_is_list(
+                            msg="Text in passages must be a list", field=text
+                        )
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -375,7 +411,9 @@ class TestDataLoader(unittest.TestCase):
 
                         for idx, (start, end) in enumerate(offsets):
                             msg = f"Split:{split} - Example:{example_id} - text:`{example_text[start:end]}` != text_by_offset:`{text[idx]}`"
-                            self.assertEqual(example_text[start:end], text[idx], msg)
+                            self.assertEqual(
+                                example_text[start:end], text[idx], msg
+                            )
 
     def _check_offsets(
         self,
@@ -449,7 +487,10 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - entity:{entity_id} "
+                                + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -483,7 +524,10 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - event:{event_id} "
+                                + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -501,7 +545,9 @@ class TestDataLoader(unittest.TestCase):
 
                 for example in dataset_bigbio[split]:
                     example_id = example["id"]
-                    entity_lookup = {ent["id"]: ent for ent in example["entities"]}
+                    entity_lookup = {
+                        ent["id"]: ent for ent in example["entities"]
+                    }
 
                     # check all coref entity ids are in entity lookup
                     for coref in example["coreferences"]:
@@ -509,7 +555,6 @@ class TestDataLoader(unittest.TestCase):
                             assert (
                                 entity_id in entity_lookup
                             ), f"Split:{split} - Example:{example_id} - Entity:{entity_id} not found!"
-
 
     def test_multiple_choice(self, dataset_bigbio: DatasetDict):
         """
@@ -521,24 +566,23 @@ class TestDataLoader(unittest.TestCase):
             for example in dataset_bigbio[split]:
 
                 if len(example["choices"]) > 0:
-                    assert(
-                        example["type"] == "multiple_choice"  # can change this to "in" if we include ranking
+                    assert (
+                        example["type"]
+                        == "multiple_choice"  # can change this to "in" if we include ranking
                     ), f"example has populated choices, but is not type 'multiple_choice' {example}"
 
                 if example["type"] == "multiple_choice":
-                    assert(
+                    assert (
                         len(example["choices"]) > 0
                     ), f"example has type 'multiple_choice' but no values in 'choices' {example}"
 
                     for answer in example["answer"]:
-                        assert(
+                        assert (
                             answer in example["choices"]
                         ), f"example has an answer that is not present in 'choices' {example}"
 
-
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
-
 
         non_empty_features = set()
         if schema == "KB":
@@ -549,24 +593,42 @@ class TestDataLoader(unittest.TestCase):
         else:
             features = _SCHEMA_TO_FEATURES[schema]
 
-        split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
+        split_to_feature_counts = self.get_feature_statistics(
+            features=features, schema=schema
+        )
 
         for split_name, split in self.datasets_bigbio[schema].items():
-            
-            if split_name not in self.BYPASS_SPLIT:
 
-                    self.assertEqual(split.info.features, features)
-                    for non_empty_feature in non_empty_features:
-                        if split_to_feature_counts[split_name][non_empty_feature] == 0:
-                            raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
+            if split_name not in self.BYPASS_SPLITS:
 
-                for feature, count in split_to_feature_counts[split_name].items():
-                    if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
-                        logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
+                self.assertEqual(split.info.features, features)
+                for non_empty_feature in non_empty_features:
+                    if (
+                        split_to_feature_counts[split_name][
+                            non_empty_feature
+                        ]
+                        == 0
+                    ):
+                        raise AssertionError(
+                            f"Required key '{non_empty_feature}' does not have any instances"
+                        )
+
+                for feature, count in split_to_feature_counts[
+                    split_name
+                ].items():
+                    if (
+                        count > 0
+                        and feature not in non_empty_features
+                        and feature
+                        in set().union(*_TASK_TO_FEATURES.values())
+                    ):
+                        logger.warning(
+                            f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
+                        )
 
             else:
 
-
+                logger.warning("Ignoring split = " + str(split_name))
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
@@ -590,7 +652,11 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
+    parser.add_argument(
+        "path",
+        type=str,
+        help="path to dataloader script (e.g. examples/n2c2_2011.py)",
+    )
     parser.add_argument(
         "--schema",
         type=str,
