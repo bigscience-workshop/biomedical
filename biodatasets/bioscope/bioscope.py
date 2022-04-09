@@ -207,7 +207,7 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
                 example = self._create_example(sentence_tuple)
                 example["id"] = guid
                 example["passages"] = [{
-                    "id": sentence.attrib['id'],
+                    "id": f"{document_type}_{sentence.attrib['id']}",
                     "type": document_type,
                     "text": ["".join(sentence.itertext())],
                     "offsets": [(0, len("".join(sentence.itertext())))]
