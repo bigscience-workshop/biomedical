@@ -29,9 +29,10 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -144,7 +145,7 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             features = datasets.Features(
-               {
+                {
                     "document_id": datasets.Value("string"),
                     "document_type": datasets.Value("string"),
                     "text": datasets.Value("string"),
@@ -160,8 +161,8 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
                                     "db_id": datasets.Value("string"),
                                 }
                             ],
-                       }
-                   ],
+                        }
+                    ],
                 }
             )
 
@@ -206,12 +207,14 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
                 document_type, sentence = sentence_tuple
                 example = self._create_example(sentence_tuple)
                 example["id"] = guid
-                example["passages"] = [{
-                    "id": f"{document_type}_{sentence.attrib['id']}",
-                    "type": document_type,
-                    "text": ["".join(sentence.itertext())],
-                    "offsets": [(0, len("".join(sentence.itertext())))]
-                }]
+                example["passages"] = [
+                    {
+                        "id": f"{document_type}_{sentence.attrib['id']}",
+                        "type": document_type,
+                        "text": ["".join(sentence.itertext())],
+                        "offsets": [(0, len("".join(sentence.itertext())))],
+                    }
+                ]
                 example["events"] = []
                 example["coreferences"] = []
                 example["relations"] = []
@@ -222,17 +225,33 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
         Returns a list of tuples (Document type, iterator from dataset)
         """
         if self.config.subset_id.__contains__("abstracts"):
-            sentences = self._concat_iterators(("Abstract", ET.parse(os.path.join(data_files, "abstracts.xml")).getroot().iter("sentence")))
+            sentences = self._concat_iterators(
+                ("Abstract", ET.parse(os.path.join(data_files, "abstracts.xml")).getroot().iter("sentence"))
+            )
         elif self.config.subset_id.__contains__("papers"):
-            sentences = self._concat_iterators(("Paper", ET.parse(os.path.join(data_files, "full_papers.xml")).getroot().iter("sentence")))
+            sentences = self._concat_iterators(
+                ("Paper", ET.parse(os.path.join(data_files, "full_papers.xml")).getroot().iter("sentence"))
+            )
         elif self.config.subset_id.__contains__("medical_texts"):
-            sentences = self._concat_iterators(("Medical text", ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml")).getroot().iter("sentence")))
+            sentences = self._concat_iterators(
+                (
+                    "Medical text",
+                    ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml"))
+                    .getroot()
+                    .iter("sentence"),
+                )
+            )
         else:
             abstracts = ET.parse(os.path.join(data_files, "abstracts.xml")).getroot().iter("sentence")
             papers = ET.parse(os.path.join(data_files, "full_papers.xml")).getroot().iter("sentence")
-            medical_texts = ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml")).getroot().iter(
-                "sentence")
-            sentences = self._concat_iterators(("Abstract", abstracts), ("Paper", papers), ("Medical text", medical_texts))
+            medical_texts = (
+                ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml"))
+                .getroot()
+                .iter("sentence")
+            )
+            sentences = self._concat_iterators(
+                ("Abstract", abstracts), ("Paper", papers), ("Medical text", medical_texts)
+            )
         return sentences
 
     @staticmethod
@@ -257,15 +276,17 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
         cues = dict([(cue.attrib["ref"], cue) for cue in sentence.iter("cue")])
         for idx, xcope in xcopes.items():
             # X2.140.2 has no annotation in raw data
-            if cues.get(idx) == None:
+            if cues.get(idx) is None:
                 continue
-            entities.append({
-                "id": f"{document_type_prefix}_{idx}",
-                "type": cues.get(idx).attrib["type"],
-                "text": ["".join(xcope.itertext())],
-                "offsets": self._extract_offsets(text=text, entity_text="".join(xcope.itertext())),
-                "normalized": []
-            })
+            entities.append(
+                {
+                    "id": f"{document_type_prefix}_{idx}",
+                    "type": cues.get(idx).attrib["type"],
+                    "text": ["".join(xcope.itertext())],
+                    "offsets": self._extract_offsets(text=text, entity_text="".join(xcope.itertext())),
+                    "normalized": [],
+                }
+            )
         return entities
 
     def _extract_offsets(self, text, entity_text):
