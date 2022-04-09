@@ -17,7 +17,7 @@ import itertools
 from pathlib import Path
 
 from typing import List, Tuple, Dict
-import bioc
+from bioc import biocxml
 
 import datasets
 from utils import schemas
@@ -27,17 +27,17 @@ from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,
-    title       =  {NLM-Gene, a richly annotated gold standard dataset for gene entities that addresses ambiguity and 
+    title       =  {NLM-Gene, a richly annotated gold standard dataset for gene entities that addresses ambiguity and
                     multi-species gene recognition},
-    author      =   {Islamaj, 
-                    Rezarta and 
-                    Wei, Chih-Hsuan and 
-                    Cissel, David and 
-                    Miliaras, Nicholas and 
-                    Printseva, Olga and 
-                    Rodionov, Oleg and 
-                    Sekiya, Keiko and 
-                    Ward, Janice and 
+    author      =   {Islamaj,
+                    Rezarta and
+                    Wei, Chih-Hsuan and
+                    Cissel, David and
+                    Miliaras, Nicholas and
+                    Printseva, Olga and
+                    Rodionov, Oleg and
+                    Sekiya, Keiko and
+                    Ward, Janice and
                     Lu, Zhiyong},
     journal     =   {Journal of Biomedical Informatics},
     volume      =   {118},
@@ -50,11 +50,11 @@ _CITATION = """\
 _DATASETNAME = "nlm_gene"
 
 _DESCRIPTION = """\
-NLM-Gene consists of 550 PubMed articles, from 156 journals, and contains more than 15 thousand unique gene names, 
-corresponding to more than five thousand gene identifiers (NCBI Gene taxonomy). This corpus contains gene annotation 
-data from 28 organisms. The annotated articles contain on average 29 gene names, and 10 gene identifiers per article. 
-These characteristics demonstrate that this article set is an important benchmark dataset to test the accuracy of gene 
-recognition algorithms both on multi-species and ambiguous data. The NLM-Gene corpus will be invaluable for advancing 
+NLM-Gene consists of 550 PubMed articles, from 156 journals, and contains more than 15 thousand unique gene names,
+corresponding to more than five thousand gene identifiers (NCBI Gene taxonomy). This corpus contains gene annotation
+data from 28 organisms. The annotated articles contain on average 29 gene names, and 10 gene identifiers per article.
+These characteristics demonstrate that this article set is an important benchmark dataset to test the accuracy of gene
+recognition algorithms both on multi-species and ambiguous data. The NLM-Gene corpus will be invaluable for advancing
 text-mining techniques for gene identification tasks in biomedical text.
 """
 
@@ -197,7 +197,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             for uid, content in enumerate(contents):
                 file_id = content.replace("\n", "")
                 file_path = filepath/"FINAL"/f"{file_id}.BioC.XML"
-                reader = bioc.BioCXMLDocumentReader(file_path.as_posix())
+                reader = biocxml.BioCXMLDocumentReader(file_path.as_posix())
                 for xdoc in reader:
                     yield uid, {
                             "passages": [
@@ -217,7 +217,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             for i, content in enumerate(contents):
                 file_id = content.replace("\n", "")
                 file_path = filepath / "FINAL" / f"{file_id}.BioC.XML"
-                reader = bioc.BioCXMLDocumentReader(file_path.as_posix())
+                reader = biocxml.BioCXMLDocumentReader(file_path.as_posix())
                 for xdoc in reader:
                     data = {
                         "id": uid,
