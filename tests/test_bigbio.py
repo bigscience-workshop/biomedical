@@ -1,6 +1,8 @@
 """
 Unit-tests to ensure tasks adhere to big-bio schema.
-"""
+
+#TODO subset-id is a bit tricky to work with; ideally specify a view directly
+"""  # noqa
 import argparse
 import importlib
 import sys
@@ -657,6 +659,7 @@ if __name__ == "__main__":
         type=str,
         help="path to dataloader script (e.g. examples/n2c2_2011.py)",
     )
+
     parser.add_argument(
         "--schema",
         type=str,
@@ -665,26 +668,30 @@ if __name__ == "__main__":
         choices=list(_VALID_SCHEMAS),
         help="by default, bigbio schemas will be discovered from _SUPPORTED_TASKS. use this to explicitly test only one schema.",
     )
+
     parser.add_argument(
         "--subset_id",
         default=None,
         required=False,
         help="by default, subset_id will be generated from path (e.g. if path=examples/n2c2_2011.py then subset_id=n2c2_2011). the config name is then constructed as config_name=<subset_id>_bigbio_<schema>. use this to explicitly set the subset_id for the config name you want to test (e.g. bioasq9b).",
-    ),
+    )
+
     parser.add_argument(
-        "--bypass_split",
+        "--bypass_splits",
         default=[],
         required=False,
         nargs="*",
-        help="If a certain split has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing ALL keys on the named splits.",
-    ),
+        help="If a certain split has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing ALL keys on the named splits. Provide all split names as space-separated.",
+    )
+
     parser.add_argument(
-        "--bypass_key",
+        "--bypass_keys",
         default=[],
         required=False,
         nargs="*",
-        help="If a certain key has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing on the named key. If a split is not provided, it will ignore ALL splits containing this key.",
-    ),
+        help="If a certain key has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing on the named key. If a split is not provided, it will ignore ALL splits containing this key. Provide all key names as space separated.",
+    )
+
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
 
@@ -701,7 +708,7 @@ if __name__ == "__main__":
     TestDataLoader.SCHEMA = args.schema
     TestDataLoader.DATA_DIR = args.data_dir
     TestDataLoader.USE_AUTH_TOKEN = args.use_auth_token
-    TestDataLoader.BYPASS_SPLIT = args.bypass_split
-    TestDataLoader.BYPASS_KEY = args.bypass_key
+    TestDataLoader.BYPASS_SPLITS = args.bypass_splits
+    TestDataLoader.BYPASS_KEYS = args.bypass_keys
 
     unittest.TextTestRunner().run(TestDataLoader())
