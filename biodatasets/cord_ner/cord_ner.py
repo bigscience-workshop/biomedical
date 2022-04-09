@@ -105,7 +105,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             subset_id="cord_ner",
         ),
         BigBioConfig(
-            name="cord_ner_full_source",
+            name="cord_ner_source",
             version=SOURCE_VERSION,
             description="cord_ner source schema for full file",
             schema="source",
@@ -130,7 +130,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
         # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
-            if self.config.name == "cord_ner_full_source":
+            if self.config.name == "cord_ner_source":
                 features = datasets.Features(
                     {
                         "id": datasets.Value("int32"),
@@ -214,7 +214,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             try:
 
                 if (
-                    self.config.name == "cord_ner_full_source"
+                    self.config.name == "cord_ner_source"
                     or self.config.name == "cord_ner_bigbio_kb"
                 ):
                     url = {"train": _URLS[_DATASETNAME]["full"]}
@@ -235,7 +235,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             }
 
             if (
-                self.config.name == "cord_ner_full_source"
+                self.config.name == "cord_ner_source"
                 or self.config.name == "cord_ner_bigbio_kb"
             ):
                 data_dir = {
