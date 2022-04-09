@@ -78,14 +78,24 @@ class TestDataLoader(unittest.TestCase):
     """
     Given a dataset script that has been implemented, check if it adheres to the `bigbio` schema.
 
-    The test
-    """
+    Params:
+
+    :param PATH: path to dataloading script
+    :param SCHEMA: BigBio schema used to check info representation
+    :param SUBSET_ID: The explicit view/config to test BigBio on
+    :param DATA_DIR: If local, the path to dataset files
+    :param USE_AUTH_TOKEN: If private, an authentication token for loading data
+    :param BYPASS_SPLIT: If non-empty, splits in data to ignore testing
+    :param BYPASS_KEY: If non-empty, keys in data to ignore testing
+    """  # noqa
 
     PATH: str
     SCHEMA: str
     SUBSET_ID: str
     DATA_DIR: Optional[str]
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
+    BYPASS_SPLIT: List[str]
+    BYPASS_KEY: List[str]
 
     def runTest(self):
         """
@@ -106,6 +116,9 @@ class TestDataLoader(unittest.TestCase):
         (10) test_coref_ids: Check if text matches offsets in coreferences
 
         """  # noqa
+
+        if len(self.BYPASS_SPLIT) > 0:
+            logger.warning("Splits ignored")
 
         for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
@@ -537,15 +550,21 @@ class TestDataLoader(unittest.TestCase):
             features = _SCHEMA_TO_FEATURES[schema]
 
         split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
-        for split_name, split in self.datasets_bigbio[schema].items():
-            self.assertEqual(split.info.features, features)
-            for non_empty_feature in non_empty_features:
-                if split_to_feature_counts[split_name][non_empty_feature] == 0:
-                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
 
-            for feature, count in split_to_feature_counts[split_name].items():
-                if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
-                    logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
+        for split_name, split in self.datasets_bigbio[schema].items():
+            
+            if split_name not in self.BYPASS_SPLIT:
+
+                    self.assertEqual(split.info.features, features)
+                    for non_empty_feature in non_empty_features:
+                        if split_to_feature_counts[split_name][non_empty_feature] == 0:
+                            raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
+
+                for feature, count in split_to_feature_counts[split_name].items():
+                    if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
+                        logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
+
+            else:
 
 
 
@@ -586,6 +605,20 @@ if __name__ == "__main__":
         required=False,
         help="by default, subset_id will be generated from path (e.g. if path=examples/n2c2_2011.py then subset_id=n2c2_2011). the config name is then constructed as config_name=<subset_id>_bigbio_<schema>. use this to explicitly set the subset_id for the config name you want to test (e.g. bioasq9b).",
     ),
+    parser.add_argument(
+        "--bypass_split",
+        default=[],
+        required=False,
+        nargs="*",
+        help="If a certain split has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing ALL keys on the named splits.",
+    ),
+    parser.add_argument(
+        "--bypass_key",
+        default=[],
+        required=False,
+        nargs="*",
+        help="If a certain key has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing on the named key. If a split is not provided, it will ignore ALL splits containing this key.",
+    ),
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
 
@@ -602,5 +635,7 @@ if __name__ == "__main__":
     TestDataLoader.SCHEMA = args.schema
     TestDataLoader.DATA_DIR = args.data_dir
     TestDataLoader.USE_AUTH_TOKEN = args.use_auth_token
+    TestDataLoader.BYPASS_SPLIT = args.bypass_split
+    TestDataLoader.BYPASS_KEY = args.bypass_key
 
     unittest.TextTestRunner().run(TestDataLoader())
