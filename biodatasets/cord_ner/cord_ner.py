@@ -91,6 +91,7 @@ _LICENSE = """
 # This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: {
+        "full": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_651148518303",
         "ner": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_642495001609",
         "corpus": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_642522056185",
     }
@@ -134,14 +135,21 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             version=SOURCE_VERSION,
             description="cord_ner source schema for ner file",
             schema="source",
-            subset_id="cord_ner_ner",
+            subset_id="cord_ner",
         ),
         BigBioConfig(
             name="cord_ner_corpus_source",
             version=SOURCE_VERSION,
             description="cord_ner source schema for corpus file",
             schema="source",
-            subset_id="cord_ner_corpus",
+            subset_id="cord_ner",
+        ),
+        BigBioConfig(
+            name="cord_ner_full_source",
+            version=SOURCE_VERSION,
+            description="cord_ner source schema for full file",
+            schema="source",
+            subset_id="cord_ner",
         ),
         BigBioConfig(
             name="cord_ner_bigbio_kb",
@@ -162,7 +170,31 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
         # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
-            if self.config.subset_id == "cord_ner_ner":
+            if self.config.name == "cord_ner_full_source":
+                features = datasets.Features(
+                    {
+                        "id": datasets.Value("int32"),
+                        "source": datasets.Value("string"),
+                        "doi": datasets.Value("string"),
+                        "pmcid": datasets.Value("string"),
+                        "pubmed_id": datasets.Value("string"),
+                        "publish_time": datasets.Value("string"),
+                        "authors": datasets.Value("string"),
+                        "journal": datasets.Value("string"),
+                        "title": datasets.Value("string"),
+                        "abstract": datasets.Value("string"),
+                        "body": datasets.Value("string"),
+                        "entities": [
+                            {
+                                "end": datasets.Value("int32"),
+                                "start": datasets.Value("int32"),
+                                "text": datasets.Value("string"),
+                                "type": datasets.Value("string"),
+                            }
+                        ],
+                    }
+                )
+            elif self.config.name == "cord_ner_ner_source":
                 features = datasets.Features(
                     {
                         "doc_id": datasets.Value("int32"),
@@ -181,16 +213,14 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         ],
                     }
                 )
-            elif self.config.subset_id == "cord_ner_corpus":
+            elif self.config.name == "cord_ner_corpus_source":
                 features = datasets.Features(
                     {
                         "doc_id": datasets.Value("int32"),
                         "sents": [
                             {
                                 "sent_id": datasets.Value("int32"),
-                                "sent_tokens": datasets.Sequence(
-                                    datasets.Value("string")
-                                ),
+                                "sent_tokens": datasets.Sequence(datasets.Value("string")),
                             }
                         ],
                         "source": datasets.Value("string"),
@@ -202,78 +232,8 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         "journal": datasets.Value("string"),
                     }
                 )
-            else:
-                raise NotImplementedError(
-                    f"{self.config.subset_id} not a valid config subset_id"
-                )
-
-        elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Sequence(datasets.Value("string")),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "events": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            # refers to the text_bound_annotation of the trigger
-                            "trigger": {
-                                "text": datasets.Sequence(datasets.Value("string")),
-                                "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            },
-                            "arguments": [
-                                {
-                                    "role": datasets.Value("string"),
-                                    "ref_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "coreferences": [
-                        {
-                            "id": datasets.Value("string"),
-                            "entity_ids": datasets.Sequence(datasets.Value("string")),
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
-
+        elif self.config.name == "cord_ner_bigbio_kb":
+            features = schemas.kb_features
         else:
             raise NotImplementedError(f"{self.config.name} not a valid config name")
 
@@ -288,16 +248,20 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            # The download method may not be reliable, so if it fails
+            # The download method may not be reliable, so if it fails this function will still work for local files
             try:
+                # urls starts with all 3, and depending on the config, deletes 
                 urls = {
+                    "full": _URLS[_DATASETNAME]["full"],
                     "ner": _URLS[_DATASETNAME]["ner"],
                     "corpus": _URLS[_DATASETNAME]["corpus"],
                 }
-                if self.config.subset_id == "cord_ner_ner":
-                    del urls["corpus"]
-                elif self.config.subset_id == "cord_ner_corpus":
-                    del urls["ner"]
+                if self.config.name == "cord_ner_full_source" or self.config.name == "cord_ner_bigbio_kb":
+                    del urls["ner"], urls["corpus"]
+                elif self.config.name == "cord_ner_ner_source":
+                    del urls["corpus"], urls["full"]
+                elif self.config.name == "cord_ner_corpus_source":
+                    del urls["ner"], urls["full"]
                 data_dir = dl_manager.download_and_extract(urls)
             except:
                 raise ConnectionError(
@@ -305,14 +269,17 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                 )
         else:
             data_dir = {
+                "full": os.path.join(self.config.data_dir, "CORD-NER-full.json"),
                 "ner": os.path.join(self.config.data_dir, "CORD-NER-ner.json"),
                 "corpus": os.path.join(self.config.data_dir, "CORD-NER-corpus.json"),
             }
 
-            if self.config.subset_id == "cord_ner_ner":
-                del data_dir["corpus"]
-            elif self.config.subset_id == "cord_ner_corpus":
-                del data_dir["ner"]
+            if self.config.name == "cord_ner_full_source" or self.config.name == "cord_ner_bigbio_kb":
+                del data_dir["ner"], data_dir["corpus"]
+            elif self.config.name == "cord_ner_ner_source":
+                del data_dir["corpus"], data_dir["full"]
+            elif self.config.name == "cord_ner_corpus_source":
+                del data_dir["ner"], data_dir["full"]
 
         return [
             datasets.SplitGenerator(
@@ -324,22 +291,6 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                 },
             ),
         ]
-
-    def _corpus_to_dict(self, corpus_filepath) -> Dict:
-        """Loads corpus as dict object"""
-
-        doc2sents = {}
-        with open(corpus_filepath) as fp:
-            for line in fp.readlines():
-                line = json.loads(line)
-                doc_id = line["doc_id"]
-
-                if doc_id not in doc2sents:
-                    doc2sents[doc_id] = []
-
-                doc2sents[doc_id].append(line["sents"])
-
-        return doc2sents
 
     def _generate_examples(
         self, ner_filepath, corpus_filepath, split: str
@@ -358,14 +309,16 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
 
-            # doc2sents = self._corpus_to_dict(corpus_filepath)
             with open(corpus_filepath, "r") as corpus_fp, open(
                 ner_filepath, "r"
             ) as ner_fp:
+
                 for key, ner_line in enumerate(ner_fp.readlines()):
                     ner_line = json.loads(ner_line)
                     corpus_line = json.loads(corpus_fp.readline())
-                    while ner_line['doc_id'] != corpus_line["doc_id"]:
+
+                    # some docs have no entities
+                    while ner_line["doc_id"] != corpus_line["doc_id"]:
                         corpus_line = json.loads(corpus_fp.readline())
 
                     doc_id = str(corpus_line["doc_id"])
@@ -399,7 +352,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         for entity_sent in ner_line["sents"]:
                             if sent_id != entity_sent["sent_id"]:
                                 continue
-                            
+
                             entities = entity_sent["entities"]
                             sent_offsets, sent_types, sent_texts = [], [], []
 
