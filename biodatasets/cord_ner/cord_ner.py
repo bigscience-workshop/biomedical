@@ -277,9 +277,6 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                     example_id = unq_id
                     unq_id += 1
 
-                    # There are some really long lines that can cause the build to crash.
-                    if len(line) > 1e5:
-                        continue
                     line = json.loads(line)
                     passages = []
                     offset_start = 0
