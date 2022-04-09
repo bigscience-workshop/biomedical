@@ -59,6 +59,8 @@ Please note that the original version of the QUAERO corpus distributed in the CL
 All questions regarding the task or data should be addressed to aurelie.neveol@limsi.fr
 """
 
+_DATASET_NAME = "QUAERO French Medical Corpus"
+
 _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
 _LICENSE = "GFDL"
