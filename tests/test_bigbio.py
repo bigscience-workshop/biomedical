@@ -95,6 +95,8 @@ class TestDataLoader(unittest.TestCase):
     :param USE_AUTH_TOKEN: If private, an authentication token for loading data
     :param BYPASS_SPLITS: If non-empty, splits in data to ignore testing
     :param BYPASS_KEYS: If non-empty, keys in data to ignore testing
+    :param BYPASS_SPLIT_AND_KEY: If non-empty, bypass particular keys in datasplits
+
     """  # noqa
 
     PATH: str
@@ -104,6 +106,7 @@ class TestDataLoader(unittest.TestCase):
     USE_AUTH_TOKEN: Optional[Union[bool, str]]
     BYPASS_SPLITS: List[str]
     BYPASS_KEYS: List[str]
+    BYPASS_SPLIT_AND_KEY: List[str]
 
     def runTest(self):
         """
@@ -126,10 +129,15 @@ class TestDataLoader(unittest.TestCase):
         """  # noqa
 
         if len(self.BYPASS_SPLITS) > 0:
-            logger.warning("Splits ignored = " + str(self.BYPASS_SPLITS))
+            logger.warning(f"Splits ignored = '{self.BYPASS_SPLITS}'")
 
         if len(self.BYPASS_KEYS) > 0:
-            logger.warning("Keys ignored = " + str(self.BYPASS_KEYS))
+            logger.warning(f"Keys ignored = '{self.BYPASS_KEYS}'")
+
+        if len(self.BYPASS_SPLIT_AND_KEY) > 0:
+            logger.warning(
+                f"Split and key pairs ignored ='{self.BYPASS_SPLIT_AND_KEY}'"
+            )
 
         for schema in self.schemas_to_check:
             dataset_bigbio = self.datasets_bigbio[schema]
@@ -181,12 +189,15 @@ class TestDataLoader(unittest.TestCase):
         module = self.PATH
         if module.endswith(".py"):
             module = module[:-3]
+
         module = module.replace("/", ".")
+
         self._SUPPORTED_TASKS = importlib.import_module(
             module
         )._SUPPORTED_TASKS
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
+
         if len(invalid_tasks) > 0:
             raise ValueError(
                 f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
@@ -599,22 +610,37 @@ class TestDataLoader(unittest.TestCase):
             features=features, schema=schema
         )
 
-        for split_name, split in self.datasets_bigbio[schema].items():
+        # Omit a particular key in a split
+        if len(self.BYPASS_SPLIT_AND_KEY) > 0:
 
-            if split_name not in self.BYPASS_SPLITS:
+            split_keys = [i.split(",") for i in self.BYPASS_SPLIT_AND_KEY]
+
+            for split_name, split in self.datasets_bigbio[schema].items():
 
                 self.assertEqual(split.info.features, features)
-                for non_empty_feature in non_empty_features:
-                    if (
-                        split_to_feature_counts[split_name][
-                            non_empty_feature
-                        ]
-                        == 0
-                    ):
-                        raise AssertionError(
-                            f"Required key '{non_empty_feature}' does not have any instances"
-                        )
 
+                for non_empty_feature in non_empty_features:
+                    for split_key in split_keys:
+
+                        # For a split/key pair:
+                        if (split_name == split_key[0]) and (
+                            non_empty_feature == split_key[1]
+                        ):
+                            logger.warning(
+                                f"Skipping '{non_empty_feature}' for split = '{split_name}'"
+                            )
+                        else:
+                            if (
+                                split_to_feature_counts[split_name][
+                                    non_empty_feature
+                                ]
+                                == 0
+                            ):
+                                raise AssertionError(
+                                    f"Required key '{non_empty_feature}' does not have any instances"
+                                )
+
+                # check for superfluous keys
                 for feature, count in split_to_feature_counts[
                     split_name
                 ].items():
@@ -625,12 +651,52 @@ class TestDataLoader(unittest.TestCase):
                         in set().union(*_TASK_TO_FEATURES.values())
                     ):
                         logger.warning(
-                            f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
+                            f"Found instances of '{feature}' in but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
                         )
 
-            else:
+        # Test all keys/splits as needed
+        else:
+            # Skip bypassed keys
+            for key in self.BYPASS_KEYS:
+                if key in non_empty_features:
+                    logger.warning(f"Removing key = '{key}'")
+                    non_empty_features.remove(key)
 
-                logger.warning("Ignoring split = " + str(split_name))
+            # Skip untested splits
+            for split_name, split in self.datasets_bigbio[schema].items():
+
+                if split_name not in self.BYPASS_SPLITS:
+
+                    self.assertEqual(split.info.features, features)
+                    for non_empty_feature in non_empty_features:
+                        if (
+                            split_to_feature_counts[split_name][
+                                non_empty_feature
+                            ]
+                            == 0
+                        ):
+                            raise AssertionError(
+                                f"Required key '{non_empty_feature}' does not have any instances"
+                            )
+
+                    for feature, count in split_to_feature_counts[
+                        split_name
+                    ].items():
+                        if (
+                            count > 0
+                            and feature not in non_empty_features
+                            and feature
+                            in set().union(*_TASK_TO_FEATURES.values())
+                        ):
+                            logger.warning(
+                                f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
+                            )
+
+                else:
+
+                    logger.warning(
+                        f"Ignoring testing for split '{str(split_name)}'"
+                    )
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
@@ -692,6 +758,14 @@ if __name__ == "__main__":
         help="If a certain key has known issues that are too restrictive to pass unit-tests (ex: test splits with the target key empty), this flag allows you to bypass testing on the named key. If a split is not provided, it will ignore ALL splits containing this key. Provide all key names as space separated.",
     )
 
+    parser.add_argument(
+        "--bypass_split_and_key",
+        default=[],
+        required=False,
+        nargs="*",
+        help="Bypass a specific key within a data split, but check all other schema terms. Provide as comma-separated pairs without spaces of SPLIT,KEY (ex: --bypass_split_and_key train,events test,entities. This overrides bypass_keys and bypass_splits",
+    )
+
     parser.add_argument("--data_dir", type=str, default=None)
     parser.add_argument("--use_auth_token", default=None)
 
@@ -710,5 +784,6 @@ if __name__ == "__main__":
     TestDataLoader.USE_AUTH_TOKEN = args.use_auth_token
     TestDataLoader.BYPASS_SPLITS = args.bypass_splits
     TestDataLoader.BYPASS_KEYS = args.bypass_keys
+    TestDataLoader.BYPASS_SPLIT_AND_KEY = args.bypass_split_and_key
 
     unittest.TextTestRunner().run(TestDataLoader())
