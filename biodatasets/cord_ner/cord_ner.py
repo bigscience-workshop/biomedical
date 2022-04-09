@@ -273,6 +273,10 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             with open(filepath) as fp:
                 unq_id = 0
                 for key, line in enumerate(fp.readlines()):
+
+                    example_id = unq_id
+                    unq_id += 1
+
                     # There are some really long lines that can cause the build to crash.
                     if len(line) > 1e5:
                         continue
@@ -317,7 +321,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         unq_id += 1
 
                     yield key, {
-                        "id": str(key),
+                        "id": str(example_id),
                         "document_id": str(line["id"]),
                         "passages": passages,
                         "entities": entities,
