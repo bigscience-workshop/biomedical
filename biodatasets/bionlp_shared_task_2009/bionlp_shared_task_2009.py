@@ -17,8 +17,7 @@
 
 """
 
-from  pathlib import Path
-
+from pathlib import Path
 from typing import List
 
 import datasets
@@ -26,7 +25,7 @@ import datasets
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-from utils.parsing import parse_brat_file, brat_parse_to_bigbio_kb
+from utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
 _CITATION = """\
 @inproceedings{kim-etal-2009-overview,
@@ -49,7 +48,9 @@ _CITATION = """\
 _DATASETNAME = "bionlp_shared_task_2009"
 
 _DESCRIPTION = """\
-The BioNLP Shared Task 2009 was organized by GENIA Project and its corpora were curated based on the annotations of the publicly available GENIA Event corpus and an unreleased (blind) section of the GENIA Event corpus annotations, used for evaluation.
+The BioNLP Shared Task 2009 was organized by GENIA Project and its corpora were curated based
+on the annotations of the publicly available GENIA Event corpus and an unreleased (blind) section
+of the GENIA Event corpus annotations, used for evaluation.
 """
 
 _HOMEPAGE = "http://www.geniaproject.org/shared-tasks/bionlp-shared-task-2009"
@@ -147,11 +148,13 @@ include this license text and Attribution section.
 - JST (Japan Science and Technology Agency) : http://www.jst.go.jp
 """
 
+
+_URL_BASE = "http://www.nactem.ac.uk/GENIA/current/Shared-tasks/BioNLP-ST-2009/"
 _URLS = {
     _DATASETNAME: {
-        "train": "http://www.nactem.ac.uk/GENIA/current/Shared-tasks/BioNLP-ST-2009/bionlp09_shared_task_training_data_rev2.tar.gz",
-        "test": "http://www.nactem.ac.uk/GENIA/current/Shared-tasks/BioNLP-ST-2009/bionlp09_shared_task_test_data_without_gold_annotation.tar.gz",
-        "dev": "http://www.nactem.ac.uk/GENIA/current/Shared-tasks/BioNLP-ST-2009/bionlp09_shared_task_development_data_rev1.tar.gz"
+        "train": _URL_BASE + "bionlp09_shared_task_training_data_rev2.tar.gz",
+        "test": _URL_BASE + "bionlp09_shared_task_test_data_without_gold_annotation.tar.gz",
+        "dev": _URL_BASE + "bionlp09_shared_task_development_data_rev1.tar.gz",
     },
 }
 
@@ -162,10 +165,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 # https://2011.bionlp-st.org/bionlp-shared-task-2011/genia-event-extraction-genia
-_ENTITY_TYPES = [
-    "Protein",
-    "Entity"
-]
+_ENTITY_TYPES = ["Protein", "Entity"]
 
 
 class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
@@ -188,41 +188,40 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
             description="bionlp_shared_task_2009 BigBio schema",
             schema="bigbio_kb",
             subset_id="bionlp_shared_task_2009",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "bionlp_shared_task_2009_source"
 
     def _info(self) -> datasets.DatasetInfo:
-        
+
         if self.config.schema == "source":
             features = datasets.Features(
-               {
-                   "document_id": datasets.Value("string"),
-                   "text": datasets.Value("string"),
-                   "text_bound_annotations": [
-                       {
-                           "id": datasets.Value("string"),
-                           "offsets": [[datasets.Value("int64")]],
-                           "text": [datasets.Value("string")],
-                           "type": datasets.Value("string"),
-                       }
-                   ],
-                   "events": [
-                       {
-                           "arguments": [
-                                {
-                                    "ref_id": datasets.Value("string"),
-                                    "role": datasets.Value("string")
-                                }
-                            ],
-                           "id": datasets.Value("string"),
-                           "trigger": datasets.Value("string"),
-                           "type": datasets.Value("string"),
-
+                {
+                    "document_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                    "text_bound_annotations": [
+                        {
+                            "id": datasets.Value("string"),
+                            "offsets": [[datasets.Value("int64")]],
+                            "text": [datasets.Value("string")],
+                            "type": datasets.Value("string"),
                         }
                     ],
-                   "relations": [
+                    "events": [
+                        {
+                            "arguments": [
+                                {
+                                    "ref_id": datasets.Value("string"),
+                                    "role": datasets.Value("string"),
+                                }
+                            ],
+                            "id": datasets.Value("string"),
+                            "trigger": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                        }
+                    ],
+                    "relations": [
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
@@ -236,13 +235,13 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
                             ],
                         }
                     ],
-                   "equivalences": [datasets.Value("string")],
-                   "attributes": [datasets.Value("string")],
-                   "normalizations": [datasets.Value("string")],
-               }
+                    "equivalences": [datasets.Value("string")],
+                    "attributes": [datasets.Value("string")],
+                    "normalizations": [datasets.Value("string")],
+                }
             )
 
-        elif self.config.schema =="bigbio_kb":
+        elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
@@ -283,14 +282,12 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-
     def _generate_examples(self, filepath, split) -> (int, dict):
-        
 
         filepath = Path(filepath)
         txt_files: List[Path] = [file for file in filepath.iterdir() if file.suffix == ".txt"]
 
-        if self.config.schema == "source": 
+        if self.config.schema == "source":
             for i, file in enumerate(txt_files):
                 brat_content = parse_brat_file(file)
                 yield i, brat_content
@@ -301,4 +298,3 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
                 kb_example = brat_parse_to_bigbio_kb(brat_content, _ENTITY_TYPES)
                 kb_example["id"] = kb_example["document_id"]
                 yield i, kb_example
-
