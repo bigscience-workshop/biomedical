@@ -26,78 +26,154 @@ from utils.constants import Tasks
 from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
-@Article{islamaj2021nlm,
-title={NLM-Chem, a new resource for chemical entity recognition in PubMed full text literature},
-author={Islamaj, Rezarta and Leaman, Robert and Kim, Sun and Kwon, Dongseop and Wei, Chih-Hsuan and Comeau, Donald C and Peng, Yifan and Cissel, David and Coss, Cathleen and Fisher, Carol and others},
-journal={Scientific Data},
-volume={8},
+@Article{Krallinger2015,
+author={Krallinger,
+Martin and Rabal,
+Obdulia and Leitner,
+Florian and Vazquez,
+Miguel and Salgado,
+David and Lu,
+Zhiyong and Leaman,
+Robert and Lu,
+Yanan and Ji,
+Donghong and Lowe,
+Daniel M. and Sayle,
+Roger A. and Batista-Navarro,
+Riza Theresa and Rak,
+Rafal and Huber,
+Torsten and Rockt{\"a}schel,
+Tim and Matos,
+S{\'e}rgio and Campos,
+David and Tang,
+Buzhou and Xu,
+Hua and Munkhdalai,
+Tsendsuren and Ryu,
+Keun Ho and Ramanan,
+S. V. and Nathan,
+Senthil and {\v{Z}}itnik,
+Slavko and Bajec,
+Marko and Weber,
+Lutz and Irmer,
+Matthias and Akhondi,
+Saber A. and Kors,
+Jan A. and Xu,
+Shuo and An,
+Xin and Sikdar,
+Utpal Kumar and Ekbal,
+Asif and Yoshioka,
+Masaharu and Dieb,
+Thaer M. and Choi,
+Miji and Verspoor,
+Karin and Khabsa,
+Madian and Giles,
+C. Lee and Liu,
+Hongfang and Ravikumar,
+Komandur Elayavilli and Lamurias,
+Andre and Couto,
+Francisco M. and Dai,
+Hong-Jie and Tsai,
+Richard Tzong-Han and Ata,
+Caglar and Can,
+Tolga and Usi{\'e},
+Anabel and Alves,
+Rui and Segura-Bedmar,
+Isabel and Mart{\'i}nez,
+Paloma and Oyarzabal,
+Julen and Valencia,
+Alfonso},
+title={The CHEMDNER corpus of chemicals and drugs and its annotation principles},
+journal={Journal of Cheminformatics},
+year={2015},
+month={Jan},
+day={19},
+volume={7},
 number={1},
-pages={1--12},
-year={2021},
-publisher={Nature Publishing Group}
+pages={S2},
+abstract={
+    The automatic extraction of chemical information from text requires the recognition of chemical entity mentions
+    as one of its key steps. When developing supervised named entity recognition (NER) systems, the availability of
+    a large, manually annotated text corpus is desirable. Furthermore, large corpora permit the robust evaluation
+    and comparison of different approaches that detect chemicals in documents. We present the CHEMDNER corpus,
+    a collection of 10,000 PubMed abstracts that contain a total of 84,355 chemical entity mentions labeled manually
+    by expert chemistry literature curators, following annotation guidelines specifically defined for this task.
+    The abstracts of the CHEMDNER corpus were selected to be representative for all major chemical disciplines.
+    Each of the chemical entity mentions was manually labeled according to its structure-associated chemical entity
+    mention (SACEM) class: abbreviation, family, formula, identifier, multiple, systematic and trivial.
+    The difficulty and consistency of tagging chemicals in text was measured using an agreement study between
+    annotators, obtaining a percentage agreement of 91. For a subset of the CHEMDNER corpus
+    (the test set of 3,000 abstracts) we provide not only the Gold Standard manual annotations, but also
+    mentions automatically detected by the 26 teams that participated in the BioCreative IV CHEMDNER
+    chemical mention recognition task. In addition, we release the CHEMDNER silver standard corpus of automatically
+    extracted mentions from 17,000 randomly selected PubMed abstracts. A version of the CHEMDNER corpus in
+    the BioC format has been generated as well. We propose a standard for required minimum information about
+    entity annotations for the construction of domain specific corpora on chemical and drug entities.
+    The CHEMDNER corpus and annotation guidelines are available at:
+    ttp://www.biocreative.org/resources/biocreative-iv/chemdner-corpus/
+},
+issn={1758-2946},
+doi={10.1186/1758-2946-7-S1-S2},
+url={https://doi.org/10.1186/1758-2946-7-S1-S2}
 }
 """
-
-_DATASETNAME = "nlmchem"
 
 _DESCRIPTION = """\
-NLM-Chem corpus consists of 150 full-text articles from the PubMed Central Open Access dataset,
-comprising 67 different chemical journals, aiming to cover a general distribution of usage of chemical
-names in the biomedical literature.
-Articles were selected so that human annotation was most valuable (meaning that they were rich in bio-entities,
-and current state-of-the-art named entity recognition systems disagreed on bio-entity recognition.
+We present the CHEMDNER corpus, a collection of 10,000 PubMed abstracts that contain a total of 84,355 chemical entity
+mentions labeled manually by expert chemistry literature curators, following annotation guidelines specifically
+defined for this task. The abstracts of the CHEMDNER corpus were selected to be representative for all major chemical
+disciplines. Each of the chemical entity mentions was manually labeled according to its structure-associated chemical
+entity mention (SACEM) class: abbreviation, family, formula, identifier, multiple, systematic and trivial.
 """
 
-_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-2"
-_LICENSE = " CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
+_DATASETNAME = "CHEMDNER"
 
-# files found here `https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/` have issues at extraction
-# _URLs = {"biocreative": "https://ftp.ncbi.nlm.nih.gov/pub/lu/NLMChem" }
+_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/resources/biocreative-iv/chemdner-corpus/"
+_LICENSE = "Unknown"
+
 _URLs = {
-    "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
-    "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
-    "bigbio_text": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
+    "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-CHEMDNER-corpus_v2.BioC.xml.gz",
+    "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-CHEMDNER-corpus_v2.BioC.xml.gz",
+    "bigbio_text": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-CHEMDNER-corpus_v2.BioC.xml.gz",
 }
+
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.NAMED_ENTITY_DISAMBIGUATION,
     Tasks.TEXT_CLASSIFICATION,
 ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class NLMChemDataset(datasets.GeneratorBasedBuilder):
-    """NLMChem"""
+class CHEMDNERDataset(datasets.GeneratorBasedBuilder):
+    """CHEMDNER"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="nlmchem_source",
+            name="chemdner_source",
             version=SOURCE_VERSION,
-            description="NLM_Chem source schema",
+            description="CHEMDNER source schema",
             schema="source",
-            subset_id="nlmchem",
+            subset_id="chemdner",
         ),
         BigBioConfig(
-            name="nlmchem_bigbio_kb",
+            name="chemdner_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="NLM_Chem BigBio schema (KB)",
+            description="CHEMDNER BigBio schema (KB)",
             schema="bigbio_kb",
-            subset_id="nlmchem",
+            subset_id="chemdner",
         ),
         BigBioConfig(
-            name="nlmchem_bigbio_text",
+            name="chemdner_bigbio_text",
             version=BIGBIO_VERSION,
-            description="NLM_Chem BigBio schema (TEXT)",
+            description="CHEMDNER BigBio schema (TEXT)",
             schema="bigbio_text",
-            subset_id="nlmchem",
+            subset_id="chemdner",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
+    DEFAULT_CONFIG_NAME = "chemdner_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def _info(self):
 
@@ -132,43 +208,31 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
+
         elif self.config.schema == "bigbio_text":
             features = schemas.text_features
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
-            # This defines the different columns of the dataset and their types
-            features=features,  # Here we define them above because they are different between the two configurations
-            # If there's a common (input, target) tuple from the features,
-            # specify them here. They'll be used if as_supervised=True in
-            # builder.as_dataset.
+            features=features,
             supervised_keys=None,
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-        # If several configurations are possible (listed in BUILDER_CONFIGS), the configuration selected by the user is in self.config.name
 
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs
-        # It can accept any type or nested list/dict and will give back the same structure with the url replaced with path to local files.
-        # By default the archives will be extracted and a path to a cached folder where they are extracted is returned instead of the archive
         my_urls = _URLs[self.config.schema]
-        data_dir = dl_manager.download_and_extract(my_urls)
+        data_dir = dl_manager.download_and_extract(my_urls) + "/"
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"
+                        data_dir, "BC7T2-CHEMDNER-corpus-training.BioC.xml"
                     ),
                     "split": "train",
                 },
@@ -178,7 +242,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"
+                        data_dir, "BC7T2-CHEMDNER-corpus-evaluation.BioC.xml"
                     ),
                     "split": "test",
                 },
@@ -188,26 +252,12 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(
-                        data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"
+                        data_dir, "BC7T2-CHEMDNER-corpus-development.BioC.xml"
                     ),
                     "split": "dev",
                 },
             ),
         ]
-
-    def _get_textcls_example(self, d: bioc.BioCDocument) -> Dict:
-
-        example = {"document_id": d.id, "text": [], "labels": []}
-
-        for p in d.passages:
-            example["text"].append(p.text)
-            for a in p.annotations:
-                if a.infons.get("type") == "MeSH_Indexing_Chemical":
-                    example["labels"].append(a.infons.get("identifier"))
-
-        example["text"] = " ".join(example["text"])
-
-        return example
 
     def _get_passages_and_entities(
         self, d: bioc.BioCDocument
@@ -220,17 +270,13 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         po_start = 0
 
-        for _, p in enumerate(d.passages):
+        for i, p in enumerate(d.passages):
 
             eo = p.offset - text_total_length
 
             text_total_length += len(p.text) + 1
 
             po_end = po_start + len(p.text)
-
-            # annotation used only for document indexing
-            if p.text is None:
-                continue
 
             dp = {
                 "text": p.text,
@@ -249,11 +295,15 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
                 a_type = a.infons.get("type")
 
-                # no in-text annotation: only for document indexing
                 if (
                     self.config.schema == "bigbio_kb"
                     and a_type == "MeSH_Indexing_Chemical"
                 ):
+                    continue
+
+                if (
+                    a.text == None or a.text == ""
+                ) and self.config.schema == "bigbio_kb":
                     continue
 
                 offsets, text = get_texts_and_offsets_from_bioc_ann(a)
@@ -293,14 +343,33 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         else:
 
-            normalized = [{"db_name": "-1", "db_id": "-1"}]
+            # No normalization
+            normalized = []
 
         return normalized
+
+    def _get_textcls_example(self, d: bioc.BioCDocument) -> Dict:
+
+        example = {"document_id": d.id, "text": [], "labels": []}
+
+        for p in d.passages:
+
+            example["text"].append(p.text)
+
+            for a in p.annotations:
+
+                if a.infons.get("type") == "MeSH_Indexing_Chemical":
+
+                    example["labels"].append(a.infons.get("identifier"))
+
+        example["text"] = " ".join(example["text"])
+
+        return example
 
     def _generate_examples(
         self,
         filepath: str,
-        split: str,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
+        split: str,
     ) -> Iterator[Tuple[int, Dict]]:
         """Yields examples as (key, example) tuples."""
 
@@ -321,25 +390,16 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
                 yield uid, {"passages": passages}
 
-        elif self.config.schema == "bigbio_text":
-            uid = 0
-            for idx, doc in enumerate(reader):
-
-                example = self._get_textcls_example(doc)
-                example["id"] = uid
-                # global id
-                uid += 1
-
-                yield idx, example
-
         elif self.config.schema == "bigbio_kb":
-            uid = 0
-            for idx, doc in enumerate(reader):
 
-                # global id
-                uid += 1
+            uid = 0
+
+            for idx, doc in enumerate(reader):
 
                 passages, passages_entities = self._get_passages_and_entities(doc)
+
+                # global id
+                uid += 1
 
                 # unpack per-passage entities
                 entities = [e for pe in passages_entities for e in pe]
@@ -354,9 +414,6 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     e["id"] = uid  # override BioC default id
                     uid += 1
 
-                # if split == "validation" and uid == 6705:
-                #     breakpoint()
-
                 yield idx, {
                     "id": uid,
                     "document_id": doc.id,
@@ -366,3 +423,17 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     "coreferences": [],
                     "relations": [],
                 }
+
+        elif self.config.schema == "bigbio_text":
+
+            uid = 0
+
+            for idx, doc in enumerate(reader):
+
+                example = self._get_textcls_example(doc)
+                example["id"] = uid
+
+                # global id
+                uid += 1
+
+                yield idx, example
