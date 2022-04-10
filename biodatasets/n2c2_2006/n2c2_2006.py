@@ -40,7 +40,7 @@ the files). For example, if the following directory structure exists
 on the users local machine,
 
 
-n2c2_2016
+n2c2_2006
 ├── smokers_surrogate_train_all_version2.zip
 ├── smokers_surrogate_test_all_groundtruth_version2.zip
 
