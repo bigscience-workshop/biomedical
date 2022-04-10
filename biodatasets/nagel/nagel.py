@@ -72,14 +72,27 @@ This dataset is designed for XXX NLP task.
 # TODO: Add a link to an official homepage for the dataset here (if possible)
 _HOMEPAGE = "https://sourceforge.net/projects/bionlp-corpora/files/ProteinResidue/"
 
-# TODO: Add the licence for the dataset here (if possible)
 # Note that this doesn't have to be a common open source license.
 # Some datasets have custom licenses. In this case, simply put the full license terms
 # into `_LICENSE`
-_LICENSE = ""
-
-# TODO: Add links to the urls needed to download your dataset files.
-# For local datasets, this variable can be an empty dictionary.
+_LICENSE = """
+Copyright (c) 2011 Kevin Nagel
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+"""
 
 # For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
 # In most cases the URLs will be the same for the source and bigbio config.
@@ -156,7 +169,7 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
             # TODO: Create your source schema here
             features = datasets.Features(
                {
-                   "doc_id": datasets.Value("string"),
+                   "document_id": datasets.Value("string"),
                    "text": datasets.Value("string"),
                    "entities": [
                        {
@@ -186,17 +199,6 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
-
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
 
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
@@ -210,7 +212,7 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(data_dir, "NagelCorpus", "Nagel_GC.xml"),
-                    "filepath_standoff": os.path.join(data_dir, "NagelCorpus", "Nagel_GC.xml"),
+                    "filepath_standoff": os.path.join(data_dir, "NagelCorpus", "Nagel_GC.standoff.txt"),
                     "folder_path": os.path.join(data_dir, "NagelCorpus", "NagelCorpusText"),
                     "split": "train",
                 },
@@ -238,19 +240,100 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
     def _generate_examples(self, filepath, filepath_standoff, folder_path, split) -> (int, dict):
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
+       
+        from pprint import pprint
+        from pathlib import Path
+
+        from utils.parsing import parse_brat_file
+
+        import pandas as pd
+
+        so_annot = pd.read_csv(
+                filepath_standoff,
+                delimiter="\t",
+                names=[
+                    "PMID",
+                    "AnnotationType",
+                    "Span_start",
+                    "Span_End",
+                    "AminoAcid_WildType_3_Letter_Abbrev",
+                    "ResiduePosition",
+                    "AminoAcid_MutatedType_3_Letter_Abbrev",
+                    "Residue_mention_in_original_text"
+                ]
+        )
+        
+        import xml.etree.ElementTree as ET
+            
+        xml_abstracts = []
+
+        # XML annotated abstract, but not a read correct xml tree
+        # Abstract are divided by a extra newline
+        with open(filepath) as f:
+            # current_abstract = []
+            # xml_lines = f.readlines()
+            #
+            # for i, line in enumerate(xml_lines):
+            #     if line == "\n":
+            #         xml_abstracts.append(current_abstract)
+            #         current_abstract = []
+            #     elif i == len(xml_lines):
+            #         xml_abstracts.append(current_abstract)
+            #     else:
+            #         current_abstract.append(line)
+        
+            xml_abstracts = f.read().split("\n\n")
+            
+        xml_annotations = {}
+
+        for abstract in xml_abstracts:
+            # For convenience construct correct xml structure
+            xml_abstract = ET.fromstring("<root>" + abstract + "</root>")
+            for child in xml_abstract:
+                print(child.tag, child.attrib)
+            exit()
+         
+        for file in Path(folder_path).iterdir():
+
+            if file.suffix != ".txt":
+                continue
+
+            with open(file) as f:
+                text = f.read()
+
+            pmid = int(file.name.removesuffix(".txt"))
+            
+            doc_annotations = so_annot[so_annot.PMID == pmid]
+
+            entities = []
+            for annot in doc_annotations.to_dict("records"):
+
+                entities.append({
+                    "offsets": [annot["Span_start"], annot["Span_End"]],
+                    "type": annot["AnnotationType"],
+                    "AminoAcid_WildType_3_Letter_Abbrev": annot["AminoAcid_WildType_3_Letter_Abbrev"],
+                    "Residue_Position": annot["Residue_Position"],
+                    "AminoAcid_MutatedType_3_Letter_Abbrev": annot["AminoAcid_MutatedType_3_Letter_Abbrev"], "Residue_mention_in_original_text": annot["Residue_mention_in_original_text"]
+
+                })
+            yield pmid, {
+                "id": pmid,
+                "document_id": pmid,
+                "text": text,
+                "entities": entities
+            }
+
 
 
             
-        with open(str(filepath)) as fp:
-            reader = bioc.biocxml.load(fp)
-
+        # with open(str(filepath)) as fp:
+        #     reader = bioc.biocxml.load(fp)
+        #
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
 
         if self.config.schema == "source":
-
             for uid, doc in enumerate(reader):
                 print(uid, doc)
 
