@@ -191,9 +191,3 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
     @staticmethod
     def _get_db_name(entity: PubTatorAnn) -> str:
         return "omim" if "OMIM" in entity.id else "mesh"
-
-
-# This allows you to run your dataloader with `python ncbi_disease.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
