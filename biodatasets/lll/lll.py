@@ -25,9 +25,10 @@ interaction means, extracting the agent (proteins) and the target (genes) of all
 sentences.
 """
 
-# Comment from author:
+# WARNING: Comment from author:
 # In the bigbio configuration off-by-one errors in the stop offsets of entities are fixed.
 # The offsets in the source configuration remain unchanged.
+# Please make this is the intended behavior you need.
 
 import itertools as it
 from typing import List
