@@ -21,7 +21,9 @@ resource for the biomedical natural language processing community.
 import os
 from typing import Dict, Iterator, List, Tuple
 
+import bioc
 import datasets
+from bioc.pubtator import PubTatorAnn
 
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
@@ -156,19 +158,39 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
-            pubtator_parsed = parsing.parse_pubtator_file(filepath)
-            for pubtator_example in pubtator_parsed:
-                yield pubtator_example["pmid"], pubtator_example
+            with open(filepath, "r") as f:
+                for i, doc in enumerate(bioc.pubtator.iterparse(f)):
+                    source_example = {
+                        "pmid": doc.pmid,
+                        "title": doc.title,
+                        "abstract": doc.abstract,
+                        "mentions": [
+                            {
+                                "concept_id": mention.id,
+                                "type": mention.type,
+                                "text": mention.text,
+                                "offsets": [mention.start, mention.end],
+                            }
+                            for mention in doc.annotations
+                        ],
+                    }
+
+                    # Some examples are duplicated in NCBI Disease. We have to make them unique to
+                    # avoid and error from datasets.
+                    yield str(i) + "_" + source_example["pmid"], source_example
 
         elif self.config.schema == "bigbio_kb":
-            pubtator_parsed = parsing.parse_pubtator_file(filepath)
-            for pubtator_example in pubtator_parsed:
-                kb_example = parsing.pubtator_parse_to_bigbio_kb(pubtator_example, get_db_name=self._get_db_name)
+            seen = []
+            for kb_example in parsing.pubtator_to_bigbio_kb(filepath, get_db_name=self._get_db_name):
+                # Some examples are duplicated in NCBI Disease. Avoid yielding more than once.
+                if kb_example["id"] in seen:
+                    continue
                 yield kb_example["id"], kb_example
+                seen.append(kb_example["id"])
 
     @staticmethod
-    def _get_db_name(mention: Dict) -> str:
-        return "omim" if "OMIM" in mention["concept_id"] else "mesh"
+    def _get_db_name(entity: PubTatorAnn) -> str:
+        return "omim" if "OMIM" in entity.id else "mesh"
 
 
 # This allows you to run your dataloader with `python ncbi_disease.py` during development
