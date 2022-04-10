@@ -104,10 +104,18 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "document_id": datasets.Value("string"),
-                    "text_1": datasets.Value("string"),
-                    "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string"),
+                    "snomed_id_1": datasets.Value("string"),
+                    "snomed_label_1": datasets.Value("string"),
+                    "snomed_id_2": datasets.Value("string"),
+                    "snomed_label_2": datasets.Value("string"),
+                    "rater_A": datasets.Value("string"),
+                    "rater_B": datasets.Value("string"),
+                    "rater_C": datasets.Value("string"),
+                    "rater_D": datasets.Value("string"),
+                    "rater_E": datasets.Value("string"),
+                    "mean_rating": datasets.Value("string"),
+                    "CUI_1": datasets.Value("string"),
+                    "CUI_2": datasets.Value("string"),
                 }
             )
 
@@ -135,7 +143,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
-        uid = 0
+        uid = -1  # want first instance to be 0
         for file in data_dir.iterdir():
             # Ignore hidden files and annotation files - we just consider the brat text files
             if file.suffix == ".tsv":
@@ -145,23 +153,42 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
                     for id_, row in enumerate(csv_reader):
                         uid += 1
                         document_id = "NULL"  # .tsv files don't contain document_ids
-                        text_1 = row[1]
-                        text_2 = row[3]
-                        label = row[9]
+                        (
+                            snomed_id_1,
+                            snomed_label_1,
+                            snomed_id_2,
+                            snomed_label_2,
+                            rater_A,
+                            rater_B,
+                            rater_C,
+                            rater_D,
+                            rater_E,
+                            mean_rating,
+                            CUI_1,
+                            CUI_2,
+                        ) = row
 
                         if self.config.schema == "source":
                             yield uid, {
-                                "document_id": document_id,
-                                "text_1": text_1,
-                                "text_2": text_2,
-                                "label": label,
+                                "snomed_id_1": snomed_id_1,
+                                "snomed_label_1": snomed_label_1,
+                                "snomed_id_2": snomed_id_1,
+                                "snomed_label_2": snomed_label_2,
+                                "rater_A": rater_A,
+                                "rater_B": rater_B,
+                                "rater_C": rater_C,
+                                "rater_D": rater_D,
+                                "rater_E": rater_E,
+                                "mean_rating": mean_rating,
+                                "CUI_1": CUI_1,
+                                "CUI_2": CUI_2,
                             }
 
                         elif self.config.schema == "bigbio_pairs":
                             yield uid, {
                                 "id": uid,  # uid is an unique identifier for every record that starts from 1
                                 "document_id": document_id,  # .tsv files don't contain document_ids
-                                "text_1": text_1,
-                                "text_2": text_2,
-                                "label": label,
+                                "text_1": snomed_label_1,
+                                "text_2": snomed_label_2,
+                                "label": mean_rating,
                             }
