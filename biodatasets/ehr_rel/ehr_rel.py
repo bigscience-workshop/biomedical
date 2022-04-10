@@ -104,6 +104,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
+                    "document_id": datasets.Value("string"),
                     "snomed_id_1": datasets.Value("string"),
                     "snomed_label_1": datasets.Value("string"),
                     "snomed_id_2": datasets.Value("string"),
@@ -145,14 +146,13 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
         uid = -1  # want first instance to be 0
         for file in data_dir.iterdir():
-            # Ignore hidden files and annotation files - we just consider the brat text files
             if file.suffix == ".tsv":
+                document_id = str(file.stem)
                 with open(file, encoding="utf-8") as csv_file:
                     csv_reader = csv.reader(csv_file, quotechar='"', delimiter="\t")
                     next(csv_reader, None)  # remove column headers
                     for id_, row in enumerate(csv_reader):
                         uid += 1
-                        document_id = "NULL"  # .tsv files don't contain document_ids
                         (
                             snomed_id_1,
                             snomed_label_1,
@@ -170,6 +170,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
 
                         if self.config.schema == "source":
                             yield uid, {
+                                "document_id": document_id,
                                 "snomed_id_1": snomed_id_1,
                                 "snomed_label_1": snomed_label_1,
                                 "snomed_id_2": snomed_id_1,
@@ -186,8 +187,8 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
 
                         elif self.config.schema == "bigbio_pairs":
                             yield uid, {
-                                "id": uid,  # uid is an unique identifier for every record that starts from 1
-                                "document_id": document_id,  # .tsv files don't contain document_ids
+                                "id": uid,
+                                "document_id": document_id,
                                 "text_1": snomed_label_1,
                                 "text_2": snomed_label_2,
                                 "label": mean_rating,
