@@ -260,13 +260,3 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
                 }
             else:
                 raise NotImplementedError(self.config.schema)
-
-
-# This allows you to run your dataloader with `python chebi_nactem.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    # datasets.load_dataset(__file__, name='chebi_nactem_fullpaper_bigbio_kb')
-    for subset_id in ["abstr_ann1", "abstr_ann2", "fullpaper"]:
-        datasets.load_dataset(__file__, name=f"chebi_nactem_{subset_id}_bigbio_kb")
-    for subset_id in ["abstr_ann1", "abstr_ann2", "fullpaper"]:
-        datasets.load_dataset(__file__, name=f"chebi_nactem_{subset_id}_source")
