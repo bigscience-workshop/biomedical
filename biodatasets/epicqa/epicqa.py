@@ -181,10 +181,7 @@ class EpicQaDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
 
-        print("====> ", self.config.name)
-
         my_urls = _URLs[self.config.name]
-        # my_urls = _URLs[self.config.schema]
         data_dir = dl_manager.download_and_extract(my_urls)
 
         return [
@@ -216,8 +213,6 @@ class EpicQaDataset(datasets.GeneratorBasedBuilder):
 
                 # Get the JSON file path
                 full_path = filepath + "/" + sub_dir + f_path
-
-                # print(full_path)
 
                 # Read the JSON file content
                 with open(full_path, encoding="utf-8") as file:
