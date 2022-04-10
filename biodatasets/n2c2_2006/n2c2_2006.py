@@ -19,17 +19,15 @@ A dataset loader for the n2c2 2006 smoking status dataset.
 
 https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
 
-The dataset consists of four archive files,
+The dataset consists of two archive files,
 
 * smokers_surrogate_train_all_version2.zip
 * smokers_surrogate_test_all_groundtruth_version2.zip
 
-The individual data files (inside the zip and tar archives) come in 4 types,
+The individual data files (inside the zip archives) come in just 1 type:
 
-* docs (*.txt files): text of a patient record
-* concepts (*.txt.con files): entities used as input to a coreference model
-* chains (*.txt.chains files): chains (i.e. one or more) coreferent entities
-* pairs (*.txt.pairs files): pairs of coreferent entities (not required)
+* xml (*.xml files): contains the id and text of the patient records, 
+and corresponding smoking status labels
 
 
 The files comprising this dataset must be on the users local machine
