@@ -32,15 +32,19 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 
 """
 
+
 import json
 import os
+from pathlib import Path
 import sys
+import time
 
-import bioc
 sys.path.append("/Users/patrickhaller/Projects/biomedical/")
 from typing import List
 
 import datasets
+from tqdm import tqdm
+from Bio import Entrez
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -72,19 +76,12 @@ _HOMEPAGE = "http://participants-area.bioasq.org/general_information/Task5c/"
 
 _LICENSE = "NLM License Code: 8283NLM123"
 
-# TODO: Add links to the urls needed to download your dataset files.
-# For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
+# Website contains all data, but login required
 _URLS = {
-    _DATASETNAME: "https://ii.nlm.nih.gov/BioASQ/Task5C/BioASQ_2017_Task5C_Training.tar.gz",
-    # http://participants-area.bioasq.org/taskCTrainingData/
+    _DATASETNAME: "http://participants-area.bioasq.org/datasets/"
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
 # this version doesn't have to be consistent with semantic versioning. Anything that is
 # provided by the original dataset as a version goes.
@@ -108,42 +105,42 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             description="bioasq_task_c_2017 source schema",
             schema="source",
             subset_id="bioasq_task_c_2017",
+            # cred_mail=""
+            
         ),
         BigBioConfig(
-            name="bioasq_task_c_2017_bigbio_[schema_name]",
+            name="bioasq_task_c_2017_bigbio_text",
             version=BIGBIO_VERSION,
             description="bioasq_task_c_2017 BigBio schema",
-            schema="bigbio_[bigbio_schema_name]",
+            schema="bigbio_text",
             subset_id="bioasq_task_c_2017",
+            # cred_mail=""
         )
     ]
 
 
     def _info(self) -> datasets.DatasetInfo:
-       
-        print(self.config)
+
         # BioASQ Task C source schema
         if self.config.schema == "source":
             features = datasets.Features(
                {
+                   "document_id": datasets.Value("string"),
                    "pmid": datasets.Value("string"),
                    "pmcid": datasets.Value("string"),
                    "grantList": [
                        {
-                           "grantID": datasets.Value("string"),
+                           # "grantID": datasets.Value("string"),
                            "agency": datasets.Value("string"),
                        }
                    ],
+                   "text": datasets.Value("string")
                }
             )
 
-        # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
-
-        # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
-
         # For example bigbio_kb, bigbio_t2t
-        elif self.config.schema =="bigbio_kb":
-            features = schemas.kb_features
+        elif self.config.schema =="bigbio_text":
+            features = schemas.text
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -190,14 +187,16 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "test.jsonl"),
+                    "filepath": os.path.join(data_dir, "taskc_golden2.json"),
+                    "filespath": os.path.join(data_dir, "Final_Text"),
                     "split": "test",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "dev.jsonl"),
+                    "filepath": os.path.join(data_dir, "taskc_golden2.json"),
+                    "filespath": os.path.join(data_dir, "Final_Text"),
                     "split": "dev",
                 },
             ),
@@ -207,30 +206,100 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, filespath, split) -> (int, dict):
 
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
+        with open(filepath) as f:
+            task_data = json.load(f)
 
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
+        # pmids = []
+        # for article in task_data["articles"]:
+        #     pmids.append(article["pmid"])
+        #
+        # Download all pubmed articles
+        # pubmed_dir = self.config.data_dir + "/.pubmed_data"
+        # fetch_pubmed_abstracts(pmids, pubmed_dir, self.config.cred_mail)
+
+        # articles = {}
+        #
+        # for pubmed_file in Path(pubmed_dir).iterdir():
+        #
+        #     with open(pubmed_file) as f:
+        #         pubmed_json = json.load(f)
+        #     
+        #     # Collect article according to pmid
+        #     for article in pubmed_json["PubmedArticle"]:
+        #         pmid = article["MedlineCitation"]["PMID"]
+        #         articles[pmid] = article
+
         
-        for file in os.listdir(filespath):
-            train_file = os.path.join(filespath, file)
-            print(train_file)
-            with open(train_file) as fp:
-                print(fp.read())
-                content = bioc.load(fp)
-            print(content)
-            exit()
-
-
         if self.config.schema == "source":
-            # TODO: yield (key, example) tuples in the original dataset schema
-            for key, example in file_content["articles"]:
-                yield key, example
+            for article in task_data["articles"]:
+                with open(filespath + "/" + article["pmcid"] + ".xml") as f:
+                    text = f.read()
+                    
+                pmid = article["pmid"]
+
+                yield pmid, {
+                    "text": text, #articles[pmid],
+                    "document_id": pmid,
+                    "pmid": pmid,
+                    "pmcid": article["pmcid"],
+                    "grantList": [{"agency": grant["agency"]} for grant in article["grantList"]]
+                }
 
         elif self.config.schema == "bigbio":
-            # TODO: yield (key, example) tuples in the bigbio schema
-            for key, example in thing:
-                yield key, example
+            for article in task_data["articles"]:
+                with open(filespath + "/" + article["pmcid"] + ".xml") as f:
+                    text = f.read()
+                
+                yield article["pmid"], {
+                    "text": text,
+                    "id": article["pmid"],
+                    "document_id": article["pmid"],
+                    "labels": [grant["agency"] for grant in article["grantList"]]
+                }
 
+def fetch_pubmed_abstracts(
+    pmids: List,
+    outdir: str,
+    cred_mail: str,
+    batch_size: int = 1000,
+    delay: float = 0.3,
+    overwrite: bool = False,
+    verbose: bool = True,
+):
+
+    Entrez.email = cred_mail
+
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+
+    if not isinstance(pmids, list):
+        pmids = list(pmids)
+
+    n_chunks = int(len(pmids) / batch_size)
+
+    for i in tqdm(
+        range(0, n_chunks + (1 if n_chunks * batch_size < len(pmids) else 0))
+    ):
+        start, end = i * batch_size, (i + 1) * batch_size
+        outfname = f"{outdir}/pubmed.{i}.json"
+        if os.path.exists(outfname) and not overwrite:
+            continue
+
+        query = ",".join(pmids[start:end])
+        handle = Entrez.efetch(
+            db="pubmed", id=query, rettype="gb", retmode="xml", retmax=batch_size
+        )
+        record = Entrez.read(handle)
+        if len(record["PubmedArticle"]) != len(pmids[start:end]) and verbose:
+            print(
+                f"Queried {len(pmids[start:end])}, returned {len(record['PubmedArticle'])}"
+            )
+
+
+        time.sleep(delay)
+        # dump to JSON
+        with open(outfname, "wt") as file:
+            file.write(json.dumps(record, indent=2))
 
 # This allows you to run your dataloader with `python [dataset_name].py` during development
 # TODO: Remove this before making your PR
