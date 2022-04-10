@@ -14,14 +14,13 @@
 # limitations under the License.
 
 """
-Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of performance
-on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard word representation
-models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine for particular
-word classes (e.g. verbs).
+Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of
+performance on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard word
+representation models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine
+for particular word classes (e.g. verbs).
 [bigbio_schema_name] = pairs
 """
 
-import os
 from typing import Dict, List, Tuple
 
 import datasets
@@ -48,10 +47,10 @@ doi = {10.1186/s12859-018-2039-z}
 _DATASETNAME = "bio_simlex"
 
 _DESCRIPTION = """\
-Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of performance
-on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard word representation
-models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine for particular
-word classes (e.g. verbs).
+Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of
+performance on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard
+word representation models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine
+for particular word classes (e.g. verbs).
 """
 
 _HOMEPAGE = "https://github.com/cambridgeltl/bio-simverb"
@@ -69,7 +68,8 @@ applies to the data made available in this article, unless otherwise stated."""
 
 
 _URLS = {
-    _DATASETNAME: "https://github.com/cambridgeltl/bio-simverb/blob/master/wvlib/word-similarities/bio-simlex/Bio-SimLex.txt?raw=true",
+    _DATASETNAME: "https://github.com/cambridgeltl/bio-simverb/blob/master/wvlib/word-similarities/\
+bio-simlex/Bio-SimLex.txt?raw=true"
 }
 
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
