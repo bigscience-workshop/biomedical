@@ -2,8 +2,7 @@ from enum import Enum
 
 
 class BigBioValues(Enum):
-    MISSING = "<BB-MISSING-VALUE>"  # to represent data that is not present in a dataset
-    NULL = "<BB-NULL-VALUE">        # to represent data that is present in a dataset but has null meaning
+    NULL = "<BB-NULL-VALUE">        # to represent missing data
 
 
 class Tasks(Enum):
