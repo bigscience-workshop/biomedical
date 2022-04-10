@@ -135,7 +135,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
-        uid = 1
+        uid = 0
         for file in data_dir.iterdir():
             # Ignore hidden files and annotation files - we just consider the brat text files
             if file.suffix == ".tsv":
@@ -144,7 +144,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
                     next(csv_reader, None)  # remove column headers
                     for id_, row in enumerate(csv_reader):
                         uid += 1
-                        document_id = str(uid)  # .tsv files don't contain document_ids
+                        document_id = "NULL"  # .tsv files don't contain document_ids
                         text_1 = row[1]
                         text_2 = row[3]
                         label = row[9]
