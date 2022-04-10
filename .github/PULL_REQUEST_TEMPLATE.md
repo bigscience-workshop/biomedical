@@ -16,3 +16,4 @@ If the following information is NOT present in the issue, please populate:
 - [ ] Make sure that the `BUILDER_CONFIGS` class attribute is a list with at least one `BigBioConfig` for the source schema and one for a bigbio schema.
 - [ ] Confirm dataloader script works with `datasets.load_dataset` function.
 - [ ] Confirm that your dataloader script passes the test suite run with `python -m tests.test_bigbio biodatasets/my_dataset/my_dataset.py`.
+- [ ] If my dataset is local, I have provided an output of the unit-tests in the PR (please copy paste). This is OPTIONAL for public datasets, as we can test these without access to the data files.
