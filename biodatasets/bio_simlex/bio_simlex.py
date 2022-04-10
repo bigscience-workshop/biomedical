@@ -86,15 +86,6 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="bio_simlex_source",
@@ -121,7 +112,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                 {
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "score": datasets.Value("float"),
+                    "score": datasets.Value("string"),
                 }
             )
 
@@ -162,7 +153,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                     yield id_, {
                         "text_1": word1,
                         "text_2": word2,
-                        "score": score,
+                        "score": str(score),
                     }
 
                 elif self.config.schema == "bigbio_pairs":
@@ -171,7 +162,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": word1,
                         "text_2": word2,
-                        "label": "0" if float(score) < 5 else "1",
+                        "label": str(score),
                     }
 
 
