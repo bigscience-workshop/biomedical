@@ -159,7 +159,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Question Answering
 - [Schema Template](utils/schemas/qa.py)
-- Examples: [BioASQ9 Task B](examples/bioasq9b.py)
+- Examples: [BioASQ Task B](examples/bioasq.py)
 
 ```
 {
@@ -168,6 +168,7 @@ Passages capture document structure, such as the title and abstact sections of a
 	"question_id": "55031181e9bde69634000014",
 	"question": "Is RANKL secreted from the cells?",
 	"type": "yesno",
+	"choices": [],
 	"context": "Osteoprotegerin (OPG) is a soluble secreted factor that acts as a decoy receptor for receptor activator of NF-\u03baB ligand (RANKL)",
 	"answer": ["yes"],
 }
@@ -229,6 +230,6 @@ Passages capture document structure, such as the title and abstact sections of a
 	"id": "0",
 	"document_id": "NULL",
 	"text": "Am I over weight (192.9) for my age (39)?",
-	"label": "question",
+	"labels": ["question"],
 }
 ```

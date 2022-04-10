@@ -3,7 +3,6 @@ Textual Entailment Schema
 """
 import datasets
 
-
 features = datasets.Features(
     {
         "id": datasets.Value("string"),
