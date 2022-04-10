@@ -24,16 +24,19 @@ The dataset consists of four archive files,
 * smokers_surrogate_train_all_version2.zip
 * smokers_surrogate_test_all_groundtruth_version2.zip
 
-The individual data files (inside the zip files) come in just 1 type:
+The individual data files (inside the zip and tar archives) come in 4 types,
 
-* xml (*.xml files): contains the id and text of the patient records and its
-corresponding smoking status label
+* docs (*.txt files): text of a patient record
+* concepts (*.txt.con files): entities used as input to a coreference model
+* chains (*.txt.chains files): chains (i.e. one or more) coreferent entities
+* pairs (*.txt.pairs files): pairs of coreferent entities (not required)
+
 
 The files comprising this dataset must be on the users local machine
-in a single directory that is passed to `datasets.load_dataset` via
+in a single directory that is passed to `datasets.load_datset` via
 the `data_dir` kwarg. This loader script will read the archive files
-directly (i.e. the user should not uncompress or unzip any of the
-files). For example, if the following directory structure exists
+directly (i.e. the user should not uncompress, untar or unzip any of
+the files). For example, if the following directory structure exists
 on the users local machine,
 
 
@@ -136,6 +139,11 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
+    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
+    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
+    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
+    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
+
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="n2c2_2006_source",
@@ -226,3 +234,9 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
                 elif self.config.schema == "bigbio_text":
                     yield _id, {"id": sample[0], "document_id": sample[0], "text": sample[1], "labels": [sample[-1]]}
                 _id += 1
+
+
+# This allows you to run your dataloader with `python [dataset_name].py` during development
+# TODO: Remove this before making your PR
+if __name__ == "__main__":
+    datasets.load_dataset(__file__)
