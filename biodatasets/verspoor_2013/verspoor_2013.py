@@ -18,12 +18,12 @@ TODO:
 Description
 """
 
-import os
-from typing import List, Tuple, Dict
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import datasets
-from utils import schemas, parsing
+
+from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -36,7 +36,8 @@ volume={2013},
 year={2013},
 publisher={Oxford Academic}
 }
-"""
+"""  # noqa: E501
+
 
 _DATASETNAME = "verspoor_2013"
 
@@ -65,7 +66,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-_URLS = ['http://github.com/rockt/SETH/zipball/master/']
+_URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
@@ -75,6 +76,7 @@ _SUPPORTED_TASKS = [
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
 
 class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
@@ -119,8 +121,6 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
         # You can arbitrarily nest lists and dictionaries.
         # For iterables, use lists over tuples or `datasets.Sequence`
 
@@ -140,9 +140,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value(
-                                "string"
-                            ),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -186,12 +184,8 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value(
-                                "string"
-                            ),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value(
-                                "string"
-                            ),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -199,10 +193,6 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                     ],
                 },
             )
-
-        # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
-
-        # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
 
         # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_kb":
@@ -219,14 +209,13 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-       
         data_dir = Path(dl_manager.download_and_extract(_URLS[0]))
 
-        verspoor_dir = list(data_dir.glob('*/resources/Verspoor2013'))[0]
-        text_files = list(verspoor_dir.glob('corpus/*.txt'))
-        annotation_dir = verspoor_dir / 'annotations'
-        
-        data_files = {'text_files': text_files, 'annotation_dir': annotation_dir}
+        verspoor_dir = list(data_dir.glob("*/resources/Verspoor2013"))[0]
+        text_files = list(verspoor_dir.glob("corpus/*.txt"))
+        annotation_dir = verspoor_dir / "annotations"
+
+        data_files = {"text_files": text_files, "annotation_dir": annotation_dir}
 
         return [
             datasets.SplitGenerator(
@@ -239,13 +228,12 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
             )
         ]
 
-
     def _generate_examples(self, data_files, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-       
+
         if self.config.schema == "source":
-            txt_files = data_files['text_files']
-            annotation_dir = data_files['annotation_dir']
+            txt_files = data_files["text_files"]
+            annotation_dir = data_files["annotation_dir"]
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.parse_brat_file(txt_file, annotation_dir)
                 example["id"] = str(guid)
@@ -253,7 +241,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_[bigbio_schema_name]":
             txt_files = list(data_files.glob("*txt"))
-            annotation_dir = data_files['annotation_dir']
+            annotation_dir = data_files["annotation_dir"]
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
                     parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
