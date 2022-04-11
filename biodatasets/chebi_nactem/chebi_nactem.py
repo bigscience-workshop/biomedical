@@ -14,14 +14,15 @@
 # limitations under the License.
 
 import os
-import re
-from typing import Dict, List, Set, Tuple
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 import datasets
 
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import parse_brat_file
 
 _CITATION = """\
 @InProceedings{Shardlow2018,
@@ -137,12 +138,7 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
             "chebi_nactem_fullpaper": "ChEBI/fullpapers",
         }
 
-        subset_dir = os.path.join(data_dir, subset_paths[self.config.subset_id])
-
-        doc_ids = set()
-        for file_name in os.listdir(subset_dir):
-            _id = file_name.split(".")[0]
-            doc_ids.add(_id)
+        subset_dir = Path(data_dir) / subset_paths[self.config.subset_id]
 
         return [
             datasets.SplitGenerator(
@@ -150,15 +146,12 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "data_dir": subset_dir,
-                    "document_ids": doc_ids,
                 },
             )
         ]
 
-    def _generate_examples(self, data_dir: str, document_ids: Set[str]) -> Tuple[int, Dict]:
+    def _generate_examples(self, data_dir: Path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-
-        label_pos_pattern = re.compile(r"(?P<entity>\S+) (?P<offsets>(;?\d+ \d+)+)")
 
         def uid_gen():
             _uid = 0
@@ -168,94 +161,61 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
 
         uid = iter(uid_gen())
 
-        for idx, doc_id in enumerate(document_ids):
-            doc_file = os.path.join(data_dir, doc_id + ".txt")
-            with open(doc_file) as handle:
-                text = handle.read()
+        txt_files = (f for f in os.listdir(data_dir) if f.endswith(".txt"))
+        for idx, file_name in enumerate(txt_files):
 
-            ann_file = os.path.join(data_dir, doc_id + ".ann")
-
-            annotations = []
-            relations = []
-
-            with open(ann_file) as handle:
-                for line in handle:
-                    line = line.strip()
-                    if line.startswith("#"):
-                        continue
-                    if line.startswith("T"):
-                        ann_id, label_pos, ann_text = line.split("\t")
-                        match = label_pos_pattern.fullmatch(label_pos)
-                        entity = match.group("entity")
-                        offsets = [p.split() for p in match.group("offsets").split(";")]
-                        offsets = [(int(p[0]), int(p[1])) for p in offsets]
-
-                        annotations.append((ann_id, entity, offsets, ann_text))
-                    else:
-                        assert line.startswith("R")
-                        rel_id, label_spans = line.split("\t")
-                        relation, arg1, arg2 = label_spans.split()
-                        arg1 = arg1.split(":")[1]
-                        arg2 = arg2.split(":")[1]
-
-                        relations.append((rel_id, relation, arg1, arg2))
+            brat_file = data_dir / file_name
+            contents = parse_brat_file(brat_file)
 
             if self.config.schema == "source":
                 yield idx, {
-                    "document_id": doc_id,
-                    "text": text,
-                    "entities": [
-                        {
-                            "id": ann_id,
-                            "type": entity,
-                            "text": ann_text,
-                            "offsets": offsets,
-                        }
-                        for ann_id, entity, offsets, ann_text in annotations
-                    ],
+                    "document_id": contents["document_id"],
+                    "text": contents["text"],
+                    "entities": contents["text_bound_annotations"],
                     "relations": [
                         {
-                            "id": rel_id,
-                            "type": relation,
-                            "arg1": arg1,
-                            "arg2": arg2,
+                            "id": relation["id"],
+                            "type": relation["type"],
+                            "arg1": relation["head"]["ref_id"],
+                            "arg2": relation["tail"]["ref_id"],
                         }
-                        for rel_id, relation, arg1, arg2 in relations
+                        for relation in contents["relations"]
                     ],
                 }
+
             elif self.config.schema == "bigbio_kb":
                 yield idx, {
                     "id": next(uid),
-                    "document_id": doc_id,
+                    "document_id": contents["document_id"],
                     "passages": [
                         {
                             "id": next(uid),
                             "type": "",
-                            "text": [text],
-                            "offsets": [(0, len(text))],
+                            "text": [contents["text"]],
+                            "offsets": [(0, len(contents["text"]))],
                         }
                     ],
                     "entities": [
                         {
-                            "id": f"{idx}_{ann_id}",
-                            "type": entity,
-                            "text": [ann_text],
-                            "offsets": offsets,
+                            "id": f"{idx}_{entity['id']}",
+                            "type": entity["type"],
+                            "offsets": entity["offsets"],
+                            "text": entity["text"],
                             "normalized": [],
                         }
-                        for ann_id, entity, offsets, ann_text in annotations
+                        for entity in contents["text_bound_annotations"]
                     ],
                     "events": [],
                     "coreferences": [],
                     "relations": [
                         {
-                            "id": f"{idx}_{rel_id}",
-                            "type": relation,
-                            "arg1_id": f"{idx}_{arg1}",
-                            "arg2_id": f"{idx}_{arg2}",
+                            "id": f"{idx}_{relation['id']}",
+                            "type": relation["type"],
+                            "arg1_id": f"{idx}_{relation['head']['ref_id']}",
+                            "arg2_id": f"{idx}_{relation['tail']['ref_id']}",
                             "normalized": [],
                         }
-                        for rel_id, relation, arg1, arg2 in relations
+                        for relation in contents["relations"]
                     ],
                 }
             else:
