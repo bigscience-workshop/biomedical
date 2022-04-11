@@ -17,11 +17,13 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-
+from bioc import biocxml
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,
@@ -35,6 +37,8 @@ year={2021},
 publisher={Nature Publishing Group}
 }
 """
+
+_DATASETNAME = "nlmchem"
 
 _DESCRIPTION = """\
 NLM-Chem corpus consists of 150 full-text articles from the PubMed Central Open Access dataset,
@@ -52,8 +56,13 @@ _LICENSE = " CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"
 _URLs = {
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
     "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
+    "bigbio_text": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-NLMChem-corpus_v2.BioC.xml.gz",
 }
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.TEXT_CLASSIFICATION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -75,15 +84,20 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="nlmchem_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="NLM_Chem BigBio schema",
+            description="NLM_Chem BigBio schema (KB)",
             schema="bigbio_kb",
+            subset_id="nlmchem",
+        ),
+        BigBioConfig(
+            name="nlmchem_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="NLM_Chem BigBio schema (TEXT)",
+            schema="bigbio_text",
             subset_id="nlmchem",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = (
-        "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
-    )
+    DEFAULT_CONFIG_NAME = "nlmchem_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     def _info(self):
 
@@ -118,6 +132,8 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
+        elif self.config.schema == "bigbio_text":
+            features = schemas.text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -151,7 +167,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-train.BioC.xml"
+                    ),
                     "split": "train",
                 },
             ),
@@ -159,7 +177,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-test.BioC.xml"
+                    ),
                     "split": "test",
                 },
             ),
@@ -167,13 +187,31 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "BC7T2-NLMChem-corpus-dev.BioC.xml"
+                    ),
                     "split": "dev",
                 },
             ),
         ]
 
-    def _get_passages_and_entities(self, d: bioc.BioCDocument) -> Tuple[List[Dict], List[List[Dict]]]:
+    def _get_textcls_example(self, d: bioc.BioCDocument) -> Dict:
+
+        example = {"document_id": d.id, "text": [], "labels": []}
+
+        for p in d.passages:
+            example["text"].append(p.text)
+            for a in p.annotations:
+                if a.infons.get("type") == "MeSH_Indexing_Chemical":
+                    example["labels"].append(a.infons.get("identifier"))
+
+        example["text"] = " ".join(example["text"])
+
+        return example
+
+    def _get_passages_and_entities(
+        self, d: bioc.BioCDocument
+    ) -> Tuple[List[Dict], List[List[Dict]]]:
 
         passages: List[Dict] = []
         entities: List[List[Dict]] = []
@@ -212,19 +250,18 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                 a_type = a.infons.get("type")
 
                 # no in-text annotation: only for document indexing
-                if a_type in ["MeSH_Indexing_Chemical", "OTHER"]:
+                if (
+                    self.config.schema == "bigbio_kb"
+                    and a_type == "MeSH_Indexing_Chemical"
+                ):
                     continue
+
+                offsets, text = get_texts_and_offsets_from_bioc_ann(a)
 
                 da = {
                     "type": a_type,
-                    "offsets": [
-                        (
-                            loc.offset - eo,
-                            loc.offset + loc.length - eo,
-                        )
-                        for loc in a.locations
-                    ],
-                    "text": (a.text,),
+                    "offsets": [(start - eo, end - eo) for (start, end) in offsets],
+                    "text": text,
                     "id": a.id,
                     "normalized": self._get_normalized(a),
                 }
@@ -250,7 +287,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
 
             normalized = [i.split(":") for i in identifiers]
 
-            normalized = [{"db_name": elems[0], "db_id": elems[1]} for elems in normalized]
+            normalized = [
+                {"db_name": elems[0], "db_id": elems[1]} for elems in normalized
+            ]
 
         else:
 
@@ -265,7 +304,7 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
     ) -> Iterator[Tuple[int, Dict]]:
         """Yields examples as (key, example) tuples."""
 
-        reader = bioc.BioCXMLDocumentReader(str(filepath))
+        reader = biocxml.BioCXMLDocumentReader(str(filepath))
 
         if self.config.schema == "source":
 
@@ -281,6 +320,17 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
                     p["entities"] = pe  # BioC has per passage entities
 
                 yield uid, {"passages": passages}
+
+        elif self.config.schema == "bigbio_text":
+            uid = 0
+            for idx, doc in enumerate(reader):
+
+                example = self._get_textcls_example(doc)
+                example["id"] = uid
+                # global id
+                uid += 1
+
+                yield idx, example
 
         elif self.config.schema == "bigbio_kb":
             uid = 0
