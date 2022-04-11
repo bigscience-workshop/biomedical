@@ -69,7 +69,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class MeQSumDataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """Dataset containing 1000 summarized consumer health questions."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
