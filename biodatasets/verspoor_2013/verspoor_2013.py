@@ -14,20 +14,8 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
+TODO:
+Description
 """
 
 import os
@@ -52,8 +40,6 @@ publisher={Oxford Academic}
 
 _DATASETNAME = "verspoor_2013"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
 This dataset is designed for XXX NLP task.
 """
@@ -234,7 +220,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
        
-        data_dir = Path(dl_manager.download_and_extract(_URLS))
+        data_dir = Path(dl_manager.download_and_extract(_URLS[0]))
 
         verspoor_dir = list(data_dir.glob('*/resources/Verspoor2013'))[0]
         text_files = list(verspoor_dir.glob('corpus/*.txt'))
@@ -253,7 +239,6 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
             )
         ]
 
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
     def _generate_examples(self, data_files, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
@@ -277,9 +262,3 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
