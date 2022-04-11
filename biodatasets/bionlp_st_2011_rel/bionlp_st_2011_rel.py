@@ -67,7 +67,8 @@ _URLs = {
     "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
