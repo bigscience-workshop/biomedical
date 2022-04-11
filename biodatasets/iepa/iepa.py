@@ -14,7 +14,8 @@
 # limitations under the License.
 
 """
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
+The IEPA benchmark PPI corpus is designed for relation extraction. It was created from 303 PubMed abstracts,
+each of which contains a specific pair of co-occurring chemicals.
 """
 
 import xml.dom.minidom as xml
@@ -41,12 +42,13 @@ _CITATION = """\
 _DATASETNAME = "iepa"
 
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+The IEPA benchmark PPI corpus is designed for relation extraction. It was created from 303 PubMed abstracts,
+each of which contains a specific pair of co-occurring chemicals.
 """
 
 _HOMEPAGE = "http://psb.stanford.edu/psb-online/proceedings/psb02/abstracts/p326.html"
 
-_LICENSE = ""
+_LICENSE = "Unknown"
 
 _URLS = {
     _DATASETNAME: {
@@ -63,7 +65,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class IepaDataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """The IEPA benchmark PPI corpus is designed for relation extraction."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
