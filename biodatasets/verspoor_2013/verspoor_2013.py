@@ -239,12 +239,12 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                 example["id"] = str(guid)
                 yield guid, example
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
-            txt_files = list(data_files.glob("*txt"))
+        elif self.config.schema == "bigbio_kb":
+            txt_files = data_files["text_files"]
             annotation_dir = data_files["annotation_dir"]
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file, annotation_dir), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
