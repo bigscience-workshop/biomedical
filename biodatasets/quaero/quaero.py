@@ -5,6 +5,7 @@ import os
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @InProceedings{neveol14quaero, 
@@ -59,8 +60,6 @@ Please note that the original version of the QUAERO corpus distributed in the CL
 All questions regarding the task or data should be addressed to aurelie.neveol@limsi.fr
 """
 
-_DATASET_NAME = "QUAERO French Medical Corpus"
-
 _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
 _LICENSE = "GFDL"
@@ -69,6 +68,8 @@ _URLS = {
     "quaero_source": "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip",
     "quaero_bigbio_kb": "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip",
 }
+
+_DATASET_NAME = "QUAERO French Medical Corpus"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
@@ -105,26 +106,26 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
                     "entities": [
-			            {
-			                "id": datasets.Value("string"),
-			                "type": datasets.Value("string"),
-			                "text": datasets.Sequence(datasets.Value("string")),
-			                "offsets": datasets.Sequence([datasets.Value("int32")]),
-			                "normalized": [
-			                    {
-			                        "db_name": datasets.Value("string"),
-			                        "db_id": datasets.Value("string"),
-			                    }
-			                ],
-			            }
-			        ],
-			        "passages": [
-			            {
-			                "id": datasets.Value("string"),
-			                "type": datasets.Value("string"),
-			                "text": datasets.Sequence(datasets.Value("string")),
-			                "offsets": datasets.Sequence([datasets.Value("int32")]),
-			            }
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
+                        }
+                    ],
+                    "passages": [
+                        {
+                            "id": datasets.Value("string"),
+                            "type": datasets.Value("string"),
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                        }
         ],
                       }
             )
@@ -155,8 +156,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
         dict
             entity information
         """
-        offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        texts = [doc_text[i:j] for i, j in offsets]
+        offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons[db_id_key] if db_id_key else "-1"
         normalized = [
             # some entities are linked to multiple normalized ids
@@ -217,7 +217,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             for file in [f"EMEA_{split}_bioc", f"MEDLINE_{split}_bioc"]:
               f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-              reader = bioc.BioCXMLDocumentReader(str(f))
+              reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
 
               for xdoc in reader:
                   doc_text = self._get_document_text(xdoc)
@@ -241,7 +241,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             uid = 0 #unique identifier needed for the schema
             for file in [f"EMEA_{split}_bioc", f"MEDLINE_{split}_bioc"]:
               f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-              reader = bioc.BioCXMLDocumentReader(str(f))
+              reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
               for xdoc in reader:
                 data = {
                     "id": uid,
@@ -269,6 +269,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                         }
                     )
                     uid += 1
+
                 # entities
                 for passage in xdoc.passages:
                     for span in passage.annotations:
@@ -276,5 +277,6 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                         ent["id"] = uid  # override BioC default id
                         data["entities"].append(ent)
                         uid += 1
+
                 yield i, data
                 i += 1
