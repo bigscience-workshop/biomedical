@@ -1,5 +1,5 @@
 loguru==0.5.3
-bioc==1.3.7
+bioc==2.0.post1
 pandas==1.3.3
 numpy==1.21.2
 pybrat==0.1.4
@@ -7,5 +7,5 @@ datasets==1.18.3
 black~=22.0
 flake8>=3.8.3
 isort>=5.0.0
-aiohttp
-datasets
+aiohttp==3.8.1
+openpxyl>=3.0.9
