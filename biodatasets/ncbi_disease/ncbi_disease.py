@@ -21,11 +21,10 @@ resource for the biomedical natural language processing community.
 import os
 from typing import Dict, Iterator, List, Tuple
 
-import bioc
 import datasets
-from bioc.pubtator import PubTatorAnn
+from bioc import pubtator
 
-from utils import parsing, schemas
+from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -158,30 +157,14 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
-            with open(filepath, "r") as f:
-                for i, doc in enumerate(bioc.pubtator.iterparse(f)):
-                    source_example = {
-                        "pmid": doc.pmid,
-                        "title": doc.title,
-                        "abstract": doc.abstract,
-                        "mentions": [
-                            {
-                                "concept_id": mention.id,
-                                "type": mention.type,
-                                "text": mention.text,
-                                "offsets": [mention.start, mention.end],
-                            }
-                            for mention in doc.annotations
-                        ],
-                    }
-
-                    # Some examples are duplicated in NCBI Disease. We have to make them unique to
-                    # avoid and error from datasets.
-                    yield str(i) + "_" + source_example["pmid"], source_example
+            for i, source_example in enumerate(self._pubtator_to_source(filepath)):
+                # Some examples are duplicated in NCBI Disease. We have to make them unique to
+                # avoid and error from datasets.
+                yield str(i) + "_" + source_example["pmid"], source_example
 
         elif self.config.schema == "bigbio_kb":
             seen = []
-            for kb_example in parsing.pubtator_to_bigbio_kb(filepath, get_db_name=self._get_db_name):
+            for kb_example in self._pubtator_to_bigbio_kb(filepath):
                 # Some examples are duplicated in NCBI Disease. Avoid yielding more than once.
                 if kb_example["id"] in seen:
                     continue
@@ -189,5 +172,78 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                 seen.append(kb_example["id"])
 
     @staticmethod
-    def _get_db_name(entity: PubTatorAnn) -> str:
-        return "omim" if "OMIM" in entity.id else "mesh"
+    def _pubtator_to_source(filepath: Dict) -> Iterator[Dict]:
+        with open(filepath, "r") as f:
+            for doc in pubtator.iterparse(f):
+                source_example = {
+                    "pmid": doc.pmid,
+                    "title": doc.title,
+                    "abstract": doc.abstract,
+                    "mentions": [
+                        {
+                            "concept_id": mention.id,
+                            "type": mention.type,
+                            "text": mention.text,
+                            "offsets": [mention.start, mention.end],
+                        }
+                        for mention in doc.annotations
+                    ],
+                }
+                yield source_example
+
+    @staticmethod
+    def _pubtator_to_bigbio_kb(filepath: Dict) -> Iterator[Dict]:
+        with open(filepath, "r") as f:
+            unified_example = {}
+            for doc in pubtator.iterparse(f):
+                unified_example["id"] = doc.pmid
+                unified_example["document_id"] = doc.pmid
+
+                unified_example["passages"] = [
+                    {
+                        "id": doc.pmid + "_title",
+                        "type": "title",
+                        "text": [doc.title],
+                        "offsets": [[0, len(doc.title)]],
+                    },
+                    {
+                        "id": doc.pmid + "_abstract",
+                        "type": "abstract",
+                        "text": [doc.abstract],
+                        "offsets": [
+                            [
+                                # +1 assumes the title and abstract will be joined by a space.
+                                len(doc.title) + 1,
+                                len(doc.title) + 1 + len(doc.abstract),
+                            ]
+                        ],
+                    },
+                ]
+
+                unified_entities = {}
+                for entity in doc.annotations:
+                    # We need a unique identifier for this entity, so build it from the document id and entity id
+                    unified_entity_id = doc.pmid + "_" + entity.id
+                    # The user can provide a callable that returns the database name.
+                    db_name = "omim" if "OMIM" in entity.id else "mesh"
+                    if unified_entity_id not in unified_entities:
+                        unified_entities[unified_entity_id] = {
+                            "id": unified_entity_id,
+                            "type": entity.type,
+                            "text": [entity.text],
+                            "offsets": [[entity.start, entity.end]],
+                            "normalized": [{"db_name": db_name, "db_id": entity.id}],
+                        }
+                    else:
+                        unified_entities[unified_entity_id]["text"].append(entity.text)
+                        unified_entities[unified_entity_id]["offsets"].append([entity.start, entity.end])
+                        unified_entities[unified_entity_id]["normalized"].append(
+                            {"db_name": db_name, "db_id": entity.id}
+                        )
+
+                unified_example["entities"] = list(unified_entities.values())
+                unified_example["relations"] = []
+                unified_example["events"] = []
+                unified_example["coreferences"] = []
+
+                yield unified_example
