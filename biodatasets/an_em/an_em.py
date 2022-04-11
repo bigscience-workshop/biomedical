@@ -66,7 +66,7 @@ _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/anatomy/data/AnEM-1.0.4.tar.gz",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.COREFERENCE_RESOLUTION, Tasks.RELATION_EXTRACTION]
 
 _SOURCE_VERSION = "1.0.4"
 _BIGBIO_VERSION = "1.0.0"
@@ -128,6 +128,26 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                             "entity_id": datasets.Value("string"),
                         }
                     ],
+                    "equivalences": [
+                        {
+                            "entity_id": datasets.Value("string"),
+                            "ref_ids": datasets.Sequence(datasets.Value("string"))
+                        }
+                    ],
+                    "relations": [
+                        {
+                            "id": datasets.Value("string"),
+                            "head": {
+                                "ref_id": datasets.Value("string"),
+                                "role": datasets.Value("string"),
+                            },
+                            "tail": {
+                                "ref_id": datasets.Value("string"),
+                                "role": datasets.Value("string"),
+                            },
+                            "type": datasets.Value("string")
+                        }
+                    ]
                 }
             )
 
@@ -222,6 +242,27 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 }
                 for brat_entity in brat_example["text_bound_annotations"]
             ],
+            "equivalences": [
+                {
+                    "entity_id": brat_entity["id"],
+                    "ref_ids": [f"{brat_example['document_id']}_{ids}" for ids in brat_entity["ref_ids"]]
+                }
+                for brat_entity in brat_example["equivalences"]
+            ],
+            "relations": [
+                {
+                    "id": f"{brat_example['document_id']}_{brat_entity['id']}",
+                    "head": {
+                        "ref_id": f"{brat_example['document_id']}_{brat_entity['head']['ref_id']}",
+                        "role": brat_entity["head"]["role"],
+                    },
+                    "tail": {
+                        "ref_id": f"{brat_example['document_id']}_{brat_entity['tail']['ref_id']}",
+                        "role": brat_entity["tail"]["role"],
+                    },
+                    "type": brat_entity["type"]
+                } for brat_entity in brat_example["relations"]
+            ]
         }
 
         return source_example
