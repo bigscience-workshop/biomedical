@@ -59,7 +59,9 @@ _URLs = {
     "bionlp_st_2013_cg": "https://github.com/openbiocorpora/bionlp-st-2013-cg/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.COREFERENCE_RESOLUTION,]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
