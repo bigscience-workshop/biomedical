@@ -8,4 +8,4 @@ black~=22.0
 flake8>=3.8.3
 isort>=5.0.0
 aiohttp==3.8.1
-openpxyl>=3.0.9
+openpyxl>=3.0.9
