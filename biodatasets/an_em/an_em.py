@@ -129,10 +129,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                         }
                     ],
                     "equivalences": [
-                        {
-                            "entity_id": datasets.Value("string"),
-                            "ref_ids": datasets.Sequence(datasets.Value("string"))
-                        }
+                        {"entity_id": datasets.Value("string"), "ref_ids": datasets.Sequence(datasets.Value("string"))}
                     ],
                     "relations": [
                         {
@@ -145,9 +142,9 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                                 "ref_id": datasets.Value("string"),
                                 "role": datasets.Value("string"),
                             },
-                            "type": datasets.Value("string")
+                            "type": datasets.Value("string"),
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -166,16 +163,14 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(urls))
-
         all_data = data_dir / "AnEM-1.0.4" / "standoff"
-        split_dir = data_dir / "AnEM-1.0.4" / "test"
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": split_dir / "train-files.list",
+                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "train-files.list",
                     "split": "train",
                 },
             ),
@@ -183,8 +178,16 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": split_dir / "test-files.list",
+                    "split_path": data_dir / "AnEM-1.0.4" / "test" / "test-files.list",
                     "split": "test",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepath": all_data,
+                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "test-files.list",
+                    "split": "dev",
                 },
             ),
         ]
@@ -245,7 +248,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
             "equivalences": [
                 {
                     "entity_id": brat_entity["id"],
-                    "ref_ids": [f"{brat_example['document_id']}_{ids}" for ids in brat_entity["ref_ids"]]
+                    "ref_ids": [f"{brat_example['document_id']}_{ids}" for ids in brat_entity["ref_ids"]],
                 }
                 for brat_entity in brat_example["equivalences"]
             ],
@@ -260,9 +263,10 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                         "ref_id": f"{brat_example['document_id']}_{brat_entity['tail']['ref_id']}",
                         "role": brat_entity["tail"]["role"],
                     },
-                    "type": brat_entity["type"]
-                } for brat_entity in brat_example["relations"]
-            ]
+                    "type": brat_entity["type"],
+                }
+                for brat_entity in brat_example["relations"]
+            ],
         }
 
         return source_example
