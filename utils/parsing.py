@@ -33,7 +33,7 @@ def remove_prefix(a: str, prefix: str) -> str:
     return a
 
 
-def parse_brat_file(txt_file: Path, annotation_dir: Optional(Path) = None,  annotation_file_suffixes: List[str] = None) -> Dict:
+def parse_brat_file(txt_file: Path, annotation_dir: Optional[Path] = None,  annotation_file_suffixes: List[str] = None) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
