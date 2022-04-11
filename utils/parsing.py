@@ -1,6 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Iterator, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 import bioc
 
@@ -127,7 +127,9 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
         annotation_file_suffixes = [".a1", ".a2", ".ann"]
 
     if len(annotation_file_suffixes) == 0:
-        raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
+        raise AssertionError(
+            "At least one suffix for the to-be-read annotation files should be given!"
+        )
 
     ann_lines = []
     for suffix in annotation_file_suffixes:
@@ -166,7 +168,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
                 i = 0
                 for start, end in ann["offsets"]:
                     chunk_len = end - start
-                    ann["text"].append(text[i : chunk_len + i])
+                    ann["text"].append(text[i:chunk_len+i])
                     i += chunk_len
                     while i < len(text) and text[i] == " ":
                         i += 1
@@ -346,73 +348,8 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
-            unified_example["coreferences"].append({"id": id_prefix + str(i), "entity_ids": entity_ids})
+            unified_example["coreferences"].append(
+                {"id": id_prefix + str(i), "entity_ids": entity_ids}
+            )
 
     return unified_example
-
-
-def pubtator_to_bigbio_kb(filepath: Dict, get_db_name: Callable[[Dict], str]) -> Iterator[Dict]:
-    """
-    For each example in the given `filepath` to a file in the PubTator format, yields a
-    dictionary a conforming to the `bigbio-kb` schema (as defined in ../schemas/kb.py).
-    :param filepath: A filepath to a file in the PubTator format.
-    :param get_db_name: A callable that takes a dictionary representing a entity and returns the
-                        name of the database that the mention is grounded to. If not provided,
-                        `db_name` in the returned dictionary will be None for all entities.
-    """
-    with open(filepath, "r") as f:
-        unified_example = {}
-        for doc in bioc.pubtator.iterparse(f):
-            unified_example["id"] = doc.pmid
-            unified_example["document_id"] = doc.pmid
-
-            unified_example["passages"] = [
-                {
-                    "id": doc.pmid + "_title",
-                    "type": "title",
-                    "text": [doc.title],
-                    "offsets": [[0, len(doc.title)]],
-                },
-                {
-                    "id": doc.pmid + "_abstract",
-                    "type": "abstract",
-                    "text": [doc.abstract],
-                    "offsets": [
-                        [
-                            # +1 assumes the title and abstract will be joined by a space.
-                            len(doc.title) + 1,
-                            len(doc.title) + 1 + len(doc.abstract),
-                        ]
-                    ],
-                },
-            ]
-
-            unified_entities = {}
-            for entity in doc.annotations:
-                # We need a unique identifier for this entity, so build it from the document id and entity id
-                unified_entity_id = doc.pmid + "_" + entity.id
-                # The user can provide a callable that returns the database name.
-                db_name = get_db_name(entity) if get_db_name is not None else None
-                if unified_entity_id not in unified_entities:
-                    unified_entities[unified_entity_id] = {
-                        "id": unified_entity_id,
-                        "type": entity.type,
-                        "text": [entity.text],
-                        "offsets": [[entity.start, entity.end]],
-                        "normalized": [{"db_name": db_name, "db_id": entity.id}],
-                    }
-                else:
-                    unified_entities[unified_entity_id]["text"].append(entity.text)
-                    unified_entities[unified_entity_id]["offsets"].append([entity.start, entity.end])
-                    unified_entities[unified_entity_id]["normalized"].append({"db_name": db_name, "db_id": entity.id})
-
-            unified_example["entities"] = list(unified_entities.values())
-
-            # TODO: In the interest of time I am skipping relations.
-            unified_example["relations"] = []
-            # I haven't seen a PubTator formatted dataset with events or coreference, so leaving
-            # these fields empty. This can always be implemented later.
-            unified_example["events"] = []
-            unified_example["coreferences"] = []
-
-            yield unified_example
