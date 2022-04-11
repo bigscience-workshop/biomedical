@@ -209,9 +209,9 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
                             "id": ann_id,
                             "type": entity,
                             "text": ann_text,
-                            "offsets": positions,
+                            "offsets": offsets,
                         }
-                        for ann_id, entity, positions, ann_text in annotations
+                        for ann_id, entity, offsets, ann_text in annotations
                     ],
                     "relations": [
                         {
@@ -240,10 +240,10 @@ class ChebiNactemDatasset(datasets.GeneratorBasedBuilder):
                             "id": f"{idx}_{ann_id}",
                             "type": entity,
                             "text": [ann_text],
-                            "offsets": positions,
+                            "offsets": offsets,
                             "normalized": [],
                         }
-                        for ann_id, entity, positions, ann_text in annotations
+                        for ann_id, entity, offsets, ann_text in annotations
                     ],
                     "events": [],
                     "coreferences": [],
