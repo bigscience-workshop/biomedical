@@ -58,7 +58,7 @@ the dataset is sampled from EHRs to ensure concepts are relevant for the EHR con
 A detailed analysis of the concepts in the dataset reveals a far larger coverage compared to existing datasets.
 """
 
-_HOMEPAGE = "https://aclanthology.org/2020.coling-main.577/"
+_HOMEPAGE = "https://github.com/babylonhealth/EHR-Rel"
 
 _LICENSE = "Apache License 2.0"
 
@@ -84,9 +84,23 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="ehr_rel_source",
             version=SOURCE_VERSION,
-            description="EHR-Rel source schema",
+            description="EHR-Rel combined source schema",
             schema="source",
             subset_id="ehr_rel",
+        ),
+        BigBioConfig(
+            name="ehr_rel_a_source",
+            version=SOURCE_VERSION,
+            description="EHR-Rel-A source schema",
+            schema="source",
+            subset_id="ehr_rel_a",
+        ),
+        BigBioConfig(
+            name="ehr_rel_b_source",
+            version=SOURCE_VERSION,
+            description="EHR-Rel-B source schema",
+            schema="source",
+            subset_id="ehr_rel_b",
         ),
         BigBioConfig(
             name="ehr_rel_bigbio_pairs",
@@ -97,7 +111,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "ehr_rel_source"
+    DEFAULT_CONFIG_NAME = "ehr_rel_bigbio_pairs"
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -144,52 +158,61 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
+
+        if self.config.subset_id == "ehr_rel_a":
+            files = ["EHR-RelA.tsv"]
+        elif self.config.subset_id == "ehr_rel_b":
+            files = ["EHR-RelB.tsv"]
+        else:
+            files = ["EHR-RelA.tsv", "EHR-RelB.tsv"]
+
         uid = -1  # want first instance to be 0
-        for file in data_dir.iterdir():
-            if file.suffix == ".tsv":
-                document_id = str(file.stem)
-                with open(file, encoding="utf-8") as csv_file:
-                    csv_reader = csv.reader(csv_file, quotechar='"', delimiter="\t")
-                    next(csv_reader, None)  # remove column headers
-                    for id_, row in enumerate(csv_reader):
-                        uid += 1
-                        (
-                            snomed_id_1,
-                            snomed_label_1,
-                            snomed_id_2,
-                            snomed_label_2,
-                            rater_A,
-                            rater_B,
-                            rater_C,
-                            rater_D,
-                            rater_E,
-                            mean_rating,
-                            CUI_1,
-                            CUI_2,
-                        ) = row
 
-                        if self.config.schema == "source":
-                            yield uid, {
-                                "document_id": document_id,
-                                "snomed_id_1": snomed_id_1,
-                                "snomed_label_1": snomed_label_1,
-                                "snomed_id_2": snomed_id_1,
-                                "snomed_label_2": snomed_label_2,
-                                "rater_A": rater_A,
-                                "rater_B": rater_B,
-                                "rater_C": rater_C,
-                                "rater_D": rater_D,
-                                "rater_E": rater_E,
-                                "mean_rating": mean_rating,
-                                "CUI_1": CUI_1,
-                                "CUI_2": CUI_2,
-                            }
+        for filename in files:
+            file = data_dir.joinpath(filename)
+            document_id = str(file.stem)
+            with open(file, encoding="utf-8") as csv_file:
+                csv_reader = csv.reader(csv_file, quotechar='"', delimiter="\t")
+                next(csv_reader, None)  # remove column headers
+                for id_, row in enumerate(csv_reader):
+                    uid += 1
+                    (
+                        snomed_id_1,
+                        snomed_label_1,
+                        snomed_id_2,
+                        snomed_label_2,
+                        rater_A,
+                        rater_B,
+                        rater_C,
+                        rater_D,
+                        rater_E,
+                        mean_rating,
+                        CUI_1,
+                        CUI_2,
+                    ) = row
 
-                        elif self.config.schema == "bigbio_pairs":
-                            yield uid, {
-                                "id": uid,
-                                "document_id": document_id,
-                                "text_1": snomed_label_1,
-                                "text_2": snomed_label_2,
-                                "label": mean_rating,
-                            }
+                    if self.config.schema == "source":
+                        yield uid, {
+                            "document_id": document_id,
+                            "snomed_id_1": snomed_id_1,
+                            "snomed_label_1": snomed_label_1,
+                            "snomed_id_2": snomed_id_1,
+                            "snomed_label_2": snomed_label_2,
+                            "rater_A": rater_A,
+                            "rater_B": rater_B,
+                            "rater_C": rater_C,
+                            "rater_D": rater_D,
+                            "rater_E": rater_E,
+                            "mean_rating": mean_rating,
+                            "CUI_1": CUI_1,
+                            "CUI_2": CUI_2,
+                        }
+
+                    elif self.config.schema == "bigbio_pairs":
+                        yield uid, {
+                            "id": uid,
+                            "document_id": document_id,
+                            "text_1": snomed_label_1,
+                            "text_2": snomed_label_2,
+                            "label": mean_rating,
+                        }
