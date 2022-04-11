@@ -18,7 +18,7 @@ The IEPA benchmark PPI corpus is designed for relation extraction. It was create
 each of which contains a specific pair of co-occurring chemicals.
 """
 
-### Comment from Author
+# Comment from Author
 # BigBio schema fixes offsets of entities to an offset where 0 is the start of the document.
 # (In source offsets of entities start from 0 for each passage in document)
 # Offsets of entities in source remain unchanged.
@@ -234,10 +234,12 @@ class IepaDataset(datasets.GeneratorBasedBuilder):
                 entity_["normalized"] = []
                 entity_.pop("origID")
                 entity_["text"] = [entity_["text"]]
-                entity_["offsets"] = [[
-                    int(sentence_["offsets"][0]) + int(entity_["offsets"][0]), 
-                    int(sentence_["offsets"][0]) + int(entity_["offsets"][1])
-                ]]
+                entity_["offsets"] = [
+                    [
+                        int(sentence_["offsets"][0]) + int(entity_["offsets"][0]),
+                        int(sentence_["offsets"][0]) + int(entity_["offsets"][1]),
+                    ]
+                ]
                 entities.append(entity_)
             for relation_ in sentence_["interactions"]:
                 relation_["arg1_id"] = relation_.pop("e1")
