@@ -1,6 +1,5 @@
 from collections import defaultdict
 from pathlib import Path
-from token import N_TOKENS
 from typing import Dict, Iterable, List, Tuple, Optional
 
 import bioc
