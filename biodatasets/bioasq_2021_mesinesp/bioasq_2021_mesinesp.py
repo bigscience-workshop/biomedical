@@ -14,21 +14,14 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
+The main aim of MESINESP2 is to promote the development of practically relevant semantic indexing tools for biomedical content in non-English language. We have generated a manually annotated corpus, where domain experts have labeled a set of scientific literature, clinical trials, and patent abstracts. All the documents were labeled with DeCS descriptors, which is a structured controlled vocabulary created by BIREME to index scientific publications on BvSalud, the largest database of scientific documents in Spanish, which hosts records from the databases LILACS, MEDLINE, IBECS, among others. 
 
-When modifying it for your dataset, look for TODO items that offer specific instructions.
+MESINESP track at BioASQ9 explores the efficiency of systems for assigning DeCS to different types of biomedical documents. To that purpose, we have divided the task into three subtracks depending on the document type. Then, for each one we generated an annotated corpus which was provided to participating teams:
 
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+[Subtrack 1 corpus] MESINESP-L – Scientific Literature: It contains all Spanish records from LILACS and IBECS databases at the Virtual Health Library (VHL) with non-empty abstract written in Spanish.
+[Subtrack 2 corpus] MESINESP-T- Clinical Trials contains records from Registro Español de Estudios Clínicos (REEC). REEC doesn't provide documents with the structure title/abstract needed in BioASQ, for that reason we have built artificial abstracts based on the content available in the data crawled using the REEC API. 
+[Subtrack 3 corpus] MESINESP-P – Patents: This corpus includes patents in Spanish extracted from Google Patents which have the IPC code “A61P” and “A61K31”.
+In addition, we also provide a set of complementary data such as: the DeCS terminology file, a silver standard with the participants' predictions to the task background set and the entities of medications, diseases, symptoms and medical procedures extracted from the BSC NERs documents.
 """
 
 import os
@@ -40,25 +33,20 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-# TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+@conference {396,
+	title = {Overview of BioASQ 2021-MESINESP track. Evaluation of advance hierarchical classification techniques for scientific literature, patents and clinical trials.},
+	booktitle = {Proceedings of the 9th BioASQ Workshop A challenge on large-scale biomedical semantic indexing and question answering},
+	year = {2021},
+	url = {http://ceur-ws.org/Vol-2936/paper-11.pdf},
+	author = {Gasco, Luis and Nentidis, Anastasios and Krithara, Anastasia and Estrada-Zavala, Darryl and Toshiyuki Murasaki, Renato and Primo-Pe{\~n}a, Elena and Bojo-Canales, Cristina and Paliouras, Georgios and Krallinger, Martin}
 }
+
 """
 
 _DATASETNAME = "bioasq_2021_mesinesp"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
+
 _DESCRIPTION = """\
 The main aim of MESINESP2 is to promote the development of practically relevant semantic indexing tools for biomedical content in non-English language. We have generated a manually annotated corpus, where domain experts have labeled a set of scientific literature, clinical trials, and patent abstracts. All the documents were labeled with DeCS descriptors, which is a structured controlled vocabulary created by BIREME to index scientific publications on BvSalud, the largest database of scientific documents in Spanish, which hosts records from the databases LILACS, MEDLINE, IBECS, among others. 
 
@@ -96,25 +84,6 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -180,15 +149,13 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
                 features = datasets.Features(
                     {
-                        "articles": [{
                             "abstractText": datasets.Value("string"),
                             "db":datasets.Value("string"),
                             "decsCodes": datasets.Sequence(datasets.Value("string")),
                             "id":datasets.Value("string"),
                             "journal":datasets.Value("string"),
                             "title":datasets.Value("string"),
-                            "year": datasets.Value("int32"),
-                        }]
+                            "year": datasets.Value("string"),
                     }
                 )
 
@@ -198,7 +165,7 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
 
         # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_text":
-            features = schemas.text
+            features = schemas.text.features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -218,7 +185,7 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
         else:
             track = "3"
 
-        urls = _URLS[_DATASETNAME[f"subtrack{track}"]]
+        urls = _URLS[_DATASETNAME][f"subtrack{track}"]
         if self.config.data_dir is None:
             try:
                 data_dir = dl_manager.download_and_extract(urls)
@@ -227,34 +194,42 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
         else:
             data_dir = self.config.data_dir
 
+        if track == "1":
+            top_folder = "Subtrack1-Scientific_Literature"
+        elif track == "2":
+            top_folder = "Subtrack2-Clinical_Trials"
+        else:
+            top_folder = "Subtrack3-Patents"
         if self.config.name == "bioasq_2021_mesinesp_subtrack1_all_source":
             train_filepath = "training_set_subtrack1_all.json"
-        elif self.config.name == "bioasq_2021_mesinesp_subtrack1_only_articles_source" or self.config.schema == "bigbio_text":
+        elif self.config.name == "bioasq_2021_mesinesp_subtrack1_only_articles_source":
             train_filepath = "training_set_subtrack1_only_articles.json"
+        elif self.config.schema == "bigbio_text" and track == "1":
+            train_filepath = "training_set_subtrack1_all.json"
         else:
             train_filepath = f"training_set_subtrack{track}.json"
 
         dev_filepath = f"development_set_subtrack{track}.json"
-        test_filepath = f"testing_set_subtrack{track}.json"
+        test_filepath = f"test_set_subtrack{track}.json"
 
         split_gens = [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "Train", train_filepath),
+                    "filepath": os.path.join(data_dir, top_folder, "Train", train_filepath),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "Development", dev_filepath),
+                    "filepath": os.path.join(data_dir, top_folder, "Development", dev_filepath),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "Test", test_filepath),
+                    "filepath": os.path.join(data_dir, top_folder, "Test", test_filepath),
                 },
             ),
         ]
@@ -286,7 +261,7 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
                         "id": example["id"],
                         "document_id": "NULL",
                         "text": example["abstractText"],
-                        "labels": example["descCodes"],
+                        "labels": example["decsCodes"],
                 }
 
 if __name__ == "__main__":
