@@ -129,43 +129,30 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
     for language_name, language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
         # NOTE: BigBio text classification configurations
         # Text classification data for each language
-        BUILDER_CONFIGS.extend(
-            [
-                BigBioConfig(
-                    name=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
-                    version=BIGBIO_VERSION,
-                    description=f"NTCIR 13 MedWeb BigBio {language_name} Classification schema",
-                    schema="bigbio_text",
-                    subset_id=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
-                ),
-            ]
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
+                version=BIGBIO_VERSION,
+                description=f"NTCIR 13 MedWeb BigBio {language_name} Classification schema",
+                schema="bigbio_text",
+                subset_id=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
+            ),
         )
 
         for target_language_name, target_language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
             # NOTE: BigBio text to text (translation) configurations
             # Parallel text corpora for all pairs of languages
             if language_name != target_language_name:
-                BUILDER_CONFIGS.extend(
-                    [
-                        BigBioConfig(
-                            name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
-                            version=SOURCE_VERSION,
-                            description=(
-                                f"NTCIR 13 MedWeb {language_name} -> {target_language_name} translation source schema",
-                            ),
-                            schema="source",
-                            subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
+                BUILDER_CONFIGS.append(
+                    BigBioConfig(
+                        name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
+                        version=BIGBIO_VERSION,
+                        description=(
+                            f"NTCIR 13 MedWeb BigBio {language_name} -> {target_language_name} translation schema",
                         ),
-                        BigBioConfig(
-                            name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
-                            version=BIGBIO_VERSION,
-                            description=(
-                                f"NTCIR 13 MedWeb BigBio {language_name} -> {target_language_name} translation schema",
-                            ),
-                            schema="bigbio_t2t",
-                            subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
-                        ),
-                    ]
+                        schema="bigbio_t2t",
+                        subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
+                    ),
                 )
 
     DEFAULT_CONFIG_NAME = "ntcir_13_medweb_source"
