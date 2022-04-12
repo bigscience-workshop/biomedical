@@ -354,34 +354,3 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
                     "text_1_name": source_language_code,
                     "text_2_name": target_language_code,
                 }
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    schema = "source"
-    dataset = datasets.load_dataset(
-        __file__,
-        name=f"ntcir_13_medweb_{schema}",
-        data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
-    )
-    print(dataset)
-    schema = "bigbio_t2t"
-    for source_language_code in ("ja", "en", "zh"):
-        for target_language_code in ("ja", "en", "zh"):
-            if source_language_code == target_language_code:
-                continue
-            dataset = datasets.load_dataset(
-                __file__,
-                name=f"ntcir_13_medweb_translation_{source_language_code}_{target_language_code}_{schema}",
-                data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
-            )
-            print(dataset)
-    schema = "bigbio_text"
-    for language_code in ("ja", "en", "zh"):
-        dataset = datasets.load_dataset(
-            __file__,
-            name=f"ntcir_13_medweb_classification_{language_code}_{schema}",
-            data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
-        )
-        print(dataset)
