@@ -141,6 +141,37 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
             description="PubTator Central BigBio schema",
             schema="bigbio_kb",
             subset_id="pubtator_central",
+        # sample source 
+        BigBioConfig(
+            name="pubtator_central_sample_source",
+            version=SOURCE_VERSION,
+            description="PubTator Central sample source schema",
+            schema="source",
+            subset_id="pubtator_central_sample",
+        ),
+        # sample big bio
+        BigBioConfig(
+            name="pubtator_central_sample_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="PubTator Central sample BigBio schema",
+            schema="bigbio_kb",
+            subset_id="pubtator_central_sample",
+        ),
+        # full dataset source
+        BigBioConfig(
+            name="pubtator_central_source",
+            version=SOURCE_VERSION,
+            description="PubTator Central source schema",
+            schema="source",
+            subset_id="pubtator_central",
+        ),
+        # full dataset bigbio
+        BigBioConfig(
+            name="pubtator_central_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="PubTator Central BigBio schema",
+            schema="bigbio_kb",
+            subset_id="pubtator_central",
         ),
     ]
 
