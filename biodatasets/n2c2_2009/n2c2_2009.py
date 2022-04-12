@@ -51,7 +51,7 @@ import re
 import tarfile
 import zipfile
 from collections import defaultdict
-from typing import Dict, List, Match, Tuple
+from typing import Dict, List, Match, Tuple, Union
 
 from datasets import Features, Value, DatasetInfo, GeneratorBasedBuilder, Version, SplitGenerator, Split, load_dataset
 from utils import schemas
@@ -374,14 +374,7 @@ def _get_entities_from_sample(sample_id, sample, split):
         }
         entities.append(entity)
 
-        # IDs are constructed such that duplicate IDs indicate duplicate (i.e. redundant) entities
-        # In practive this removes one duplicate sample from the test set
-        # {
-        #    'id': 'clinical-627-entity-test-122-9-122-9',
-        #    'offsets': [(5600, 5603)],
-        #    'text': ['her'],
-        #    'type': 'person'
-        # }
+    # IDs are constructed such that duplicate IDs indicate duplicate (i.e. redundant) entities
     dedupe_entities = []
     dedupe_entity_ids = set()
     for entity in entities:
@@ -446,7 +439,7 @@ class N2C22009MedicationDataset(GeneratorBasedBuilder):
                     "text": Value("string"),
                     "entities": [
                         {
-                            "entity_id": Value("string"),
+                            ENTITY_ID: Value("string"),
                             MEDICATION: offset_text_schema,
                             DOSAGE: offset_text_schema,
                             MODE_OF_ADMIN: offset_text_schema,
@@ -456,9 +449,9 @@ class N2C22009MedicationDataset(GeneratorBasedBuilder):
                             EVENT: Value("string"),
                             TEMPORAL: Value("string"),
                             CERTAINTY: Value("string"),
-                            IS_FOUND_IN_LIST_OR_NARRATIVE: Value("string"),
+                            IS_FOUND_IN_LIST_OR_NARRATIVE: Value("string")
                         }
-                    ],
+                    ]
                 }
             )
 
@@ -499,7 +492,7 @@ class N2C22009MedicationDataset(GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_source_sample(sample_id, sample):
+    def _get_source_sample(sample_id, sample) -> Dict[str, Union[str, List[Dict[str, str]]]]:
         return {
             "doc_id": sample_id,
             "text": sample.get(TEXT_DATA_FIELDNAME, ""),
@@ -521,7 +514,7 @@ class N2C22009MedicationDataset(GeneratorBasedBuilder):
         }
 
     @staticmethod
-    def _get_bigbio_sample(sample_id, sample, split):
+    def _get_bigbio_sample(sample_id, sample, split) -> Dict[str, Union[str, List[Dict[str, Union[str, List[Tuple]]]]]]:
 
         passage_text = sample.get(TEXT_DATA_FIELDNAME, "")
         entities = _get_entities_from_sample(sample_id, sample, split)
