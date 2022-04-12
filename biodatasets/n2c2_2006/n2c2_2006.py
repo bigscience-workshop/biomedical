@@ -233,8 +233,3 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
                     yield _id, {"id": sample[0], "document_id": sample[0], "text": sample[1], "labels": [sample[-1]]}
                 _id += 1
 
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
