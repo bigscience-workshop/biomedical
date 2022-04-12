@@ -40,12 +40,11 @@ REFERENCE:
     ClinVar for precision medicine", Bioinformatics,34(1): 80-87
 """
 
-import io
-import re
+
 from typing import Dict, Iterator, List, Tuple
 
 import datasets
-import requests
+from bioc import pubtator
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -81,11 +80,6 @@ disambiguation module based on cutting-edge deep learning techniques provide inc
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/pubtator/"
-
-# TODO: Add the licence for the dataset here (if possible)
-# Note that this doesn't have to be a common open source license.
-# Some datasets have custom licenses. In this case, simply put the full license terms
-# into `_LICENSE`
 _LICENSE = """\
 PUBLIC DOMAIN NOTICE
 National Center for Biotechnology Information
@@ -101,17 +95,30 @@ using this software or data. The NLM and the U.S. Government disclaim all warran
 including warranties of performance, merchantability or fitness for any particular purpose.
 """
 
-_URLS = {
-    "api": "https://www.ncbi.nlm.nih.gov/research/pubtator-api/publications/export/pubtator",
-    "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
-    "bigbio_kb": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
-}
+_URLS = {_DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.sample"}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "2022.01.08"
-
 _BIGBIO_VERSION = "1.0.0"
+
+# Maps the entity types in PubTator to the name of the database they are grounded to
+_TYPE_TO_DB_NAME = {
+    "Gene": "ncbi_gene",
+    "Disease": "mesh",
+    "Species": "ncbi_taxon",
+    "Chemical": "mesh",
+    "CellLine": "cellosaurus",
+}
+
+_DB_NAME_TO_URL = {
+    "ncbi_gene": "https://www.ncbi.nlm.nih.gov/gene/",
+    "mesh": "https://www.nlm.nih.gov/mesh/meshhome.html",
+    "ncbi_taxon": "https://www.ncbi.nlm.nih.gov/taxonomy/",
+    "cellosaurus": "https://web.expasy.org/cellosaurus/",
+    "ncbi_dbsnp": "https://www.ncbi.nlm.nih.gov/snp/",
+    "tmvar": "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/",
+}
 
 
 class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
@@ -121,13 +128,6 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        BigBioConfig(
-            name="pubtator_central_api",
-            version=SOURCE_VERSION,
-            description="PubTator Central API schema",
-            schema="api",
-            subset_id="pubtator_central",
-        ),
         BigBioConfig(
             name="pubtator_central_source",
             version=SOURCE_VERSION,
@@ -146,24 +146,9 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "pubtator_central_source"
 
-    # Maps the entity types in PubTator to the name of the database they are grounded to
-    PUBTATOR_TYPE_TO_UNIFIED_DB_NAME = {
-        "Gene": "ncbi_gene",
-        "Chemical": "mesh",
-        "Species": "ncbi_taxon",
-        "Disease": "mesh",
-        "Mutation": "ncbi_dbsnp",
-        "CellLine": "cellosaurus",
-        "SNP": "ncbi_dbsnp",
-        # TODO: I don't know what these are being grounded to. It's not documented anywhere AFAICT.
-        "ProteinMutation": None,
-        "DNAMutation": None,
-        "DomainMotif": None,
-    }
-
     def _info(self) -> datasets.DatasetInfo:
 
-        if self.config.schema in ["api", "source"]:
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "pmid": datasets.Value("string"),
@@ -193,138 +178,114 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS[self.config.schema]
-        if self.config.schema == "api":
-            blob = {
-                "pmids": ["27940449", "28058064", "28078498"],
-            }
-            res = requests.post(urls, json=blob)
-            content = res.content.decode("utf-8")
-            is_filepath = False
-        else:
-            content = dl_manager.download_and_extract(urls)
-            is_filepath = True
+        urls = _URLS[_DATASETNAME]
+        data_dir = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "content": content,
-                    "is_filepath": is_filepath,
+                    "filepath": data_dir,
                     "split": "train",
                 },
             ),
         ]
 
-    def _generate_examples(self, content: str, split: str, is_filepath: bool) -> Iterator[Tuple[str, Dict]]:
-        if self.config.schema in ["api", "source"]:
-            for pubtator_example in self._parse_pubtator_file(content, is_filepath=is_filepath):
-                yield pubtator_example["pmid"], pubtator_example
+    def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
+        if self.config.schema == "source":
+            for source_example in self._pubtator_to_source(filepath):
+                yield source_example["pmid"], source_example
 
         elif self.config.schema == "bigbio_kb":
-            for pubtator_example in self._parse_pubtator_file(content, is_filepath=is_filepath):
-                kb_example = self._pubtator_parse_to_bigbio_kb(pubtator_example)
+            for kb_example in self._pubtator_to_bigbio_kb(filepath):
                 yield kb_example["id"], kb_example
 
     @staticmethod
-    def _parse_pubtator_file(text_or_filepath: str, is_filepath: bool = True) -> Iterator[Dict]:
-        """Returns a generator that returns a dict for each entry in `text_or_filepath`. If
-        `is_filepath`, we assume this is a filepath to a text file in PubTator format. Otherwise,
-        We assume this is a string containing the text in PubTator format.
-        """
-        if is_filepath:
-            f = open(text_or_filepath, "r")
-        else:
-            f = io.StringIO(text_or_filepath)
-
-        line = f.readline().strip()
-        while line != "":
-            if re.search(r"\d+\|t\|", line) is not None:
-                pmid, title = line.split("|t|")
-                # The next line has to be the abstract.
-                abstract = f.readline().split("|a|")[-1].strip()
-                line = f.readline().strip()
-                mentions = []
-                while line != "":
-                    split_line = line.split("\t")
-                    if len(split_line) == 6:
-                        _, start, end, text, type_, concept_id = split_line
-                    # This entity is not grounded.
-                    elif len(split_line) == 5:
-                        _, start, end, text, type_, concept_id = *split_line, None
-                    # This entity is not grounded and has no type.
-                    elif len(split_line) == 4:
-                        _, start, end, text, type_, concept_id = *split_line, None, None
-                    # This line just contains the start and end offsets.
-                    elif len(split_line) == 3:
-                        _, start, end, text, type_, concept_id = *split_line, None, None, None
-
-                    mentions.append(
-                        {"concept_id": concept_id, "type": type_, "text": text, "offsets": [int(start), int(end)]}
-                    )
-                    line = f.readline().strip()
-                yield {"pmid": pmid, "title": title, "abstract": abstract, "mentions": mentions}
-                line = f.readline().strip()
-
-        f.close()
-
-    def _pubtator_parse_to_bigbio_kb(self, pubtator_parse: Dict) -> Dict:
-        """
-        Transform a PubTator parse (conforming to the standard PubTator schema) obtained with
-        `_parse_pubtator_file_file` into a dictionary conforming to the `bigbio-kb` schema
-        (as defined in ../schemas/kb.py)
-
-        :param pubtator_parse:
-        """
-
-        unified_example = {}
-
-        unified_example["id"] = pubtator_parse["pmid"]
-        unified_example["document_id"] = pubtator_parse["pmid"]
-
-        unified_example["passages"] = [
-            {
-                "id": pubtator_parse["pmid"] + "_title",
-                "type": "title",
-                "text": [pubtator_parse["title"]],
-                "offsets": [[0, len(pubtator_parse["title"])]],
-            },
-            {
-                "id": pubtator_parse["pmid"] + "_abstract",
-                "type": "abstract",
-                "text": [pubtator_parse["abstract"]],
-                "offsets": [
-                    [
-                        # +1 assumes the title and abstract will be joined by a space.
-                        len(pubtator_parse["title"]) + 1,
-                        len(pubtator_parse["title"]) + 1 + len(pubtator_parse["abstract"]),
-                    ]
-                ],
-            },
-        ]
-
-        unified_entities = {}
-        for entity in pubtator_parse["mentions"]:
-            # We use the entity type to convert to the unified db_name
-            db_name = self.PUBTATOR_TYPE_TO_UNIFIED_DB_NAME[entity["type"]] if entity["type"] else None
-            # PubTator prefixes MeSH IDs with "MESH:", so we strip it here.
-            db_id = entity["concept_id"].replace("MESH:", "") if entity["concept_id"] else None
-            if entity["concept_id"] not in unified_entities:
-                unified_entities[entity["concept_id"]] = {
-                    "id": entity["concept_id"],
-                    "type": entity["type"],
-                    "text": [entity["text"]],
-                    "offsets": [entity["offsets"]],
-                    "normalized": [{"db_name": db_name, "db_id": db_id}],
+    def _pubtator_to_source(filepath: Dict) -> Iterator[Dict]:
+        with open(filepath, "r") as f:
+            for doc in pubtator.iterparse(f):
+                source_example = {
+                    "pmid": doc.pmid,
+                    "title": doc.title,
+                    "abstract": doc.abstract,
+                    "mentions": [
+                        {
+                            "concept_id": mention.id,
+                            "type": mention.type,
+                            "text": mention.text,
+                            "offsets": [mention.start, mention.end],
+                        }
+                        for mention in doc.annotations
+                    ],
                 }
+                yield source_example
+
+    def _pubtator_to_bigbio_kb(self, filepath: Dict) -> Iterator[Dict]:
+        with open(filepath, "r") as f:
+            unified_example = {}
+            for doc in pubtator.iterparse(f):
+                unified_example["id"] = doc.pmid
+                unified_example["document_id"] = doc.pmid
+
+                unified_example["passages"] = [
+                    {
+                        "id": doc.pmid + "_title",
+                        "type": "title",
+                        "text": [doc.title],
+                        "offsets": [[0, len(doc.title)]],
+                    },
+                    {
+                        "id": doc.pmid + "_abstract",
+                        "type": "abstract",
+                        "text": [doc.abstract],
+                        "offsets": [
+                            [
+                                # +1 assumes the title and abstract will be joined by a space.
+                                len(doc.title) + 1,
+                                len(doc.title) + 1 + len(doc.abstract),
+                            ]
+                        ],
+                    },
+                ]
+
+                unified_entities = {}
+                for entity in doc.annotations:
+                    # We need a unique identifier for this entity, so build it from the document id and entity id
+                    unified_entity_id = doc.pmid + "_" + entity.id
+                    # The user can provide a callable that returns the database name.
+                    db_name = self._get_db_name(entity)
+                    if unified_entity_id not in unified_entities:
+                        unified_entities[unified_entity_id] = {
+                            "id": unified_entity_id,
+                            "type": entity.type,
+                            "text": [entity.text],
+                            "offsets": [[entity.start, entity.end]],
+                            "normalized": [{"db_name": db_name, "db_id": entity.id}],
+                        }
+                    else:
+                        unified_entities[unified_entity_id]["text"].append(entity.text)
+                        unified_entities[unified_entity_id]["offsets"].append([entity.start, entity.end])
+                        unified_entities[unified_entity_id]["normalized"].append(
+                            {"db_name": db_name, "db_id": entity.id}
+                        )
+
+                unified_example["entities"] = list(unified_entities.values())
+                unified_example["relations"] = []
+                unified_example["events"] = []
+                unified_example["coreferences"] = []
+
+                yield unified_example
+
+    @staticmethod
+    def _get_db_name(entity: pubtator.PubTatorAnn) -> str:
+        if entity.type in _TYPE_TO_DB_NAME:
+            db_name = _TYPE_TO_DB_NAME[entity.type]
+        elif entity.type in ["Mutation", "ProteinMutation", "DNAMutation"]:
+            # Mutation anntotations are grounded to either tmVar or dbSNP
+            if entity.id.startswith("tmVar"):
+                db_name = "tmVar"
             else:
-                unified_entities[entity["concept_id"]]["text"].append(entity["text"])
-                unified_entities[entity["concept_id"]]["offsets"].append(entity["offsets"])
-                unified_entities[entity["concept_id"]]["normalized"].append({"db_name": db_name, "db_id": db_id})
-
-        unified_example["entities"] = list(unified_entities.values())
-        unified_example["events"] = []
-        unified_example["relations"] = []
-        unified_example["coreferences"] = []
-
-        return unified_example
+                db_name = "ncbi_dbsnp"
+        else:
+            db_name = "unknown"
+        return db_name
