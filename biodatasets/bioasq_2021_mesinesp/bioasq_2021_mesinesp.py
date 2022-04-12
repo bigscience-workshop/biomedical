@@ -161,7 +161,14 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
             subset_id="bioasq_2021_mesinesp_subtrack3",
         ),
         BigBioConfig(
-            name="bioasq_2021_mesinesp_subtrack1_bigbio_text",
+            name="bioasq_2021_mesinesp_subtrack1_all_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="bioasq_2021_mesinesp BigBio schema subtrack1",
+            schema="bigbio_text",
+            subset_id="bioasq_2021_mesinesp_subtrack1",
+        ),
+        BigBioConfig(
+            name="bioasq_2021_mesinesp_subtrack1_only_articles_bigbio_text",
             version=BIGBIO_VERSION,
             description="bioasq_2021_mesinesp BigBio schema subtrack1",
             schema="bigbio_text",
@@ -237,12 +244,11 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
             top_folder = "Subtrack2-Clinical_Trials"
         else:
             top_folder = "Subtrack3-Patents"
-        if self.config.name == "bioasq_2021_mesinesp_subtrack1_all_source":
-            train_filepath = "training_set_subtrack1_all.json"
-        elif self.config.name == "bioasq_2021_mesinesp_subtrack1_only_articles_source":
-            train_filepath = "training_set_subtrack1_only_articles.json"
-        elif self.config.schema == "bigbio_text" and track == "1":
-            train_filepath = "training_set_subtrack1_all.json"
+        if track == "1":
+            if "all" in self.config.name:
+                train_filepath = "training_set_subtrack1_all.json"
+            else:
+                train_filepath = "training_set_subtrack1_only_articles.json"
         else:
             train_filepath = f"training_set_subtrack{track}.json"
 
