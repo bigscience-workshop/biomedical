@@ -28,6 +28,8 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
+logger = datasets.utils.logging.get_logger(__name__)
+
 _CITATION = """\
 @article{kotonya2020explainable,
   title={Explainable automated fact-checking for public health claims},
@@ -139,35 +141,26 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
             )
             next(csv_reader, None)  # remove column headers
             for id_, row in enumerate(csv_reader):
-                if split == "train" or split == "validation":
-                    if len(row) != 9:
-                        continue
-                    (
-                        claim_id,
-                        claim,
-                        date_published,
-                        explanation,
-                        fact_checkers,
-                        main_text,
-                        sources,
-                        label,
-                        subjects,
-                    ) = row
-                else:
-                    if len(row) != 10:
-                        continue
-                    (
-                        row_num,
-                        claim_id,
-                        claim,
-                        date_published,
-                        explanation,
-                        fact_checkers,
-                        main_text,
-                        sources,
-                        label,
-                        subjects,
-                    ) = row
+                # train.tsv/dev.tsv only has 9 columns
+                # test.tsv has an additional column at the beginning
+                #  Some entries are misformed, will log skipped lines
+                if len(row) < 9:
+                    logger.warning("Line %s is misformed", id_)
+                    continue
+                (
+                    claim_id,
+                    claim,
+                    date_published,
+                    explanation,
+                    fact_checkers,
+                    main_text,
+                    sources,
+                    label,
+                    subjects,
+                ) = row[
+                    -9:
+                ]  # only take last 9 columns to fix test.tsv disparity
+
                 if self.config.schema == "source":
                     yield id_, {
                         "claim_id": claim_id,
@@ -183,7 +176,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
 
                 elif self.config.schema == "bigbio_text":
                     yield id_, {
-                        "id": id_,  # uid is an unique identifier for every record that starts from 1
+                        "id": id_,  # uid is an unique identifier for every record that starts from 0
                         "document_id": claim_id,
                         "text": main_text,
                         "labels": [label],
