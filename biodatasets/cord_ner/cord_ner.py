@@ -14,21 +14,7 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+CORD-NER dataset covers 75 fine-grained entity types: In addition to the common biomedical entity types (e.g., genes, chemicals and diseases), it covers many new entity types related explicitly to the COVID-19 studies (e.g., coronaviruses, viral proteins, evolution, materials, substrates and immune responses), which may benefit research on COVID-19 related virus, spreading mechanisms, and potential vaccines. CORD-NER annotation is a combination of four sources with different NER methods.
 """
 
 import os
@@ -82,15 +68,9 @@ _LICENSE = """
     The full license details can be found here: https://www.kaggle.com/datasets/allen-institute-for-ai/CORD-19-research-challenge?select=metadata.csv
     """
 
-# TODO: Add links to the urls needed to download your dataset files.
-#  For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: {
+        "full": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_651148518303",
         "ner": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_642495001609",
         "corpus": "https://uofi.app.box.com/index.php?rm=box_download_shared_file&shared_name=k8pw7d5kozzpoum2jwfaqdaey1oij93x&file_id=f_642522056185",
     }
@@ -109,39 +89,27 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
-
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="cord_ner_ner_source",
             version=SOURCE_VERSION,
             description="cord_ner source schema for ner file",
             schema="source",
-            subset_id="cord_ner_ner",
+            subset_id="cord_ner",
         ),
         BigBioConfig(
             name="cord_ner_corpus_source",
             version=SOURCE_VERSION,
             description="cord_ner source schema for corpus file",
             schema="source",
-            subset_id="cord_ner_corpus",
+            subset_id="cord_ner",
+        ),
+        BigBioConfig(
+            name="cord_ner_source",
+            version=SOURCE_VERSION,
+            description="cord_ner source schema for full file",
+            schema="source",
+            subset_id="cord_ner",
         ),
         BigBioConfig(
             name="cord_ner_bigbio_kb",
@@ -162,7 +130,31 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
         # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
-            if self.config.subset_id == "cord_ner_ner":
+            if self.config.name == "cord_ner_source":
+                features = datasets.Features(
+                    {
+                        "id": datasets.Value("int32"),
+                        "source": datasets.Value("string"),
+                        "doi": datasets.Value("string"),
+                        "pmcid": datasets.Value("string"),
+                        "pubmed_id": datasets.Value("string"),
+                        "publish_time": datasets.Value("string"),
+                        "authors": datasets.Value("string"),
+                        "journal": datasets.Value("string"),
+                        "title": datasets.Value("string"),
+                        "abstract": datasets.Value("string"),
+                        "body": datasets.Value("string"),
+                        "entities": [
+                            {
+                                "end": datasets.Value("int32"),
+                                "start": datasets.Value("int32"),
+                                "text": datasets.Value("string"),
+                                "type": datasets.Value("string"),
+                            }
+                        ],
+                    }
+                )
+            elif self.config.name == "cord_ner_ner_source":
                 features = datasets.Features(
                     {
                         "doc_id": datasets.Value("int32"),
@@ -181,7 +173,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         ],
                     }
                 )
-            elif self.config.subset_id == "cord_ner_corpus":
+            elif self.config.name == "cord_ner_corpus_source":
                 features = datasets.Features(
                     {
                         "doc_id": datasets.Value("int32"),
@@ -202,78 +194,8 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
                         "journal": datasets.Value("string"),
                     }
                 )
-            else:
-                raise NotImplementedError(
-                    f"{self.config.subset_id} not a valid config subset_id"
-                )
-
-        elif self.config.schema == "bigbio_kb":
-            features = datasets.Features(
-                {
-                    "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),
-                    "passages": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                        }
-                    ],
-                    "entities": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Sequence(datasets.Value("string")),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "events": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            # refers to the text_bound_annotation of the trigger
-                            "trigger": {
-                                "text": datasets.Sequence(datasets.Value("string")),
-                                "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            },
-                            "arguments": [
-                                {
-                                    "role": datasets.Value("string"),
-                                    "ref_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                    "coreferences": [
-                        {
-                            "id": datasets.Value("string"),
-                            "entity_ids": datasets.Sequence(datasets.Value("string")),
-                        }
-                    ],
-                    "relations": [
-                        {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "arg1_id": datasets.Value("string"),
-                            "arg2_id": datasets.Value("string"),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            )
-
+        elif self.config.name == "cord_ner_bigbio_kb":
+            features = schemas.kb_features
         else:
             raise NotImplementedError(f"{self.config.name} not a valid config name")
 
@@ -288,146 +210,118 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            # The download method may not be reliable, so if it fails
+            # The download method may not be reliable, so if it fails this function will still work for local files
             try:
-                urls = {
-                    "ner": _URLS[_DATASETNAME]["ner"],
-                    "corpus": _URLS[_DATASETNAME]["corpus"],
-                }
-                if self.config.subset_id == "cord_ner_ner":
-                    del urls["corpus"]
-                elif self.config.subset_id == "cord_ner_corpus":
-                    del urls["ner"]
-                data_dir = dl_manager.download_and_extract(urls)
+
+                if (
+                    self.config.name == "cord_ner_source"
+                    or self.config.name == "cord_ner_bigbio_kb"
+                ):
+                    url = {"train": _URLS[_DATASETNAME]["full"]}
+                elif self.config.name == "cord_ner_ner_source":
+                    url = {"train": _URLS[_DATASETNAME]["ner"]}
+                elif self.config.name == "cord_ner_corpus_source":
+                    url = {"train": _URLS[_DATASETNAME]["corpus"]}
+                data_dir = dl_manager.download_and_extract(url)
             except:
                 raise ConnectionError(
                     "The dataset could not be downloaded. Please download to local storage and pass the data_dir kwarg to load_dataset."
                 )
         else:
-            data_dir = {
-                "ner": os.path.join(self.config.data_dir, "CORD-NER-ner.json"),
-                "corpus": os.path.join(self.config.data_dir, "CORD-NER-corpus.json"),
+            filenames = {
+                "full": "CORD-NER-full.json",
+                "ner": "CORD-NER-ner.json",
+                "corpus": "CORD-NER-corpus.json",
             }
 
-            if self.config.subset_id == "cord_ner_ner":
-                del data_dir["corpus"]
-            elif self.config.subset_id == "cord_ner_corpus":
-                del data_dir["ner"]
+            if (
+                self.config.name == "cord_ner_source"
+                or self.config.name == "cord_ner_bigbio_kb"
+            ):
+                data_dir = {
+                    "train": os.path.join(self.config.data_dir, filenames["full"])
+                }
+            elif self.config.name == "cord_ner_ner_source":
+                data_dir = {
+                    "train": os.path.join(self.config.data_dir, filenames["ner"])
+                }
+            elif self.config.name == "cord_ner_corpus_source":
+                data_dir = {
+                    "train": os.path.join(self.config.data_dir, filenames["corpus"])
+                }
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "ner_filepath": data_dir.get("ner", None),
-                    "corpus_filepath": data_dir.get("corpus", None),
+                    "filepath": data_dir["train"],
                     "split": "train",
                 },
             ),
         ]
 
-    def _corpus_to_dict(self, corpus_filepath) -> Dict:
-        """Loads corpus as dict object"""
-
-        doc2sents = {}
-        with open(corpus_filepath) as fp:
-            for line in fp.readlines():
-                line = json.loads(line)
-                doc_id = line["doc_id"]
-
-                if doc_id not in doc2sents:
-                    doc2sents[doc_id] = []
-
-                doc2sents[doc_id].append(line["sents"])
-
-        return doc2sents
-
-    def _generate_examples(
-        self, ner_filepath, corpus_filepath, split: str
-    ) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            if self.config.subset_id == "cord_ner_ner":
-                filepath = ner_filepath
-            else:
-                filepath = corpus_filepath
-
-            with open(filepath, "r") as fp:
+            with open(filepath) as fp:
                 for key, example in enumerate(fp.readlines()):
                     yield key, json.loads(example)
 
         elif self.config.schema == "bigbio_kb":
 
-            # doc2sents = self._corpus_to_dict(corpus_filepath)
-            with open(corpus_filepath, "r") as corpus_fp, open(
-                ner_filepath, "r"
-            ) as ner_fp:
-                for key, ner_line in enumerate(ner_fp.readlines()):
-                    ner_line = json.loads(ner_line)
-                    corpus_line = json.loads(corpus_fp.readline())
-                    while ner_line['doc_id'] != corpus_line["doc_id"]:
-                        corpus_line = json.loads(corpus_fp.readline())
+            with open(filepath) as fp:
+                unq_id = 0
+                for key, line in enumerate(fp.readlines()):
 
-                    doc_id = str(corpus_line["doc_id"])
-                    doc_sents = corpus_line["sents"]
+                    example_id = unq_id
+                    unq_id += 1
 
-                    passage_offset_start = 0
+                    line = json.loads(line)
                     passages = []
-                    new_entities = []
-
-                    for sent_id, sent in enumerate(doc_sents):
-
-                        text = " ".join(sent["sent_tokens"])
-                        passage_offset_end = passage_offset_start + len(text)
+                    offset_start = 0
+                    for text_type in ["title", "abstract", "body"]:
 
                         passages.append(
                             {
-                                "id": str(sent["sent_id"]),
-                                "type": "",
-                                "text": [text],
+                                "id": str(unq_id),
+                                "type": text_type,
+                                "text": [line[text_type]],
                                 "offsets": [
                                     [
-                                        passage_offset_start,
-                                        passage_offset_end,
+                                        offset_start,
+                                        offset_start + len(line[text_type]),
                                     ]
                                 ],
                             }
                         )
-                        # add one to account for the space that is added when joining
-                        passage_offset_start = passage_offset_end + 1
+                        # add +1 for the space
+                        offset_start += len(line[text_type]) + 1
+                        unq_id += 1
 
-                        for entity_sent in ner_line["sents"]:
-                            if sent_id != entity_sent["sent_id"]:
-                                continue
-                            
-                            entities = entity_sent["entities"]
-                            sent_offsets, sent_types, sent_texts = [], [], []
-
-                            for entity in entities:
-                                sent_offsets.append([entity["start"], entity["end"]])
-                                sent_types.append(entity["type"])
-                                sent_texts.append(entity["text"])
-
-                            new_entities.append(
-                                {
-                                    "id": sent_id,
-                                    "type": sent_types,
-                                    "text": sent_texts,
-                                    "offsets": sent_offsets,
-                                    "normalized": [
-                                        {
-                                            "db_name": "",
-                                            "db_id": "",
-                                        }
-                                    ],
-                                }
-                            )
+                    entities = []
+                    for ent in line["entities"]:
+                        entities.append(
+                            {
+                                "id": str(unq_id),
+                                "type": ent["type"],
+                                "text": [ent["text"]],
+                                "offsets": [[ent["start"], ent["end"]]],
+                                "normalized": [
+                                    {
+                                        "db_name": "",
+                                        "db_id": "",
+                                    }
+                                ],
+                            }
+                        )
+                        unq_id += 1
 
                     yield key, {
-                        "id": str(key),
-                        "document_id": doc_id,
+                        "id": str(example_id),
+                        "document_id": str(line["id"]),
                         "passages": passages,
-                        "entities": new_entities,
+                        "entities": entities,
                         "events": [],
                         "coreferences": [],
                         "relations": [],
