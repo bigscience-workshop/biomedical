@@ -275,8 +275,8 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
         Method parameters are unpacked from `gen_kwargs` as given in `_split_generators`.
         """
 
-        txt_files = list(filepaths[0].glob("*txt"))
-        tsv_files = list(filepaths[1].glob("*tsv"))
+        txt_files = sorted(list(filepaths[0].glob("*txt")))
+        tsv_files = sorted(list(filepaths[1].glob("*tsv")))
 
         if self.config.schema == "source":
             for guid, (txt_file, tsv_file) in enumerate(zip(txt_files, tsv_files)):
