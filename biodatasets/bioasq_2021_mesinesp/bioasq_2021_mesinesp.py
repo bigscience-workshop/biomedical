@@ -165,14 +165,14 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
             version=BIGBIO_VERSION,
             description="bioasq_2021_mesinesp BigBio schema subtrack1",
             schema="bigbio_text",
-            subset_id="bioasq_2021_mesinesp_subtrack1",
+            subset_id="bioasq_2021_mesinesp_subtrack1_all",
         ),
         BigBioConfig(
             name="bioasq_2021_mesinesp_subtrack1_only_articles_bigbio_text",
             version=BIGBIO_VERSION,
             description="bioasq_2021_mesinesp BigBio schema subtrack1",
             schema="bigbio_text",
-            subset_id="bioasq_2021_mesinesp_subtrack1",
+            subset_id="bioasq_2021_mesinesp_subtrack1_only_articles",
         ),
         BigBioConfig(
             name="bioasq_2021_mesinesp_subtrack2_bigbio_text",
