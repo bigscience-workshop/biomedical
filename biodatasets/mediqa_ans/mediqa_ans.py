@@ -244,7 +244,7 @@ class MediqaAnsDataset(datasets.GeneratorBasedBuilder):
         text1 += "Question: " + example["question"] + "\n"
         for article in example["articles"]:
             text1 += "Answer ID: " + article["answer_id"] + "\n"
-            text1 += "Text: " + article["text"] + "\n"
+            text1 += "Answer: " + article["text"] + "\n"
             text1 += "Rating: " + article["rating"] + "\n"
         example_["text_1"] = text1
 
