@@ -95,7 +95,10 @@ using this software or data. The NLM and the U.S. Government disclaim all warran
 including warranties of performance, merchantability or fitness for any particular purpose.
 """
 
-_URLS = {_DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.sample"}
+_URLS = {
+    "sample": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.sample",
+    "full": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.gz",
+}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
@@ -196,7 +199,7 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS[_DATASETNAME]
+        urls = _URLS["sample"] if self.config.subset_id.endswith("sample") else _URLS["full"]
         data_dir = dl_manager.download_and_extract(urls)
 
         return [
