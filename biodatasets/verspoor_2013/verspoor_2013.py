@@ -14,18 +14,25 @@
 # limitations under the License.
 
 """
-TODO:
-Description
+This dataset contains annotations for a small corpus of full text journal publications 
+on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
+Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
+capture the core concepts and relations relevant to cataloguing  and interpreting human 
+genetic variation and its relationship to disease, as described in the published literature.
+The schema was inspired by the needs of the database curators of the International Society
+for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+application to genetic variation information in a range of diseases.
 """
 
 from pathlib import Path
+from shutil import rmtree
 from typing import Dict, List, Tuple
 
 import datasets
 
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from utils.constants import Tasks, BigBioValues
 
 _CITATION = """\
 @article{verspoor2013annotating,
@@ -42,29 +49,19 @@ publisher={Oxford Academic}
 _DATASETNAME = "verspoor_2013"
 
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
-"""
+This dataset contains annotations for a small corpus of full text journal publications 
+on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
+Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
+capture the core concepts and relations relevant to cataloguing  and interpreting human 
+genetic variation and its relationship to disease, as described in the published literature.
+The schema was inspired by the needs of the database curators of the International Society
+for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+application to genetic variation information in a range of diseases."""
 
-_HOMEPAGE = ""
 
-# The source repo (https://github.com/rockt/SETH/blob/master/LICENSE) is license
-# Apache 2.0 but does that match the dataset? Best info I have for now...
-_LICENSE = """\
-Copyright 2013 Humboldt-Universität zu Berlin, Dept. of Computer Science and Dept.
-of Wissensmanagement in der Bioinformatik
+_HOMEPAGE = BigBioValues.NULL
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+_LICENSE = BigBioValues.NULL
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
@@ -79,7 +76,14 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """This dataset contains annotations for a small corpus of full text journal publications 
+    on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
+    Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
+    capture the core concepts and relations relevant to cataloguing  and interpreting human 
+    genetic variation and its relationship to disease, as described in the published literature.
+    The schema was inspired by the needs of the database curators of the International Society
+    for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+    application to genetic variation information in a range of diseases."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -120,9 +124,6 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
     }
 
     def _info(self) -> datasets.DatasetInfo:
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
             features = datasets.Features(
@@ -194,14 +195,13 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                 },
             )
 
-        # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
-            # description=_DESCRIPTION,
+            description=_DESCRIPTION,
             features=features,
-            # homepage=_HOMEPAGE,
+            homepage=_HOMEPAGE,
             license=_LICENSE,
             citation=_CITATION,
         )
@@ -209,13 +209,25 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        data_dir = Path(dl_manager.download_and_extract(_URLS[0]))
+        # Download gets entire git repo containing unused data from other datasets
+        repo_dir = Path(dl_manager.download_and_extract(_URLS[0]))
+        data_dir = repo_dir / "data"
+        data_dir.mkdir(exist_ok=True)
 
-        verspoor_dir = list(data_dir.glob("*/resources/Verspoor2013"))[0]
-        text_files = list(verspoor_dir.glob("corpus/*.txt"))
-        annotation_dir = verspoor_dir / "annotations"
+        # Find the relevant files from Verspor2013 and move them to a new directory
+        verspoor_files = repo_dir.glob("*/*/*Verspoor2013/**/*")
+        for file in verspoor_files:
+            if file.is_file() and "readme" not in str(file):
+                file.rename(data_dir / file.name)
 
-        data_files = {"text_files": text_files, "annotation_dir": annotation_dir}
+        # Delete all unused files and directories from the original download
+        for x in repo_dir.glob("[!data]*"):
+            if x.is_file():
+                x.unlink()
+            elif x.is_dir():
+                rmtree(x)
+
+        data_files = {"text_files": list(data_dir.glob("*.txt"))}
 
         return [
             datasets.SplitGenerator(
@@ -233,18 +245,16 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             txt_files = data_files["text_files"]
-            annotation_dir = data_files["annotation_dir"]
             for guid, txt_file in enumerate(txt_files):
-                example = parsing.parse_brat_file(txt_file, annotation_dir)
+                example = parsing.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
             txt_files = data_files["text_files"]
-            annotation_dir = data_files["annotation_dir"]
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file, annotation_dir), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
                 )
                 example["id"] = str(guid)
                 yield guid, example
