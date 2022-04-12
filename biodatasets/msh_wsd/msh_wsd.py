@@ -24,6 +24,11 @@ For each ambiguous term/abbreviation, the data set contains a maximum of 100 ins
 MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 """
 
+# Note from the Author how to load dataset:
+# 1) Download the file MSHCorpus.zip (Link "MSHWSD Data Set") from  https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html
+# 2) Unzip MSHCorpus.zip
+# 3) Set kwarg data_dir to the path of the folder containing the .arrf files ("MSHCorpus")
+
 import itertools as it
 import re
 from pathlib import Path
@@ -72,7 +77,9 @@ _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 
 _LICENSE = "DUA (UMLS)"
 
-_URLS = {}
+_URLS = {
+    _DATASETNAME: ""
+}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
