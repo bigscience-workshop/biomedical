@@ -143,9 +143,9 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
             for id_, row in enumerate(csv_reader):
                 # train.tsv/dev.tsv only has 9 columns
                 # test.tsv has an additional column at the beginning
-                #  Some entries are misformed, will log skipped lines
+                #  Some entries are malformed, will log skipped lines
                 if len(row) < 9:
-                    logger.warning("Line %s is misformed", id_)
+                    logger.warning("Line %s is malformed", id_)
                     continue
                 (
                     claim_id,
