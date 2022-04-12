@@ -64,10 +64,7 @@ _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
 _LICENSE = "GFDL"
 
-_URLS = {
-    "quaero_source": "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip",
-    "quaero_bigbio_kb": "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip",
-}
+_URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip"
 
 _DATASET_NAME = "QUAERO French Medical Corpus"
 
@@ -76,26 +73,39 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 class QUAERO(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-    DEFAULT_CONFIG_NAME = "quaero_source"  # It's not mandatory to have a default configuration. Just use one if it make sense.
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="quaero_source",
+            name="quaero_emea_source",
             version=SOURCE_VERSION,
-            description="QUAERO source schema",
+            description="QUAERO source schema on the EMEA subset",
             schema="source",
-            subset_id="quaero",
+            subset_id="quaero_emea",
+        ),
+            BigBioConfig(
+            name="quaero_medline_source",
+            version=SOURCE_VERSION,
+            description="QUAERO source schema on the MEDLINE subset",
+            schema="source",
+            subset_id="quaero_medline",
+        ),
+
+        BigBioConfig(
+            name="quaero_emea_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="QUAERO simplified BigBio schema on the EMEA subset",
+            schema="bigbio_kb",
+            subset_id="quaero_emea",
         ),
         BigBioConfig(
-            name="quaero_bigbio_kb",
+            name="quaero_medline_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="QUAERO simplified BigBio schema",
+            description="QUAERO simplified BigBio schema on the MEDLINE subset",
             schema="bigbio_kb",
-            subset_id="quaero",
+            subset_id="quaero_medline",
         ),
     ]
 
@@ -182,7 +192,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
         return text
 
     def _split_generators(self, dl_manager):
-        urls = _URLS[self.config.name]
+        urls = _URL
         data_dir = dl_manager.download_and_extract(urls)
         return [
             datasets.SplitGenerator(
@@ -213,36 +223,42 @@ class QUAERO(datasets.GeneratorBasedBuilder):
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     def _generate_examples(self, filepath, split):
+
+        if self.config.subset_id == "quaero_emea" :
+            subset = "EMEA"
+        elif self.config.subset_id == "quaero_medline":
+            subset = "MEDLINE"
+
         key=0
         if self.config.schema == "source":
-            for file in [f"EMEA_{split}_bioc", f"MEDLINE_{split}_bioc"]:
-              f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-              reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
+            file = f"{subset}_{split}_bioc"
+            f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
+            reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
 
-              for xdoc in reader:
-                  doc_text = self._get_document_text(xdoc)
-                  yield (key, {
-                      "id": xdoc.id,
-                      "document_id": xdoc.id,
-                      "entities": [self._get_bioc_entity(span, doc_text) for passage in xdoc.passages for span in passage.annotations],
-                      "passages": [
-                          {
-                              "id": xdoc.id,
-                              "type": passage.infons,
-                              "text": [passage.text],
-                              "offsets": [self._get_bioc_entity(span, doc_text)["offsets"][0] for span in passage.annotations],
-                          }
-                          for passage in xdoc.passages
-                      ]
-                      })
-                  key+=1
+            for xdoc in reader:
+              doc_text = self._get_document_text(xdoc)
+              yield (key, {
+                  "id": xdoc.id,
+                  "document_id": xdoc.id,
+                  "entities": [self._get_bioc_entity(span, doc_text) for passage in xdoc.passages for span in passage.annotations],
+                  "passages": [
+                      {
+                          "id": xdoc.id,
+                          "type": passage.infons,
+                          "text": [passage.text],
+                          "offsets": [self._get_bioc_entity(span, doc_text)["offsets"][0] for span in passage.annotations],
+                      }
+                      for passage in xdoc.passages
+                  ]
+              })
+              key+=1
         elif self.config.schema == "bigbio_kb":
             i = 0 #unique key for each data sample, needed for datasets
             uid = 0 #unique identifier needed for the schema
-            for file in [f"EMEA_{split}_bioc", f"MEDLINE_{split}_bioc"]:
-              f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-              reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
-              for xdoc in reader:
+            file = f"{subset}_{split}_bioc"
+            f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
+            reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
+            for xdoc in reader:
                 data = {
                     "id": uid,
                     "document_id": xdoc.id,
