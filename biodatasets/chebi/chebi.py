@@ -56,22 +56,24 @@ _CITATION = """\
 
 # TODO: create a module level variable with your dataset name (should match script name)
 #  E.g. Hallmarks of Cancer: [dataset_name] --> hallmarks_of_cancer
-_DATASETNAME = "[dataset_name]"
+_DATASETNAME = "chebi"
 
 # TODO: Add description of the dataset here
 # You can copy an official description
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+This dataset contains biomedical named entities in patents. 
+It is sourced from the project Chemical Entities of Biological Interest (ChEBI), which is a freely available database of chemical compounds and other small molecular entities. The dataset is the Chapti dataset of ChEBI - http://chebi.cvs.sourceforge.net/viewvc/chebi/chapati/ 
+
 """
 
 # TODO: Add a link to an official homepage for the dataset here (if possible)
-_HOMEPAGE = ""
+_HOMEPAGE = "http://chebi.cvs.sourceforge.net/viewvc/chebi/chapati/"
 
 # TODO: Add the licence for the dataset here (if possible)
 # Note that this doesn't have to be a common open source license.
 # Some datasets have custom licenses. In this case, simply put the full license terms
 # into `_LICENSE`
-_LICENSE = ""
+_LICENSE = "Creative Commons"
 
 # TODO: Add links to the urls needed to download your dataset files.
 #  For local datasets, this variable can be an empty dictionary.
@@ -85,12 +87,15 @@ _URLS = {
 }
 
 # TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = []  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 # TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
 #  This version doesn't have to be consistent with semantic versioning. Anything that is
 #  provided by the original dataset as a version goes.
-_SOURCE_VERSION = ""
+_SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
@@ -206,7 +211,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # TODO: KEEP if your dataset is LOCAL; remove if NOT
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
