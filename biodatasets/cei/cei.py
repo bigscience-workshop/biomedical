@@ -43,21 +43,21 @@ from utils.constants import Tasks
 # TODO: Add BibTeX citation
 _CITATION = """\
 @article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+  author    = {Larsson, Kristin and Baker, Simon and Silins, Ilona and Guo, Yufan and Stenius, Ulla and Korhonen, Anna and Berglund, Marika},
+  title     = {Text mining for improved exposure assessment},
+  journal   = {PloS one},
+  volume    = {12},
+  year      = {2017},
+  url       = {https://doi.org/10.1371/journal.pone.0173132},
+  doi       = {10.1371/journal.pone.0173132},
+  biburl    = {https://journals.plos.org/plosone/article/citation/bibtex?id=10.1371/journal.pone.0173132},
+  bibsource = {PloS one}
 }
 """
 
 # TODO: create a module level variable with your dataset name (should match script name)
 #  E.g. Hallmarks of Cancer: [dataset_name] --> hallmarks_of_cancer
-_DATASETNAME = "[dataset_name]"
+_DATASETNAME = "cei"
 
 # TODO: Add description of the dataset here
 # You can copy an official description
@@ -66,13 +66,13 @@ This dataset is designed for XXX NLP task.
 """
 
 # TODO: Add a link to an official homepage for the dataset here (if possible)
-_HOMEPAGE = ""
+_HOMEPAGE = "https://github.com/sb895/chemical-exposure-information-corpus"
 
 # TODO: Add the licence for the dataset here (if possible)
 # Note that this doesn't have to be a common open source license.
 # Some datasets have custom licenses. In this case, simply put the full license terms
 # into `_LICENSE`
-_LICENSE = ""
+_LICENSE = "GPL-3.0 License"
 
 # TODO: Add links to the urls needed to download your dataset files.
 #  For local datasets, this variable can be an empty dictionary.
