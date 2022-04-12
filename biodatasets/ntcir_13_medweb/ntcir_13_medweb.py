@@ -29,12 +29,13 @@ For more information, see:
 http://research.nii.ac.jp/ntcir/permission/ntcir-13/perm-en-MedWeb.html
 """
 
-from pathlib import Path
 import re
-from typing import List, Tuple, Dict
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 import datasets
 import pandas as pd
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -45,7 +46,9 @@ _CITATION = """\
   title     = {Overview of the NTCIR-13 MedWeb Task},
   journal   = {Proceedings of the 13th NTCIR Conference on Evaluation of Information Access Technologies (NTCIR-13)},
   year      = {2017},
-  url       = {http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings13/pdf/ntcir/01-NTCIR13-OV-MEDWEB-WakamiyaS.pdf},
+  url       = {
+    http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings13/pdf/ntcir/01-NTCIR13-OV-MEDWEB-WakamiyaS.pdf
+  },
 }
 """
 
@@ -82,7 +85,6 @@ _URLS = {}
 _SUPPORTED_TASKS = [
     Tasks.TRANSLATION,
     Tasks.TEXT_CLASSIFICATION,
-
 ]
 
 _SOURCE_VERSION = "1.0.0"
@@ -124,69 +126,69 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             subset_id="ntcir_13_medweb_source",
         )
     ]
-    for language_name, language_code in (
-        ("Japanese", "ja"),
-        ("English", "en"),
-        ("Chinese", "zh")
-    ):
+    for language_name, language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
         # NOTE: BigBio text classification configurations
         # Text classification data for each language
-        BUILDER_CONFIGS.extend([
-            BigBioConfig(
-                name=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
-                version=BIGBIO_VERSION,
-                description=f"NTCIR 13 MedWeb BigBio {language_name} Classification schema",
-                schema="bigbio_text",
-                subset_id=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
-            ),
-        ])
+        BUILDER_CONFIGS.extend(
+            [
+                BigBioConfig(
+                    name=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
+                    version=BIGBIO_VERSION,
+                    description=f"NTCIR 13 MedWeb BigBio {language_name} Classification schema",
+                    schema="bigbio_text",
+                    subset_id=f"ntcir_13_medweb_classification_{language_code}_bigbio_text",
+                ),
+            ]
+        )
 
-        for target_language_name, target_language_code in (
-            ("Japanese", "ja"),
-            ("English", "en"),
-            ("Chinese", "zh")
-        ):
+        for target_language_name, target_language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
             # NOTE: BigBio text to text (translation) configurations
             # Parallel text corpora for all pairs of languages
             if language_name != target_language_name:
-                BUILDER_CONFIGS.extend([
-                    BigBioConfig(
-                        name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
-                        version=SOURCE_VERSION,
-                        description=f"NTCIR 13 MedWeb {language_name} -> {target_language_name} translation source schema",
-                        schema="source",
-                        subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
-                    ),
-                    BigBioConfig(
-                        name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
-                        version=BIGBIO_VERSION,
-                        description=f"NTCIR 13 MedWeb BigBio {language_name} -> {target_language_name} translation schema",
-                        schema="bigbio_t2t",
-                        subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
-                    ),
-                ])
+                BUILDER_CONFIGS.extend(
+                    [
+                        BigBioConfig(
+                            name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
+                            version=SOURCE_VERSION,
+                            description=(
+                                f"NTCIR 13 MedWeb {language_name} -> {target_language_name} translation source schema",
+                            ),
+                            schema="source",
+                            subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_source",
+                        ),
+                        BigBioConfig(
+                            name=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
+                            version=BIGBIO_VERSION,
+                            description=(
+                                f"NTCIR 13 MedWeb BigBio {language_name} -> {target_language_name} translation schema",
+                            ),
+                            schema="bigbio_t2t",
+                            subset_id=f"ntcir_13_medweb_translation_{language_code}_{target_language_code}_bigbio_t2t",
+                        ),
+                    ]
+                )
 
     DEFAULT_CONFIG_NAME = "ntcir_13_medweb_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-        # We added a "Language" column that allows us to combine data for all
-        # languages into a single source schema.
+        # Create the source schema; this schema will keep all keys/information/labels
+        # as close to the original dataset as possible.
         if self.config.schema == "source":
-            features = datasets.Features({
-                "ID": datasets.Value("string"),
-                "Language": datasets.Value("string"),
-                "Tweet": datasets.Value("string"),
-                "Influenza": datasets.Value("string"),
-                "Diarrhea": datasets.Value("string"),
-                "Hayfever": datasets.Value("string"),
-                "Cough": datasets.Value("string"),
-                "Headache": datasets.Value("string"),
-                "Fever": datasets.Value("string"),
-                "Runnynose": datasets.Value("string"),
-                "Cold": datasets.Value("string"),
-            })
+            features = datasets.Features(
+                {
+                    "ID": datasets.Value("string"),
+                    "Language": datasets.Value("string"),
+                    "Tweet": datasets.Value("string"),
+                    "Influenza": datasets.Value("string"),
+                    "Diarrhea": datasets.Value("string"),
+                    "Hayfever": datasets.Value("string"),
+                    "Cough": datasets.Value("string"),
+                    "Headache": datasets.Value("string"),
+                    "Fever": datasets.Value("string"),
+                    "Runnynose": datasets.Value("string"),
+                    "Cold": datasets.Value("string"),
+                }
+            )
         elif self.config.schema == "bigbio_text":
             features = schemas.text_features
         elif self.config.schema == "bigbio_t2t":
@@ -215,10 +217,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_text":
             # NOTE: Identify the language for the chosen subset using regex
             pattern = r"ntcir_13_medweb_classification_(?P<language_code>ja|en|zh)_bigbio_text"
-            match = re.search(
-                pattern=pattern,
-                string=self.config.subset_id
-            )
+            match = re.search(pattern=pattern, string=self.config.subset_id)
 
             if not match:
                 raise ValueError(
@@ -237,10 +236,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             pattern = (
                 r"ntcir_13_medweb_translation_(?P<source_language_code>ja|en|zh)_(?P<target_language_code>ja|en|zh)_bigbio_t2t"
             )
-            match = re.search(
-                pattern=pattern,
-                string=self.config.subset_id
-            )
+            match = re.search(pattern=pattern, string=self.config.subset_id)
 
             if not match:
                 raise ValueError(
@@ -276,10 +272,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
 
     def _language_from_filepath(self, filepath: Path):
         pattern = r"NTCIR-13_MedWeb_(?P<language_code>ja|en|zh)_(training|test).xlsx"
-        match = re.search(
-            pattern=pattern,
-            string=filepath.name
-        )
+        match = re.search(pattern=pattern, string=filepath.name)
 
         if not match:
             raise ValueError(
@@ -308,7 +301,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
                 yield row_index, row._asdict()
 
         elif self.config.schema == "bigbio_text":
-            filepath, = filepaths
+            (filepath,) = filepaths
             language_code = self._language_from_filepath(filepath)
 
             df = pd.read_excel(
@@ -316,10 +309,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
                 sheet_name=f"{language_code}_{split}",
             )
 
-            label_column_names = [
-                column_name for column_name in df.columns
-                if column_name not in ("ID", "Tweet")
-            ]
+            label_column_names = [column_name for column_name in df.columns if column_name not in ("ID", "Tweet")]
             labels = df[label_column_names].apply(lambda row: row[row == "p"].index.tolist(), axis=1).values
 
             ids = df["ID"]
@@ -342,17 +332,17 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
                 source_filepath,
                 sheet_name=f"{source_language_code}_{split}",
             )[["ID", "Tweet"]]
-            source_df["id_int"] = source_df['ID'].str.extract(r'(\d+)').astype(int)
+            source_df["id_int"] = source_df["ID"].str.extract(r"(\d+)").astype(int)
 
             target_df = pd.read_excel(
                 target_filepath,
                 sheet_name=f"{target_language_code}_{split}",
             )[["ID", "Tweet"]]
-            target_df["id_int"] = target_df['ID'].str.extract(r'(\d+)').astype(int)
+            target_df["id_int"] = target_df["ID"].str.extract(r"(\d+)").astype(int)
 
-            df_combined = source_df.merge(
-                target_df, on="id_int", suffixes=("_source", "_target")
-            )[["id_int", "Tweet_source", "Tweet_target"]]
+            df_combined = source_df.merge(target_df, on="id_int", suffixes=("_source", "_target"))[
+                ["id_int", "Tweet_source", "Tweet_target"]
+            ]
 
             for row_index, record in enumerate(df_combined.itertuples(index=False)):
                 row = record._asdict()
@@ -370,16 +360,28 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
 # TODO: Remove this before making your PR
 if __name__ == "__main__":
     schema = "source"
-    dataset = datasets.load_dataset(__file__, name=f"ntcir_13_medweb_{schema}", data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection")
+    dataset = datasets.load_dataset(
+        __file__,
+        name=f"ntcir_13_medweb_{schema}",
+        data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
+    )
     print(dataset)
     schema = "bigbio_t2t"
     for source_language_code in ("ja", "en", "zh"):
         for target_language_code in ("ja", "en", "zh"):
             if source_language_code == target_language_code:
                 continue
-            dataset = datasets.load_dataset(__file__, name=f"ntcir_13_medweb_translation_{source_language_code}_{target_language_code}_{schema}", data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection")
+            dataset = datasets.load_dataset(
+                __file__,
+                name=f"ntcir_13_medweb_translation_{source_language_code}_{target_language_code}_{schema}",
+                data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
+            )
             print(dataset)
     schema = "bigbio_text"
     for language_code in ("ja", "en", "zh"):
-        dataset = datasets.load_dataset(__file__, name=f"ntcir_13_medweb_classification_{language_code}_{schema}", data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection")
+        dataset = datasets.load_dataset(
+            __file__,
+            name=f"ntcir_13_medweb_classification_{language_code}_{schema}",
+            data_dir="/Users/freidmo1/Downloads/ntcir13_MedWeb_taskdata/MedWeb_TestCollection",
+        )
         print(dataset)
