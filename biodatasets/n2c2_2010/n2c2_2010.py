@@ -18,8 +18,6 @@
 """
 A dataset loader for the n2c2 2010 relations dataset.
 
-https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
-
 The dataset consists of three archive files,
 ├── concept_assertion_relation_training_data.tar.gz
 ├── reference_standard_for_test_data.tar.gz
@@ -34,7 +32,7 @@ The individual data files (inside the zip and tar archives) come in 4 types,
 
 
 The files comprising this dataset must be on the users local machine
-in a single directory that is passed to `datasets.load_datset` via
+in a single directory that is passed to `datasets.load_dataset` via
 the `data_dir` kwarg. This loader script will read the archive files
 directly (i.e. the user should not uncompress, untar or unzip any of
 the files).
@@ -53,6 +51,7 @@ import datasets
 from datasets import Version
 
 from utils import schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
@@ -389,17 +388,6 @@ def _get_entities_from_sample(sample_id, sample, split):
     return dedupe_entities
 
 
-@dataclass
-class BigBioConfig(datasets.BuilderConfig):
-    """BuilderConfig for BigBio."""
-
-    name: str = None
-    version: Version = None
-    description: str = None
-    schema: str = None
-    subset_id: str = None
-
-
 class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
     """i2b2 2010 task comprising concept, assertion and relation extraction"""
 
@@ -435,7 +423,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = _DATASETNAME + "_" + SOURCE
+    DEFAULT_CONFIG_NAME = _SOURCE_CONFIG_NAME
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -512,8 +500,8 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
-        if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+        if self.config.data_dir is None or self.config.name is None:
+            raise ValueError("This is a local dataset. Please pass the data_dir and name kwarg to load_dataset.")
         else:
             data_dir = self.config.data_dir
 
@@ -523,14 +511,14 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "data_dir": data_dir,
-                    "split": "train",
+                    "split": str(datasets.Split.TRAIN),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "data_dir": data_dir,
-                    "split": "test",
+                    "split": str(datasets.Split.TEST),
                 },
             ),
         ]
@@ -554,11 +542,10 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
         }
 
     @staticmethod
-    def _get_bigbio_sample(sample_id, sample, split):
+    def _get_bigbio_sample(sample_id, sample, split) -> dict:
 
         passage_text = sample.get("txt", "")
         entities = _get_entities_from_sample(sample_id, sample, split)
-        # entity_ids = set([entity["id"] for entity in entities])
         relations = _get_relations_from_sample(sample_id, sample, split)
         return {
             "id": sample_id,
