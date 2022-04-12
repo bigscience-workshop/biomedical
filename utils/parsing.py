@@ -1,6 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple, Optional
+from typing import Dict, Iterable, List, Tuple
 
 import bioc
 
@@ -32,7 +32,7 @@ def remove_prefix(a: str, prefix: str) -> str:
     return a
 
 
-def parse_brat_file(txt_file: Path, annotation_dir: Optional[Path] = None,  annotation_file_suffixes: List[str] = None) -> Dict:
+def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
@@ -121,7 +121,6 @@ def parse_brat_file(txt_file: Path, annotation_dir: Optional[Path] = None,  anno
     with txt_file.open() as f:
         example["text"] = f.read()
 
-
     # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
     # for event extraction
     if annotation_file_suffixes is None:
@@ -132,13 +131,9 @@ def parse_brat_file(txt_file: Path, annotation_dir: Optional[Path] = None,  anno
             "At least one suffix for the to-be-read annotation files should be given!"
         )
 
-    if annotation_dir is None:
-        annotation_dir = txt_file.parent
-
-
     ann_lines = []
     for suffix in annotation_file_suffixes:
-        annotation_file = annotation_dir.joinpath(f"{txt_file.stem}{suffix}")
+        annotation_file = txt_file.with_suffix(suffix)
         if annotation_file.exists():
             with annotation_file.open() as f:
                 ann_lines.extend(f.readlines())
