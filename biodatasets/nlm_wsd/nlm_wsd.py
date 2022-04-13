@@ -28,17 +28,18 @@ BigBio schema fixes off by one error of end offset of entities. The source confi
 
 Instructions on how to load locally:
 1) Create directory
-2) Download one of the following annotation sets and put it into the folder
+2) Download one of the following annotation sets from https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html
+   and put it into the folder:
    - Full Reviewed Set
-     https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/full_reviewed_results.tar.gz 
-     (Link "Full Reviewed Result Set (requires Common Files above)" from https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html)
+     https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/full_reviewed_results.tar.gz
+     (Link "Full Reviewed Result Set (requires Common Files above)")
      subset_id = nlm_wsd_reviewed
    - Full Non-Reviewed Set
-     https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/full_non_reviewed_results.tar.gz 
-     (Link "Full Non-Reviewed Result Set (requires Common Files above)" from https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html)
-     subset_id = nlm_wsd_non_reviewed   
-3) Download https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/UMLS1999.tar.gz (Link "1999 UMLS Data Files" from
-   https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html) and put it into the folder
+     https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/full_non_reviewed_results.tar.gz
+     (Link "Full Non-Reviewed Result Set (requires Common Files above)")
+     subset_id = nlm_wsd_non_reviewed
+3) Download https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/downloads/UMLS1999.tar.gz (Link "1999 UMLS Data Files")
+   and put it into the folder
 4) Set kwarg data_dir of load_datasets to the path of the directory
 """
 
