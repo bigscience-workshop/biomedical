@@ -23,6 +23,7 @@ from bioc import biocxml
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{Wei2015,
@@ -149,6 +150,25 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBI"):
+        offsets, texts = get_texts_and_offsets_from_bioc_ann(bioc_ann)
+        normalized = []
+        _type = bioc_ann.infons["type"]
+        if _type in bioc_ann.infons:
+            db_ids = bioc_ann.infons[_type]
+            normalized = [
+                # some entities are linked to multiple normalized ids
+                {"db_name": db_id_key, "db_id": _id}
+                for _id in db_ids.split(",")
+            ]
+        return {
+            "id": uid,
+            "offsets": offsets,
+            "text": texts,
+            "type": _type,
+            "normalized": normalized,
+        }
+
     def _generate_examples(self, filepath) -> Tuple[int, Dict]:
         uid = map(str, itertools.count(start=0, step=1))
 
@@ -188,7 +208,6 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                     }
                     yield idx, features
                 elif self.config.schema == "bigbio_kb":
-
                     # passage offsets/lengths do not connect, recalculate them for this schema.
                     passage_spans = []
                     start = 0
@@ -210,20 +229,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                             for passage, span in zip(document.passages, passage_spans)
                         ],
                         "entities": [
-                            {
-                                "id": next(uid),
-                                "type": entity.infons["type"],
-                                "text": [entity.text],
-                                "offsets": [(loc.offset, loc.end) for loc in entity.locations],
-                                "normalized": [
-                                    {
-                                        "db_name": "NCBI",
-                                        "db_id": entity.infons[entity.infons["type"]],
-                                    }
-                                ]
-                                if entity.infons["type"] in entity.infons
-                                else [],
-                            }
+                            self._parse_bioc_entity(next(uid), entity)
                             for passage in document.passages
                             for entity in passage.annotations
                         ],
