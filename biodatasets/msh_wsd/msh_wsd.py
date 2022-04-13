@@ -22,12 +22,13 @@ consists of 106 ambiguous abbreviations, 88 ambiguous terms and 9 which are a co
 ambiguous words. Each instance containing the ambiguous word was assigned a CUI from the 2009AB version of the UMLS.
 For each ambiguous term/abbreviation, the data set contains a maximum of 100 instances per sense obtained from
 MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
+
+Note from the Author how to load dataset:
+1) Download the file MSHCorpus.zip (Link "MSHWSD Data Set") from  https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html
+2) Set kwarg data_dir to the path of the zip file
 """
 
-# Note from the Author how to load dataset:
-# 1) Download the file MSHCorpus.zip (Link "MSHWSD Data Set") from  https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html
-# 2) Unzip MSHCorpus.zip
-# 3) Set kwarg data_dir to the path of the folder containing the .arrf files ("MSHCorpus")
+
 
 import itertools as it
 import re
@@ -152,7 +153,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = self.config.data_dir
+            data_dir = data_dir = dl_manager.download_and_extract(self.config.data_dir)
 
         return [
             datasets.SplitGenerator(
@@ -165,7 +166,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, data_dir: Path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-
+        data_dir = data_dir / "MSHCorpus"
         concepts = data_dir / "benchmark_mesh.txt"
         with concepts.open() as f:
             concepts = f.readlines()
