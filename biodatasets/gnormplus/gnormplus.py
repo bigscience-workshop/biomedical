@@ -188,11 +188,6 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                     }
                     yield idx, features
                 elif self.config.schema == "bigbio_kb":
-                    for i, passage in enumerate(document.passages):
-                        # print('passage', i, passage.offset, passage.total_span.end, len(passage.text))
-                        for ann in passage.annotations:
-                            for loc in ann.locations:
-                                assert loc.offset >= passage.offset
 
                     # passage offsets/lengths do not connect, recalculate them for this schema.
                     passage_spans = []
@@ -239,10 +234,3 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                     yield idx, features
                 else:
                     raise NotImplementedError(self.config.schema)
-
-
-# This allows you to run your dataloader with `python gnormplus.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    # datasets.load_dataset(__file__, name='gnormplus_bigbio_kb')
-    datasets.load_dataset(__file__)
