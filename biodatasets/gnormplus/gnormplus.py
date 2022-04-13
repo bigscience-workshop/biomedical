@@ -15,6 +15,7 @@
 
 import itertools
 import os
+import re
 from typing import Dict, List, Tuple
 
 import datasets
@@ -94,6 +95,8 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "gnormplus_source"
 
+    _re_tax_id = re.compile(r"(?P<db_id>\d+)\(Tax:(?P<tax_id>\d+)\)")
+
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
             features = datasets.Features(
@@ -108,10 +111,17 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                     ],
                     "entities": [
                         {
-                            "locations": [{"offset": datasets.Value("int64"), "length": datasets.Value("int64")}],
-                            "text": datasets.Value("string"),
+                            "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "normalized": [{"db_id": datasets.Value("string")}],
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                    "tax_id": datasets.Value("string"),
+                                }
+                            ],
                         }
                     ],
                 }
@@ -150,17 +160,23 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBI"):
+    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBI", insert_tax_id=False):
         offsets, texts = get_texts_and_offsets_from_bioc_ann(bioc_ann)
-        normalized = []
         _type = bioc_ann.infons["type"]
+
+        # parse db ids
+        normalized = []
         if _type in bioc_ann.infons:
-            db_ids = bioc_ann.infons[_type]
-            normalized = [
-                # some entities are linked to multiple normalized ids
-                {"db_name": db_id_key, "db_id": _id}
-                for _id in db_ids.split(",")
-            ]
+            for _id in bioc_ann.infons[_type].split(","):
+                match = self._re_tax_id.match(_id)
+                if match:
+                    _id = match.group("db_id")
+
+                n = {"db_name": db_id_key, "db_id": _id}
+                if insert_tax_id:
+                    n["tax_id"] = match.group("tax_id") if match else None
+
+                normalized.append(n)
         return {
             "id": uid,
             "offsets": offsets,
@@ -188,20 +204,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                             for passage in document.passages
                         ],
                         "entities": [
-                            {
-                                "locations": [
-                                    {"offset": loc.offset, "length": loc.length} for loc in entity.locations
-                                ],
-                                "text": entity.text,
-                                "type": entity.infons["type"],
-                                "normalized": [
-                                    {
-                                        "db_id": entity.infons[entity.infons["type"]],
-                                    }
-                                ]
-                                if entity.infons["type"] in entity.infons
-                                else [],
-                            }
+                            self._parse_bioc_entity(next(uid), entity, insert_tax_id=True)
                             for passage in document.passages
                             for entity in passage.annotations
                         ],
