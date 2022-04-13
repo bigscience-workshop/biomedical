@@ -98,7 +98,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
             version=BIGBIO_VERSION,
             description="scielo BigBio schema English-Portuguese",
             schema="bigbio_t2t",
-            subset_id="scielo",
+            subset_id="scielo_en_pt",
         ),
     ]
 
