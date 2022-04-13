@@ -59,9 +59,9 @@ for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to h
 application to genetic variation information in a range of diseases."""
 
 
-_HOMEPAGE = BigBioValues.NULL
+_HOMEPAGE = "NA" # BigBioValues.NULL
 
-_LICENSE = BigBioValues.NULL
+_LICENSE = "NA" # BigBioValues.NULL
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
