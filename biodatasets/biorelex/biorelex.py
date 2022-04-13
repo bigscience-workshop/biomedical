@@ -26,10 +26,13 @@ the annotated entities 5) Binding interaction types: positive, negative (A does 
 B)
 """
 
+import itertools as it
 import json
-from typing import List, Tuple, Dict
+from collections import defaultdict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -83,11 +86,17 @@ _URLS = {
     },
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.RELATION_EXTRACTION, Tasks.COREFERENCE_RESOLUTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.RELATION_EXTRACTION,
+    Tasks.COREFERENCE_RESOLUTION,
+]
 
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
 
 class BioRelExDataset(datasets.GeneratorBasedBuilder):
     """BioRelEx is a biological relation extraction dataset."""
@@ -119,40 +128,44 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "paperid": datasets.Value("string"), 
+                    "paperid": datasets.Value("string"),
                     "interactions": [
                         {
-                            "participants": datasets.Sequence(datasets.Value("int32")), 
-                            "type": datasets.Value("string"), 
-                            "implicit": datasets.Value("bool"), 
-                            "label": datasets.Value("int32")
+                            "participants": datasets.Sequence(datasets.Value("int32")),
+                            "type": datasets.Value("string"),
+                            "implicit": datasets.Value("bool"),
+                            "label": datasets.Value("int32"),
                         }
-                    ], 
-                    "url": datasets.Value("string"), 
-                    "text": datasets.Value("string"), 
+                    ],
+                    "url": datasets.Value("string"),
+                    "text": datasets.Value("string"),
                     "entities": [
                         {
-                            "is_state": datasets.Value("bool"), 
-                            "label": datasets.Value("string"), 
-                            "names": [{
-                                "text": datasets.Value("string"),
-                                "is_mentioned": datasets.Value("bool"), 
-                                "mentions": datasets.Sequence([datasets.Value("int32")])
-                            }], 
-                            "grounding": [{
-                                "comment": datasets.Value("string"), 
-                                "entrez_gene": datasets.Value("string"),
-                                "source": datasets.Value("string"), 
-                                "link": datasets.Value("string"),
-                                "hgnc_symbol": datasets.Value("string"),
-                                "organism": datasets.Value("string"),
-                            }], 
+                            "is_state": datasets.Value("bool"),
+                            "label": datasets.Value("string"),
+                            "names": [
+                                {
+                                    "text": datasets.Value("string"),
+                                    "is_mentioned": datasets.Value("bool"),
+                                    "mentions": datasets.Sequence([datasets.Value("int32")]),
+                                }
+                            ],
+                            "grounding": [
+                                {
+                                    "comment": datasets.Value("string"),
+                                    "entrez_gene": datasets.Value("string"),
+                                    "source": datasets.Value("string"),
+                                    "link": datasets.Value("string"),
+                                    "hgnc_symbol": datasets.Value("string"),
+                                    "organism": datasets.Value("string"),
+                                }
+                            ],
                             "is_mentioned": datasets.Value("bool"),
                             "is_mutant": datasets.Value("bool"),
                         }
                     ],
-                    "_line_": datasets.Value("int32"), 
-                    "id": datasets.Value("string")
+                    "_line_": datasets.Value("int32"),
+                    "id": datasets.Value("string"),
                 }
             )
         elif self.config.schema == "bigbio_kb":
@@ -168,7 +181,7 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        
+
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
@@ -189,7 +202,7 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        
+
         with open(filepath, "r", encoding="utf8") as f:
             data = json.load(f)
         data = self._prep(data)
@@ -200,7 +213,8 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             for key, example in enumerate(data):
-                yield key, self._source_to_kb(example)
+                example_ = self._source_to_kb(example)
+                yield key, example_
 
     def _prep(self, data):
         for example in data:
@@ -211,120 +225,153 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
                 else:
                     entity["grounding"] = [entity["grounding"]]
         return data
-            
+
     def _json_dict_to_list(self, json, new_key):
         list_ = []
         for key, values in json.items():
             assert isinstance(values, dict), "Child element is not a dict"
-            assert (new_key not in values), "New key already in values"
+            assert new_key not in values, "New key already in values"
             values[new_key] = key
             list_.append(values)
         return list_
 
     def _source_to_kb(self, example):
+        example_id = example["id"]
+        entities_, corefs_, ref_id_map = self._get_entities(example_id, example["entities"])
+        relations_ = self._get_relations(example_id, ref_id_map, example["interactions"])
+
         document_ = {
-            "id": example["id"],
+            "id": example_id,
             "document_id": example["paperid"],
             "passages": [
                 {
-                    "id": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "text": example["text"],
-                    "offsets": [[0,len(example["text"])]],
+                    "id": example_id + ".sent",
+                    "type": "sentence",
+                    "text": [example["text"]],
+                    "offsets": [[0, len(example["text"])]],
                 }
             ],
-            "entities": [
-                {
-                    "id": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "text": datasets.Sequence(datasets.Value("string")),
-                    "offsets": datasets.Sequence([datasets.Value("int32")]),
-                    "normalized": [
+            "entities": entities_,
+            "coreferences": corefs_,
+            "relations": relations_,
+            "events": [],
+        }
+        return document_
+
+    def _get_entities(self, example_id, entities):
+        entities_ = []
+        corefs_ = []
+
+        eid = it.count(0)
+        cid = it.count(0)
+        # dictionary mapping the original ref ids (indexes of entities) for relations
+        org_rel_ref_id_2_kb_entity_id = defaultdict(list)
+
+        for relation_ref_id, entity in enumerate(entities):
+
+            # get normalization for entities
+            normalized_ = self._get_normalizations(entity)
+
+            # create entity for each synonym
+            coref_eids_ = []
+            for names in entity["names"]:
+                for id, mention in enumerate(names["mentions"]):
+                    entity_id = example_id + ".ent" + str(next(eid)) + "_" + str(id)
+                    org_rel_ref_id_2_kb_entity_id[relation_ref_id].append(entity_id)
+                    coref_eids_.append(entity_id)
+                    entities_.append(
                         {
-                            "db_name": datasets.Value("string"),
-                            "db_id": datasets.Value("string"),
+                            "id": entity_id,
+                            "type": entity["label"],
+                            "text": [names["text"]],
+                            "offsets": [mention],
+                            "normalized": normalized_,
                         }
-                    ],
-                }
-            ],
-            "events": [
+                    )
+
+            # create coreferences
+            coref_id = example_id + ".coref" + str(next(cid))
+            corefs_.append(
                 {
-                    "id": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    # refers to the text_bound_annotation of the trigger
-                    "trigger": {
-                        "text": datasets.Sequence(datasets.Value("string")),
-                        "offsets": datasets.Sequence([datasets.Value("int32")]),
-                    },
-                    "arguments": [
+                    "id": coref_id,
+                    "entity_ids": coref_eids_,
+                }
+            )
+        return entities_, corefs_, org_rel_ref_id_2_kb_entity_id
+
+    def _get_normalizations(self, entity):
+        normalized_ = []
+        if entity["grounding"]:
+            assert len(entity["grounding"]) == 1
+            if entity["grounding"][0]["entrez_gene"] != "NA":
+                normalized_.append({"db_name": "entrez", "db_id": entity["grounding"][0]["entrez_gene"]})
+            if entity["grounding"][0]["hgnc_symbol"] != "NA":
+                normalized_.append({"db_name": "hgnc", "db_id": entity["grounding"][0]["hgnc_symbol"]})
+
+            # maybe parse some other ids?
+            source = entity["grounding"][0]["source"]
+            if (
+                source != "NCBI gene" and source != "https://www.genenames.org/data/genegroup/"
+            ):  # NCBI gene is same as entrez
+                normalized_.append(
+                    self._parse_id_from_link(entity["grounding"][0]["link"], entity["grounding"][0]["source"])
+                )
+        return normalized_
+
+    def _get_relations(self, example_id, org_rel_ref_id_2_kb_entity_id, interactions):
+        rid = it.count(0)
+        relations_ = []
+        for interaction in interactions:
+            rel_id = example_id + ".rel" + str(next(rid))
+            assert len(interaction["participants"]) == 2
+
+            subjects = org_rel_ref_id_2_kb_entity_id[interaction["participants"][0]]
+            objects = org_rel_ref_id_2_kb_entity_id[interaction["participants"][1]]
+
+            for s in subjects:
+                for o in objects:
+                    relations_.append(
                         {
-                            "role": datasets.Value("string"),
-                            "ref_id": datasets.Value("string"),
+                            "id": rel_id + "s" + s + ".o" + o,
+                            "type": interaction["type"],
+                            "arg1_id": s,
+                            "arg2_id": o,
+                            "normalized": [],
                         }
-                    ],
-                }
-            ],
-            "coreferences": [
-                {
-                    "id": datasets.Value("string"),
-                    "entity_ids": datasets.Sequence(datasets.Value("string")),
-                }
-            ],
-            "relations": [
-                {
-                    "id": datasets.Value("string"),
-                    "type": datasets.Value("string"),
-                    "arg1_id": datasets.Value("string"),
-                    "arg2_id": datasets.Value("string"),
-                    "normalized": [
-                        {
-                            "db_name": datasets.Value("string"),
-                            "db_id": datasets.Value("string"),
-                        }
-                    ],
-                }
-            ],
+                    )
+        return relations_
+
+    def _parse_id_from_link(self, link, source):
+        source_template_map = {
+            "uniprot": ["https://www.uniprot.org/uniprot/"],
+            "pubchem:compound": ["https://pubchem.ncbi.nlm.nih.gov/compound/"],
+            "pubchem:substance": ["https://pubchem.ncbi.nlm.nih.gov/substance/"],
+            "pfam": ["https://pfam.xfam.org/family/", "http://pfam.xfam.org/family/"],
+            "interpro": ["http://www.ebi.ac.uk/interpro/entry/", "https://www.ebi.ac.uk/interpro/entry/"],
+            "DrugBank": ["https://www.drugbank.ca/drugs/"],
         }
 
+        # fix exceptions manually
+        if source == "https://enzyme.expasy.org/EC/2.5.1.18" and link == source:
+            return {"db_name": "intenz", "db_id": "2.5.1.18"}
+        elif source == "https://www.genome.jp/kegg-bin/show_pathway?map=ko04120" and link == source:
+            return {"db_name": "kegg", "db_id": "ko04120"}
+        elif source == "https://www.genome.jp/dbget-bin/www_bget?enzyme+2.7.11.1" and link == source:
+            return {"db_name": "intenz", "db_id": "2.7.11.1"}
+        elif source == "http://www.chemspider.com/Chemical-Structure.7995676.html" and link == source:
+            return {"db_name": "chemspider", "db_id": "7995676"}
+        elif source == "intenz":
+            id = link.split("=")[0]
+            return {"db_name": source, "db_id": id}
+        else:
+            link_templates = source_template_map[source]
+            for template in link_templates:
+                if link.startswith(template):
+                    id = link.replace(template, "")
+                    id = id.split("?")[0]
+                    assert "/" not in id
+                    if source == "https://enzyme.expasy.org/EC/2.5.1.18":
+                        source = "EC"
+                    return {"db_name": source, "db_id": id}
 
-
-        features = datasets.Features(
-            {
-                "paperid": datasets.Value("string"), 
-                "interactions": [
-                    {
-                        "participants": datasets.Sequence(datasets.Value("int32")), 
-                        "type": datasets.Value("string"), 
-                        "implicit": datasets.Value("bool"), 
-                        "label": datasets.Value("int32")
-                    }
-                ], 
-                "url": datasets.Value("string"), 
-                "text": datasets.Value("string"), 
-                "entities": [
-                    {
-                        "is_state": datasets.Value("bool"), 
-                        "label": datasets.Value("string"), 
-                        "names": [{
-                            "text": datasets.Value("string"),
-                            "is_mentioned": datasets.Value("bool"), 
-                            "mentions": datasets.Sequence([datasets.Value("int32")])
-                        }], 
-                        "grounding": [{
-                            "comment": datasets.Value("string"), 
-                            "entrez_gene": datasets.Value("string"),
-                            "source": datasets.Value("string"), 
-                            "link": datasets.Value("string"),
-                            "hgnc_symbol": datasets.Value("string"),
-                            "organism": datasets.Value("string"),
-                        }], 
-                        "is_mentioned": datasets.Value("bool"),
-                        "is_mutant": datasets.Value("bool"),
-                    }
-                ],
-                "_line_": datasets.Value("int32"), 
-                "id": datasets.Value("string")
-            }
-        )
-
-    
+            assert False, f"No template found for {link}, choices: {repr(link_templates)}"
