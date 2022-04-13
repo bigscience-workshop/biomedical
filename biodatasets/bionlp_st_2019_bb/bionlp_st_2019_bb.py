@@ -73,14 +73,14 @@ _LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
 
 _URLs = {
     "source": {
-        "train": "https://drive.google.com/file/d/1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L/view",
-        "dev": "https://drive.google.com/file/d/1oOfOfjIfg1XnesXwaKvSDfqgnchuximG/view",
-        "test": "https://drive.google.com/file/d/1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW/view",
+        "train": "https://drive.google.com/uc?id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L/view",
+        "dev": "https://drive.google.com/uc?id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG/view",
+        "test": "https://drive.google.com/uc?id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW/view",
     },
     "bigbio_kb": {
-        "train": "https://drive.google.com/file/d/1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L/view",
-        "dev": "https://drive.google.com/file/d/1oOfOfjIfg1XnesXwaKvSDfqgnchuximG/view",
-        "test": "https://drive.google.com/file/d/1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW/view",
+        "train": "https://drive.google.com/uc?id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L/view",
+        "dev": "https://drive.google.com/uc?id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG/view",
+        "test": "https://drive.google.com/uc?id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW/view",
     },
 }
 
