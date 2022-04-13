@@ -81,7 +81,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 class BioSimlexDataset(datasets.GeneratorBasedBuilder):
     """Bio-SimLex enables intrinsic evaluation of word representations. Config schema as source gives score between
-    0-10 for pairs of words. Config schema as bigbio gives label 0 and 1 for pairs of words."""
+    0-10 for pairs of words. The source schema casts labels as `float`, but the bigbio schema casts them as `str`."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
