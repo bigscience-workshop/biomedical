@@ -6,90 +6,6 @@ import bioc
 import datasets
 
 
-brat_features = datasets.Features(
-    {
-        "id": datasets.Value("string"),
-        "document_id": datasets.Value("string"),
-        "text": datasets.Value("string"),
-        "text_bound_annotations": [  # T line in brat, e.g. type or event trigger
-            {
-                "offsets": datasets.Sequence([datasets.Value("int32")]),
-                "text": datasets.Sequence(datasets.Value("string")),
-                "type": datasets.Value("string"),
-                "id": datasets.Value("string"),
-            }
-        ],
-        "events": [  # E line in brat
-            {
-                "trigger": datasets.Value(
-                    "string"
-                ),  # refers to the text_bound_annotation of the trigger,
-                "id": datasets.Value("string"),
-                "type": datasets.Value("string"),
-                "arguments": datasets.Sequence(
-                    {
-                        "role": datasets.Value("string"),
-                        "ref_id": datasets.Value("string"),
-                    }
-                ),
-            }
-        ],
-        "relations": [  # R line in brat
-            {
-                "id": datasets.Value("string"),
-                "head": {
-                    "ref_id": datasets.Value("string"),
-                    "role": datasets.Value("string"),
-                },
-                "tail": {
-                    "ref_id": datasets.Value("string"),
-                    "role": datasets.Value("string"),
-                },
-                "type": datasets.Value("string"),
-            }
-        ],
-        "equivalences": [  # Equiv line in brat
-            {
-                "id": datasets.Value("string"),
-                "ref_ids": datasets.Sequence(datasets.Value("string")),
-            }
-        ],
-        "attributes": [  # M or A lines in brat
-            {
-                "id": datasets.Value("string"),
-                "type": datasets.Value("string"),
-                "ref_id": datasets.Value("string"),
-                "value": datasets.Value("string"),
-            }
-        ],
-        "normalizations": [  # N lines in brat
-            {
-                "id": datasets.Value("string"),
-                "type": datasets.Value("string"),
-                "ref_id": datasets.Value("string"),
-                "resource_name": datasets.Value(
-                    "string"
-                ),  # Name of the resource, e.g. "Wikipedia"
-                "cuid": datasets.Value(
-                    "string"
-                ),  # ID in the resource, e.g. 534366
-                "text": datasets.Value(
-                    "string"
-                ),  # Human readable description/name of the entity, e.g. "Barack Obama"
-            }
-        ],
-        "notes": [  # # lines in brat
-            {
-                "id": datasets.Value("string"),
-                "type": datasets.Value("string"),
-                "ref_id": datasets.Value("string"),
-                "text": datasets.Value("string"),
-            }
-        ],
-    },
-)
-
-
 
 def get_texts_and_offsets_from_bioc_ann(ann: bioc.BioCAnnotation) -> Tuple:
 
@@ -118,15 +34,99 @@ def remove_prefix(a: str, prefix: str) -> str:
     return a
 
 
-
-def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) -> Dict:
+def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
+                    parse_notes: bool = False) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
     Assumes that the annotations are contained in one or more of the corresponding '.a1', '.a2' or '.ann' files,
     e.g. 'data/1234.ann' or 'data/1234.a1' and 'data/1234.a2'.
 
-    Schema of the parse will adhere to `brat_features`
+    Will include annotator notes, when `parse_notes == True`.
+
+    brat_features = datasets.Features(
+        {
+            "id": datasets.Value("string"),
+            "document_id": datasets.Value("string"),
+            "text": datasets.Value("string"),
+            "text_bound_annotations": [  # T line in brat, e.g. type or event trigger
+                {
+                    "offsets": datasets.Sequence([datasets.Value("int32")]),
+                    "text": datasets.Sequence(datasets.Value("string")),
+                    "type": datasets.Value("string"),
+                    "id": datasets.Value("string"),
+                }
+            ],
+            "events": [  # E line in brat
+                {
+                    "trigger": datasets.Value(
+                        "string"
+                    ),  # refers to the text_bound_annotation of the trigger,
+                    "id": datasets.Value("string"),
+                    "type": datasets.Value("string"),
+                    "arguments": datasets.Sequence(
+                        {
+                            "role": datasets.Value("string"),
+                            "ref_id": datasets.Value("string"),
+                        }
+                    ),
+                }
+            ],
+            "relations": [  # R line in brat
+                {
+                    "id": datasets.Value("string"),
+                    "head": {
+                        "ref_id": datasets.Value("string"),
+                        "role": datasets.Value("string"),
+                    },
+                    "tail": {
+                        "ref_id": datasets.Value("string"),
+                        "role": datasets.Value("string"),
+                    },
+                    "type": datasets.Value("string"),
+                }
+            ],
+            "equivalences": [  # Equiv line in brat
+                {
+                    "id": datasets.Value("string"),
+                    "ref_ids": datasets.Sequence(datasets.Value("string")),
+                }
+            ],
+            "attributes": [  # M or A lines in brat
+                {
+                    "id": datasets.Value("string"),
+                    "type": datasets.Value("string"),
+                    "ref_id": datasets.Value("string"),
+                    "value": datasets.Value("string"),
+                }
+            ],
+            "normalizations": [  # N lines in brat
+                {
+                    "id": datasets.Value("string"),
+                    "type": datasets.Value("string"),
+                    "ref_id": datasets.Value("string"),
+                    "resource_name": datasets.Value(
+                        "string"
+                    ),  # Name of the resource, e.g. "Wikipedia"
+                    "cuid": datasets.Value(
+                        "string"
+                    ),  # ID in the resource, e.g. 534366
+                    "text": datasets.Value(
+                        "string"
+                    ),  # Human readable description/name of the entity, e.g. "Barack Obama"
+                }
+            ],
+            ### OPTIONAL: Only included when `parse_notes == True`
+            "notes": [  # # lines in brat
+                {
+                    "id": datasets.Value("string"),
+                    "type": datasets.Value("string"),
+                    "ref_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                }
+            ],
+        },
+        )
     """
 
     example = {}
@@ -272,7 +272,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
             ann["cuid"] = info[2].split(":")[1]
             example["normalizations"].append(ann)
 
-        elif line.startswith("#"):
+        elif parse_notes and line.startswith("#"):
             ann = {}
             fields = line.split("\t")
 
