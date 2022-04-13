@@ -167,19 +167,19 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             entity information
         """
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
-        db_ids = span.infons[db_id_key] if db_id_key else "-1"
-        normalized = [
+        #db_ids = span.infons[db_id_key] if db_id_key else "-1"
+        #normalized = [
             # some entities are linked to multiple normalized ids
-            {"db_name": db_id_key, "db_id": db_id}
-            for db_id in db_ids.split("|")
-        ]
+         #   {"db_name": db_id_key, "db_id": db_id}
+          #  for db_id in db_ids.split("|")
+        #]
 
         return {
             "id": span.id,
             "offsets": offsets,
             "text": texts,
             "type": span.infons["type"],
-            "normalized": normalized,
+            "normalized": [],
         }
 
 
