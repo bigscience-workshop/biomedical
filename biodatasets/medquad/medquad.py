@@ -27,11 +27,11 @@ For more info please visit https://github.com/abachaa/MedQuAD/
 """
 import json
 import os
+import glob
 import xml.etree.ElementTree as ET
 from typing import List, Tuple, Dict
 
 import datasets
-import requests
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -67,7 +67,7 @@ _LICENSE = "https://creativecommons.org/licenses/by/4.0/legalcode"  # TODO: term
 
 _DATA_PATH = "https://raw.githubusercontent.com/abachaa/MedQuAD/master"
 
-_DATA_REPO_FETCH_URL = "https://api.github.com/repos/abachaa/MedQuAD/git/trees/master?recursive=1"
+_DATA_REPO_FETCH_URL = "https://github.com/abachaa/MedQuAD/archive/refs/heads/master.zip"
 
 _SUBSET_BASE_URIS = {
     "cancergov_qa": "1_CancerGov_QA",
@@ -182,22 +182,26 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
         This method parses the dataset
 
         """
+        repo_extracted = dl_manager.download_and_extract(_DATA_REPO_FETCH_URL)
+        repo_dir = os.path.join(
+            repo_extracted,
+            os.path.basename(_HOMEPAGE) + '-' + os.path.splitext(os.path.basename(_DATA_REPO_FETCH_URL))[0]
+        )
+
         if self.config.subset_id == "medquad":
             file_base_urls = _URLS[f"{self.config.subset_id}_base_urls"]
             qa_pairs_enriched_fname = f"MedQuADGoldenEnriched/{self.config.subset_id}.json"
-            repo_files = json.loads(requests.get(_DATA_REPO_FETCH_URL).text)
         else:
             raise NotImplementedError("Only full set loader is implemented here")
 
         # Collect path info for all repo paths, and determine relevant XML files
         qa_file_paths = []
         for subset_name, uri_ in file_base_urls.items():
-            for path in repo_files["tree"]:
-                if path["type"] == "blob" and path["path"].startswith(uri_) and path["path"].endswith(".xml"):
-                    qa_file_paths.append(os.path.join(_DATA_PATH, path["path"]))
+            for file_path in glob.glob(os.path.join(repo_dir, uri_, "*.xml")):
+                qa_file_paths.append(file_path)
 
         qa_list, data_dir = self._load_qa_from_xml(
-            file_paths=dl_manager.download_and_extract(qa_file_paths)
+            file_paths=qa_file_paths
         )
 
         qa_pairs_enriched_full_path = os.path.join(data_dir, qa_pairs_enriched_fname)
