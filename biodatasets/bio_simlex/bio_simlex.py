@@ -153,7 +153,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                     yield id_, {
                         "text_1": word1,
                         "text_2": word2,
-                        "score": str(score),
+                        "score": float(score),
                     }
 
                 elif self.config.schema == "bigbio_pairs":
