@@ -85,7 +85,6 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-
 class MedalDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
