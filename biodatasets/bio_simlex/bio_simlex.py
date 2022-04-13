@@ -164,9 +164,3 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                         "text_2": word2,
                         "label": str(score),
                     }
-
-
-# This allows you to run your dataloader with `python bio_simlex.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
