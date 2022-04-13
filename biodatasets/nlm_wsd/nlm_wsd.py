@@ -24,7 +24,7 @@ which 8 completed 100% of the 5,000 instances, 1 completed 56%, 1 completed 44%,
 of the instances. Evaluations were only used when the evaluators completed all 100 instances for a given ambiguity.
 """
 
-import os
+import itertools as it
 from pathlib import Path
 from typing import List, Tuple, Dict
 
@@ -73,26 +73,11 @@ _BIGBIO_VERSION = "1.0.0"
 class NlmWsdDataset(datasets.GeneratorBasedBuilder):
     """Biomedical Word Sense Disambiguation (WSD)."""
 
+    uid = it.count(0)
+
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    BUILDER_CONFIGS = [
-        BigBioConfig(
-            name="nlm_wsd_source",
-            version=SOURCE_VERSION,
-            description="NLM-WSD source schema",
-            schema="source",
-            subset_id="nlm_wsd_",
-        ),
-        BigBioConfig(
-            name="nlm_wsd_bigbio_kb",
-            version=BIGBIO_VERSION,
-            description="NLM-WSD BigBio schema",
-            schema="bigbio_kb",
-            subset_id="nlm_wsd",
-        ),
-    ]
-    """
     BUILDER_CONFIGS = [
         BigBioConfig(
             name="nlm_wsd_non_reviewed_source",
@@ -123,7 +108,6 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
             subset_id="nlm_wsd_reviewed",
         ),
     ]
-    """
 
     DEFAULT_CONFIG_NAME = "nlm_wsd_reviewed_source"
 
@@ -138,16 +122,16 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
                         "text": datasets.Value("string"),
                         "ambiguous_word": datasets.Value("string"),
                         "ambiguous_word_alias": datasets.Value("string"),
-                        "offsets_context": datasets.Sequence("int32"),
-                        "offsets_ambiguity": datasets.Sequence("int32"),
+                        "offsets_context": datasets.Sequence(datasets.Value("int32")),
+                        "offsets_ambiguity": datasets.Sequence(datasets.Value("int32")),
                         "context": datasets.Value("string"),
                     },
                     "citation":{
                         "text": datasets.Value("string"),
                         "ambiguous_word": datasets.Value("string"),
                         "ambiguous_word_alias": datasets.Value("string"),
-                        "offsets_context": datasets.Sequence("int32"),
-                        "offsets_ambiguity": datasets.Sequence("int32"),
+                        "offsets_context": datasets.Sequence(datasets.Value("int32")),
+                        "offsets_ambiguity": datasets.Sequence(datasets.Value("int32")),
                         "context": datasets.Value("string"),
                     }
                 }
@@ -169,7 +153,11 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = self.config.data_dir
+            data_dir = dl_manager.download_and_extract(self.config.data_dir)
+            if self.config.subset_id == "nlm_wsd_reviewed":
+                data_dir = Path(data_dir) / "Basic_Reviewed_Results"
+            else:
+                data_dir = Path(data_dir) / "Basic_Non_Reviewed_Results"
 
         return [
             datasets.SplitGenerator(
@@ -182,15 +170,16 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, data_dir: Path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
+
         
         for dir in data_dir.iterdir():
             if self.config.schema == "source":
-                for key, example in self._generate_parsed_documents(dir):
-                    yield key, example
+                for example in self._generate_parsed_documents(dir):
+                    yield next(self.uid), example
 
             elif self.config.schema == "bigbio_kb":
-                for key, example in self._generate_parsed_documents(dir):
-                    yield key, example
+                for example in self._generate_parsed_documents(dir):
+                    yield next(self.uid), self._source_to_kb(example)
 
     def _generate_parsed_documents(self, dir):
         file_path = dir / f"{dir.name}_set"
@@ -208,7 +197,7 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
 
                 document = {
                     "id": id,
-                    "document_id": document_id,
+                    "sentence_id": document_id,
                     "label": label,
                     "sentence": info_sentence,
                     "citation": info_citation
@@ -230,13 +219,48 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
 
     def _parse_ambig_pos_info(self, line):
          infos = line.split("|")
-         assert len(infos) == 7
+         assert len(infos) == 8
          pos_info = {
-             "amiguous_word": infos[0], 
+             "ambiguous_word": infos[0], 
              "ambiguous_word_alias": infos[1], 
              "offsets_context": [infos[2], infos[3]], 
              "offsets_ambiguity": [infos[4], infos[5]], 
              "context": infos[6]
          }
          return pos_info
+
+    def _source_to_kb(self, example):
+        document_ = {}
+        document_["events"] = []
+        document_["relations"] = []
+        document_["coreferences"] = []
+        document_["id"] = next(self.uid)
+        document_["document_id"] = example["sentence_id"].split(".")[0]
+        document_["passages"] = [
+            {"id": next(self.uid), "type": "", "text": [example["citation"]["text"]], "offsets": [[0, len(example["citation"]["text"])]]}
+        ]
+
+
+        choices = {x["label"]: x["concept"] for x in document["choices"]}
+        for sentence in document["sentences"]:
+            document_ = {}
+            document_["events"] = []
+            document_["relations"] = []
+            document_["coreferences"] = []
+            document_["id"] = next(self.uid)
+            document_["document_id"] = sentence["pmid"]
+            document_["passages"] = [
+                {"id": next(self.uid), "type": "", "text": [sentence["text"]], "offsets": [[0, len(sentence["text"])]]}
+            ]
+            document_["entities"] = [
+                {
+                    "id": next(self.uid),
+                    "type": "",
+                    "text": [document["ambiguous_word"]],
+                    "offsets": [self._parse_offset(sentence["text"])],
+                    "normalized": [{"db_name": "MeSH", "db_id": choices[sentence["label"]]}],
+                }
+            ]
+            yield document_
+
 
