@@ -112,7 +112,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                 {
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "score": datasets.Value("string"),
+                    "score": datasets.Value("float32"),
                 }
             )
 
