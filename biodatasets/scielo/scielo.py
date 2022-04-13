@@ -44,9 +44,9 @@ _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWS
 _LICENSE = "CC BY 4.0"
 
 _URLS = {
-    "en-es": "https://ndownloader.figstatic.com/files/14019287",
-    "en-pt": "https://ndownloader.figstatic.com/files/14019308",
-    "en-pt-es": "https://ndownloader.figstatic.com/files/14019293",
+    "en_es": "https://ndownloader.figstatic.com/files/14019287",
+    "en_pt": "https://ndownloader.figstatic.com/files/14019308",
+    "en_pt_es": "https://ndownloader.figstatic.com/files/14019293",
 }
 
 _SUPPORTED_TASKS = [Tasks.TRANSLATION]
@@ -66,35 +66,35 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="scielo_en-es_source",
+            name="scielo_en_es_source",
             version=SOURCE_VERSION,
             description="English-Spanish",
             schema="source",
-            subset_id="scielo_en-es",
+            subset_id="scielo_en_es",
         ),
         BigBioConfig(
-            name="scielo_en-pt_source",
+            name="scielo_en_pt_source",
             version=SOURCE_VERSION,
             description="English-Portuguese",
             schema="source",
-            subset_id="scielo_en-pt",
+            subset_id="scielo_en_pt",
         ),
         BigBioConfig(
-            name="scielo_en-pt-es_source",
+            name="scielo_en_pt_es_source",
             version=SOURCE_VERSION,
             description="English-Portuguese-Spanish",
             schema="source",
-            subset_id="scielo_en-pt-es",
+            subset_id="scielo_en_pt_es",
         ),
         BigBioConfig(
-            name="scielo_en-es_bigbio_t2t",
+            name="scielo_en_es_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="scielo BigBio schema English-Spanish",
             schema="bigbio_t2t",
-            subset_id="scielo_en-es",
+            subset_id="scielo_en_es",
         ),
         BigBioConfig(
-            name="scielo_en-pt_bigbio_t2t",
+            name="scielo_en_pt_bigbio_t2t",
             version=BIGBIO_VERSION,
             description="scielo BigBio schema English-Portuguese",
             schema="bigbio_t2t",
@@ -102,12 +102,12 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "scielo_source_en-es"
+    DEFAULT_CONFIG_NAME = "scielo_source_en_es"
 
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
-            lang_list: List[str] = self.config.name.split("_")[1].split("-")
+            lang_list: List[str] = self.config.subset_id.split("_")[1:]
             features = datasets.Features({"translation": datasets.features.Translation(languages=lang_list)})
 
         elif self.config.schema == "bigbio_t2t":
@@ -123,12 +123,13 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        languages: str = self.config.name.split("_")[1]
+        lang_list: List[str] = self.config.subset_id.split("_")[1:]
+        languages = "_".join(lang_list)
         archive = dl_manager.download(_URLS[languages])
-        lang_list: List[str] = languages.split("-")
-        fname = languages.replace("-", "_")
 
-        if languages == "en-pt-es":
+        fname = languages
+
+        if languages == "en_pt_es":
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
@@ -172,16 +173,16 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
                     source_sentences = f.read().decode("utf-8").split("\n")
                 elif path == target_file:
                     target_sentences = f.read().decode("utf-8").split("\n")
-                elif languages == "en-pt-es" and path == target_file_2:
+                elif languages == "en_pt_es" and path == target_file_2:
                     target_sentences_2 = f.read().decode("utf-8").split("\n")
 
-            if languages == "en-pt-es":
-                source, target, target_2 = tuple(languages.split("-"))
+            if languages == "en_pt_es":
+                source, target, target_2 = tuple(languages.split("_"))
                 for idx, (l1, l2, l3) in enumerate(zip(source_sentences, target_sentences, target_sentences_2)):
                     result = {"translation": {source: l1, target: l2, target_2: l3}}
                     yield idx, result
             else:
-                source, target = tuple(languages.split("-"))
+                source, target = tuple(languages.split("_"))
                 for idx, (l1, l2) in enumerate(zip(source_sentences, target_sentences)):
                     result = {"translation": {source: l1, target: l2}}
                     yield idx, result
@@ -194,7 +195,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
                     target_sentences = f.read().decode("utf-8").split("\n")
 
             uid = 0
-            source, target = tuple(languages.split("-"))
+            source, target = tuple(languages.split("_"))
             for idx, (l1, l2) in enumerate(zip(source_sentences, target_sentences)):
                 uid += 1
                 yield idx, {
