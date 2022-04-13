@@ -67,6 +67,8 @@ _LICENSE = "https://creativecommons.org/licenses/by/4.0/legalcode"  # TODO: term
 
 _DATA_PATH = "https://raw.githubusercontent.com/abachaa/MedQuAD/master"
 
+_TEST_DATA_PATH = "https://raw.githubusercontent.com/abachaa/LiveQA_MedicalTask_TREC2017/master/TestDataset/TREC-2017-LiveQA-Medical-Test.xml"
+
 _DATA_REPO_FETCH_URL = "https://github.com/abachaa/MedQuAD/archive/refs/heads/master.zip"
 
 _SUBSET_BASE_URIS = {
@@ -86,7 +88,7 @@ _SUBSET_BASE_URIS = {
 
 _URLS = {
     "medquad_base_urls": _SUBSET_BASE_URIS,
-    f"QATestSetMedQrels_judged_answers": f"{_DATA_PATH}/QA-TestSet-LiveQA-Med-Qrels-2479-Answers.zip",
+    f"QATestSetMedQrels_judged_answers": _TEST_DATA_PATH,
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]  # TODO: shall we add a non-existing task type such as `RQE`?
@@ -175,7 +177,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
                             "Answer": answer.text,
                         })
 
-        return qa_list, os.path.dirname(file_paths[0])
+        return qa_list
 
     def _dump_xml_to_json(self, dl_manager) -> str:
         """
@@ -200,21 +202,22 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             for file_path in glob.glob(os.path.join(repo_dir, uri_, "*.xml")):
                 qa_file_paths.append(file_path)
 
-        qa_list, data_dir = self._load_qa_from_xml(
-            file_paths=qa_file_paths
-        )
+        data_dir = os.path.dirname(qa_file_paths[0])
 
         qa_pairs_enriched_full_path = os.path.join(data_dir, qa_pairs_enriched_fname)
 
-        qa_pairs_enriched_dir = os.path.dirname(qa_pairs_enriched_full_path)
-        if not os.path.exists(qa_pairs_enriched_dir):
-            os.mkdir(qa_pairs_enriched_dir)
-
         if not os.path.exists(qa_pairs_enriched_full_path):
-            data = {"qa_pairs": qa_list}
+            qa_list = self._load_qa_from_xml(
+                file_paths=qa_file_paths
+            )
+
+            qa_pairs_enriched_dir = os.path.dirname(qa_pairs_enriched_full_path)
+            if not os.path.exists(qa_pairs_enriched_dir):
+                os.mkdir(qa_pairs_enriched_dir)
+
             # dump QA paris to json
             with open(qa_pairs_enriched_full_path, "wt", encoding="utf-8") as file:
-                json.dump(data, file, indent=2)
+                json.dump(qa_list, file, indent=2)
 
         return qa_pairs_enriched_full_path
 
@@ -240,7 +243,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             with open(filepath, encoding="utf-8") as file:
                 data = json.load(file)
-                for key, record in enumerate(data["qa_pairs"]):
+                for key, record in enumerate(data):
                     yield key, {
                         "Document": record["Document"],
                         "QAPair": record["QAPair"],
@@ -254,7 +257,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             with open(filepath, encoding="utf-8") as file:
                 uid = 0
                 data = json.load(file)
-                for key, record in enumerate(data["qa_pairs"]):
+                for key, record in enumerate(data):
                     uid += 1
                     yield key, {
                         "id": str(uid),
