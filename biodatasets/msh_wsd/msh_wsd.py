@@ -232,7 +232,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
             document_["entities"] = [
                 {
                     "id": next(self.uid),
-                    "type": "",
+                    "type": "ambiguous_word",
                     "text": [document["ambiguous_word"]],
                     "offsets": [self._parse_offset(sentence["text"])],
                     "normalized": [{"db_name": "MeSH", "db_id": choices[sentence["label"]]}],
