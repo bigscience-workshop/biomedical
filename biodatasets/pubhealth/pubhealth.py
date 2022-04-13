@@ -53,7 +53,7 @@ _LICENSE = "MIT License"
 
 _URLs = {_DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"}
 
-_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
+_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -73,10 +73,10 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
             subset_id="pubhealth",
         ),
         BigBioConfig(
-            name="pubhealth_bigbio_text",
+            name="pubhealth_bigbio_te",
             version=BIGBIO_VERSION,
             description="PUBHEALTH BigBio schema",
-            schema="bigbio_text",
+            schema="bigbio_te",
             subset_id="pubhealth",
         ),
     ]
@@ -100,9 +100,9 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        # Using in pairs schema
-        elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+        # Using in entailment schema
+        elif self.config.schema == "bigbio_te":
+            features = schemas.entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -174,10 +174,10 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                         "subjects": subjects,
                     }
 
-                elif self.config.schema == "bigbio_text":
+                elif self.config.schema == "bigbio_te":
                     yield id_, {
                         "id": id_,  # uid is an unique identifier for every record that starts from 0
-                        "document_id": claim_id,
-                        "text": main_text,
-                        "labels": [label],
+                        "premise": explanation,
+                        "hypothesis": claim,
+                        "label": label,
                     }
