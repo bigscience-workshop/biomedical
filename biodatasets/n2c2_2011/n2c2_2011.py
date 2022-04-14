@@ -408,7 +408,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "n2c2_2011_source"
+    BUILDER_CONFIG_CLASS = BigBioConfig
 
     def _info(self):
 
