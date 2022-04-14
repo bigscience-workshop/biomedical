@@ -32,7 +32,8 @@ import datasets
 
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
-from utils.constants import Tasks, BigBioValues
+from utils.constants import Tasks
+#, BigBioValues
 
 _CITATION = """\
 @article{verspoor2013annotating,
@@ -260,3 +261,4 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
+            
