@@ -247,7 +247,8 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
         from utils.parsing import parse_brat_file
 
         import pandas as pd
-
+        
+        print(filepath)
         so_annot = pd.read_csv(
                 filepath_standoff,
                 delimiter="\t",
@@ -284,14 +285,14 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
         
             xml_abstracts = f.read().split("\n\n")
             
-        xml_annotations = {}
-
-        for abstract in xml_abstracts:
-            # For convenience construct correct xml structure
-            xml_abstract = ET.fromstring("<root>" + abstract + "</root>")
-            for child in xml_abstract:
-                print(child.tag, child.attrib)
-            exit()
+        # xml_annotations = {}
+        #
+        # for abstract in xml_abstracts:
+        #     # For convenience construct correct xml structure
+        #     xml_abstract = ET.fromstring("<root>" + abstract + "</root>")
+        #     for child in xml_abstract:
+        #         print(child.tag, child.attrib)
+        #     exit()
          
         for file in Path(folder_path).iterdir():
 
@@ -302,7 +303,8 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
                 text = f.read()
 
             pmid = int(file.name.removesuffix(".txt"))
-            
+                
+            # Can PMID corresponding annotations
             doc_annotations = so_annot[so_annot.PMID == pmid]
 
             entities = []
