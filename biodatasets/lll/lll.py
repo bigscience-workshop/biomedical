@@ -27,6 +27,7 @@ sentences.
 
 # NOTE: 
 # word stop offsets are increased by one to be consistent with python slicing.
+# test set does not include entity relation information
 
 import itertools as it
 from typing import List
