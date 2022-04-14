@@ -294,9 +294,9 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             for guid, txt_file in enumerate(txt_files_task2):
                 example = parsing.parse_brat_file(txt_file, parse_notes=True)
-                try:
+                if example["document_id"] in task3_dict:
                     example["labels"] = task3_dict[example["document_id"]]
-                except Exception:
+                else:
                     example["labels"] = []  # few cases where subtrack 3 has no codes for the current document
                 example["id"] = str(guid)
                 yield guid, example
@@ -314,9 +314,9 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_text":
             for guid, txt_file in enumerate(txt_files_task1):
                 parsed_brat = parsing.parse_brat_file(txt_file, parse_notes=False)
-                try:
+                if parsed_brat["document_id"] in task3_dict:
                     labels = task3_dict[parsed_brat["document_id"]]
-                except Exception:
+                else:
                     labels = []  # few cases where subtrack 3 has no codes for the current document
                 example = {
                     "id": str(guid),
