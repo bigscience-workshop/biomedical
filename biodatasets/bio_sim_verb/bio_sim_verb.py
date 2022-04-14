@@ -118,7 +118,7 @@ class BioSimVerb(datasets.GeneratorBasedBuilder):
                 {
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string"),
+                    "label": datasets.Value("float32"),
                 }
             )
 
@@ -158,7 +158,7 @@ class BioSimVerb(datasets.GeneratorBasedBuilder):
                     yield id_, {
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label": label,
+                        "label": float(label),
                     }
 
             elif self.config.schema == "bigbio_pairs":
@@ -171,5 +171,5 @@ class BioSimVerb(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label": "0" if float(label) < 5 else "1",
+                        "label": str(label),
                     }
