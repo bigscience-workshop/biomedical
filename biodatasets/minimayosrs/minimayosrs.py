@@ -187,9 +187,16 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
 
             if self.config.schema == "source":
                 for id_, row in enumerate(data):
-                    text_1, text_2, label_physicians,
-                    code_1_physicians, code_2_physicians,
-                    label_coders, code_1_coders, code_2_coders = row
+                    (
+                        text_1,
+                        text_2,
+                        label_physicians,
+                        code_1_physicians,
+                        code_2_physicians,
+                        label_coders,
+                        code_1_coders,
+                        code_2_coders,
+                    ) = row
 
                     yield id_, {
                         "text_1": text_1,
