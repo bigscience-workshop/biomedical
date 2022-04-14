@@ -16,11 +16,11 @@
 
 import json
 import os
-import time
+
 from typing import List
+import xml.etree.ElementTree as ET
 
 import datasets
-from tqdm import tqdm
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -80,7 +80,6 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             description="bioasq_task_c_2017 source schema",
             schema="source",
             subset_id="bioasq_task_c_2017",
-            # cred_mail=""
         ),
         BigBioConfig(
             name="bioasq_task_c_2017_bigbio_text",
@@ -88,7 +87,6 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             description="bioasq_task_c_2017 BigBio schema",
             schema="bigbio_text",
             subset_id="bioasq_task_c_2017",
-            # cred_mail=""
         ),
     ]
 
@@ -154,32 +152,11 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
         with open(filepath) as f:
             task_data = json.load(f)
 
-        # Possible usage of `fetch_pubmed_abstracts` function
-        # pmids = []
-        # for article in task_data["articles"]:
-        #     pmids.append(article["pmid"])
-        #
-        # Download all pubmed articles
-        # pubmed_dir = self.config.data_dir + "/.pubmed_data"
-        # fetch_pubmed_abstracts(pmids, pubmed_dir, self.config.cred_mail)
-        #
-        # articles = {}
-        #
-        # for pubmed_file in Path(pubmed_dir).iterdir():
-        #
-        #     with open(pubmed_file) as f:
-        #         pubmed_json = json.load(f)
-        #
-        #     # Collect article according to pmid
-        #     for article in pubmed_json["PubmedArticle"]:
-        #         pmid = article["MedlineCitation"]["PMID"]
-        #         articles[pmid] = article
-
         if self.config.schema == "source":
-            for i, article in enumerate(task_data["articles"]):
+            for article in task_data["articles"]:
+
                 with open(filespath + "/" + article["pmcid"] + ".xml") as f:
                     text = f.read()
-
                 pmid = article["pmid"]
 
                 yield pmid, {
@@ -192,9 +169,26 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
                 }
 
         elif self.config.schema == "bigbio_text":
-            for i, article in enumerate(task_data["articles"]):
+
+            for article in task_data["articles"]:
+
                 with open(filespath + "/" + article["pmcid"] + ".xml") as f:
-                    text = f.read()
+                    xml_string = f.read()
+                
+                try:
+                    article_body = ET.fromstring(xml_string).find("./article/body")
+                except ET.ParseError:
+                    
+                    # PubMed XML might not contain namespace which results in parse error, add manually
+                    xml_string = xml_string.replace(
+                            "</pmc-articleset>",
+                            # xlink namespace                                    mml namespace
+                            '<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article">'
+                    )
+                    xml_string = xml_string + "</article></pmc-articleset>"
+                    article_body = ET.fromstring(xml_string).find("./article/body")
+
+                text = ET.tostring(article_body, encoding='utf8', method='text')
 
                 yield article["pmid"], {
                     "text": text,
@@ -204,56 +198,3 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
                 }
 
 
-def fetch_pubmed_abstracts(
-    pmids: List,
-    outdir: str,
-    cred_mail: str,
-    batch_size: int = 1000,
-    delay: float = 0.3,
-    overwrite: bool = False,
-    verbose: bool = True,
-):
-    """
-    Fetches pubmed articles for a given list of PMIDs.
-
-    PubMed articles can be downloaded in bulks, for now tested with 1000 articles per requests,
-    but can still be slow. The BioASQ Task C 2017 contains up to 63 000 articles per split.
-
-    Also required is a email address which is registered at https://pubmed.ncbi.nlm.nih.gov,
-    we therefore discussed a extra attribute "cred_mail" in the BigBioConfig class, that can
-    optionally be filled out. Additionally the dependecy `biopython` has to be introduced
-    (https://biopython.org).
-
-    For now this function also dumps all articles in arbitrary named json files in outdir.
-
-    All the code on how to use this function/apporach is commented out in the data loader.
-    """
-    from Bio import Entrez
-
-    # TODO: required to be set
-    # Entrez.email = cred_mail
-
-    if not os.path.exists(outdir):
-        os.mkdir(outdir)
-
-    if not isinstance(pmids, list):
-        pmids = list(pmids)
-
-    n_chunks = int(len(pmids) / batch_size)
-
-    for i in tqdm(range(0, n_chunks + (1 if n_chunks * batch_size < len(pmids) else 0))):
-        start, end = i * batch_size, (i + 1) * batch_size
-        outfname = f"{outdir}/pubmed.{i}.json"
-        if os.path.exists(outfname) and not overwrite:
-            continue
-
-        query = ",".join(pmids[start:end])
-        handle = Entrez.efetch(db="pubmed", id=query, rettype="gb", retmode="xml", retmax=batch_size)
-        record = Entrez.read(handle)
-        if len(record["PubmedArticle"]) != len(pmids[start:end]) and verbose:
-            print(f"Queried {len(pmids[start:end])}, returned {len(record['PubmedArticle'])}")
-
-        time.sleep(delay)
-        # dump to JSON
-        with open(outfname, "wt") as file:
-            file.write(json.dumps(record, indent=2))
