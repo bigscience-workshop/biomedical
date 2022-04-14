@@ -53,9 +53,11 @@ _LICENSE = "MIT License"
 
 _URLs = {_DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"}
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
+_CLASSES = ["true", "false", "unproven", "mixture"]
 
 
 class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
@@ -73,10 +75,10 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
             subset_id="pubhealth",
         ),
         BigBioConfig(
-            name="pubhealth_bigbio_te",
+            name="pubhealth_bigbio_pairs",
             version=BIGBIO_VERSION,
             description="PUBHEALTH BigBio schema",
-            schema="bigbio_te",
+            schema="bigbio_pairs",
             subset_id="pubhealth",
         ),
     ]
@@ -95,14 +97,14 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                     "fact_checkers": datasets.Value("string"),
                     "main_text": datasets.Value("string"),
                     "sources": datasets.Value("string"),
-                    "label": datasets.Value("string"),
+                    "label": datasets.ClassLabel(names=_CLASSES),
                     "subjects": datasets.Value("string"),
                 }
             )
 
         # Using in entailment schema
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+        elif self.config.schema == "bigbio_pairs":
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -161,6 +163,10 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                     -9:
                 ]  # only take last 9 columns to fix test.tsv disparity
 
+                if label not in _CLASSES:
+                    logger.warning("Line %s is missing label", id_)
+                    continue
+
                 if self.config.schema == "source":
                     yield id_, {
                         "claim_id": claim_id,
@@ -174,10 +180,11 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                         "subjects": subjects,
                     }
 
-                elif self.config.schema == "bigbio_te":
+                elif self.config.schema == "bigbio_pairs":
                     yield id_, {
                         "id": id_,  # uid is an unique identifier for every record that starts from 0
-                        "premise": explanation,
-                        "hypothesis": claim,
+                        "document_id": claim_id,
+                        "text_1": claim,
+                        "text_2": explanation,
                         "label": label,
                     }
