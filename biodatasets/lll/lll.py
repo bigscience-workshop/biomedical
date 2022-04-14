@@ -25,10 +25,8 @@ interaction means, extracting the agent (proteins) and the target (genes) of all
 sentences.
 """
 
-# WARNING: Comment from author:
-# In the bigbio configuration off-by-one errors in the stop offsets of entities are fixed.
-# The offsets in the source configuration remain unchanged.
-# Please make this is the intended behavior you need.
+# NOTE: 
+# word stop offsets are increased by one to be consistent with python slicing.
 
 import itertools as it
 from typing import List
@@ -280,7 +278,8 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         # Sorry for that abomination, parses the arguments from atoms like rel(arg1, ..., argn)
         args = atom.split("(", 1)[1][:-1].split(",")
         if type == "words":
-            return {"id": args[0], "text": args[1].strip("'"), "offsets": [int(args[2]), int(args[3])]}
+            # fix offsets for source schema
+            return {"id": args[0], "text": args[1].strip("'"), "offsets": [int(args[2]), int(args[3])+1]}
         elif type == "genic_interactions":
             return {"ref_id1": args[0], "ref_id2": args[1]}
         elif type == "agents":
