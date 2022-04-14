@@ -304,7 +304,7 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
         if entity["grounding"]:
             assert len(entity["grounding"]) == 1
             if entity["grounding"][0]["entrez_gene"] != "NA":
-                normalized_.append({"db_name": "entrez", "db_id": entity["grounding"][0]["entrez_gene"]})
+                normalized_.append({"db_name": "NCBI gene", "db_id": entity["grounding"][0]["entrez_gene"]})
             if entity["grounding"][0]["hgnc_symbol"] != "NA":
                 normalized_.append({"db_name": "hgnc", "db_id": entity["grounding"][0]["hgnc_symbol"]})
 
@@ -370,8 +370,6 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
                     id = link.replace(template, "")
                     id = id.split("?")[0]
                     assert "/" not in id
-                    if source == "https://enzyme.expasy.org/EC/2.5.1.18":
-                        source = "EC"
                     return {"db_name": source, "db_id": id}
 
             assert False, f"No template found for {link}, choices: {repr(link_templates)}"
