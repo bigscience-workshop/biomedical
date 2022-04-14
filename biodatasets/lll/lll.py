@@ -25,7 +25,7 @@ interaction means, extracting the agent (proteins) and the target (genes) of all
 sentences.
 """
 
-# NOTE: 
+# NOTE:
 # word stop offsets are increased by one to be consistent with python slicing.
 # test set does not include entity relation information
 
@@ -207,8 +207,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "id": f"{document_['id']}-{word['id']}",
                                 "type": None,
                                 "text": [word["text"]],
-                                # fix offsets for bigbio schema
-                                "offsets": [[word["offsets"][0], word["offsets"][1] + 1]],
+                                "offsets": [[word["offsets"][0], word["offsets"][1]]],
                                 "normalized": [],
                             }
                             for word in document["words"]
@@ -279,7 +278,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         # Sorry for that abomination, parses the arguments from atoms like rel(arg1, ..., argn)
         args = atom.split("(", 1)[1][:-1].split(",")
         if type == "words":
-            # fix offsets for source schema
+            # fix offsets for python slicing
             return {"id": args[0], "text": args[1].strip("'"), "offsets": [int(args[2]), int(args[3])+1]}
         elif type == "genic_interactions":
             return {"ref_id1": args[0], "ref_id2": args[1]}
