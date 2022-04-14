@@ -16,9 +16,8 @@
 
 import json
 import os
-
-from typing import List
 import xml.etree.ElementTree as ET
+from typing import List
 
 import datasets
 
@@ -174,21 +173,23 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
 
                 with open(filespath + "/" + article["pmcid"] + ".xml") as f:
                     xml_string = f.read()
-                
+
                 try:
                     article_body = ET.fromstring(xml_string).find("./article/body")
                 except ET.ParseError:
-                    
+
                     # PubMed XML might not contain namespace which results in parse error, add manually
                     xml_string = xml_string.replace(
-                            "</pmc-articleset>",
-                            # xlink namespace                                    mml namespace
-                            '<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article">'
+                        "</pmc-articleset>",
+                        # xlink namespace
+                        '<article xmlns:xlink="http://www.w3.org/1999/xlink"'  # mml namespace
+                        ' xmlns:mml="http://www.w3.org/1998/Math/MathML"'
+                        ' article-type="research-article">',
                     )
                     xml_string = xml_string + "</article></pmc-articleset>"
                     article_body = ET.fromstring(xml_string).find("./article/body")
 
-                text = ET.tostring(article_body, encoding='utf8', method='text')
+                text = ET.tostring(article_body, encoding="utf8", method="text")
 
                 yield article["pmid"], {
                     "text": text,
@@ -196,5 +197,3 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
                     "document_id": article["pmid"],
                     "labels": [grant["agency"] for grant in article["grantList"]],
                 }
-
-
