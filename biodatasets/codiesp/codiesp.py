@@ -276,15 +276,11 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                     "task_x": {"label": "", "code": "", "text": "", "spans": []},
                 }
 
-                try:
+                if file in task_dicts["codiesp_p"]:
                     example["task_p_labels"] = task_dicts["codiesp_p"][file]
-                except Exception:
-                    pass  # this file is not present in the task D data
 
-                try:
+                if file in task_dicts["codiesp_x"]:
                     example["task_x"] = task_dicts["codiesp_x"][file]
-                except Exception:
-                    pass  # this file is not present in the task X data
 
                 yield guid, example
 
