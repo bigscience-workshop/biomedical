@@ -66,16 +66,19 @@ _URLS = {
         "correct": f"{_BASE_URL}test/Correct.Data",
         "gold": f"{_BASE_URL}test/Gold.format",
         "text": f"{_BASE_URL}test/TOKENIZED_CORPUS",
+        "postagspath": f"{_BASE_URL}test/TAGGED_GENE_CORPUS",
     },
     "train": {
         "correct": f"{_BASE_URL}train/Correct.Data",
         "gold": f"{_BASE_URL}train/Gold.format",
         "text": f"{_BASE_URL}train/TOKENIZED_CORPUS",
+        "postagspath": f"{_BASE_URL}train/TAGGED_GENE_CORPUS",
     },
     "round1": {
         "correct": f"{_BASE_URL}round1/Correct.Data",
         "gold": f"{_BASE_URL}round1/Gold.format",
         "text": f"{_BASE_URL}round1/TOKENIZED_CORPUS",
+        "postagspath": f"{_BASE_URL}round1/TAGGED_GENE_CORPUS",
     },
 }
 
@@ -123,6 +126,8 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 {
                     "doc_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
+                    "tokenized_text": datasets.Sequence(datasets.Value("string")),
+                    "pos_tags": datasets.Sequence(datasets.Value("string")),
                     "entities": [
                         {
                             "token_offsets": datasets.Sequence([datasets.Value("int32")]),
@@ -158,6 +163,7 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepath": data_dir["train"]["text"],
                     "annotationpath": data_dir["train"][annotation_type],
+                    "postagspath": data_dir["train"]["postagspath"],
                     "split": "train",
                 },
             ),
@@ -166,6 +172,7 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepath": data_dir["test"]["text"],
                     "annotationpath": data_dir["test"][annotation_type],
+                    "postagspath": data_dir["test"]["postagspath"],
                     "split": "test",
                 },
             ),
@@ -174,14 +181,15 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepath": data_dir["round1"]["text"],
                     "annotationpath": data_dir["round1"][annotation_type],
+                    "postagspath": data_dir["round1"]["postagspath"],
                     "split": "dev",
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, annotationpath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath, annotationpath, postagspath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        corpus, annotations = self._read_files(filepath, annotationpath)
+        corpus, annotations = self._read_files(filepath, annotationpath, postagspath)
 
         if self.config.schema == "source":
             source_examples = self._parse_annotations_source(corpus, annotations, split)
@@ -193,7 +201,7 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
             for uid, doc_id in enumerate(bb_kb_examples):
                 yield uid, bb_kb_examples[doc_id]
 
-    def _read_files(self, filepath, annotation_path):
+    def _read_files(self, filepath, annotation_path, postagspath):
         """
         Reads text corpus and annotations
         """
@@ -206,7 +214,17 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 sentence_id = re.search(r"@@\d+", line).group(0)
                 # remove "/TAG" suffix and "./"
                 text = re.sub(r"(/TAG|\/\.)", "", line).split(sentence_id)[-1].strip()
-                corpus[sentence_id] = text
+                corpus[sentence_id] = {
+                    "text": text,
+                    "tokenized_text": text.split(),  # every token is space separated at source
+                }
+
+        with open(postagspath, "r") as texts:
+            for line in texts:
+                sentence_id = re.search(r"@@\d+", line).group(0)
+                _tags = re.findall(r"(\/[A-Z]+|\/[.,:()\"]+)", line)
+                pos_tags = [i.replace("/", "") for i in _tags]
+                corpus[sentence_id]["pos_tags"] = pos_tags
 
         # read annotations
         with open(annotation_path, "r") as annots:
@@ -232,8 +250,14 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
         source_examples = {}
         for sent_id in corpus:
 
-            text = corpus[sent_id]
-            source_examples[sent_id] = {"doc_id": sent_id, "text": text, "entities": []}
+            text = corpus[sent_id]["text"]
+            source_examples[sent_id] = {
+                "doc_id": sent_id,
+                "text": text,
+                "tokenized_text": corpus[sent_id]["tokenized_text"],
+                "pos_tags": corpus[sent_id]["pos_tags"],
+                "entities": [],
+            }
 
             if annotations.get(sent_id):
                 for uid, entity in enumerate(annotations[sent_id]):
@@ -255,7 +279,7 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
         bb_examples = {}
 
         for sent_id in corpus:
-            text = corpus[sent_id]
+            text = corpus[sent_id]["text"]
             bb_examples[sent_id] = {
                 "id": sent_id,
                 "document_id": sent_id,
