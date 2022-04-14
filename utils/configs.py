@@ -12,3 +12,4 @@ class BigBioConfig(datasets.BuilderConfig):
     description: str = None
     schema: str = None
     subset_id: str = None
+    cred_mail: str = None
