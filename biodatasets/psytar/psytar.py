@@ -50,6 +50,7 @@ import datasets
 import pandas as pd
 
 from utils import parsing, schemas
+from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
@@ -104,7 +105,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 @dataclass
-class PsyTARBigBioConfig(datasets.BuilderConfig):
+class PsyTARBigBioConfig(BigBioConfig):
     schema: str = "source"
     name: str = "psytar_source"
     version: datasets.Version = _SOURCE_VERSION
