@@ -87,8 +87,8 @@ _SUBSET_BASE_URIS = {
 }
 
 _URLS = {
-    "medquad_base_urls": _SUBSET_BASE_URIS,
-    f"QATestSetMedQrels_judged_answers": _TEST_DATA_PATH,
+    "medquad_base_uris": _SUBSET_BASE_URIS,
+    "medquad_test_base_uris": _TEST_DATA_PATH,
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]  # TODO: shall we add a non-existing task type such as `RQE`?
@@ -149,7 +149,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _load_qa_from_xml(self, file_paths) -> Tuple[List[dict], str]:
+    def _load_qa_from_xml(self, file_paths) -> List[dict[str, str | None]]:
         """
         This method traverses the whole list of the downloaded XML files and extracts Q&A pairs.
         Returns the extracted Q&As and the base directory of the dumped json file that contains them all.
@@ -179,35 +179,19 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
 
         return qa_list
 
-    def _dump_xml_to_json(self, dl_manager) -> str:
-        """
-        This method parses the dataset
+    def _dump_xml_to_json(self, qa_file_paths, test=False):
 
-        """
-        repo_extracted = dl_manager.download_and_extract(_DATA_REPO_FETCH_URL)
-        repo_dir = os.path.join(
-            repo_extracted,
-            os.path.basename(_HOMEPAGE) + '-' + os.path.splitext(os.path.basename(_DATA_REPO_FETCH_URL))[0]
-        )
-
-        if self.config.subset_id == "medquad":
-            file_base_urls = _URLS[f"{self.config.subset_id}_base_urls"]
-            qa_pairs_enriched_fname = f"MedQuADGoldenEnriched/{self.config.subset_id}.json"
-        else:
-            raise NotImplementedError("Only full set loader is implemented here")
+        qa_pairs_enriched_fname = f"MedQuADGoldenEnriched/{self.config.subset_id}.json"
 
         # Collect path info for all repo paths, and determine relevant XML files
-        qa_file_paths = []
-        for subset_name, uri_ in file_base_urls.items():
-            for file_path in glob.glob(os.path.join(repo_dir, uri_, "*.xml")):
-                qa_file_paths.append(file_path)
-
         data_dir = os.path.dirname(qa_file_paths[0])
 
         qa_pairs_enriched_full_path = os.path.join(data_dir, qa_pairs_enriched_fname)
 
         if not os.path.exists(qa_pairs_enriched_full_path):
             qa_list = self._load_qa_from_xml(
+                file_paths=qa_file_paths
+            ) if test else self._load_qa_from_xml(
                 file_paths=qa_file_paths
             )
 
@@ -221,10 +205,42 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
 
         return qa_pairs_enriched_full_path
 
+    def _dump_test_xml_to_json(self, dl_manager):
+        file_base_url = _URLS[f"medquad_test_base_uris"]
+        file_extracted = dl_manager.download_and_extract(file_base_url)
+
+        return self._dump_xml_to_json([file_extracted], test=True)
+
+    def _dump_train_xml_to_json(self, dl_manager) -> str:
+        """
+        This method parses training dataset, or a single batch that belongs to the websites,
+        please check the repo page.
+        """
+        repo_extracted = dl_manager.download_and_extract(_DATA_REPO_FETCH_URL)
+        repo_dir = os.path.join(
+            repo_extracted,
+            os.path.basename(_HOMEPAGE) + '-' + os.path.splitext(os.path.basename(_DATA_REPO_FETCH_URL))[0]
+        )
+
+        if self.config.subset_id == "medquad":
+            file_base_urls = _URLS[f"medquad_base_uris"]
+        else:
+            file_base_urls = [_SUBSET_BASE_URIS[self.config.subset_id]]
+
+        qa_file_paths = []
+        for subset_name, uri_ in file_base_urls.items():
+            for file_path in glob.glob(os.path.join(repo_dir, uri_, "*.xml")):
+                qa_file_paths.append(file_path)
+
+        return self._dump_xml_to_json(qa_file_paths)
+
+
+
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        qa_pairs_enriched_fpath = self._dump_xml_to_json(dl_manager)
+        qa_pairs_enriched_fpath = self._dump_train_xml_to_json(dl_manager)
+        qa_pairs_enriched_test_fpath = self._dump_test_xml_to_json(dl_manager)
 
         # There is no canonical train/valid/test set in this dataset. So, only TRAIN is added.
         return [
