@@ -19,18 +19,16 @@ a large medical text dataset curated for abbreviation disambiguation, designed f
 pre-training in the medical domain. This script loads the MeDAL dataset in the bigbio KB schema and/or source schema.
 """
 
-import os
-from typing import List, Tuple, Dict
-
-import csv 
+import csv
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 logger = datasets.logging.get_logger(__name__)
-
 
 _CITATION = """\
 @inproceedings{,
@@ -79,30 +77,20 @@ _URLS = {
     "train": _URL + "train.csv",
     "test": _URL + "test.csv",
     "valid": _URL + "valid.csv",
-    "full": _URL + "full_data.csv",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION] 
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
 
 class MedalDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -125,20 +113,15 @@ class MedalDataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
-
         if self.config.schema == "source":
-            features=datasets.Features(
+            features = datasets.Features(
                 {
                     "abstract_id": datasets.Value("int32"),
                     "text": datasets.Value("string"),
                     "location": datasets.Sequence(datasets.Value("int32")),
-                    "label": datasets.Sequence(datasets.Value("string"))
+                    "label": datasets.Sequence(datasets.Value("string")),
                 }
-            ),
+            )
 
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
@@ -151,21 +134,10 @@ class MedalDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
-
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-
-        urls = _URLS[_DATASETNAME]
+        urls = _URLS
         data_dir = dl_manager.download_and_extract(urls)
 
         urls_to_dl = _URLS
@@ -193,85 +165,84 @@ class MedalDataset(datasets.GeneratorBasedBuilder):
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
             ),
-            datasets.SplitGenerator(
-                name="full",
-                # These kwargs will be passed to _generate_examples
-                gen_kwargs={"filepath": dl_dir["full"], "split": "full"},
-            ),
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
+    def _generate_offsets(self, text, location):
+        """Generate offsets from text and word location.
 
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
+        Parameters
+        ----------
+        text : text
+            Abstract text
+        location : int
+            location of abbreviation in text, indexed by number of words in abstract
+
+        Returns
+        -------
+        tuple (int, int)
+            offsets
+        """
+        words = text.split(" ")
+        word = words[location]
+        offset_start = sum(len(word) for word in words[0:location]) + location
+        offset_end = offset_start + len(word)
+
+        return (offset_start, offset_end)
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
         with open(filepath, encoding="utf-8") as f:
             data = csv.reader(f)
             # Skip header
             next(data)
 
-            if split == "full":
-                id_ = 0
-                if self.config.schema == "source":
-                    for id_, row in enumerate(data):
-                        yield id_, {
-                            "abstract_id": -1,
-                            "text": row[0],
-                            "location": [int(location) for location in row[1].split("|")],
-                            "label": [row[2].split("|")]
-                        }
-                elif self.config.schema == "bigbio_kb":
-                       for id_, row in enumerate(data):
-                        yield id_, {
-                            "id": id_,
-                            "document_id": -1,
-                            "entities": [ 
+            if self.config.schema == "source":
+                for id_, row in enumerate(data):
+                    yield id_, {
+                        "abstract_id": int(row[0]),
+                        "text": row[1],
+                        "location": [int(row[2])],
+                        "label": [row[3]],
+                    }
+            elif self.config.schema == "bigbio_kb":
+                uid = 0  # global unique id
+                for id_, row in enumerate(data):
+                    result = self._generate_offsets(row[1], int(row[2]))
+
+                    data = {
+                        "id": uid,
+                        "document_id": int(row[0]),
+                        "passages": [],
+                        "entities": [],
+                        "relations": [],
+                        "events": [],
+                        "coreferences": [],
+                    }
+
+                    uid += 1
+
+                    data["passages"].append(
+                        {"id": uid, "type": "PubMed abstract", "text": [row[1]], "offsets": [(0, len(row[1]))]}
+                    )
+
+                    uid += 1
+
+                    data["entities"].append(
+                        {
+                            "id": uid,
+                            "type": "abbreviation",
+                            "text": [row[1]],
+                            "offsets": [result["offsets"]],
+                            "normalized": [
                                 {
-                                    "id": -1,
-                                    "type": "abbreviation",
-                                    "text": row[0],
-                                    "offsets": [int(location) for location in row[1].split("|")],
-                                    "normalized": [
-                                         { 
-                                             "db_name": "medal",
-                                             "db_id": [row[2].split("|")],
-                                         }
-                                    ],
+                                    "db_name": "medal",
+                                    "db_id": [row[3]],
                                 }
-                            ]
+                            ],
                         }
-            else:
-                if self.config.schema == "source":
-                    for id_, row in enumerate(data):
-                        yield id_, {
-                            "abstract_id": int(row[0]),
-                            "text": row[1],
-                            "location": [int(row[2])],
-                            "label": [row[3]],
-                        }
-                elif self.config.schema == "bigbio_kb":
-                    for id_, row in enumerate(data):
-                        yield id_, {
-                                "id": id_,
-                                "document_id": int(row[0]),
-                                "entities": [
-                                    {
-                                        "id": -1,
-                                        "type": "abbreviation",
-                                        "text": row[1],
-                                        "offsets": [int(row[2])],
-                                        "normalized" : [
-                                            {
-                                                "db_name": "medal",
-                                                "db_id": [row[3]],
-                                            }
-                                        ] 
-                                    }
-                                ]
-                            }
+                    )
+
+                    uid += 1
+
+            yield id_, data
