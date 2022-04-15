@@ -25,8 +25,6 @@ The individual data files (inside the zip and tar archives) come in 4 types,
 * docs (*.txt files): text of a patient record
 * annotations (*.ann files): entities and relations along with offsets used as input to a NER / RE model
 
-Annotation
-
 The files comprising this dataset must be on the users local machine
 in a single directory that is passed to `datasets.load_dataset` via
 the `data_dir` kwarg. This loader script will read the archive files
