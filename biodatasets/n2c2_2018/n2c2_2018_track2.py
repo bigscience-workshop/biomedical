@@ -14,21 +14,28 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
+A dataset loader for the n2c2 2018 Adverse Drug Events and Medication Extraction dataset.
 
-When modifying it for your dataset, look for TODO items that offer specific instructions.
+The dataset consists of multiple archive files two of which are being used by the script,
+├── training_20180910.zip
+└── gold-standard-test-data.zip
 
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
+The individual data files (inside the zip and tar archives) come in 4 types,
 
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
+* docs (*.txt files): text of a patient record
+* annotations (*.ann files): entities and relations along with offsets used as input to a NER / RE model
 
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
+Annotation
 
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+The files comprising this dataset must be on the users local machine
+in a single directory that is passed to `datasets.load_dataset` via
+the `data_dir` kwarg. This loader script will read the archive files
+directly (i.e. the user should not uncompress, untar or unzip any of
+the files).
+
+Data Access from https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
+
+[bigbio_schema_name] = kb
 """
 
 import os
@@ -41,7 +48,6 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-# https://dblp.org/rec/journals/jamia/HenryBFSU20.html?view=bibtex
 _CITATION = """\
 @article{DBLP:journals/jamia/HenryBFSU20,
   author    = {
@@ -68,10 +74,42 @@ _CITATION = """\
 
 _DATASETNAME = "n2c2_2018_track2"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+The National NLP Clinical Challenges (n2c2), organized in 2018, continued the
+legacy of i2b2 (Informatics for Biology and the Bedside), adding 2 new tracks and 2
+new sets of data to the shared tasks organized since 2006. Track 2 of 2018
+n2c2 shared tasks focused on the extraction of medications, with their signature
+information, and adverse drug events (ADEs) from clinical narratives. 
+This track built on our previous medication challenge, but added a special focus on ADEs. 
+
+ADEs are injuries resulting from a medical intervention related to a drugs and 
+can include allergic reactions, drug interactions, overdoses, and medication errors. 
+Collectively, ADEs are estimated to account for 30% of all hospital adverse
+events; however, ADEs are preventable. Identifying potential drug interactions,
+overdoses, allergies, and errors at the point of care and alerting the caregivers of
+potential ADEs can improve health delivery, reduce the risk of ADEs, and improve health
+outcomes.  
+
+A step in this direction requires processing narratives of clinical records
+that often elaborate on the medications given to a patient, as well as the known
+allergies, reactions, and adverse events of the patient. Extraction of this information
+from narratives complements the structured medication information that can be
+obtained from prescriptions, allowing a more thorough assessment of potential ADEs
+before they happen.  
+
+The 2018 n2c2 shared task Track 2, hereon referred to as the ADE track,
+tackled these natural language processing tasks in 3 different steps, 
+which we refer to as tasks:  
+1. Concept Extraction: identification of concepts related to medications, 
+their signature information, and ADEs  
+2. Relation Classification: linking the previously mentioned concepts to 
+their medication  by identifying relations on gold standard concepts  
+3. End-to-End: building end-to-end systems that process raw narrative text 
+to discover concepts and find relations of those concepts to their medications
+
+Shared tasks provide a venue for head-to-head comparison of systems developed
+for the same task and on the same data, allowing researchers to identify the state
+of the art in a particular task, learn from it, and build on it.
 """
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
@@ -81,19 +119,19 @@ _LICENSE = "External Data User Agreement"
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 _SOURCE_VERSION = "1.0.0"  # 2018-09-10
-
 _BIGBIO_VERSION = "1.0.0"
-C_PATTERN = r"c=\"(.+?)\" (\d+):(\d+) (\d+):(\d+)"
-T_PATTERN = r"t=\"(.+?)\""
-A_PATTERN = r"a=\"(.+?)\""
-R_PATTERN = r"r=\"(.+?)\""
 
 # Constants
 DELIMITER = "||"
 SOURCE = "source"
 BIGBIO_KB = "bigbio_kb"
+ID = "id"
 ANNOTATIONS_EXT = "ann"
-TEXT_EXT = "txt"
+TEXT, TEXT_EXT = "text", "txt"
+TAG, TAGS = "tag", "tags"
+RELATION, RELATIONS = "relation", "relations"
+START, END = "start", "end"
+
 N2C2_2018_NER_LABELS = sorted(['Drug', 'Frequency', 'Reason', 'ADE', 'Dosage', 'Duration', 'Form', 'Route', 'Strength'])
 N2C2_2018_RELATION_LABELS = sorted(['Frequency-Drug', 'Strength-Drug', 'Route-Drug', 'Dosage-Drug', 'ADE-Drug',
                                     'Reason-Drug', 'Duration-Drug', 'Form-Drug'])
@@ -112,25 +150,31 @@ def _form_id(sample_id, entity_id, split, start_token, end_token, entity_type='e
 
 def _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text):
     return {
-        "id": tag_id,
-        "text": tag_text,
-        "start": int(tag_start),
-        "end": int(tag_end),
-        "concept": tag_type,
+        ID: tag_id,
+        TEXT: tag_text,
+        START: int(tag_start),
+        END: int(tag_end),
+        TAG: tag_type,
     }
 
 
 def _build_relation_dict(rel_id, arg1, arg2, rel_type):
     return {
-        "id": rel_id,
+        ID: rel_id,
         "arg1_id": arg1,
         "arg2_id": arg2,
-        "relation": rel_type,
+        RELATION: rel_type,
     }
 
 
 def _get_annotations(annotation_file):
-    """Return a dictionary with all the annotations in the .ann file."""
+    """Return a dictionary with all the annotations in the .ann file.
+
+    A typical line has either of the following form,
+        1. 'T41	Form 8977 8990	ophthalmology' -> '<ID> <CONCEPT> <START CHAR OFFSET> <END CHAR OFFSET> <TEXT>'
+        2. 'R22	Form-Drug Arg1:T41 Arg2:T40' -> '<ID> <RELATION> <CONCEPT_1_ID> <CONCEPT_2_ID>'
+
+    """
     tags, relations = {}, {}
     lines = annotation_file.splitlines()
     for line_num, line in enumerate(lines):
@@ -159,8 +203,8 @@ def _get_annotations(annotation_file):
         rel_type, rel_arg1, rel_arg2 = rel_m.split(' ')
         rel_arg1 = rel_arg1.split(':')[1]
         rel_arg2 = rel_arg2.split(':')[1]
-        arg1 = tags[rel_arg1]['id']
-        arg2 = tags[rel_arg2]['id']
+        arg1 = tags[rel_arg1][ID]
+        arg2 = tags[rel_arg2][ID]
         relations[rel_id] = _build_relation_dict(rel_id, arg1, arg2, rel_type)
 
     return tags.values(), relations.values()
@@ -181,7 +225,7 @@ def _read_zip(file_path):
                 if ext == TEXT_EXT:
                     samples[sample_id][ext] = content
                 else:
-                    samples[sample_id]["tags"], samples[sample_id]["relations"] = _get_annotations(content)
+                    samples[sample_id][TAGS], samples[sample_id][RELATIONS] = _get_annotations(content)
 
     return samples
 
@@ -189,19 +233,19 @@ def _read_zip(file_path):
 def _get_entities_from_sample(sample_id, sample, split):
     entities = []
     text = sample[TEXT_EXT]
-    for entity in sample['tags']:
-        text_slice = text[entity["start"]: entity["end"]]
+    for entity in sample[TAGS]:
+        text_slice = text[entity[START]: entity[END]]
         text_slice_norm_1 = text_slice.replace("\n", "").lower()
         text_slice_norm_2 = text_slice.replace("\n", " ").lower()
-        match = text_slice_norm_1 == entity["text"] or text_slice_norm_2 == entity["text"]
+        match = text_slice_norm_1 == entity[TEXT] or text_slice_norm_2 == entity[TEXT]
         if not match:
             continue
         entities.append({
-            "id": _form_id(sample_id, entity["id"], split,
-                           entity["start"], entity["end"]),
-            "type": entity["concept"],
-            "text": [text_slice],
-            "offsets": [(entity["start"], entity["end"])],
+            ID: _form_id(sample_id, entity[ID], split,
+                         entity[START], entity[END]),
+            "type": entity[TAG],
+            TEXT: [text_slice],
+            "offsets": [(entity[START], entity[END])],
             "normalized": [],
         })
 
@@ -210,11 +254,11 @@ def _get_entities_from_sample(sample_id, sample, split):
 
 def _get_relations_from_sample(sample_id, sample, split):
     relations = []
-    for relation in sample['relations']:
+    for relation in sample[RELATIONS]:
         relations.append({
-            "id": _form_id(sample_id, relation["id"], split,
-                           relation["arg1_id"], relation["arg2_id"], 'relation'),
-            "type": relation["relation"],
+            ID: _form_id(sample_id, relation[ID], split,
+                         relation["arg1_id"], relation["arg2_id"], RELATION),
+            "type": relation[RELATION],
             "arg1_id": relation["arg1_id"],
             "arg2_id": relation["arg2_id"],
             "normalized": [],
@@ -224,7 +268,7 @@ def _get_relations_from_sample(sample_id, sample, split):
 
 
 class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """n2c2 2018 Track 2 concept and relation task"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -266,22 +310,22 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
             features = datasets.Features(
                 {
                     "doc_id": datasets.Value("string"),
-                    "text": datasets.Value("string"),
-                    "tags": [
+                    TEXT: datasets.Value("string"),
+                    TAGS: [
                         {
-                            "id": datasets.Value("string"),
-                            "text": datasets.Value("string"),
-                            "start": datasets.Value("int64"),
-                            "end": datasets.Value("int64"),
-                            "concept": datasets.ClassLabel(names=N2C2_2018_NER_LABELS),
+                            ID: datasets.Value("string"),
+                            TEXT: datasets.Value("string"),
+                            START: datasets.Value("int64"),
+                            END: datasets.Value("int64"),
+                            TAG: datasets.ClassLabel(names=N2C2_2018_NER_LABELS),
                         }
                     ],
-                    "relations": [
+                    RELATIONS: [
                         {
-                            "id": datasets.Value("string"),
+                            ID: datasets.Value("string"),
                             "arg1_id": datasets.Value("string"),
                             "arg2_id": datasets.Value("string"),
-                            "relation": datasets.ClassLabel(names=N2C2_2018_RELATION_LABELS),
+                            RELATION: datasets.ClassLabel(names=N2C2_2018_RELATION_LABELS),
                         }
                     ]
                 }
@@ -330,9 +374,9 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
     def _get_source_sample(sample_id, sample):
         return {
             "doc_id": sample_id,
-            "text": sample.get(TEXT_EXT, ""),
-            "tags": sample.get("tags", []),
-            "relations": sample.get("relations", [])
+            TEXT: sample.get(TEXT_EXT, ""),
+            TAGS: sample.get(TAGS, []),
+            RELATIONS: sample.get(RELATIONS, [])
         }
 
     @staticmethod
@@ -372,10 +416,3 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
                 yield _id, self._get_bigbio_sample(sample_id, sample, split)
 
             _id += 1
-
-
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__,
-                          name=N2C2AdverseDrugEventsMedicationExtractionDataset.BIGBIO_CONFIG_NAME,
-                          data_dir="/Users/ayush.singh/workspace/data/Healthcare/i2b2_2018_ADE_Medication")
