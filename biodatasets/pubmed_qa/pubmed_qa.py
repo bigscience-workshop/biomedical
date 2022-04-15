@@ -23,7 +23,7 @@ from typing import Dict, Iterator, Tuple
 import utils.parsing as parsing
 import utils.schemas as schemas
 from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from utils.constants import BigBioValues, Tasks
 
 _CITATION = """\
 @inproceedings{jin2019pubmedqa,
@@ -40,25 +40,30 @@ _DATASETNAME = "pubmed_qa"
 _DESCRIPTION = """\
 PubMedQA is a novel biomedical question answering (QA) dataset collected from PubMed abstracts.
 The task of PubMedQA is to answer research biomedical questions with yes/no/maybe using the corresponding abstracts. 
-PubMedQA has 1k expert-annotated, 61.2k unlabeled and 211.3k artificially generated QA instances. 
+PubMedQA has 1k expert-annotated (PQA-L), 61.2k unlabeled (PQA-U) and 211.3k artificially generated QA instances (PQA-A). 
 
 Each PubMedQA instance is composed of:
   (1) a question which is either an existing research article title or derived from one, 
-  (2) a context which is the corresponding abstract without its conclusion, 
+  (2) a context which is the corresponding PubMed abstract without its conclusion, 
   (3) a long answer, which is the conclusion of the abstract and, presumably, answers the research question, and
   (4) a yes/no/maybe answer which summarizes the conclusion.
 
 PubMedQA is the first QA dataset where reasoning over biomedical research texts, 
 especially their quantitative contents, is required to answer the questions.
+
+PubMedQA datasets comprise of 3 different subsets:
+  (1) PubMedQA Labeled (PQA-L): A labeled PubMedQA subset comprises of 1k manually annotated yes/no/maybe QA data collected from PubMed articles.
+  (2) PubMedQA Artificial (PQA-A): An artificially labelled PubMedQA subset comprises of 211.3k PubMed articles with automatically generated questions from the statement titles and yes/no answer labels generated using a simple heuristic.
+  (3) PubMedQA Unlabeled (PQA-U): An unlabeled PubMedQA subset comprises of 61.2k context-question pairs data collected from PubMed articles.
 """
 
 _HOMEPAGE = "https://github.com/pubmedqa/pubmedqa"
 _LICENSE = "MIT License"
 
 _URLS = {
-    "pqaa": "https://drive.google.com/uc?export=download&id=1kaU0ECRbVkrfjBAKtVsPCRF6qXSouoq9",
-    "pqal": "https://drive.google.com/uc?export=download&id=1kQnjowPHOcxETvYko7DRG9wE7217BQrD",
-    "pqau": "https://drive.google.com/uc?export=download&id=1q4T_nhhj8UvJ9JbZedhkTZHN6ZeEZ2H9",
+    "pubmed_qa_artificial": "https://drive.google.com/uc?export=download&id=1kaU0ECRbVkrfjBAKtVsPCRF6qXSouoq9",
+    "pubmed_qa_labeled": "https://drive.google.com/uc?export=download&id=1kQnjowPHOcxETvYko7DRG9wE7217BQrD",
+    "pubmed_qa_unlabeled": "https://drive.google.com/uc?export=download&id=1q4T_nhhj8UvJ9JbZedhkTZHN6ZeEZ2H9",
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
@@ -66,9 +71,9 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _CLASS_NAMES = [
-    "Yes",
-    "No",
-    "Maybe"
+    "yes",
+    "no",
+    "maybe"
 ]
 
 class PubmedQADataset(datasets.GeneratorBasedBuilder):
@@ -79,55 +84,55 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
         # PQAU & PQAA Source
         BigBioConfig(
-            name="pqaa_source",
+            name="pubmed_qa_artificial_source",
             version=SOURCE_VERSION,
             description="PubmedQA artificial source schema",
             schema="source",
-            subset_id="pqaa",
+            subset_id="pubmed_qa_artificial"
         ),
         BigBioConfig(
-            name="pqau_source",
+            name="pubmed_qa_unlabeled_source",
             version=SOURCE_VERSION,
             description="PubmedQA unlabeled source schema",
             schema="source",
-            subset_id="pqau",
+            subset_id="pubmed_qa_unlabeled"
         ),
         # PQAU & PQAA BigBio Schema
         BigBioConfig(
-            name="pqaa_bigbio_qa",
+            name="pubmed_qa_artificial_bigbio_qa",
             version=BIGBIO_VERSION,
             description="PubmedQA artificial BigBio schema",
             schema="bigbio_qa",
-            subset_id="pqaa",
+            subset_id="pubmed_qa_artificial"
         ),
         BigBioConfig(
-            name="pqau_bigbio_qa",
+            name="pubmed_qa_unlabeled_bigbio_qa",
             version=BIGBIO_VERSION,
             description="PubmedQA unlabeled BigBio schema",
             schema="bigbio_qa",
-            subset_id="pqau",
+            subset_id="pubmed_qa_unlabeled"
         ),
     ] + [
         # PQAL Source Schema        
         BigBioConfig(
-            name=f"pqal_fold{i}_source",
+            name=f"pubmed_qa_labeled_fold{i}_source",
             version=datasets.Version(_SOURCE_VERSION),
             description="PubmedQA labeled source schema",
             schema="source",
-            subset_id=f"pqal_fold{i}"
+            subset_id=f"pubmed_qa_labeled_fold{i}"
         ) for i in range(10)
     ] + [
         # PQAL BigBio Schema
         BigBioConfig(
-            name=f"pqal_fold{i}_bigbio_qa",
+            name=f"pubmed_qa_labeled_fold{i}_bigbio_qa",
             version=datasets.Version(_BIGBIO_VERSION),
             description="PubmedQA labeled BigBio schema",
             schema="bigbio_qa",
-            subset_id=f"pqal_fold{i}"
+            subset_id=f"pubmed_qa_labeled_fold{i}"
         ) for i in range(10)
     ]
 
-    DEFAULT_CONFIG_NAME = "pqaa_source"
+    DEFAULT_CONFIG_NAME = "pubmed_qa_artificial_source"
 
     def _info(self):
         if self.config.schema == "source":
@@ -156,25 +161,27 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        subset_id = self.config.subset_id
-        if 'pqal' in subset_id:
-            subset_id = 'pqal'
+        url_id = self.config.subset_id
+        if 'pubmed_qa_labeled' in url_id:
+            # Enforce naming since there is fold number in the PQA-L subset
+            url_id = 'pubmed_qa_labeled'
+        print(self.config.subset_id)
 
-        urls = _URLS[subset_id]
+        urls = _URLS[url_id]
         data_dir = Path(dl_manager.download_and_extract(urls))
 
-        if 'pqal' in self.config.subset_id:
+        if 'pubmed_qa_labeled' in self.config.subset_id:
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "filepath": data_dir / self.config.subset_id / "train_set.json"
+                        "filepath": data_dir / self.config.subset_id.replace('pubmed_qa_labeled', 'pqal') / "train_set.json"
                     }
                 ),
                 datasets.SplitGenerator(
                     name=datasets.Split.VALIDATION,
                     gen_kwargs={
-                        "filepath": data_dir / self.config.subset_id / "dev_set.json"
+                        "filepath": data_dir / self.config.subset_id.replace('pubmed_qa_labeled', 'pqal') / "dev_set.json"
                     }
                 ),
                 datasets.SplitGenerator(
@@ -184,7 +191,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     }
                 )
             ]            
-        elif self.config.subset_id == 'pqaa':
+        elif self.config.subset_id == 'pubmed_qa_artificial':
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
@@ -199,7 +206,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     }
                 )
             ]            
-        else: # if self.config.subset_id == 'pqau'
+        else: # if self.config.subset_id == 'pubmed_qa_unlabeled'
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
@@ -214,11 +221,11 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             for id, row in data.items():
-                if self.config.subset_id == 'pqau':
+                if self.config.subset_id == 'pubmed_qa_unlabeled':
                     row["reasoning_required_pred"] = None
                     row["reasoning_free_pred"] = None
                     row["final_decision"] = None
-                elif self.config.subset_id == 'pqaa':
+                elif self.config.subset_id == 'pubmed_qa_artificial':
                     row["YEAR"] = None
                     row["reasoning_required_pred"] = None
                     row["reasoning_free_pred"] = None
@@ -226,8 +233,8 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                 yield id, row
         elif self.config.schema == "bigbio_qa":
             for id, row in data.items():
-                if self.config.subset_id == 'pqau':
-                    answers =  [None]
+                if self.config.subset_id == 'pubmed_qa_unlabeled':
+                    answers =  [BigBioValues.NULL]
                 else:
                     answers = [row['final_decision']]
 
