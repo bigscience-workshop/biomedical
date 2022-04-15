@@ -117,7 +117,7 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = schemas.kb_features
+            features = schemas.entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -169,7 +169,6 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
                     json_line = json.loads(line)
                     entailment_example = {
                         "id": json_line["pairID"],
-                        "document_id": json_line["pairID"],
                         "premise": json_line["sentence1"],
                         "hypothesis": json_line["sentence2"],
                         "label": json_line["gold_label"],
