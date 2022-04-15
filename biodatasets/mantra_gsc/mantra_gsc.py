@@ -217,18 +217,18 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         raw_files = [raw_file for _dir in data_dir for raw_file in _dir.glob("*.txt")]
 
         if self.config.schema == "source":
-            for raw_file in raw_files:
+            for i, raw_file in enumerate(raw_files):
                 brat_example = parsing.parse_brat_file(raw_file, parse_notes=True)
                 source_example = self._to_source_example(brat_example)
-                yield source_example["document_id"], source_example
+                yield i, source_example
 
         elif self.config.schema == "bigbio_kb":
-            for raw_file in raw_files:
+            for i, raw_file in enumerate(raw_files):
                 brat_example = parsing.parse_brat_file(raw_file, parse_notes=True)
                 brat_to_bigbio_example = self._brat_to_bigbio_example(brat_example)
                 kb_example = parsing.brat_parse_to_bigbio_kb(brat_to_bigbio_example, _ENTITY_TYPES)
-                kb_example["id"] = kb_example["document_id"]
-                yield kb_example["document_id"], kb_example
+                kb_example["id"] = i
+                yield i, kb_example
 
     def _to_source_example(self, brat_example: Dict) -> Dict:
         document_id: str = brat_example["document_id"]
@@ -287,13 +287,3 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         kb_example["notes"] = brat_example["notes"]
 
         return kb_example
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python mantra_gsc.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    d = datasets.load_dataset(__file__)
