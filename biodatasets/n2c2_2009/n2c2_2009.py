@@ -128,15 +128,28 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"  # 18-Aug-2009
 _BIGBIO_VERSION = "1.0.0"
 
+DELIMITER = "||"
+SOURCE = "source"
+BIGBIO_KB = "bigbio_kb"
+
 TEXT_DATA_FIELDNAME = 'txt'
 MEDICATIONS_DATA_FIELDNAME = 'med'
-
+OFFSET_PATTERN = r"(.+?)=\"(.+?)\"( .+)?"  # captures -> do="500" 102:6 102:6 and mo="nm"
+BINARY_PATTERN = r"(.+?)=\"(.+?)\""
+ENTITY_ID = "entity_id"
+MEDICATION = "m"
+DOSAGE = "do"
+MODE_OF_ADMIN = "mo"
+FREQUENCY = "f"
+DURATION = "du"
+REASON = "r"
+EVENT = "e"
+TEMPORAL = "t"
+CERTAINTY = "c"
+IS_FOUND_IN_LIST_OR_NARRATIVE = "ln"
+NOT_MENTIONED = "nm"
 
 def _read_train_test_data_from_tar_gz(data_dir):
-    """
-    Training set directory structure: root>1,2,...10 where each number is directory comprising of raw text files
-    Test set directory structure: root>converted.noduplicates.sorted/*.m
-    """
     samples = defaultdict(dict)
 
     with tarfile.open(os.path.join(data_dir, 'train.test.released.8.17.09.tar.gz'), "r:gz") as tf:
@@ -205,27 +218,6 @@ def _add_entities_to_test_set(data_dir, test_set):
                     with tf.extractfile(member) as fp:
                         content_bytes = fp.read()
                     test_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = content_bytes.decode("utf-8")
-
-
-# OFFSET_PATTERN = r"(.+?)=\"(.+?)\"(?: (\d+):(\d+) (\d+):(\d+))?"  # captures -> do="500" 102:6 102:6 and mo="nm"
-OFFSET_PATTERN = r"(.+?)=\"(.+?)\"( .+)?"  # captures -> do="500" 102:6 102:6 and mo="nm"
-BINARY_PATTERN = r"(.+?)=\"(.+?)\""
-DELIMITER = "||"
-SOURCE = "source"
-BIGBIO_KB = "bigbio_kb"
-
-ENTITY_ID = "entity_id"
-MEDICATION = "m"
-DOSAGE = "do"
-MODE_OF_ADMIN = "mo"
-FREQUENCY = "f"
-DURATION = "du"
-REASON = "r"
-EVENT = "e"
-TEMPORAL = "t"
-CERTAINTY = "c"
-IS_FOUND_IN_LIST_OR_NARRATIVE = "ln"
-NOT_MENTIONED = "nm"
 
 
 def _make_empty_schema_dict_with_text(text):
@@ -533,7 +525,6 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "entities": [
                         {
-                            # ENTITY_ID: datasets.Value("string"),
                             MEDICATION: offset_text_schema,
                             DOSAGE: offset_text_schema,
                             MODE_OF_ADMIN: offset_text_schema,
