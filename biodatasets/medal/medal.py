@@ -19,11 +19,12 @@ a large medical text dataset curated for abbreviation disambiguation, designed f
 pre-training in the medical domain. This script loads the MeDAL dataset in the bigbio KB schema and/or source schema.
 """
 
-import csv
-from typing import Dict, List, Tuple
+import os
+from typing import List, Tuple, Dict
+
+import csv 
 
 import datasets
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -84,7 +85,6 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
-
 
 class MedalDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
