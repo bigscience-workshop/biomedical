@@ -220,28 +220,23 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                     },
                 ]
 
-                unified_entities = {}
-                for entity in doc.annotations:
+                unified_entities = []
+                for i, entity in enumerate(doc.annotations):
                     # We need a unique identifier for this entity, so build it from the document id and entity id
-                    unified_entity_id = doc.pmid + "_" + entity.id
+                    unified_entity_id = "_".join([doc.pmid, entity.id, str(i)])
                     # The user can provide a callable that returns the database name.
                     db_name = "omim" if "OMIM" in entity.id else "mesh"
-                    if unified_entity_id not in unified_entities:
-                        unified_entities[unified_entity_id] = {
+                    unified_entities.append(
+                        {
                             "id": unified_entity_id,
                             "type": entity.type,
                             "text": [entity.text],
                             "offsets": [[entity.start, entity.end]],
                             "normalized": [{"db_name": db_name, "db_id": entity.id}],
                         }
-                    else:
-                        unified_entities[unified_entity_id]["text"].append(entity.text)
-                        unified_entities[unified_entity_id]["offsets"].append([entity.start, entity.end])
-                        unified_entities[unified_entity_id]["normalized"].append(
-                            {"db_name": db_name, "db_id": entity.id}
-                        )
+                    )
 
-                unified_example["entities"] = list(unified_entities.values())
+                unified_example["entities"] = unified_entities
                 unified_example["relations"] = []
                 unified_example["events"] = []
                 unified_example["coreferences"] = []
