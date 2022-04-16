@@ -100,10 +100,10 @@ _BIGBIO_VERSION = "1.0.0"
 @dataclass
 class NlmWsdBigBioConfig(BigBioConfig):
     schema: str = "source"
-    name="nlm_wsd_reviewed_source",
+    name: str = "nlm_wsd_reviewed_source"
     version: datasets.Version = datasets.Version(_SOURCE_VERSION)
-    description: str = "NLM-WSD basic reviewed source schema",
-    subset_id: str = "nlm_wsd_reviewed",
+    description: str = "NLM-WSD basic reviewed source schema"
+    subset_id: str = "nlm_wsd_reviewed"
 
             
 class NlmWsdDataset(datasets.GeneratorBasedBuilder):
