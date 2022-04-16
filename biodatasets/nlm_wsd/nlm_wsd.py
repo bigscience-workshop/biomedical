@@ -43,6 +43,7 @@ Instructions on how to load locally:
 4) Set kwarg data_dir of load_datasets to the path of the directory
 """
 
+from dataclasses import dataclass
 import itertools as it
 import re
 from pathlib import Path
