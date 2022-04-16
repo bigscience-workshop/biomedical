@@ -53,8 +53,8 @@ import zipfile
 from collections import defaultdict
 from typing import Dict, List, Match, Tuple, Union
 
-# from datasets import Features, Value, DatasetInfo, GeneratorBasedBuilder, Version, SplitGenerator, Split, load_dataset
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -83,39 +83,45 @@ _CITATION = """\
 _DATASETNAME = "n2c2_2009"
 
 _DESCRIPTION = """\
-The Third i2b2 Workshop on Natural Language Processing Challenges for Clinical Records 
-focused on the identification of medications, their dosages, modes (routes) of administration, 
-frequencies, durations, and reasons for administration in discharge summaries. 
-The third i2b2 challenge—that is, the medication challenge—extends information 
+The Third i2b2 Workshop on Natural Language Processing Challenges for Clinical Records
+focused on the identification of medications, their dosages, modes (routes) of administration,
+frequencies, durations, and reasons for administration in discharge summaries.
+The third i2b2 challenge—that is, the medication challenge—extends information
 extraction to relation extraction; it requires extraction of medications and
-medication-related information followed by determination of which medication 
+medication-related information followed by determination of which medication
 belongs to which medication-related details.
 
 The medication challenge was designed as an information extraction task.
-The goal, for each discharge summary, was to extract the following information 
+The goal, for each discharge summary, was to extract the following information
 on medications experienced by the patient:
-1. Medications (m): including names, brand names, generics, and collective names of prescription substances, 
+1. Medications (m): including names, brand names, generics, and collective names of prescription substances,
 over the counter medications, and other biological substances for which the patient is the experiencer.
 2. Dosages (do): indicating the amount of a medication used in each administration.
 3. Modes (mo): indicating the route for administering the medication.
 4. Frequencies (f): indicating how often each dose of the medication should be taken.
 5. Durations (du): indicating how long the medication is to be administered.
 6. Reasons (r): stating the medical reason for which the medication is given.
-7. List/narrative (ln): indicating whether the medication information appears in a 
+7. Certainty (c): stating whether the event occurs. Certainty can be expressed by uncertainty words,
+e.g., “suggested”, or via modals, e.g., “should” indicates suggestion.
+8. Event (e): stating on whether the medication is started, stopped, or continued.
+9. Temporal (t): stating whether the medication was administered in the past,
+is being administered currently, or will be administered in the future, to the extent
+that this information is expressed in the tense of the verbs and auxiliary verbs used to express events.
+10. List/narrative (ln): indicating whether the medication information appears in a
 list structure or in narrative running text in the discharge summary.
 
-The medication challenge asked that systems extract the text corresponding to each of the fields 
-for each of the mentions of the medications that were experienced by the patients. 
+The medication challenge asked that systems extract the text corresponding to each of the fields
+for each of the mentions of the medications that were experienced by the patients.
 
-The values for the set of fields related to a medication mention, if presented within a 
-two-line window of the mention, were linked in order to create what we defined as an ‘entry’. 
-If the value of a field for a mention were not specified within a two-line window, 
+The values for the set of fields related to a medication mention, if presented within a
+two-line window of the mention, were linked in order to create what we defined as an ‘entry’.
+If the value of a field for a mention were not specified within a two-line window,
 then the value ‘nm’ for ‘not mentioned’ was entered and the offsets were left unspecified.
 
 Since the dataset annotations were crowd-sourced, it contains various violations that are handled
 throughout the data loader via means of exception catching or conditional statements. e.g.
-annotation: anticoagulation, while in text all words are to be separated by space which 
-means words at end of sentence will always contain `.` and hence won't be an exact match 
+annotation: anticoagulation, while in text all words are to be separated by space which
+means words at end of sentence will always contain `.` and hence won't be an exact match
 i.e. `anticoagulation` != `anticoagulation.` from doc_id: 818404
 """
 
@@ -132,8 +138,8 @@ DELIMITER = "||"
 SOURCE = "source"
 BIGBIO_KB = "bigbio_kb"
 
-TEXT_DATA_FIELDNAME = 'txt'
-MEDICATIONS_DATA_FIELDNAME = 'med'
+TEXT_DATA_FIELDNAME = "txt"
+MEDICATIONS_DATA_FIELDNAME = "med"
 OFFSET_PATTERN = r"(.+?)=\"(.+?)\"( .+)?"  # captures -> do="500" 102:6 102:6 and mo="nm"
 BINARY_PATTERN = r"(.+?)=\"(.+?)\""
 ENTITY_ID = "entity_id"
@@ -149,12 +155,13 @@ CERTAINTY = "c"
 IS_FOUND_IN_LIST_OR_NARRATIVE = "ln"
 NOT_MENTIONED = "nm"
 
+
 def _read_train_test_data_from_tar_gz(data_dir):
     samples = defaultdict(dict)
 
-    with tarfile.open(os.path.join(data_dir, 'train.test.released.8.17.09.tar.gz'), "r:gz") as tf:
+    with tarfile.open(os.path.join(data_dir, "train.test.released.8.17.09.tar.gz"), "r:gz") as tf:
         for member in tf.getmembers():
-            if member.name != 'train.test.released.8.17.09':
+            if member.name != "train.test.released.8.17.09":
                 _, sample_id = os.path.split(member.name)
 
                 with tf.extractfile(member) as fp:
@@ -169,7 +176,7 @@ def _get_train_set(data_dir, train_test_set):
     train_sample_ids = set()
 
     # Read training set IDs
-    with tarfile.open(os.path.join(data_dir, 'training.sets.released.tar.gz'), "r:gz") as tf:
+    with tarfile.open(os.path.join(data_dir, "training.sets.released.tar.gz"), "r:gz") as tf:
         for member in tf.getmembers():
             if member.name not in list(map(str, range(1, 11))):
                 _, sample_id = os.path.split(member.name)
@@ -193,43 +200,35 @@ def _get_test_set(train_set, train_test_set):
 
 
 def _add_entities_to_train_set(data_dir, train_set):
-    with zipfile.ZipFile(os.path.join(data_dir, 'training.ground.truth.01.06.11.2009.zip')) as zf:
+    with zipfile.ZipFile(os.path.join(data_dir, "training.ground.truth.01.06.11.2009.zip")) as zf:
         for info in zf.infolist():
             base, filename = os.path.split(info.filename)
             _, ext = os.path.splitext(filename)
             ext = ext[1:]  # get rid of dot
 
             # Extract sample id from filename pattern `379569_gold.entries`
-            sample_id = filename.split(".")[0].split('_')[0]
-            if ext == 'entries':
+            sample_id = filename.split(".")[0].split("_")[0]
+            if ext == "entries":
                 train_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = zf.read(info).decode("utf-8")
 
 
 def _add_entities_to_test_set(data_dir, test_set):
-    with tarfile.open(os.path.join(data_dir, 'annotations_ground_truth.tar.gz'), "r:gz") as tf:
+    with tarfile.open(os.path.join(data_dir, "annotations_ground_truth.tar.gz"), "r:gz") as tf:
         for member in tf.getmembers():
-            if 'converted.noduplicates.sorted' in member.name:
+            if "converted.noduplicates.sorted" in member.name:
                 base, filename = os.path.split(member.name)
                 _, ext = os.path.splitext(filename)
                 ext = ext[1:]  # get rid of dot
 
                 sample_id = filename.split(".")[0]
-                if ext == 'm':
+                if ext == "m":
                     with tf.extractfile(member) as fp:
                         content_bytes = fp.read()
                     test_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = content_bytes.decode("utf-8")
 
 
 def _make_empty_schema_dict_with_text(text):
-    return {
-        "text": text,
-        "offsets": [{
-            "start_line": 0,
-            "start_token": 0,
-            "end_line": 0,
-            "end_token": 0
-        }]
-    }
+    return {"text": text, "offsets": [{"start_line": 0, "start_token": 0, "end_line": 0, "end_token": 0}]}
 
 
 def _ct_match_to_dict(c_match: Match) -> dict:
@@ -241,40 +240,41 @@ def _ct_match_to_dict(c_match: Match) -> dict:
         offsets = offsets.strip()
         offsets_formatted = []
         # Pattern: f="monday-wednesday-friday...before hemodialysis...p.r.n." 15:7 15:7,16:0 16:1,16:5 16:5
-        if ',' in offsets:
+        if "," in offsets:
             line_offsets = offsets.split(",")
             for offset in line_offsets:
                 start, end = offset.split(" ")
                 start_line, start_token = start.split(":")
                 end_line, end_token = end.split(":")
-                offsets_formatted.append({
-                    "start_line": int(start_line),
-                    "start_token": int(start_token),
-                    "end_line": int(end_line),
-                    "end_token": int(end_token)
-                })
+                offsets_formatted.append(
+                    {
+                        "start_line": int(start_line),
+                        "start_token": int(start_token),
+                        "end_line": int(end_line),
+                        "end_token": int(end_token),
+                    }
+                )
         else:
             """Handle another edge annotations.ground.truth>984424 which has discontinuous
             annotation as 23:4 23:4 23:10 23:10 which violates annotation guideline that
-            discontinuous spans should be separated by comma -> 23:4 23:4,23:10 23:10 
+            discontinuous spans should be separated by comma -> 23:4 23:4,23:10 23:10
             """
             offset = offsets.split(" ")
             for i in range(0, len(offset), 2):
-                start, end = offset[i: i+2]
+                start, end = offset[i: i + 2]
                 start_line, start_token = start.split(":")
                 end_line, end_token = end.split(":")
 
-                offsets_formatted.append({
-                    "start_line": int(start_line),
-                    "start_token": int(start_token),
-                    "end_line": int(end_line),
-                    "end_token": int(end_token)
-                })
+                offsets_formatted.append(
+                    {
+                        "start_line": int(start_line),
+                        "start_token": int(start_token),
+                        "end_line": int(end_line),
+                        "end_token": int(end_token),
+                    }
+                )
 
-        return {
-            "text": text,
-            "offsets": offsets_formatted
-        }
+        return {"text": text, "offsets": offsets_formatted}
     elif key in {CERTAINTY, EVENT, TEMPORAL, IS_FOUND_IN_LIST_OR_NARRATIVE}:
         return text
     else:
@@ -321,20 +321,20 @@ def _parse_line(line: str) -> dict:
     2. Some files have discontinuous annotations violating guidelines i.e. using space insead of comma as delimiter
     """
     entity = {
-        MEDICATION: _make_empty_schema_dict_with_text(''),
-        DOSAGE: _make_empty_schema_dict_with_text(''),
-        MODE_OF_ADMIN: _make_empty_schema_dict_with_text(''),
-        FREQUENCY: _make_empty_schema_dict_with_text(''),
-        DURATION: _make_empty_schema_dict_with_text(''),
-        REASON: _make_empty_schema_dict_with_text(''),
-        EVENT: '',
-        TEMPORAL: '',
-        CERTAINTY: '',
-        IS_FOUND_IN_LIST_OR_NARRATIVE: ''
+        MEDICATION: _make_empty_schema_dict_with_text(""),
+        DOSAGE: _make_empty_schema_dict_with_text(""),
+        MODE_OF_ADMIN: _make_empty_schema_dict_with_text(""),
+        FREQUENCY: _make_empty_schema_dict_with_text(""),
+        DURATION: _make_empty_schema_dict_with_text(""),
+        REASON: _make_empty_schema_dict_with_text(""),
+        EVENT: "",
+        TEMPORAL: "",
+        CERTAINTY: "",
+        IS_FOUND_IN_LIST_OR_NARRATIVE: "",
     }
     for i, pattern in enumerate(line.split(DELIMITER)):
         # Handle edge case of triple pipe as delimiter in 18563_gold.entries: ...7,16:0 16:1,16:5 16:5||| du="nm"...
-        if pattern[0] == '|':
+        if pattern[0] == "|":
             pattern = pattern[1:]
 
         pattern = pattern.strip()
@@ -368,13 +368,13 @@ def _get_entities_from_sample(sample_id, sample, split):
     # parsed concepts (sort is just a convenience)
     med_parsed = sorted(
         [_parse_line(line) for line in med_lines],
-        key=lambda x: (x[MEDICATION]['offsets'][0]["start_line"], x[MEDICATION]['offsets'][0]["start_token"]),
+        key=lambda x: (x[MEDICATION]["offsets"][0]["start_line"], x[MEDICATION]["offsets"][0]["start_token"]),
     )
 
     for ii_cp, cp in enumerate(med_parsed):
         for entity_type in {MEDICATION, DOSAGE, DURATION, REASON, FREQUENCY, MODE_OF_ADMIN}:
             offsets, texts = [], []
-            for txt, offset in zip(cp[entity_type]['text'].split('...'), cp[entity_type]['offsets']):
+            for txt, offset in zip(cp[entity_type]["text"].split("..."), cp[entity_type]["offsets"]):
                 # annotations can span multiple lines
                 # we loop over all lines and build up the character offsets
                 for ii_line in range(offset["start_line"], offset["end_line"] + 1):
@@ -382,7 +382,7 @@ def _get_entities_from_sample(sample_id, sample, split):
                     # character offset to the beginning of the line
                     # line length of each line + 1 new line character for each line
                     # need to subtract 1 from offset["start_line"] because line index starts at 1 in dataset
-                    start_line_off = sum(text_line_lengths[:ii_line - 1]) + (ii_line - 1)
+                    start_line_off = sum(text_line_lengths[: ii_line - 1]) + (ii_line - 1)
 
                     # offsets for each token relative to the beginning of the line
                     # "one two" -> [(0,3), (4,6)]
@@ -398,29 +398,23 @@ def _get_entities_from_sample(sample_id, sample, split):
                         elif (ii_line == offset["start_line"]) and (ii_line != offset["end_line"]):
                             start_off = start_line_off + tokoff[offset["start_token"]][0]
                             end_off = start_line_off + text_line_lengths[ii_line - 1] + 1
-                            if 'anticoagulation' in txt and sample_id == '818404':
-                                print('1.', ii_line, start_off, end_off, text[start_off:end_off], txt, offset)
-                                print(tokoff)
 
                         # if multi-line and on last line
                         elif (ii_line != offset["start_line"]) and (ii_line == offset["end_line"]):
                             end_off += tokoff[offset["end_token"]][1]
-                            if 'anticoagulation' in txt and sample_id == '818404':
-                                print('2.', ii_line, start_off, end_off, repr(text[start_off:end_off]), txt, offset)
-                                print(tokoff)
 
                         # if mult-line and not on first or last line
                         # (this does not seem to occur in this corpus)
                         else:
                             end_off += text_line_lengths[ii_line - 1] + 1
 
-                    except IndexError as e:
+                    except IndexError:
                         """This is to handle an erroneous annotation in files #974209 line 51
                         line is 'the PACU in stable condition. Her pain was well controlled with PCA'
                         whereas the annotation says 'pca analgesia' where 'analgesia' is missing from
                         the end of the line. This results in token not being found in `tokoff` array
                         and raises IndexError
-                        
+
                         similar files:
                          * 5091 - amputation beginning two weeks ago associated with throbbing
                          * 944118 - dysuria , joint pain. Reported small rash on penis for which was taking
@@ -433,7 +427,12 @@ def _get_entities_from_sample(sample_id, sample, split):
                 text_slice = text[start_off:end_off]
                 text_slice_norm_1 = text_slice.replace("\n", "").lower()
                 text_slice_norm_2 = text_slice.replace("\n", " ").lower()
-                match = text_slice_norm_1 == txt or text_slice_norm_2 == txt.lower()
+                text_slice_norm_3 = text_slice.replace(".", "").lower()
+                match = (
+                    text_slice_norm_1 == txt.lower()
+                    or text_slice_norm_2 == txt.lower()
+                    or text_slice_norm_3 == txt.lower()
+                )
                 if not match:
                     continue
 
@@ -442,10 +441,10 @@ def _get_entities_from_sample(sample_id, sample, split):
             entity_id = _form_entity_id(
                 sample_id,
                 split,
-                cp[entity_type]['offsets'][0]['start_line'],
-                cp[entity_type]['offsets'][0]['start_token'],
-                cp[entity_type]['offsets'][-1]['end_line'],
-                cp[entity_type]['offsets'][-1]['end_token']
+                cp[entity_type]["offsets"][0]["start_line"],
+                cp[entity_type]["offsets"][0]["start_token"],
+                cp[entity_type]["offsets"][-1]["end_line"],
+                cp[entity_type]["offsets"][-1]["end_token"],
             )
             entity = {
                 "id": entity_id,
@@ -517,7 +516,7 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
                         "end_line": datasets.Value("int64"),
                         "end_token": datasets.Value("int64"),
                     }
-                ]
+                ],
             }
             features = datasets.Features(
                 {
@@ -534,9 +533,9 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
                             EVENT: datasets.Value("string"),
                             TEMPORAL: datasets.Value("string"),
                             CERTAINTY: datasets.Value("string"),
-                            IS_FOUND_IN_LIST_OR_NARRATIVE: datasets.Value("string")
+                            IS_FOUND_IN_LIST_OR_NARRATIVE: datasets.Value("string"),
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -573,7 +572,7 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
                     "data_dir": data_dir,
                     "split": str(datasets.Split.TEST),
                 },
-            )
+            ),
         ]
 
     @staticmethod
@@ -581,14 +580,12 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
         entities = []
         if MEDICATIONS_DATA_FIELDNAME in sample:
             entities = list(map(_parse_line, sample[MEDICATIONS_DATA_FIELDNAME].splitlines()))
-        return {
-            "doc_id": sample_id,
-            "text": sample.get(TEXT_DATA_FIELDNAME, ""),
-            "entities": entities
-        }
+        return {"doc_id": sample_id, "text": sample.get(TEXT_DATA_FIELDNAME, ""), "entities": entities}
 
     @staticmethod
-    def _get_bigbio_sample(sample_id, sample, split) -> Dict[str, Union[str, List[Dict[str, Union[str, List[Tuple]]]]]]:
+    def _get_bigbio_sample(
+        sample_id, sample, split
+    ) -> Dict[str, Union[str, List[Dict[str, Union[str, List[Tuple]]]]]]:
 
         passage_text = sample.get(TEXT_DATA_FIELDNAME, "")
         entities = _get_entities_from_sample(sample_id, sample, split)
@@ -614,10 +611,10 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
         train_set = _get_train_set(data_dir, train_test_set)
         test_set = _get_test_set(train_set, train_test_set)
 
-        if split == 'train':
+        if split == "train":
             _add_entities_to_train_set(data_dir, train_set)
             samples = train_set
-        elif split == 'test':
+        elif split == "test":
             _add_entities_to_test_set(data_dir, test_set)
             samples = test_set
 
