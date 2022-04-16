@@ -96,6 +96,15 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
+@dataclass
+class NlmWsdBigBioConfig(BigBioConfig):
+    schema: str = "source"
+    name="nlm_wsd_reviewed_source",
+    version: datasets.Version = datasets.Version(_SOURCE_VERSION)
+    description: str = "NLM-WSD basic reviewed source schema",
+    subset_id: str = "nlm_wsd_reviewed",
+
+            
 class NlmWsdDataset(datasets.GeneratorBasedBuilder):
     """Biomedical Word Sense Disambiguation (WSD)."""
 
@@ -105,28 +114,28 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        BigBioConfig(
+        NlmWsdBigBioConfig(
             name="nlm_wsd_non_reviewed_source",
             version=SOURCE_VERSION,
             description="NLM-WSD basic non reviewed source schema",
             schema="source",
             subset_id="nlm_wsd_non_reviewed",
         ),
-        BigBioConfig(
+        NlmWsdBigBioConfig(
             name="nlm_wsd_non_reviewed_bigbio_kb",
             version=BIGBIO_VERSION,
             description="NLM-WSD basic non reviewed BigBio schema",
             schema="bigbio_kb",
             subset_id="nlm_wsd_non_reviewed",
         ),
-        BigBioConfig(
+        NlmWsdBigBioConfig(
             name="nlm_wsd_reviewed_source",
             version=SOURCE_VERSION,
             description="NLM-WSD basic reviewed source schema",
             schema="source",
             subset_id="nlm_wsd_reviewed",
         ),
-        BigBioConfig(
+        NlmWsdBigBioConfig(
             name="nlm_wsd_reviewed_bigbio_kb",
             version=BIGBIO_VERSION,
             description="NLM-WSD basic reviewed BigBio schema",
@@ -135,7 +144,7 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "nlm_wsd_reviewed_source"
+    BUILDER_CONFIG_CLASS = NlmWsdBigBioConfig
 
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
