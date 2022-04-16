@@ -126,7 +126,9 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_text":
-            features = schemas.text
+            features = schemas.text.features
+        else:
+            raise ValueError("Unrecognized schema: %s" % self.config.schema)
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=_LICENSE, citation=_CITATION,
@@ -189,7 +191,7 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
 
             elif self.config.schema == "bigbio_text":
                 for example in examples:
-                    if example["label2"] != "none":
+                    if "label2" in example:
                         labels = [example["label"], example["label2"]]
                     else:
                         labels = [example["label"]]
