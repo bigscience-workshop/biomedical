@@ -28,12 +28,13 @@ missing values.
 TODO: Use standard BigBio missing values.
 """
 
+import json
 import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
-import json
 import numpy as np
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -42,7 +43,7 @@ _CITATION = """\
 @inproceedings{,
   author    = {Arman Cohan and Waleed Ammar and Madeleine van Zuylen and Field Cady},
   title     = {Structural Scaffolds for Citation Intent Classification in Scientific Publications},
-  booktitle = {Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL)},
+  booktitle = {Conference of the North American Chapter of the Association for Computational Linguistics},
   year      = {2019},
   url       = {https://aclanthology.org/N19-1361/},
   doi       = {10.18653/v1/N19-1361},
@@ -102,7 +103,6 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "scicite_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
         if self.config.schema == "source":
             features = datasets.Features(
                 {
@@ -129,11 +129,7 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
             features = schemas.text
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION,
-            features=features,
-            homepage=_HOMEPAGE,
-            license=_LICENSE,
-            citation=_CITATION,
+            description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=_LICENSE, citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
@@ -144,31 +140,22 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": os.path.join(data_dir, "scicite", "train.jsonl"),
-                    "split": "train",
-                },
+                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "train.jsonl"), "split": "train", },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={
-                    "filepath": os.path.join(data_dir, "scicite", "test.jsonl"),
-                    "split": "test",
-                },
+                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "test.jsonl"), "split": "test", },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={
-                    "filepath": os.path.join(data_dir, "scicite", "dev.jsonl"),
-                    "split": "dev",
-                },
+                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "dev.jsonl"), "split": "dev", },
             ),
         ]
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        with open(filepath, 'r') as data_file:
+        with open(filepath, "r") as data_file:
             examples = [json.loads(line) for line in data_file]
 
             # Preprocesses examples
