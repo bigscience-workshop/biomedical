@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# TODO: see if we can add long answer for QA task and text classification for MESH tags
+
 import os
 import json
 import glob
@@ -82,7 +85,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        # PQAU & PQAA Source
+        # PQA-A Source
         BigBioConfig(
             name="pubmed_qa_artificial_source",
             version=SOURCE_VERSION,
@@ -90,6 +93,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="pubmed_qa_artificial"
         ),
+        # PQA-U Source
         BigBioConfig(
             name="pubmed_qa_unlabeled_source",
             version=SOURCE_VERSION,
@@ -97,7 +101,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="pubmed_qa_unlabeled"
         ),
-        # PQAU & PQAA BigBio Schema
+        # PQA-A BigBio Schema
         BigBioConfig(
             name="pubmed_qa_artificial_bigbio_qa",
             version=BIGBIO_VERSION,
@@ -105,6 +109,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_qa",
             subset_id="pubmed_qa_artificial"
         ),
+        # PQA-U BigBio Schema
         BigBioConfig(
             name="pubmed_qa_unlabeled_bigbio_qa",
             version=BIGBIO_VERSION,
@@ -113,7 +118,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             subset_id="pubmed_qa_unlabeled"
         ),
     ] + [
-        # PQAL Source Schema        
+        # PQA-L Source Schema        
         BigBioConfig(
             name=f"pubmed_qa_labeled_fold{i}_source",
             version=datasets.Version(_SOURCE_VERSION),
@@ -122,7 +127,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             subset_id=f"pubmed_qa_labeled_fold{i}"
         ) for i in range(10)
     ] + [
-        # PQAL BigBio Schema
+        # PQA-L BigBio Schema
         BigBioConfig(
             name=f"pubmed_qa_labeled_fold{i}_bigbio_qa",
             version=datasets.Version(_BIGBIO_VERSION),
@@ -165,7 +170,6 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
         if 'pubmed_qa_labeled' in url_id:
             # Enforce naming since there is fold number in the PQA-L subset
             url_id = 'pubmed_qa_labeled'
-        print(self.config.subset_id)
 
         urls = _URLS[url_id]
         data_dir = Path(dl_manager.download_and_extract(urls))
