@@ -332,7 +332,3 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
         result = result.replace("&quot;", '"')
         result = result.replace("&apos;", "'")
         return result
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
