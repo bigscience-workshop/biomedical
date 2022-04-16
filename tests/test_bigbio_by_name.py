@@ -284,7 +284,7 @@ class TestDataLoader(unittest.TestCase):
                                 f"this is not because of a bug in your data loader."
                             )
                     else:
-                        if not (ref_id, ref_type) in referenced_ids:
+                        if not (ref_id, ref_type) in existing_ids:
                             logger.warning(
                                 f"Referenced element {(ref_id, ref_type)} could not be "
                                 f"found in existing ids {existing_ids}. Please make sure that "
