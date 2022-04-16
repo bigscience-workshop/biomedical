@@ -18,6 +18,14 @@ A dataset loader for the SciCite dataset.
 
 SciCite is a dataset of 11K manually annotated citation intents based on
 citation context in the computer science and biomedical domains.
+
+Some of the code in this module is based on the corresponding module in the
+datasets library.
+https://github.com/huggingface/datasets/blob/master/datasets/scicite/scicite.py
+
+In the source schema, we follow the datasets implementation and replace
+missing values.
+TODO: Use standard BigBio missing values.
 """
 
 import os
@@ -25,9 +33,10 @@ from typing import List, Tuple, Dict
 
 import datasets
 import json
+import numpy as np
 from utils import schemas
 from utils.configs import BigBioConfig
-from utils.constants import Tasks, BigBioValues
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{,
@@ -102,9 +111,11 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
                     "sectionName": datasets.Value("string"),
                     "string": datasets.Value("string"),
                     "citeEnd": datasets.Value("int64"),
-                    "label": datasets.Value("string"),
+                    "label": datasets.features.ClassLabel(names=["method", "background", "result"]),
                     "label_confidence": datasets.Value("float"),
-                    "label2": datasets.Value("string"),
+                    "label2": datasets.features.ClassLabel(
+                        names=["supportive", "not_supportive", "cant_determine", "none"]
+                    ),
                     "label2_confidence": datasets.Value("float"),
                     "citingPaperId": datasets.Value("string"),
                     "citedPaperId": datasets.Value("string"),
@@ -163,15 +174,7 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
             # Preprocesses examples
             keys = set()
             for example in examples:
-                # Sets fields that might not exist to None
-                if "label_confidence" not in example:
-                    example["label_confidence"] = BigBioValues.NULL
-                if "label2" not in example:
-                    example["label2"] = BigBioValues.NULL
-                if "label2_confidence" not in example:
-                    example["label2_confidence"] = BigBioValues.NULL
-
-                # Fixes duplicates
+                # Fixes duplicate keys
                 if example["unique_id"] in keys:
                     example["unique_id"] = example["unique_id"] + "_duplicate"
                 else:
@@ -179,16 +182,32 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
 
             if self.config.schema == "source":
                 for example in examples:
-                    yield example["unique_id"], example
+                    yield str(example["unique_id"]), {
+                        "string": example["string"],
+                        "label": str(example["label"]),
+                        "sectionName": str(example["sectionName"]),
+                        "citingPaperId": str(example["citingPaperId"]),
+                        "citedPaperId": str(example["citedPaperId"]),
+                        "excerpt_index": int(example["excerpt_index"]),
+                        "isKeyCitation": bool(example["isKeyCitation"]),
+                        "label2": str(example.get("label2", "none")),
+                        "citeEnd": _safe_int(example["citeEnd"]),
+                        "citeStart": _safe_int(example["citeStart"]),
+                        "source": str(example["source"]),
+                        "label_confidence": float(example.get("label_confidence", np.nan)),
+                        "label2_confidence": float(example.get("label2_confidence", np.nan)),
+                        "id": str(example["id"]),
+                        "unique_id": str(example["unique_id"]),
+                    }
 
             elif self.config.schema == "bigbio_text":
                 for example in examples:
-                    if example["label2"] != BigBioValues.NULL:
+                    if example["label2"] != "none":
                         labels = [example["label"], example["label2"]]
                     else:
                         labels = [example["label"]]
 
-                    yield example["unique_id"], {
+                    yield str(example["unique_id"]), {
                         "id": example["unique_id"],
                         "document_id": example["citingPaperId"],
                         "text": example["string"],
@@ -196,7 +215,9 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
                     }
 
 
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
+def _safe_int(a):
+    try:
+        # skip NaNs
+        return int(a)
+    except ValueError:
+        return -1
