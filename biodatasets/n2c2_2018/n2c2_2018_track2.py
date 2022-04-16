@@ -39,9 +39,10 @@ Data Access from https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/
 import os
 import zipfile
 from collections import defaultdict
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -77,32 +78,32 @@ The National NLP Clinical Challenges (n2c2), organized in 2018, continued the
 legacy of i2b2 (Informatics for Biology and the Bedside), adding 2 new tracks and 2
 new sets of data to the shared tasks organized since 2006. Track 2 of 2018
 n2c2 shared tasks focused on the extraction of medications, with their signature
-information, and adverse drug events (ADEs) from clinical narratives. 
-This track built on our previous medication challenge, but added a special focus on ADEs. 
+information, and adverse drug events (ADEs) from clinical narratives.
+This track built on our previous medication challenge, but added a special focus on ADEs.
 
-ADEs are injuries resulting from a medical intervention related to a drugs and 
-can include allergic reactions, drug interactions, overdoses, and medication errors. 
+ADEs are injuries resulting from a medical intervention related to a drugs and
+can include allergic reactions, drug interactions, overdoses, and medication errors.
 Collectively, ADEs are estimated to account for 30% of all hospital adverse
 events; however, ADEs are preventable. Identifying potential drug interactions,
 overdoses, allergies, and errors at the point of care and alerting the caregivers of
 potential ADEs can improve health delivery, reduce the risk of ADEs, and improve health
-outcomes.  
+outcomes.
 
 A step in this direction requires processing narratives of clinical records
 that often elaborate on the medications given to a patient, as well as the known
 allergies, reactions, and adverse events of the patient. Extraction of this information
 from narratives complements the structured medication information that can be
 obtained from prescriptions, allowing a more thorough assessment of potential ADEs
-before they happen.  
+before they happen.
 
 The 2018 n2c2 shared task Track 2, hereon referred to as the ADE track,
-tackled these natural language processing tasks in 3 different steps, 
-which we refer to as tasks:  
-1. Concept Extraction: identification of concepts related to medications, 
-their signature information, and ADEs  
-2. Relation Classification: linking the previously mentioned concepts to 
-their medication  by identifying relations on gold standard concepts  
-3. End-to-End: building end-to-end systems that process raw narrative text 
+tackled these natural language processing tasks in 3 different steps,
+which we refer to as tasks:
+1. Concept Extraction: identification of concepts related to medications,
+their signature information, and ADEs
+2. Relation Classification: linking the previously mentioned concepts to
+their medication  by identifying relations on gold standard concepts
+3. End-to-End: building end-to-end systems that process raw narrative text
 to discover concepts and find relations of those concepts to their medications
 
 Shared tasks provide a venue for head-to-head comparison of systems developed
@@ -130,12 +131,24 @@ TAG, TAGS = "tag", "tags"
 RELATION, RELATIONS = "relation", "relations"
 START, END = "start", "end"
 
-N2C2_2018_NER_LABELS = sorted(['Drug', 'Frequency', 'Reason', 'ADE', 'Dosage', 'Duration', 'Form', 'Route', 'Strength'])
-N2C2_2018_RELATION_LABELS = sorted(['Frequency-Drug', 'Strength-Drug', 'Route-Drug', 'Dosage-Drug', 'ADE-Drug',
-                                    'Reason-Drug', 'Duration-Drug', 'Form-Drug'])
+N2C2_2018_NER_LABELS = sorted(
+    ["Drug", "Frequency", "Reason", "ADE", "Dosage", "Duration", "Form", "Route", "Strength"]
+)
+N2C2_2018_RELATION_LABELS = sorted(
+    [
+        "Frequency-Drug",
+        "Strength-Drug",
+        "Route-Drug",
+        "Dosage-Drug",
+        "ADE-Drug",
+        "Reason-Drug",
+        "Duration-Drug",
+        "Form-Drug",
+    ]
+)
 
 
-def _form_id(sample_id, entity_id, split, start_token, end_token, entity_type='entity'):
+def _form_id(sample_id, entity_id, split, start_token, end_token, entity_type="entity"):
     return "{}-{}-{}-{}-{}-{}".format(
         sample_id,
         entity_type,
@@ -176,31 +189,27 @@ def _get_annotations(annotation_file):
     tags, relations = {}, {}
     lines = annotation_file.splitlines()
     for line_num, line in enumerate(lines):
-        if line.strip().startswith('T'):
+        if line.strip().startswith("T"):
             try:
-                tag_id, tag_m, tag_text = line.strip().split('\t')
+                tag_id, tag_m, tag_text = line.strip().split("\t")
             except ValueError:
                 print(line)
 
-            if len(tag_m.split(' ')) == 3:
-                tag_type, tag_start, tag_end = tag_m.split(' ')
-            elif len(tag_m.split(' ')) == 4:
-                tag_type, tag_start, _, tag_end = tag_m.split(' ')
-            elif len(tag_m.split(' ')) == 5:
-                tag_type, tag_start, _, _, tag_end = tag_m.split(' ')
+            if len(tag_m.split(" ")) == 3:
+                tag_type, tag_start, tag_end = tag_m.split(" ")
+            elif len(tag_m.split(" ")) == 4:
+                tag_type, tag_start, _, tag_end = tag_m.split(" ")
+            elif len(tag_m.split(" ")) == 5:
+                tag_type, tag_start, _, _, tag_end = tag_m.split(" ")
             else:
                 print(line)
-            tags[tag_id] = _build_concept_dict(tag_id,
-                                               tag_start,
-                                               tag_end,
-                                               tag_type,
-                                               tag_text)
+            tags[tag_id] = _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text)
 
-    for line_num, line in enumerate(filter(lambda line: line.strip().startswith('R'), lines)):
-        rel_id, rel_m = line.strip().split('\t')
-        rel_type, rel_arg1, rel_arg2 = rel_m.split(' ')
-        rel_arg1 = rel_arg1.split(':')[1]
-        rel_arg2 = rel_arg2.split(':')[1]
+    for line_num, line in enumerate(filter(lambda line: line.strip().startswith("R"), lines)):
+        rel_id, rel_m = line.strip().split("\t")
+        rel_type, rel_arg1, rel_arg2 = rel_m.split(" ")
+        rel_arg1 = rel_arg1.split(":")[1]
+        rel_arg2 = rel_arg2.split(":")[1]
         arg1 = tags[rel_arg1][ID]
         arg2 = tags[rel_arg2][ID]
         relations[rel_id] = _build_relation_dict(rel_id, arg1, arg2, rel_type)
@@ -238,14 +247,15 @@ def _get_entities_from_sample(sample_id, sample, split):
         match = text_slice_norm_1 == entity[TEXT] or text_slice_norm_2 == entity[TEXT]
         if not match:
             continue
-        entities.append({
-            ID: _form_id(sample_id, entity[ID], split,
-                         entity[START], entity[END]),
-            "type": entity[TAG],
-            TEXT: [text_slice],
-            "offsets": [(entity[START], entity[END])],
-            "normalized": [],
-        })
+        entities.append(
+            {
+                ID: _form_id(sample_id, entity[ID], split, entity[START], entity[END]),
+                "type": entity[TAG],
+                TEXT: [text_slice],
+                "offsets": [(entity[START], entity[END])],
+                "normalized": [],
+            }
+        )
 
     return entities
 
@@ -253,14 +263,15 @@ def _get_entities_from_sample(sample_id, sample, split):
 def _get_relations_from_sample(sample_id, sample, split):
     relations = []
     for relation in sample[RELATIONS]:
-        relations.append({
-            ID: _form_id(sample_id, relation[ID], split,
-                         relation["arg1_id"], relation["arg2_id"], RELATION),
-            "type": relation[RELATION],
-            "arg1_id": relation["arg1_id"],
-            "arg2_id": relation["arg2_id"],
-            "normalized": [],
-        })
+        relations.append(
+            {
+                ID: _form_id(sample_id, relation[ID], split, relation["arg1_id"], relation["arg2_id"], RELATION),
+                "type": relation[RELATION],
+                "arg1_id": relation["arg1_id"],
+                "arg2_id": relation["arg2_id"],
+                "normalized": [],
+            }
+        )
 
     return relations
 
@@ -325,7 +336,7 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
                             "arg2_id": datasets.Value("string"),
                             RELATION: datasets.ClassLabel(names=N2C2_2018_RELATION_LABELS),
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -365,7 +376,7 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
                     "file_path": os.path.join(data_dir, "gold-standard-test-data.zip"),
                     "split": datasets.Split.TEST,
                 },
-            )
+            ),
         ]
 
     @staticmethod
@@ -374,7 +385,7 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
             "doc_id": sample_id,
             TEXT: sample.get(TEXT_EXT, ""),
             TAGS: sample.get(TAGS, []),
-            RELATIONS: sample.get(RELATIONS, [])
+            RELATIONS: sample.get(RELATIONS, []),
         }
 
     @staticmethod
