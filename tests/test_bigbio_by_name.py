@@ -2,22 +2,28 @@
 Unit-tests to ensure tasks adhere to big-bio schema.
 """
 import argparse
-import importlib
-import sys
-import unittest
 from collections import defaultdict
+import importlib
+import logging
 from pathlib import Path
+import sys
 from typing import Iterable, Iterator, List, Optional, Union, Dict
+import unittest
 
 import datasets
 from datasets import DatasetDict, Features
 from utils.constants import Tasks
-from utils.schemas import (entailment_features, kb_features, pairs_features,
-                           qa_features, text2text_features, text_features)
+from utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +60,7 @@ _TASK_TO_FEATURES = {
     Tasks.RELATION_EXTRACTION: {"relations", "entities"},
     Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
     Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-    Tasks.EVENT_EXTRACTION: {"events"}
+    Tasks.EVENT_EXTRACTION: {"events"},
 }
 
 
@@ -77,60 +83,58 @@ OFFSET_ERROR_MSG = (
 class TestDataLoader(unittest.TestCase):
     """
     Given a dataset script that has been implemented, check if it adheres to the `bigbio` schema.
-
-    The test
     """
 
     PATH: str
     NAME: str
     DATA_DIR: Optional[str]
 
-
     def runTest(self):
-        """
-         Run all tests that check:
-         (1) [removed - full path to script is now passed in] test_name: Checks if
-             dataloading script has correct path format
-         (2) setUp: Checks data and _SUPPORTED_TASKS can be loaded
-         (3) print_statistics: Counts number of all possible schema keys/instances of the examples
-         (4) test_schema: confirms big-bio keys present
-         (5) test_are_ids_globally_unique: Checks if all examples have a unique identifier
 
-         # KB-Specific tests
-         (6) test_do_all_referenced_ids_exist: Check if any sub-key (ex: entities/events etc.)
-             have referenced keys
-         (7) test_passages_offsets: Check if text matches offsets in passages
-         (8) test_entities_offsets: Check if text matches offsets in entities
-         (9) test_events_offsets: Check if text matches offsets in events
-        (10) test_coref_ids: Check if text matches offsets in coreferences
+        logger.info(f"self.PATH: {self.PATH}")
+        logger.info(f"self.NAME: {self.NAME}")
+        logger.info(f"self.DATA_DIR: {self.DATA_DIR}")
 
-        """  # noqa
-        print(self.dataset)
+        # Get task type of the dataset
+        logger.info("Checking for _SUPPORTED_TASKS ...")
+        module = self.PATH
+        if module.endswith(".py"):
+            module = module[:-3]
+        module = module.replace("/", ".")
+        self._SUPPORTED_TASKS = importlib.import_module(module)._SUPPORTED_TASKS
+        logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
+        invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
+        if len(invalid_tasks) > 0:
+            raise ValueError(
+                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
+            )
+
+        self._MAPPED_SCHEMAS = set(
+            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+        )
+        logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
+
+        config_name = self.NAME
+        logger.info(f"Checking load_dataset with config name {config_name}")
+        self.dataset = datasets.load_dataset(
+            self.PATH,
+            name=config_name,
+            data_dir=self.DATA_DIR,
+        )
 
         if "bigbio" in self.NAME:
             schema = self.NAME.split("_")[-1].upper()
         else:
             schema = None
 
+        logger.info(f"schema = {schema}")
         if schema is None:
             return
-
-        print("schema: ", schema)
-
 
         with self.subTest("IDs globally unique"):
             self.test_are_ids_globally_unique(self.dataset)
         with self.subTest("Check schema validity"):
             self.test_schema(schema)
-
-        mapped_features = _SCHEMA_TO_FEATURES[schema]
-        split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
-        for split_name, split in self.dataset.items():
-            print(split_name)
-            print("=" * 10)
-            for k, v in split_to_feature_statistics[split_name].items():
-                print(f"{k}: {v}")
-            print()
 
         if schema == "KB":
             with self.subTest("Check referenced ids"):
@@ -147,37 +151,6 @@ class TestDataLoader(unittest.TestCase):
         elif schema == "QA":
             with self.subTest("Check multiple choice"):
                 self.test_multiple_choice(self.dataset)
-
-
-    def setUp(self) -> None:
-        """Load original and big-bio schema views"""
-
-        logger.info(f"self.PATH: {self.PATH}")
-        logger.info(f"self.NAME: {self.NAME}")
-        logger.info(f"self.DATA_DIR: {self.DATA_DIR}")
-
-        # Get task type of the dataset
-        logger.info("Checking for _SUPPORTED_TASKS ...")
-        module = self.PATH
-        if module.endswith(".py"):
-            module = module[:-3]
-        module = module.replace("/", ".")
-        self._SUPPORTED_TASKS = importlib.import_module(module)._SUPPORTED_TASKS
-        logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
-        invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
-        if len(invalid_tasks) > 0:
-            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
-
-        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
-        logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
-
-        config_name = self.NAME
-        logger.info(f"Checking load_dataset with config name {config_name}")
-        self.dataset = datasets.load_dataset(
-            self.PATH,
-            name=config_name,
-            data_dir=self.DATA_DIR,
-        )
 
 
     def get_feature_statistics(self, features: Features, schema: str) -> Dict:
@@ -301,14 +274,21 @@ class TestDataLoader(unittest.TestCase):
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event":
-                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
+                        if not (
+                            (ref_id, "entity") in existing_ids
+                            or (ref_id, "event") in existing_ids
+                        ):
                             logger.warning(
-                                f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                                f"Referenced element ({ref_id}, entity/event) could not be "
+                                f"found in existing ids {existing_ids}. Please make sure that "
+                                f"this is not because of a bug in your data loader."
                             )
                     else:
-                        if not (ref_id, ref_type) in referenced_ids:
+                        if not (ref_id, ref_type) in existing_ids:
                             logger.warning(
-                                f"Referenced element {(ref_id, ref_type)} could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
+                                f"Referenced element {(ref_id, ref_type)} could not be "
+                                f"found in existing ids {existing_ids}. Please make sure that "
+                                f"this is not because of a bug in your data loader."
                             )
 
     def test_passages_offsets(self, dataset_bigbio: DatasetDict):
@@ -332,7 +312,9 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(msg="Text in passages must be a list", field=text)
+                        self._test_is_list(
+                            msg="Text in passages must be a list", field=text
+                        )
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -350,7 +332,10 @@ class TestDataLoader(unittest.TestCase):
                         )
 
                         for idx, (start, end) in enumerate(offsets):
-                            msg = f"Split:{split} - Example:{example_id} - text:`{example_text[start:end]}` != text_by_offset:`{text[idx]}`"
+                            msg = (
+                                f"Split:{split} - Example:{example_id} - "
+                                f"text:`{example_text[start:end]}` != text_by_offset:`{text[idx]}`"
+                            )
                             self.assertEqual(example_text[start:end], text[idx], msg)
 
     def _check_offsets(
@@ -371,16 +356,25 @@ class TestDataLoader(unittest.TestCase):
 
         if len(texts) != len(offsets):
             logger.warning(
-                f"Split:{split} - Example:{example_id} - Number of texts {len(texts)} != number of offsets {len(offsets)}. Please make sure that this error already exists in the original data and was not introduced in the data loader."
+                f"Split:{split} - Example:{example_id} - "
+                f"Number of texts {len(texts)} != number of offsets {len(offsets)}. "
+                f"Please make sure that this error already exists in the original "
+                f"data and was not introduced in the data loader."
             )
 
         self._test_is_list(
-            msg=f"Split:{split} - Example:{example_id} - Text fields paired with offsets must be in the form [`text`, ...]",
+            msg=(
+                f"Split:{split} - Example:{example_id} - "
+                f"Text fields paired with offsets must be in the form [`text`, ...]"
+            ),
             field=texts,
         )
 
         with self.subTest(
-            f"Split:{split} - Example:{example_id} - All offsets must be in the form [(lo1, hi1), ...]",
+            (
+                f"Split:{split} - Example:{example_id} - "
+                f"All offsets must be in the form [(lo1, hi1), ...]"
+            ),
             offsets=offsets,
         ):
             self.assertTrue(all(len(o) == 2 for o in offsets))
@@ -425,12 +419,14 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - entity:{entity_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
 
-    # UNTESTED: no dataset example
+
     def test_events_offsets(self, dataset_bigbio: DatasetDict):
         """
         Verify that the events' trigger offsets are correct,
@@ -459,7 +455,9 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - event:{event_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -486,35 +484,33 @@ class TestDataLoader(unittest.TestCase):
                                 entity_id in entity_lookup
                             ), f"Split:{split} - Example:{example_id} - Entity:{entity_id} not found!"
 
-
     def test_multiple_choice(self, dataset_bigbio: DatasetDict):
         """
         Verify that each answer in a multiple choice Q/A task is in choices.
-        """  # noqa
+        """
         logger.info("QA ONLY: Checking multiple choice")
         for split in dataset_bigbio:
 
             for example in dataset_bigbio[split]:
 
                 if len(example["choices"]) > 0:
-                    assert(
-                        example["type"] == "multiple_choice"  # can change this to "in" if we include ranking
-                    ), f"example has populated choices, but is not type 'multiple_choice' {example}"
+                    # can change "==" to "in" if we include ranking later
+                    assert (
+                        example["type"] == "multiple_choice"
+                    ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
 
                 if example["type"] == "multiple_choice":
-                    assert(
+                    assert (
                         len(example["choices"]) > 0
-                    ), f"example has type 'multiple_choice' but no values in 'choices' {example}"
+                    ), f"type is 'multiple_choice' but no values in 'choices' {example}"
 
                     for answer in example["answer"]:
-                        assert(
+                        assert (
                             answer in example["choices"]
-                        ), f"example has an answer that is not present in 'choices' {example}"
-
+                        ), f"answer is not present in 'choices' {example}"
 
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
-
 
         non_empty_features = set()
         if schema == "KB":
@@ -525,18 +521,35 @@ class TestDataLoader(unittest.TestCase):
         else:
             features = _SCHEMA_TO_FEATURES[schema]
 
-        split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
+        split_to_feature_counts = self.get_feature_statistics(
+            features=features, schema=schema
+        )
+
+        for split_name, split in self.dataset.items():
+            print(split_name)
+            print("=" * 10)
+            for k, v in split_to_feature_counts[split_name].items():
+                print(f"{k}: {v}")
+            print()
+
         for split_name, split in self.dataset.items():
             self.assertEqual(split.info.features, features)
             for non_empty_feature in non_empty_features:
                 if split_to_feature_counts[split_name][non_empty_feature] == 0:
-                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
+                    raise AssertionError(
+                        f"Required key '{non_empty_feature}' does not have any instances"
+                    )
 
             for feature, count in split_to_feature_counts[split_name].items():
-                if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
-                    logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
-
-
+                if (
+                    count > 0
+                    and feature not in non_empty_features
+                    and feature in set().union(*_TASK_TO_FEATURES.values())
+                ):
+                    logger.warning(
+                        f"Found instances of '{feature}' but there seems to be no task "
+                        f"in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
+                    )
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
@@ -560,18 +573,16 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
     parser.add_argument(
-        "name",
-        type=str,
-        default=None,
-        help="the name of the config you want to test."
+        "path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)"
+    )
+    parser.add_argument(
+        "name", type=str, default=None, help="the name of the config you want to test."
     )
     parser.add_argument("--data_dir", type=str, default=None)
 
     args = parser.parse_args()
     logger.info(f"args: {args}")
-
 
     TestDataLoader.PATH = args.path
     TestDataLoader.NAME = args.name
