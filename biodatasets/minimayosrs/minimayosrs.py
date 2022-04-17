@@ -107,10 +107,10 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
                 {
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "label_physicians": datasets.Value("string"),
+                    "label_physicians": datasets.Value("float32"),
                     "code_1_physicians": datasets.Value("string"),
                     "code_2_physicians": datasets.Value("string"),
-                    "label_coders": datasets.Value("string"),
+                    "label_coders": datasets.Value("float32"),
                     "code_1_coders": datasets.Value("string"),
                     "code_2_coders": datasets.Value("string"),
                 }
@@ -201,10 +201,10 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
                     yield id_, {
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label_physicians": label_physicians,
+                        "label_physicians": float(label_physicians),
                         "code_1_physicians": code_1_physicians,
                         "code_2_physicians": code_2_physicians,
-                        "label_coders": label_coders,
+                        "label_coders": float(label_coders),
                         "code_1_coders": code_1_coders,
                         "code_2_coders": code_2_coders,
                     }
@@ -219,7 +219,7 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label": label_physicians,
+                        "label": str(label_physicians),
                     }
 
         else:
