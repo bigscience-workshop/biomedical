@@ -40,7 +40,7 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
-@inproceedings{,
+@inproceedings{cohan:naacl19,
   author    = {Arman Cohan and Waleed Ammar and Madeleine van Zuylen and Field Cady},
   title     = {Structural Scaffolds for Citation Intent Classification in Scientific Publications},
   booktitle = {Conference of the North American Chapter of the Association for Computational Linguistics},
