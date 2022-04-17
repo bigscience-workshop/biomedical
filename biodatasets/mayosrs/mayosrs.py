@@ -103,7 +103,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                 {
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
-                    "label": datasets.Value("string"),
+                    "label": datasets.Value("float32"),
                     "code_1": datasets.Value("string"),
                     "code_2": datasets.Value("string"),
                 }
@@ -170,7 +170,13 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                 for id_, row in enumerate(data):
                     text_1, text_2, label, code_1, code_2 = row
 
-                    yield id_, {"text_1": text_1, "text_2": text_2, "label": label, "code_1": code_1, "code_2": code_2}
+                    yield id_, {
+                        "text_1": text_1,
+                        "text_2": text_2,
+                        "label": float(label),
+                        "code_1": code_1,
+                        "code_2": code_2,
+                    }
 
             elif self.config.schema == "bigbio_pairs":
                 uid = 0
@@ -182,7 +188,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label": label,
+                        "label": str(label),
                     }
 
         else:
