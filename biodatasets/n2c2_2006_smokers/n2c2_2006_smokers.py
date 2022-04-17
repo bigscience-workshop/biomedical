@@ -26,7 +26,7 @@ The dataset consists of two archive files,
 
 The individual data files (inside the zip archives) come in just 1 type:
 
-* xml (*.xml files): contains the id and text of the patient records, 
+* xml (*.xml files): contains the id and text of the patient records,
 and corresponding smoking status labels
 
 
@@ -90,15 +90,15 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-The data for the n2c2 2006 smoking challenge consisted of discharge summaries 
-from Partners HealthCare, which were then de-identified, tokenized, broken into 
-sentences, converted into XML format, and separated into training and test sets. 
+The data for the n2c2 2006 smoking challenge consisted of discharge summaries
+from Partners HealthCare, which were then de-identified, tokenized, broken into
+sentences, converted into XML format, and separated into training and test sets.
 
-Two pulmonologists annotated each record with the smoking status of patients based 
-strictly on the explicitly stated smoking-related facts in the records. These 
-annotations constitute the textual judgments of the annotators. The annotators 
-were asked to classify patient records into five possible smoking status categories: 
-a past smoker, a current smoker, a smoker, a non-smoker and an unknown. A total of 
+Two pulmonologists annotated each record with the smoking status of patients based
+strictly on the explicitly stated smoking-related facts in the records. These
+annotations constitute the textual judgments of the annotators. The annotators
+were asked to classify patient records into five possible smoking status categories:
+a past smoker, a current smoker, a smoker, a non-smoker and an unknown. A total of
 502 de-identified medical discharge records were used for the smoking challenge.
 """
 
@@ -139,22 +139,22 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="n2c2_2006_source",
+            name="n2c2_2006_smokers_source",
             version=SOURCE_VERSION,
-            description="n2c2_2006 source schema",
+            description="n2c2_2006_smokers source schema",
             schema="source",
-            subset_id="n2c2_2006",
+            subset_id="n2c2_2006_smokers",
         ),
         BigBioConfig(
-            name="n2c2_2006_bigbio_text",
+            name="n2c2_2006_smokers_bigbio_text",
             version=BIGBIO_VERSION,
-            description="n2c2_2006 BigBio schema",
+            description="n2c2_2006_smokers BigBio schema",
             schema="bigbio_text",
-            subset_id="n2c2_2006",
+            subset_id="n2c2_2006_smokers",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "n2c2_2006_source"
+    DEFAULT_CONFIG_NAME = "n2c2_2006_smokers_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
