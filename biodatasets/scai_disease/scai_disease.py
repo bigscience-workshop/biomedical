@@ -134,13 +134,13 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download(urls)
+        filepath = dl_manager.download(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "Disease-ae-corpus.iob"),
+                    "filepath": filepath,
                     "split": "train",
                 },
             ),
