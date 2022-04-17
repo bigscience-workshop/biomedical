@@ -16,7 +16,7 @@
 """
 A dataset loader for the SCAI Disease dataset.
 
-SCAI Disese is a dataset annotated in 2010 with mentions of diseases and
+SCAI Disease is a dataset annotated in 2010 with mentions of diseases and
 adverse effects. It is a corpus containing 400 randomly selected MEDLINE
 abstracts generated using ‘Disease OR Adverse effect’ as a PubMed query. This
 evaluation corpus was annotated by two individuals who hold a Master’s degree
@@ -43,7 +43,7 @@ _CITATION = """\
 _DATASETNAME = "[scai_disease]"
 
 _DESCRIPTION = """\
-SCAI Disese is a dataset annotated in 2010 with mentions of diseases and
+SCAI Disease is a dataset annotated in 2010 with mentions of diseases and
 adverse effects. It is a corpus containing 400 randomly selected MEDLINE
 abstracts generated using ‘Disease OR Adverse effect’ as a PubMed query. This
 evaluation corpus was annotated by two individuals who hold a Master’s degree
@@ -66,7 +66,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
-    """SCAI Disese is a dataset annotated in 2010 with mentions of diseases and
+    """SCAI Disease is a dataset annotated in 2010 with mentions of diseases and
     adverse effects."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
