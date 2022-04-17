@@ -38,7 +38,7 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "[scai_chemical]"
+_DATASETNAME = "scai_chemical"
 
 _DESCRIPTION = """\
 SCAI Chemical is a corpus of MEDLINE abstracts that has been annotated
