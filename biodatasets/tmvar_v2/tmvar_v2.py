@@ -66,7 +66,7 @@ _BIGBIO_VERSION = "1.0.0"
 logger = datasets.utils.logging.get_logger(__name__)
 
 
-class tmvarDataset(datasets.GeneratorBasedBuilder):
+class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
     """
     This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them.
     """
