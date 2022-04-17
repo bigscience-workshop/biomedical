@@ -103,8 +103,8 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "mean_score": datasets.Value("string"),
-                    "std_score": datasets.Value("string"),
+                    "mean_score": datasets.Value("float32"),
+                    "std_score": datasets.Value("float32"),
                     "text_1": datasets.Value("string"),
                     "text_2": datasets.Value("string"),
                     "code_1": datasets.Value("string"),
@@ -160,8 +160,8 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                     mean_score, std_score, text_1, text_2, code_1, code_2 = row
 
                     yield id_, {
-                        "mean_score": mean_score,
-                        "std_score": std_score,
+                        "mean_score": float(mean_score),
+                        "std_score": float(std_score),
                         "text_1": text_1,
                         "text_2": text_2,
                         "code_1": code_1,
@@ -178,7 +178,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": text_1,
                         "text_2": text_2,
-                        "label": label,
+                        "label": str(label),
                     }
 
         else:
