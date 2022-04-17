@@ -74,6 +74,8 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+logger = datasets.utils.logging.get_logger(__name__)
+
 
 class tmvarDataset(datasets.GeneratorBasedBuilder):
     """
@@ -123,10 +125,9 @@ class tmvarDataset(datasets.GeneratorBasedBuilder):
                         "pmid": datasets.Value("string"),
                         "passages": [
                             {
-                                "concept_id": datasets.Value("string"),
                                 "type": datasets.Value("string"),
-                                "text": datasets.Value("string"),
-                                "offsets": datasets.Sequence(datasets.Value("int32")),
+                                "text": datasets.Sequence(datasets.Value("string")),
+                                "offsets": datasets.Sequence([datasets.Value("int32")]),
                             }
                         ],
                         "entities": [
@@ -147,10 +148,9 @@ class tmvarDataset(datasets.GeneratorBasedBuilder):
                         "pmid": datasets.Value("string"),
                         "passages": [
                             {
-                                "concept_id": datasets.Value("string"),
                                 "type": datasets.Value("string"),
-                                "text": datasets.Value("string"),
-                                "offsets": datasets.Sequence(datasets.Value("int32")),
+                                "text": datasets.Sequence(datasets.Value("string")),
+                                "offsets": datasets.Sequence([datasets.Value("int32")]),
                             }
                         ],
                         "entities": [
@@ -312,6 +312,9 @@ class tmvarDataset(datasets.GeneratorBasedBuilder):
                     entity_id,
                     rsid,
                 ) = mentions
+            else:
+                logger.warning("Inconsistent entity format found. Skipping")
+                logger.warning(f"Document ID: {pmid} Line: {line}")
 
             entity = {
                 "offsets": [[int(start_idx), int(end_idx)]],
