@@ -133,8 +133,8 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS[_DATASETNAME]
-        filepath = dl_manager.download(urls)
+        url = _URLS[_DATASETNAME]
+        filepath = dl_manager.download(url)
 
         return [
             datasets.SplitGenerator(
@@ -170,21 +170,36 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             for i, example in enumerate(examples):
-                yield i, {
-                    "id": i,
+                bigbio_example = {
+                    "id": "example-" + str(i),
                     "document_id": example["document_id"],
                     "passages": [
                         {
-                            "id": "0",
-                            "text": example["text"],
-                            "offsets": [0, len(example["text"])],
+                            "id": "passage-" + str(i),
+                            "type": "abstract",
+                            "text": [example["text"]],
+                            "offsets": [[0, len(example["text"])]],
                         }
                     ],
-                    "entities": example["entities"],
+                    "entities": [],
                     "events": [],
                     "coreferences": [],
                     "relations": [],
                 }
+
+                # Converts entities to BigBio format
+                for j, entity in enumerate(example["entities"]):
+                    bigbio_example["entities"].append(
+                        {
+                            "id": "entity-" + str(i) + "-" + str(j),
+                            "offsets": [entity["offsets"]],
+                            "text": [entity["text"]],
+                            "type": entity["type"],
+                            "normalized": [],
+                        }
+                    )
+
+                yield i, bigbio_example
 
     @staticmethod
     def _make_example(tokens):
@@ -198,54 +213,48 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
         document_id = tokens[0][4:]
 
         text = ""
-        tokens = []
+        processed_tokens = []
         entities = []
         last_offset = 0
 
         for token in tokens[1:]:
             token_pieces = token.split("\t")
-            token_pieces = token_pieces[:-1] + token_pieces[-1].split("|")
+            if len(token_pieces) != 5:
+                raise ValueError("Failed to parse line: %s" % token)
 
             token_text = str(token_pieces[0])
             token_start = int(token_pieces[1])
             token_end = int(token_pieces[2])
-            if len(token_pieces) == 4:
-                entity_text = None
-                token_tag = str(token_pieces[3])
-            elif len(token_pieces) == 5:
-                entity_text = str(token_pieces[3])
-                token_tag = str(token_pieces[4])
-            else:
-                raise ValueError("Failed to parse line: %s" % token)
+            entity_text = str(token_pieces[3])
+            token_tag = str(token_pieces[4])[1:]
 
-            if token_start == last_offset + 1:
-                text += " "
-            elif token_start != last_offset:
+            if token_start > last_offset:
+                for _ in range(token_start - last_offset):
+                    text += " "
+            elif token_start < last_offset:
                 raise ValueError("Invalid start index: %s" % token)
+            last_offset = token_end
 
             text += token_text
-            tokens += {
-                "offsets": [token_start, token_end],
-                "text": token_text,
-                "tag": token_tag
-            }
-            if entity_text is not None:
-                entities += {
-                    "offsets": [token_start, token_start + len(entity_text)],
-                    "text": entity_text,
-                    "type": token_tag[2:]
+            processed_tokens.append(
+                {
+                    "offsets": [token_start, token_end],
+                    "text": token_text,
+                    "tag": token_tag
                 }
+            )
+            if entity_text != "":
+                entities.append(
+                    {
+                        "offsets": [token_start, token_start + len(entity_text)],
+                        "text": entity_text,
+                        "type": token_tag[2:]
+                    }
+                )
 
         return {
             "document_id": document_id,
             "text": text,
             "entities": entities,
-            "tokens": tokens,
+            "tokens": processed_tokens,
         }
-
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
