@@ -66,7 +66,7 @@ _BIGBIO_VERSION = "1.0.0"
 logger = datasets.utils.logging.get_logger(__name__)
 
 
-class tmvarV1Dataset(datasets.GeneratorBasedBuilder):
+class TmvarV1Dataset(datasets.GeneratorBasedBuilder):
     """
     The tmVar dataset contains 500 PubMed articles manually annotated with mutation
     mentions of various kinds.
@@ -138,10 +138,8 @@ class tmvarV1Dataset(datasets.GeneratorBasedBuilder):
 
         url = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(url)
-        train_filename = "tmVarCorpus\\train.PubTator.txt"
-        test_filename = "tmVarCorpus\\test.PubTator.txt"
-        train_filepath = os.path.join(data_dir, train_filename)
-        test_filepath = os.path.join(data_dir, test_filename)
+        train_filepath = os.path.join(data_dir, "tmVarCorpus", "train.PubTator.txt")
+        test_filepath = os.path.join(data_dir, "tmVarCorpus", "test.PubTator.txt")
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
