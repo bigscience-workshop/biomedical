@@ -40,7 +40,7 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "[scai_disease]"
+_DATASETNAME = "scai_disease"
 
 _DESCRIPTION = """\
 SCAI Disease is a dataset annotated in 2010 with mentions of diseases and
