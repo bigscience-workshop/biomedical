@@ -26,12 +26,13 @@ MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 Note from the Author how to load dataset:
 1) Download the file MSHCorpus.zip (Link "MSHWSD Data Set") from
    https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html
-2) Set kwarg data_dir to the path of the zip file
+2) Set kwarg data_dir to the directory containing MSHCorpus.zip
 """
 
-
+from dataclasses import dataclass
 import itertools as it
 import re
+import os
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -86,6 +87,13 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+@dataclass
+class MshWsdBigBioConfig(BigBioConfig):
+    schema: str = "source"
+    name: str = "msh_wsd_source"
+    version: datasets.Version = datasets.Version(_SOURCE_VERSION)
+    description: str = "MSH-WSD source schema"
+    subset_id: str = "msh_wsd"
 
 class MshWsdDataset(datasets.GeneratorBasedBuilder):
     """Biomedical Word Sense Disambiguation (WSD)."""
@@ -96,14 +104,14 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        BigBioConfig(
+        MshWsdBigBioConfig(
             name="msh_wsd_source",
             version=SOURCE_VERSION,
             description="MSH-WSD source schema",
             schema="source",
             subset_id="msh_wsd",
         ),
-        BigBioConfig(
+        MshWsdBigBioConfig(
             name="msh_wsd_bigbio_kb",
             version=BIGBIO_VERSION,
             description="MSH-WSD BigBio schema",
@@ -112,7 +120,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "msh_wsd_source"
+    BUILDER_CONFIG_CLASS = MshWsdBigBioConfig
 
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
@@ -151,7 +159,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = data_dir = dl_manager.download_and_extract(self.config.data_dir)
+            data_dir = dl_manager.download_and_extract(os.path.join(self.config.data_dir, "MSHCorpus.zip"))
 
         return [
             datasets.SplitGenerator(
@@ -184,8 +192,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
                         yield example["id"], example
 
     def _parse_document(self, concept_map, file: Path):
-
-        with file.open() as f:
+        with file.open(mode="r", encoding="iso-8859-1") as f:
             content = f.readlines()
         content = [x.strip() for x in content]
 
