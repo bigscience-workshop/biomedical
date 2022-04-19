@@ -218,7 +218,7 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
                 with open(file) as f:
                     text = f.read()
 
-                pmid = int(file.name.removesuffix(".txt"))
+                pmid = int(file.name.split(".txt")[0])
 
                 # Can PMID corresponding annotations
                 doc_annotations = so_annot[so_annot.PMID == pmid]
