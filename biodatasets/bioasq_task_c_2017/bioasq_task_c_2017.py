@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from dataclasses import dataclass
 import json
 import os
 import xml.etree.ElementTree as ET
@@ -62,6 +62,14 @@ _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+@dataclass
+class BioASQTaskC2017BigBioConfig(BigBioConfig):
+    schema: str = "source"
+    name: str = "bioasq_task_c_2017_source"
+    version: datasets.Version = datasets.Version(_SOURCE_VERSION)
+    description: str = "bioasq_task_c_2017 source schema"
+    subset_id: str = "bioasq_task_c_2017"
+
 
 class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
     """
@@ -73,14 +81,14 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
-        BigBioConfig(
+        BioASQTaskC2017BigBioConfig(
             name="bioasq_task_c_2017_source",
             version=SOURCE_VERSION,
             description="bioasq_task_c_2017 source schema",
             schema="source",
             subset_id="bioasq_task_c_2017",
         ),
-        BigBioConfig(
+        BioASQTaskC2017BigBioConfig(
             name="bioasq_task_c_2017_bigbio_text",
             version=BIGBIO_VERSION,
             description="bioasq_task_c_2017 BigBio schema",
@@ -88,6 +96,8 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             subset_id="bioasq_task_c_2017",
         ),
     ]
+    
+    BUILDER_CONFIG_CLASS = BioASQTaskC2017BigBioConfig
 
     def _info(self) -> datasets.DatasetInfo:
 
