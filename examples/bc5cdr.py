@@ -22,15 +22,17 @@ all chemicals, diseases and their interactions in 1,500 PubMed articles.
 
 -- 'Overview of the BioCreative V Chemical Disease Relation (CDR) Task'
 """
-import os
-import itertools
 import collections
-import bioc
+import itertools
+import os
+
+from bioc import biocxml
 import datasets
 
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -57,8 +59,10 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "bc5cdr"
+
 _DESCRIPTION = """\
-The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of 
+The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of
 human annotations of all chemicals, diseases and their interactions in 1,500 PubMed articles.
 """
 
@@ -71,8 +75,11 @@ _URLs = {
     "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION,
-                    Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.RELATION_EXTRACTION,
+]
 _SOURCE_VERSION = "01.05.16"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -192,7 +199,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _get_bioc_entity(self, span, doc_text, db_id_key="MESH"):
-        """Parse BioC entity annotation.  
+        """Parse BioC entity annotation.
 
         Parameters
         ----------
@@ -208,8 +215,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         dict
             entity information
         """
-        offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
-        texts = [doc_text[i:j] for i, j in offsets]
+        # offsets = [(loc.offset, loc.offset + loc.length) for loc in span.locations]
+        # texts = [doc_text[i:j] for i, j in offsets]
+        offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons[db_id_key] if db_id_key else "-1"
         normalized = [
             # some entities are linked to multiple normalized ids
@@ -275,9 +283,9 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         filepath,
         split,  # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     ):
-        """ Yields examples as (key, example) tuples. """
+        """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
-            reader = bioc.BioCXMLDocumentReader(str(filepath))
+            reader = biocxml.BioCXMLDocumentReader(str(filepath))
 
             for uid, xdoc in enumerate(reader):
                 doc_text = self._get_document_text(xdoc)
@@ -306,7 +314,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
                 }
 
         elif self.config.schema == "bigbio_kb":
-            reader = bioc.BioCXMLDocumentReader(str(filepath))
+            reader = biocxml.BioCXMLDocumentReader(str(filepath))
             uid = 0  # global unique id
 
             for i, xdoc in enumerate(reader):

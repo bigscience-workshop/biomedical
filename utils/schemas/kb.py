@@ -16,7 +16,6 @@ and a flat hierarchy of document passages.
 """
 import datasets
 
-
 features = datasets.Features(
     {
         "id": datasets.Value("string"),

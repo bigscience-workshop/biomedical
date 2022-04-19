@@ -1,6 +1,13 @@
-***Update 2022.03.26: We're close to launch! Hackathon is scheduled for April 2nd - April 15th. We're excited to have you!***
-
 # Welcome to the BigScience🌸 Biomedical NLP Hackathon!
+
+
+![progress claimed](https://progress-bar.dev/96/?title=Datasets%20Claimed)
+
+![tier1](https://progress-bar.dev/100/?title=Milestone%201%20(30%20Datasets%20Completed))
+![tier2](https://progress-bar.dev/100/?title=Milestone%202%20(60%20Datasets%20Completed))
+![tier3](https://progress-bar.dev/85/?title=Milestone%203%20(100%20Datasets%20Completed))
+![tier4](https://progress-bar.dev/52/?title=Milestone%204%20(All%20Datasets%20Completed))
+
 
 Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
 <!--- @Natasha From the Data_sourcing wiki  --->
@@ -90,9 +97,32 @@ You are welcome to use any of the above resources as necessary.
 
 ## FAQs
 
-#### What if my dataset does not have a public license?
+#### How can I find the appropriate license for my dataset?
 
-We understand that some biomedical datasets require external licensing. To respect the agreement of the license, we recommend implementing a dataloader script that works if the user has a locally downloaded file. You can find an example [here](examples/cellfinder.py) and follow the local/private dataset specific instructions in  [template](templates/template.py).
+The license for a dataset is not always obvious. Here are some strategies to try in your search,
+
+* check the `Experiment A: Annotated Datasets` tab of the [google sheet](https://docs.google.com/spreadsheets/d/1eOa9NhNmgGLByWKZ9ioKmNErq824dGA-nV5WpRWZ4a8/edit?usp=sharing) we used while planning the hackathon 
+* check for files such as README or LICENSE that may be distributed with the dataset itself
+* check the dataset webpage
+* check publications that announce the release of the dataset
+* check the website of the organization providing the dataset
+
+If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE="Unknown"` in your dataset script.   
+
+#### What if my dataset is not publicly available?
+
+We understand that some biomedical datasets are not publicly available due to data usage agreements or licensing. For these datasets, we recommend implementing a dataloader script that references a local directory containing the dataset. You can find examples in the [n2c2_2011](examples/n2c2_2011.py) and [bioasq](examples/bioasq.py) implementations. There are also local dataset specific instructions in  [template](templates/template.py).
+
+
+#### My dataset is in a standard format (e.g. BRAT, BioC). Do I have to write my own parser?
+
+If your dataset is in a standard format, please use a recommended parser if available:
+- BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
+- BRAT: Use [our custom brat parser](utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+
+If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
+
+
 
 #### What types of libraries can we import?
 
@@ -100,9 +130,9 @@ Eventually, your dataloader script will need to run using only the packages supp
 
 We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
 
-#### Can I upload the dataset directly?
+#### Can I upload my dataset anywhere?
 
-No. Please do not upload your dataset directly. This is not the goal of the hackathon and many datasets have external licensing agreements. If the dataset is public (i.e. can be downloaded without credentials or signed data user agreement), include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. You can see examples of both in the [examples](https://github.com/bigscience-workshop/biomedical/tree/master/examples) directory. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
+No. Please don't upload the dataset you're working on to the huggingface hub or anywhere else.  This is not the goal of the hackathon and some datasets have licensing agreements that prevent redistribution. If the dataset is public, include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
 
 #### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
 
@@ -125,6 +155,25 @@ Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/
 #### My dataset is too complicated, can I switch?
 
 Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
+
+#### Can I change the Big-Bio schema?
+
+**No, please do not modify the Big-Bio Schema.** The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config.
+
+#### My dataset has multiple labels for a span of text - what do I do?
+
+In many of our schemas, we have a 1:1 mapping between a key and its label (i.e. in KB, entity and label). In some datasets, we've noticed that there are multiple labels assigned to a text entity. Generally speaking, if a big-bio key has multiple labels associated with it, please populate the list with multiple instances of (key, label) according to each label that correspond to it. 
+
+So for instance if the dataset has an entity "copper" with the  types "Pharmacologic Substance" and "Biologically Active", please create one entity with type "Pharmacologic Substance" and an associated unique id *and* another entity with type "Biologically Active" with a different unique id. The rest of the inputs (text, offsets, and normalization) of both entities will be identical.
+
+#### What happens after I claim a dataset?
+In order to keep turnaround time reasonable, and ensure datasets are being completed, we propose a few notes on claiming a dataset:
+
+* Please claim a dataset only if you intend to work on it. We'll try to check in within 3 days to ensure you have the help you need. Don't hesitate to contact the admins! We are ready to help 💪!
+
+* If you have already claimed a dataset prior to (2022/04/05), we will check in on Friday (2022/04/08). If we do not hear back via GitHub issues OR a message to the Discord admins on general, we will make the dataset open for other participants by **Saturday (2022/04/09)**.
+
+* If things are taking longer than expected - that is totally ok! Please let us know via GitHub issues (preferred) or by pinging the @admins channel on Discord.
 
 ## Thank you!
 
