@@ -27,16 +27,12 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
-@article{,
-  author    = {Kevin Nagel},
-  title     = {Automatic functional annotation of predicted active sites: combining PDB and literature mining},
-  journal   = {},
-  volume    = {},
-  year      = {2009},
-  url       = {https://www.ebi.ac.uk/sites/ebi.ac.uk/files/shared/documents/phdtheses/kevin_nagel.pdf},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+@phdthesis{nagel2009automatic,
+  title={Automatic functional annotation of predicted active sites: Combining PDB and literature mining},
+  author={Nagel, Kevin},
+  year={2009},
+  school={University of Cambridge}
+  url= {https://www.ebi.ac.uk/sites/ebi.ac.uk/files/shared/documents/phdtheses/kevin_nagel.pdf},
 }
 """
 
