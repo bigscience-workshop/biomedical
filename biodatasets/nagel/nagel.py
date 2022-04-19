@@ -138,8 +138,8 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
-        urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
+        url = _URLS[_DATASETNAME]
+        data_dir = dl_manager.download_and_extract(url)
 
         return [
             datasets.SplitGenerator(
