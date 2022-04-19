@@ -1,10 +1,6 @@
 from enum import Enum
 
 
-class BigBioValues(Enum):
-    NULL = "<BB-NULL-VALUE>"        # to represent missing data
-
-
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"
     NAMED_ENTITY_DISAMBIGUATION = "NED"
