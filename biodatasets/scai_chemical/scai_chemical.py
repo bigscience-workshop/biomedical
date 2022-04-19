@@ -61,15 +61,12 @@ _SOURCE_VERSION = "3.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
+class ScaiChemicalDataset(datasets.GeneratorBasedBuilder):
     """SCAI Chemical is a dataset annotated in 2008 with mentions of chemicals."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -244,7 +241,7 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
                     {
                         "offsets": [token_start, token_start + len(entity_text)],
                         "text": entity_text,
-                        "type": token_tag[2:]
+                        "type": token_tag[2:],
                     }
                 )
 
