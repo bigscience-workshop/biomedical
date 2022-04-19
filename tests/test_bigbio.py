@@ -3,14 +3,16 @@ Unit-tests to ensure tasks adhere to big-bio schema.
 """
 import argparse
 import importlib
+import re
 import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, Iterator, List, Optional, Union, Dict
+from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 import datasets
 from datasets import DatasetDict, Features
+
 from utils.constants import Tasks
 from utils.schemas import (entailment_features, kb_features, pairs_features,
                            qa_features, text2text_features, text_features)
@@ -54,7 +56,7 @@ _TASK_TO_FEATURES = {
     Tasks.RELATION_EXTRACTION: {"relations", "entities"},
     Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
     Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-    Tasks.EVENT_EXTRACTION: {"events"}
+    Tasks.EVENT_EXTRACTION: {"events"},
 }
 
 
@@ -72,6 +74,8 @@ OFFSET_ERROR_MSG = (
     " This is not a hard failure, as it is common for this type of datasets."
     " However, if the error list is long (e.g. >10) you should double check your code. \n\n"
 )
+
+_CONNECTORS = re.compile(r"\+|\,|\||\;")
 
 
 class TestDataLoader(unittest.TestCase):
@@ -115,7 +119,9 @@ class TestDataLoader(unittest.TestCase):
                 self.test_schema(schema)
 
             mapped_features = _SCHEMA_TO_FEATURES[schema]
-            split_to_feature_statistics = self.get_feature_statistics(mapped_features, schema)
+            split_to_feature_statistics = self.get_feature_statistics(
+                mapped_features, schema
+            )
             for split_name, split in self.datasets_bigbio[schema].items():
                 print(split_name)
                 print("=" * 10)
@@ -130,15 +136,17 @@ class TestDataLoader(unittest.TestCase):
                     self.test_passages_offsets(dataset_bigbio)
                 with self.subTest("Check entity offsets"):
                     self.test_entities_offsets(dataset_bigbio)
+                    self.test_entities_multilable_db_id(dataset_bigbio)
                 with self.subTest("Check events offsets"):
                     self.test_events_offsets(dataset_bigbio)
                 with self.subTest("Check coref offsets"):
                     self.test_coref_ids(dataset_bigbio)
+                with self.subTest("Check mult-label `type`"):
+                    self.test_multilabel_type(dataset_bigbio)
 
             elif schema == "QA":
                 with self.subTest("Check multiple choice"):
                     self.test_multiple_choice(dataset_bigbio)
-
 
     def setUp(self) -> None:
         """Load original and big-bio schema views"""
@@ -158,9 +166,13 @@ class TestDataLoader(unittest.TestCase):
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
         invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
         if len(invalid_tasks) > 0:
-            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}")
+            raise ValueError(
+                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
+            )
 
-        self._MAPPED_SCHEMAS = set([_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
+        self._MAPPED_SCHEMAS = set(
+            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+        )
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
         # check the schemas implied by _SUPPORTED_TASKS
@@ -312,7 +324,10 @@ class TestDataLoader(unittest.TestCase):
 
                 for ref_id, ref_type in referenced_ids:
                     if ref_type == "event":
-                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
+                        if not (
+                            (ref_id, "entity") in existing_ids
+                            or (ref_id, "event") in existing_ids
+                        ):
                             logger.warning(
                                 f"Referenced element ({ref_id}, entity/event) could not be found in existing ids {existing_ids}. Please make sure that this is not because of a bug in your data loader."
                             )
@@ -343,7 +358,9 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(msg="Text in passages must be a list", field=text)
+                        self._test_is_list(
+                            msg="Text in passages must be a list", field=text
+                        )
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -436,7 +453,9 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - entity:{entity_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -470,7 +489,9 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
+                            errors.append(
+                                f"Example:{example_id} - event:{event_id} " + msg
+                            )
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -497,7 +518,6 @@ class TestDataLoader(unittest.TestCase):
                                 entity_id in entity_lookup
                             ), f"Split:{split} - Example:{example_id} - Entity:{entity_id} not found!"
 
-
     def test_multiple_choice(self, dataset_bigbio: DatasetDict):
         """
         Verify that each answer in a multiple choice Q/A task is in choices.
@@ -508,24 +528,130 @@ class TestDataLoader(unittest.TestCase):
             for example in dataset_bigbio[split]:
 
                 if len(example["choices"]) > 0:
-                    assert(
-                        example["type"] == "multiple_choice"  # can change this to "in" if we include ranking
+                    assert (
+                        example["type"]
+                        == "multiple_choice"  # can change this to "in" if we include ranking
                     ), f"example has populated choices, but is not type 'multiple_choice' {example}"
 
                 if example["type"] == "multiple_choice":
-                    assert(
+                    assert (
                         len(example["choices"]) > 0
                     ), f"example has type 'multiple_choice' but no values in 'choices' {example}"
 
                     for answer in example["answer"]:
-                        assert(
+                        assert (
                             answer in example["choices"]
                         ), f"example has an answer that is not present in 'choices' {example}"
 
+    def test_entities_multilable_db_id(self, dataset_bigbio: DatasetDict):
+        """
+        Check if `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        """
+        logger.info("KB ONLY: multi-label `db_id`")
+
+        warning_raised = False
+
+        # yeah it looks bad: the idea is to avoid to go through the entire dataset
+        # one warning is enough to prompt a cleaning pass
+        for split in dataset_bigbio:
+
+            if warning_raised:
+                break
+
+            if "entities" not in dataset_bigbio[split].features:
+
+                continue
+
+            for example in dataset_bigbio[split]:
+
+                if warning_raised:
+                    break
+
+                example_id = example["id"]
+
+                for entity in example["entities"]:
+
+                    if warning_raised:
+
+                        break
+
+                    normalized = entity.get("normalized", [])
+
+                    entity_id = entity["id"]
+
+                    for norm in normalized:
+
+                        db_id = norm["db_id"]
+
+                        match = re.search(_CONNECTORS, db_id)
+
+                        if match is not None:
+
+                            connector = match.group(0)
+
+                            logger.warning(
+                                f"Split:{split} - Example:{example_id} - ",
+                                f"Entity:{entity_id} contains a normalization with a connector `{connector}`",
+                                "Please make sure you are that you are expanding the normalization list for each `db_id`",
+                            )
+
+                            warning_raised = True
+
+    def test_multilabel_type(self, dataset_bigbio: DatasetDict):
+        """
+        Check if features with `type` field contain multilabel values
+        and raise a warning ONLY ONCE for feature type (e.g. passages)
+        """
+
+        logger.info("KB ONLY: multi-label `type` fields")
+
+        features_with_type = ["passages", "entities", "relations", "events"]
+
+        warning_raised = {f: False for f in features_with_type}
+
+        for split in dataset_bigbio:
+
+            for feature_name in features_with_type:
+
+                if (
+                    feature_name not in dataset_bigbio[split].features
+                    or warning_raised[feature_name]
+                ):
+                    continue
+
+                for example in dataset_bigbio[split]:
+
+                    if warning_raised[feature_name]:
+
+                        break
+
+                    example_id = example["id"]
+
+                    features = example[feature_name]
+
+                    for feature in features:
+
+                        feature_type = feature["type"]
+
+                        match = re.search(_CONNECTORS, feature_type)
+
+                        if match is not None:
+
+                            connector = match.group(0)
+
+                            logger.warning(
+                                f"Split{split} - Example{example_id} - ",
+                                f"Feature:{feature_name} contains a connector `{connector}` \n",
+                                "Having multiple types it is currently not supported.",
+                                "Please split this featuere into multiple ones with different `type`",
+                            )
+
+                            warning_raised[feature_name] = True
+
+                            break
 
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
-
 
         non_empty_features = set()
         if schema == "KB":
@@ -536,18 +662,26 @@ class TestDataLoader(unittest.TestCase):
         else:
             features = _SCHEMA_TO_FEATURES[schema]
 
-        split_to_feature_counts = self.get_feature_statistics(features=features, schema=schema)
+        split_to_feature_counts = self.get_feature_statistics(
+            features=features, schema=schema
+        )
         for split_name, split in self.datasets_bigbio[schema].items():
             self.assertEqual(split.info.features, features)
             for non_empty_feature in non_empty_features:
                 if split_to_feature_counts[split_name][non_empty_feature] == 0:
-                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
+                    raise AssertionError(
+                        f"Required key '{non_empty_feature}' does not have any instances"
+                    )
 
             for feature, count in split_to_feature_counts[split_name].items():
-                if count > 0 and feature not in non_empty_features and feature in set().union(*_TASK_TO_FEATURES.values()):
-                    logger.warning(f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?")
-
-
+                if (
+                    count > 0
+                    and feature not in non_empty_features
+                    and feature in set().union(*_TASK_TO_FEATURES.values())
+                ):
+                    logger.warning(
+                        f"Found instances of '{feature}' but there seems to be no task in 'SUPPORTED_TASKS' for them. Is 'SUPPORTED_TASKS' correct?"
+                    )
 
     def _test_is_list(self, msg: str, field: list):
         with self.subTest(
@@ -571,7 +705,9 @@ if __name__ == "__main__":
         description="Unit tests for BigBio datasets. Args are passed to `datasets.load_dataset`"
     )
 
-    parser.add_argument("path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)")
+    parser.add_argument(
+        "path", type=str, help="path to dataloader script (e.g. examples/n2c2_2011.py)"
+    )
     parser.add_argument(
         "--schema",
         type=str,
