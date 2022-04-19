@@ -32,7 +32,7 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 """
 
 import os
-import glob
+from glob import glob
 import re
 from typing import List, Tuple, Dict
 
@@ -90,9 +90,9 @@ _URLS = {
 }
 
 # TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = (
-    [Tasks.RELATION_EXTRACTION]
-)  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.RELATION_EXTRACTION
+]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 # TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
 #  This version doesn't have to be consistent with semantic versioning. Anything that is
@@ -101,9 +101,12 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 def remove_page_numbers(text):
-    text = re.sub('PG - \d+ - \d+ ', '', text)
+    text = re.sub("PG - \d+ - \d+ ", "", text)
     return text
+
+
 def parse_interaction_abstracts(fpaths):
     all_entries = []
     count = 0
@@ -112,34 +115,48 @@ def parse_interaction_abstracts(fpaths):
     for a in fpaths:
         # Placeholders to build up later
         str_chunks = []
-        prot_chunks = [] 
-        prot_text = set() # Used to keep <prot> chunks and text in descendants from being repeated
+        prot_chunks = []
+        prot_text = (
+            set()
+        )  # Used to keep <prot> chunks and text in descendants from being repeated
         pairs = {}
         p1p2 = []
         current = 0
 
         # Start constructing parsed entry for this file
-        entry = {'id': count, 'document_id': count, 'passages': [], 'entities': [], 'relations': []}
+        entry = {
+            "id": count,
+            "document_id": count,
+            "passages": [],
+            "entities": [],
+            "relations": [],
+            "events": [],
+            "coreferences": [],
+        }
         count += 1
 
-        with open(a, 'r') as f:
-            content = f.read().replace('\n', ' ')
-        soup = BeautifulSoup(content, 'html.parser')
+        with open(a, "r") as f:
+            content = f.read().replace("\n", " ")
+        soup = BeautifulSoup(content, "html.parser")
 
         for chunk in soup.descendants:
             # Handle proteins
-            if chunk.name == 'prot':
+            if chunk.name == "prot":
                 text = chunk.text
                 prot_chunks.append(chunk)
                 prot_text.update({text})
                 str_chunks.append(text)
 
                 # Construct entity
-                entry['entities'].append(
-                    {'id': id(chunk),
-                     'type': 'protein',
-                     'text': [text],
-                     'offsets': [[current, current+len(text)]]})
+                entry["entities"].append(
+                    {
+                        "id": id(chunk),
+                        "type": "protein",
+                        "text": [text],
+                        "offsets": [[current, current + len(text)]],
+                        "normalized": [],
+                    }
+                )
 
                 current += len(text)
 
@@ -156,22 +173,24 @@ def parse_interaction_abstracts(fpaths):
                     current += len(text)
 
             # Handle interactions
-            if chunk.name in ['p1', 'p2']:
-                pair = chunk.get('pair')
+            if chunk.name in ["p1", "p2"]:
+                pair = chunk.get("pair")
                 name = chunk.name
 
                 # May have multiple prots in an interaction, I chose to represent all
-                chunk_prots = chunk.select('prot')
+                chunk_prots = chunk.select("prot")
                 chunk_prots = [
-                    {'id': id(prot),
-                     'prot':prot,
-                     'text':prot.text} for prot in chunk_prots]
+                    {"id": id(prot), "prot": prot, "text": prot.text}
+                    for prot in chunk_prots
+                ]
 
-                parsed = {'id': id(chunk),
-                     'prots':chunk_prots,
-                     'pair': chunk.get('pair'),
-                     'name': chunk.name,
-                     'text':chunk.text.strip()}
+                parsed = {
+                    "id": id(chunk),
+                    "prots": chunk_prots,
+                    "pair": chunk.get("pair"),
+                    "name": chunk.name,
+                    "text": chunk.text.strip(),
+                }
 
                 p1p2.append(parsed)
                 if pair not in pairs:
@@ -179,58 +198,66 @@ def parse_interaction_abstracts(fpaths):
                 pairs[pair][name] = parsed
 
         # Construct cleaned text
-        clean = ''.join(str_chunks)
+        clean = "".join(str_chunks)
 
         # Test entities
-        for e in entry['entities']:
-            start, end = e['offsets'][0]
-            assert(e['text'][0] == clean[start:end])
+        for e in entry["entities"]:
+            start, end = e["offsets"][0]
+            assert e["text"][0] == clean[start:end]
 
         # Construct interactions
         for n, pair in pairs.items():
-            p1 = pair.get('p1')
-            p2 = pair.get('p2')
+            p1 = pair.get("p1")
+            p2 = pair.get("p2")
             if not (p1 and p2):
                 break
-            for p1_prot in p1['prots']:
-                for p2_prot in p2['prots']:
-                    relation = {'id': relation_count, 'type': 'protein interaction', 'arg1_id': p1_prot['id'], 'arg2_id': p2_prot['id']}
-                    entry['relations'].append(relation)
+            for p1_prot in p1["prots"]:
+                for p2_prot in p2["prots"]:
+                    relation = {
+                        "id": relation_count,
+                        "type": "protein interaction",
+                        "arg1_id": p1_prot["id"],
+                        "arg2_id": p2_prot["id"],
+                        "normalized": []
+                    }
+                    entry["relations"].append(relation)
                     relation_count += 1
 
         # Extract passages
-        title = re.search('TI - (.*?) AB -', clean)
-        abstract = re.search('AB - (.*?) AD -',  clean)
-        ad = re.search('AB - .*? AD - (.*)$', clean)
+        title = re.search("TI - (.*?) AB -", clean)
+        abstract = re.search("AB - (.*?) AD -", clean)
+        ad = re.search("AB - .*? AD - (.*)$", clean)
 
         # Test that passages exist
-        assert(title and abstract and ad)
+        assert title and abstract and ad
 
         # Construct passage list
-        entry['passages'] = [
-            {'id': '0',
-             'type': 'title',
-             'text': [title.group(1)],
-             'offsets': [list(title.span(1))]
+        entry["passages"] = [
+            {
+                "id": "0",
+                "type": "title",
+                "text": [title.group(1)],
+                "offsets": [list(title.span(1))],
             },
-            {'id': '0',
-             'type': 'abstract',
-             'text': [abstract.group(1)],
-             'offsets': [list(abstract.span(1))]
+            {
+                "id": "1",
+                "type": "abstract",
+                "text": [abstract.group(1)],
+                "offsets": [list(abstract.span(1))],
             },
-            {'id': '0',
-             'type': 'AD',
-             'text': [ad.group(1)],
-             'offsets': [list(ad.span(1))]
-            }
+            {
+                "id": "2",
+                "type": "AD",
+                "text": [ad.group(1)],
+                "offsets": [list(ad.span(1))],
+            },
         ]
 
         # Test passage offsets
-        for passage in entry['passages']:
-            start, end = passage['offsets'][0]
-            assert(clean[start:end] == passage['text'][0])
+        for passage in entry["passages"]:
+            start, end = passage["offsets"][0]
+            assert clean[start:end] == passage["text"][0]
 
-#         entry['fulltext'] = clean
         all_entries.append(entry)
 
     # Post process entries to get better IDs for proteins
@@ -238,15 +265,16 @@ def parse_interaction_abstracts(fpaths):
     entity_count = 0
 
     for entry in all_entries:
-        for entity in entry['entities']:
-            entity_mapping[entity['id']] = entity_count
-            entity['id'] = entity_count
+        for entity in entry["entities"]:
+            entity_mapping[entity["id"]] = entity_count
+            entity["id"] = entity_count
             entity_count += 1
-        for relation in entry['relations']:
-            relation['arg1_id'] = entity_mapping[relation['arg1_id']]
-            relation['arg2_id'] = entity_mapping[relation['arg2_id']]      
-            
+        for relation in entry["relations"]:
+            relation["arg1_id"] = entity_mapping[relation["arg1_id"]]
+            relation["arg2_id"] = entity_mapping[relation["arg2_id"]]
+
     return all_entries
+
 
 def parse_protein_abstracts(fpaths):
     all_entries = []
@@ -254,47 +282,56 @@ def parse_protein_abstracts(fpaths):
     entity_count = 0
 
     for p in fpaths:
-        entry = {'id':0, 'document_id': 0, 'passages': [], 'entities': []}
+        entry = {
+            "id": 0,
+            "document_id": 0,
+            "passages": [],
+            "entities": [],
+            "relations": [],
+            "events": [],
+            "coreferences": [],
+        }
 
-        with open(p, 'r') as f:
-            content = f.read().replace('\n', ' ').strip()
-        with open(p, 'r') as f:
+        with open(p, "r") as f:
+            content = f.read().replace("\n", " ").strip()
+        with open(p, "r") as f:
             lines = [line.strip() for line in f.readlines() if line.strip()]
 
-
-        assert(lines[0].startswith('<ArticleTitle>'))
-        assert(lines[1].startswith('<AbstractText>'))
+        # assert(lines[0].startswith('<ArticleTitle>'))
+        # assert(lines[1].startswith('<AbstractText>'))
 
         title_line = lines[0]
-        title_line = re.sub('</?prot>', '', title_line)
-        title_line = re.sub('</?ArticleTitle>', '', title_line)
+        title_line = re.sub("</?prot>", "", title_line)
+        title_line = re.sub("</?ArticleTitle>", "", title_line)
 
         abstract_line = lines[1]
-        abstract_line = re.sub('</?prot>', '', abstract_line)
-        abstract_line = re.sub('</?AbstractText>', '', abstract_line)
-
+        abstract_line = re.sub("</?prot>", "", abstract_line)
+        abstract_line = re.sub("</?AbstractText>", "", abstract_line)
 
         title_offset = [[0, len(title_line)]]
-        abstract_offset = [[len(title_line) + 1, 1 + len(title_line) + len(abstract_line)]]
+        abstract_offset = [
+            [len(title_line) + 1, 1 + len(title_line) + len(abstract_line)]
+        ]
 
-        title_passage = {'id': id(title_line),
-             'type': 'title',
-             'text': [title_line],
-             'offsets': title_offset
-            }
+        title_passage = {
+            "id": id(title_line),
+            "type": "title",
+            "text": [title_line],
+            "offsets": title_offset,
+        }
 
+        abstract_passage = {
+            "id": id(abstract_line),
+            "type": "abstract",
+            "text": [abstract_line],
+            "offsets": abstract_offset,
+        }
 
-        abstract_passage = {'id': id(abstract_line),
-             'type': 'abstract',
-             'text': [abstract_line],
-             'offsets': abstract_offset
-            }
+        entry["passages"] = [title_passage, abstract_passage]
 
-        entry['passages'] = [title_passage, abstract_passage]
+        clean = title_line + " " + abstract_line
 
-        clean = title_line + ' ' +  abstract_line
-
-        soup = BeautifulSoup(content, 'html.parser')
+        soup = BeautifulSoup(content, "html.parser")
         str_chunks = []
         current = 0
         prot_str = set()
@@ -303,18 +340,22 @@ def parse_protein_abstracts(fpaths):
         for chunk in soup.descendants:
 
             # Handle proteins
-            if chunk.name == 'prot':
+            if chunk.name == "prot":
                 text = chunk.text
                 prot_chunks.append(chunk)
                 prot_str.update({text})
                 str_chunks.append(text)
 
                 # Construct entity
-                entry['entities'].append(
-                    {'id': id(chunk),
-                     'type': 'protein',
-                     'text': [text],
-                     'offsets': [[current, current+len(text)]]})
+                entry["entities"].append(
+                    {
+                        "id": id(chunk),
+                        "type": "protein",
+                        "text": [text],
+                        "offsets": [[current, current + len(text)]],
+                        "normalized": [],
+                    }
+                )
 
                 current += len(text)
 
@@ -331,30 +372,17 @@ def parse_protein_abstracts(fpaths):
                     current += len(text)
 
         all_entries.append(entry)
-        
-    return all_entries    
+
+    return all_entries
+
 
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 #  Append "Dataset" to the class name: BioASQ --> BioasqDataset
-class AIMed(datasets.GeneratorBasedBuilder):
+class AIMedDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
-    # You will be able to load the "source" or "bigbio" configurations with
-    ds_source = datasets.load_dataset('my_dataset', name='source')
-    ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio_kb')
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -368,7 +396,7 @@ class AIMed(datasets.GeneratorBasedBuilder):
             name="aimed_bigbio_kb",
             version=BIGBIO_VERSION,
             description="AIMed BigBio schema",
-            schema="bigbio_aimed",
+            schema="bigbio_kb",
             subset_id="aimed",
         ),
     ]
@@ -377,23 +405,19 @@ class AIMed(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
+        print()
+        print(self.config.schema)
+        print()
 
         if self.config.schema == "source":
             features = datasets.Features(
-               {
-                   "doc_id": datasets.Value("string"),
-                   "xml": datasets.Value("string")
-               }
+                {"doc_id": datasets.Value("string"), "xml": datasets.Value("string")}
             )
 
         # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
-            
+
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -408,14 +432,20 @@ class AIMed(datasets.GeneratorBasedBuilder):
 
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
+        print(data_dir)
+
+        if "interaction" in glob(data_dir[0] + "/*/**")[0]:
+            interaction_dir, protein_dir = data_dir
+        else:
+            protein_dir, interaction_dir = data_dir
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "interation_dir": data_dir[_DATASETNAME]['interactions'],
-                    "protein_dir": data_dir[_DATASETNAME]['proteins'],
+                    "interaction_dir": interaction_dir,
+                    "protein_dir": protein_dir,
                     "split": "train",
                 },
             )
@@ -425,43 +455,33 @@ class AIMed(datasets.GeneratorBasedBuilder):
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
-    def _generate_examples(self, interaction_dir: str, protein_dir: str, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, interaction_dir: str, protein_dir: str, split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
-        interaction_fpaths = glob(interaction_dir + '/*/**')
-        protein_fpaths = glob(protein_dir + '/*/**')
+        interaction_fpaths = glob(interaction_dir + "/*/**")
+        protein_fpaths = glob(protein_dir + "/*/**")
 
         if self.config.schema == "source":
-            # TODO: yield (key, example) tuples in the original dataset schema
             all_fpaths = interaction_fpaths + protein_fpaths
 
             for ix, fpath in enumerate(all_fpaths):
-                
-                with open(fpath, 'r') as f:
+                key = ix
+                with open(fpath, "r") as f:
                     xml = f.read()
-                example = {'doc_id':ix, 'xml': xml}
+                example = {"doc_id": ix, "xml": xml}
                 yield key, example
 
         elif self.config.schema == "bigbio_kb":
-            # TODO: yield (key, example) tuples in the bigbio schema
 
             all_entries_interaction = parse_interaction_abstracts(interaction_fpaths)
             all_entries_protein = parse_protein_abstracts(protein_fpaths)
             all_entries = all_entries_interaction + all_entries_protein
-            
+
             for key, example in enumerate(all_entries):
                 yield key, example
 
 
 # This template is based on the following template from the datasets package:
 # https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
