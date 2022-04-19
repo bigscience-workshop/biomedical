@@ -113,7 +113,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, datafile):
         key = 0
         filepath = os.path.join(datafile)
-        datatable = pd.read_csv(filepath,sep='\t',encoding='latin',keep_default_na=False)
+        datatable = pd.read_csv(filepath, sep='\t', encoding='latin', keep_default_na=False)
         if self.config.schema == "source":
             for i in range(datatable.shape[0]):
                 data = {}
