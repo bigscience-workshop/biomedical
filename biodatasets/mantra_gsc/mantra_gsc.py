@@ -73,7 +73,7 @@ _URLS = {
     _DATASETNAME: "http://biosemantics.org/MantraGSC/Mantra-GSC.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -143,7 +143,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             )
         )
 
-    DEFAULT_CONFIG_NAME = "mantra_gsc_en_patents_source"
+    DEFAULT_CONFIG_NAME = "mantra_gsc_en_medline_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -151,7 +151,6 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "document_id": datasets.Value("string"),
-                    "unit_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "entities": [
                         {
@@ -231,13 +230,8 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
                 yield i, kb_example
 
     def _to_source_example(self, brat_example: Dict) -> Dict:
-        document_id: str = brat_example["document_id"]
-        document_id = document_id.split("_")[1]
-        document_id, unit_id = document_id.split(".")
-
         source_example = {
-            "document_id": document_id,
-            "unit_id": unit_id,
+            "document_id": brat_example["document_id"],
             "text": brat_example["text"],
         }
 
@@ -251,7 +245,12 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
 
             # Get values from annotator notes
             assert entity_ann["entity_id"] == ann_notes["ref_id"]
-            cui, preferred_term, semantic_type, semantic_group = ast.literal_eval(ann_notes["text"])
+            notes_values = ast.literal_eval(ann_notes["text"])
+            if len(notes_values) == 4:
+                cui, preferred_term, semantic_type, semantic_group = notes_values
+            else:
+                preferred_term, semantic_type, semantic_group = notes_values
+                cui = entity_ann["type"]
             entity_ann["cui"] = cui
             entity_ann["preferred_term"] = preferred_term
             entity_ann["semantic_type"] = semantic_type
@@ -263,19 +262,20 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         return source_example
 
     def _brat_to_bigbio_example(self, brat_example: Dict) -> Dict:
-        document_id: str = brat_example["document_id"]
-        document_id = document_id.split("_")[1]
-        document_id, unit_id = document_id.split(".")
         kb_example = {
-            "document_id": document_id,
-            "unit_id": unit_id,
+            "document_id": brat_example["document_id"],
+            # "unit_id": unit_id,
             "text": brat_example["text"],
         }
         kb_example["text_bound_annotations"] = []
         for entity_annotation, ann_notes in zip(brat_example["text_bound_annotations"], brat_example["notes"]):
             # Get values from annotator notes
             assert entity_annotation["id"] == ann_notes["ref_id"]
-            _, _, _, semantic_group = ast.literal_eval(ann_notes["text"])
+            notes_values = ast.literal_eval(ann_notes["text"])
+            if len(notes_values) == 4:
+                _,_,_, semantic_group = notes_values
+            else:
+                _,_, semantic_group = notes_values
             entity_annotation["type"] = semantic_group
 
         kb_example["text_bound_annotations"] = brat_example["text_bound_annotations"]
