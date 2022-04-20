@@ -73,7 +73,7 @@ _URLS = {
     _DATASETNAME: "http://biosemantics.org/MantraGSC/Mantra-GSC.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -161,6 +161,12 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
                             "cui": datasets.Value("string"),
                             "preferred_term": datasets.Value("string"),
                             "semantic_type": datasets.Value("string"),
+                            "normalized": [
+                                {
+                                    "db_name": datasets.Value("string"),
+                                    "db_id": datasets.Value("string"),
+                                }
+                            ],
                         }
                     ],
                 }
@@ -255,6 +261,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             entity_ann["preferred_term"] = preferred_term
             entity_ann["semantic_type"] = semantic_type
             entity_ann["type"] = semantic_group
+            entity_ann["normalized"] = [{"db_name": "UMLS", "db_id": cui}]
 
             # Add entity annotation to sample
             source_example["entities"].append(entity_ann)
@@ -268,22 +275,33 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             "text": brat_example["text"],
         }
         kb_example["text_bound_annotations"] = []
+        kb_example["normalizations"] = []
         for entity_annotation, ann_notes in zip(brat_example["text_bound_annotations"], brat_example["notes"]):
+            entity_ann = entity_annotation.copy()
             # Get values from annotator notes
-            assert entity_annotation["id"] == ann_notes["ref_id"]
+            assert entity_ann["id"] == ann_notes["ref_id"]
             notes_values = ast.literal_eval(ann_notes["text"])
             if len(notes_values) == 4:
-                _,_,_, semantic_group = notes_values
+                cui, _, _, semantic_group = notes_values
             else:
-                _,_, semantic_group = notes_values
-            entity_annotation["type"] = semantic_group
+                _, _, semantic_group = notes_values
+                cui = entity_ann["type"]
+            entity_ann["type"] = semantic_group
+            kb_example["text_bound_annotations"].append(entity_ann)
+            kb_example["normalizations"].append(
+                {
+                    "type": semantic_group,
+                    "ref_id": entity_ann["id"],
+                    "resource_name": "UMLS",
+                    "cuid": cui,
+                    "text": "",
+                }
+            )
 
-        kb_example["text_bound_annotations"] = brat_example["text_bound_annotations"]
         kb_example["events"] = brat_example["events"]
         kb_example["relations"] = brat_example["relations"]
         kb_example["equivalences"] = brat_example["equivalences"]
         kb_example["attributes"] = brat_example["attributes"]
-        kb_example["normalizations"] = brat_example["normalizations"]
         kb_example["notes"] = brat_example["notes"]
 
         return kb_example
