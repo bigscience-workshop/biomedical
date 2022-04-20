@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-The extended Anatomical Entity Mention corpus (AnatEM) consists of 1212 documents
-(approx. 250,000 words) manually annotated to identify over 13,000 mentions of anatomical
-entities. Each annotation is assigned one of 12 granularity-based types such as Cellular
-component, Tissue and Organ, defined with reference to the Common Anatomy Reference Ontology
-(see https://bioportal.bioontology.org/ontologies/CARO).
+A large annotated corpus of patient eligibility criteria extracted from 1,000 interventional, Phase IV clinical
+trials registered in ClinicalTrials.gov. This dataset includes 12,409 annotated eligibility criteria, represented
+by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12 relationship types.
 """
 import datasets
 import utils.parsing as parsing
