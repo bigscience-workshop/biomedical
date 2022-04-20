@@ -101,7 +101,12 @@ _HOMEPAGE = "https://bionlp.nlm.nih.gov/tac2017adversereactions/"
 # NOTE: Source: https://osf.io/6h9q4/
 _LICENSE = "CC0 1.0 Universal "
 
-_URLS = {_DATASETNAME: "https://bionlp.nlm.nih.gov/tac2017adversereactions/train_xml.tar.gz"}
+_URLS = {
+    _DATASETNAME: {
+        "train": "https://bionlp.nlm.nih.gov/tac2017adversereactions/train_xml.tar.gz",
+        "unannotated": "https://bionlp.nlm.nih.gov/tac2017adversereactions/unannotated_xml.tar.gz",
+    }
+}
 
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
@@ -128,24 +133,25 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = []
 
-    BUILDER_CONFIGS.extend(
-        [
-            BigBioConfig(
-                name="spl_adr_200db_source",
-                version=SOURCE_VERSION,
-                description="SPL ADR 200db source schema",
-                schema="source",
-                subset_id="spl_adr_200db",
-            ),
-            BigBioConfig(
-                name="spl_adr_200db_bigbio_kb",
-                version=BIGBIO_VERSION,
-                description="SPL ADR 200db BigBio {subset} schema",
-                schema="bigbio_kb",
-                subset_id="spl_adr_200db",
-            ),
-        ]
-    )
+    for subset_name in _URLS[_DATASETNAME]:
+        BUILDER_CONFIGS.extend(
+            [
+                BigBioConfig(
+                    name=f"spl_adr_200db_{subset_name}_source",
+                    version=SOURCE_VERSION,
+                    description=f"SPL ADR 200db source {subset_name} schema",
+                    schema="source",
+                    subset_id=f"spl_adr_200db_{subset_name}",
+                ),
+                BigBioConfig(
+                    name=f"spl_adr_200db_{subset_name}_bigbio_kb",
+                    version=BIGBIO_VERSION,
+                    description=f"SPL ADR 200db BigBio {subset_name} schema",
+                    schema="bigbio_kb",
+                    subset_id=f"spl_adr_200db_{subset_name}",
+                ),
+            ]
+        )
 
     DEFAULT_CONFIG_NAME = "spl_adr_200db_source"
 
@@ -215,11 +221,13 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS[_DATASETNAME]
+        *_, subset_name = self.config.subset_id.split("_")
+
+        urls = _URLS[_DATASETNAME][subset_name]
 
         data_dir = dl_manager.download_and_extract(urls)
 
-        data_files = (Path(data_dir) / "train_xml").glob("*.xml")
+        data_files = (Path(data_dir) / f"{subset_name}_xml").glob("*.xml")
 
         return [
             datasets.SplitGenerator(
