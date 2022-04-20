@@ -17,13 +17,13 @@ A large annotated corpus of patient eligibility criteria extracted from 1,000 in
 trials registered in ClinicalTrials.gov. This dataset includes 12,409 annotated eligibility criteria, represented
 by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12 relationship types.
 """
-import datasets
-import utils.parsing as parsing
-import utils.schemas as schemas
-
 from pathlib import Path
 from typing import Dict, Iterator, List, Tuple
 
+import datasets
+
+import utils.parsing as parsing
+import utils.schemas as schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
@@ -284,6 +284,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
         }
 
         example_prefix = example_id + "_"
+        entity_ids = {}
 
         for tb_annotation in brat_example["text_bound_annotations"]:
             if tb_annotation["type"].capitalize() not in _ALL_ENTITY_TYPES:
@@ -291,6 +292,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
             entity_ann = tb_annotation.copy()
             entity_ann["id"] = example_prefix + entity_ann["id"]
+            entity_ids[entity_ann["id"]] = True
 
             if fix_offsets:
                 if len(entity_ann["offsets"]) > 1:
@@ -313,11 +315,17 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             if base_rel_annotation["type"].upper() not in _RELATION_TYPES:
                 continue
 
+            head_id = example_prefix + base_rel_annotation["head"]["ref_id"]
+            tail_id = example_prefix + base_rel_annotation["tail"]["ref_id"]
+
+            if head_id not in entity_ids or tail_id not in entity_ids:
+                continue
+
             relation = {
                 "id": example_prefix + base_rel_annotation["id"],
                 "type": base_rel_annotation["type"],
-                "arg1_id": example_id + base_rel_annotation["head"]["ref_id"],
-                "arg2_id": example_id + base_rel_annotation["tail"]["ref_id"],
+                "arg1_id": head_id,
+                "arg2_id": tail_id,
                 "normalized": [],
             }
 
@@ -328,11 +336,14 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             ref_ids = base_co_reference["ref_ids"]
             for i, arg1 in enumerate(ref_ids[:-1]):
                 for arg2 in ref_ids[i + 1 :]:
+                    if arg1 not in entity_ids or arg2 not in entity_ids:
+                        continue
+
                     or_relation = {
                         "id": example_prefix + f"R{relation_id}",
                         "type": "OR",
-                        "arg1_id": arg1,
-                        "arg2_id": arg2,
+                        "arg1_id": example_prefix + arg1,
+                        "arg2_id": example_prefix + arg2,
                         "normalized": [],
                     }
 
@@ -375,6 +386,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
         for offset in offsets:
             texts.append(document_text[offset[0] : offset[1]])
         return texts
+
 
 def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) -> Dict:
     """
