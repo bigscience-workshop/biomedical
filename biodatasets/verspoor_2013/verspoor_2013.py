@@ -14,13 +14,13 @@
 # limitations under the License.
 
 """
-This dataset contains annotations for a small corpus of full text journal publications 
+This dataset contains annotations for a small corpus of full text journal publications
 on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
-Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
-capture the core concepts and relations relevant to cataloguing  and interpreting human 
+Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
+capture the core concepts and relations relevant to cataloguing  and interpreting human
 genetic variation and its relationship to disease, as described in the published literature.
 The schema was inspired by the needs of the database curators of the International Society
-for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
 application to genetic variation information in a range of diseases.
 """
 
@@ -33,7 +33,6 @@ import datasets
 from utils import parsing, schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-#, BigBioValues
 
 _CITATION = """\
 @article{verspoor2013annotating,
@@ -50,19 +49,19 @@ publisher={Oxford Academic}
 _DATASETNAME = "verspoor_2013"
 
 _DESCRIPTION = """\
-This dataset contains annotations for a small corpus of full text journal publications 
+This dataset contains annotations for a small corpus of full text journal publications
 on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
-Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
-capture the core concepts and relations relevant to cataloguing  and interpreting human 
+Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
+capture the core concepts and relations relevant to cataloguing  and interpreting human
 genetic variation and its relationship to disease, as described in the published literature.
 The schema was inspired by the needs of the database curators of the International Society
-for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
 application to genetic variation information in a range of diseases."""
 
 
-_HOMEPAGE = "NA" # BigBioValues.NULL
+_HOMEPAGE = "NA"
 
-_LICENSE = "NA" # BigBioValues.NULL
+_LICENSE = "NA"
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
@@ -77,13 +76,13 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
-    """This dataset contains annotations for a small corpus of full text journal publications 
+    """This dataset contains annotations for a small corpus of full text journal publications
     on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
-    Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to 
-    capture the core concepts and relations relevant to cataloguing  and interpreting human 
+    Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
+    capture the core concepts and relations relevant to cataloguing  and interpreting human
     genetic variation and its relationship to disease, as described in the published literature.
     The schema was inspired by the needs of the database curators of the International Society
-    for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have 
+    for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
     application to genetic variation information in a range of diseases."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -261,4 +260,3 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-            

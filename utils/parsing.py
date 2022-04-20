@@ -157,7 +157,10 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
     example["equivalences"] = []
     example["attributes"] = []
     example["normalizations"] = []
-    example["notes"] = []
+
+    if parse_notes:
+        example["notes"] = []
+
     for line in ann_lines:
         line = line.strip()
         if not line:
