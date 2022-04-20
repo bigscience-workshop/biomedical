@@ -148,14 +148,19 @@ N2C2_2018_RELATION_LABELS = sorted(
 )
 
 
-def _form_id(sample_id, entity_id, split, start_token, end_token, entity_type="entity"):
-    return "{}-{}-{}-{}-{}-{}".format(
+def _form_id(sample_id, entity_id, split):
+    # return "{}-{}-{}-{}-{}-{}".format(
+    #     sample_id,
+    #     entity_type,
+    #     entity_id,
+    #     split,
+    #     start_token,
+    #     end_token,
+    # )
+    return "{}-{}-{}".format(
         sample_id,
-        entity_type,
         entity_id,
-        split,
-        start_token,
-        end_token,
+        split
     )
 
 
@@ -188,24 +193,23 @@ def _get_annotations(annotation_file):
     """
     tags, relations = {}, {}
     lines = annotation_file.splitlines()
-    for line_num, line in enumerate(lines):
-        if line.strip().startswith("T"):
-            try:
-                tag_id, tag_m, tag_text = line.strip().split("\t")
-            except ValueError:
-                print(line)
+    for line_num, line in enumerate(filter(lambda l: l.strip().startswith("T"), lines)):
+        try:
+            tag_id, tag_m, tag_text = line.strip().split("\t")
+        except ValueError:
+            print(line)
 
-            if len(tag_m.split(" ")) == 3:
-                tag_type, tag_start, tag_end = tag_m.split(" ")
-            elif len(tag_m.split(" ")) == 4:
-                tag_type, tag_start, _, tag_end = tag_m.split(" ")
-            elif len(tag_m.split(" ")) == 5:
-                tag_type, tag_start, _, _, tag_end = tag_m.split(" ")
-            else:
-                print(line)
-            tags[tag_id] = _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text)
+        if len(tag_m.split(" ")) == 3:
+            tag_type, tag_start, tag_end = tag_m.split(" ")
+        elif len(tag_m.split(" ")) == 4:
+            tag_type, tag_start, _, tag_end = tag_m.split(" ")
+        elif len(tag_m.split(" ")) == 5:
+            tag_type, tag_start, _, _, tag_end = tag_m.split(" ")
+        else:
+            print(line)
+        tags[tag_id] = _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text)
 
-    for line_num, line in enumerate(filter(lambda line: line.strip().startswith("R"), lines)):
+    for line_num, line in enumerate(filter(lambda l: l.strip().startswith("R"), lines)):
         rel_id, rel_m = line.strip().split("\t")
         rel_type, rel_arg1, rel_arg2 = rel_m.split(" ")
         rel_arg1 = rel_arg1.split(":")[1]
@@ -239,6 +243,7 @@ def _read_zip(file_path):
 
 def _get_entities_from_sample(sample_id, sample, split):
     entities = []
+    entity_ids = set()
     text = sample[TEXT_EXT]
     for entity in sample[TAGS]:
         text_slice = text[entity[START]: entity[END]]
@@ -247,9 +252,12 @@ def _get_entities_from_sample(sample_id, sample, split):
         match = text_slice_norm_1 == entity[TEXT] or text_slice_norm_2 == entity[TEXT]
         if not match:
             continue
+
+        entity_id = _form_id(sample_id, entity[ID], split)
+        entity_ids.add(entity_id)
         entities.append(
             {
-                ID: _form_id(sample_id, entity[ID], split, entity[START], entity[END]),
+                ID: entity_id,
                 "type": entity[TAG],
                 TEXT: [text_slice],
                 "offsets": [(entity[START], entity[END])],
@@ -257,21 +265,30 @@ def _get_entities_from_sample(sample_id, sample, split):
             }
         )
 
-    return entities
+    return entities, entity_ids
 
 
-def _get_relations_from_sample(sample_id, sample, split):
+def _get_relations_from_sample(sample_id, sample, split, entity_ids):
+    """
+    A small number of relation from the *.ann files could not be
+    aligned with the text and were excluded. For this reason we
+    pass in the full set of matched entity IDs and ensure that
+    no relations refers to an excluded entity.
+    """
     relations = []
     for relation in sample[RELATIONS]:
-        relations.append(
-            {
-                ID: _form_id(sample_id, relation[ID], split, relation["arg1_id"], relation["arg2_id"], RELATION),
-                "type": relation[RELATION],
-                "arg1_id": relation["arg1_id"],
-                "arg2_id": relation["arg2_id"],
-                "normalized": [],
-            }
-        )
+        arg1_id = _form_id(sample_id, relation["arg1_id"], split)
+        arg2_id = _form_id(sample_id, relation["arg2_id"], split)
+        if arg1_id in entity_ids and arg2_id in entity_ids:
+            relations.append(
+                {
+                    ID: _form_id(sample_id, relation[ID], split),
+                    "type": relation[RELATION],
+                    "arg1_id": _form_id(sample_id, relation["arg1_id"], split),
+                    "arg2_id": _form_id(sample_id, relation["arg2_id"], split),
+                    "normalized": [],
+                }
+            )
 
     return relations
 
@@ -392,8 +409,8 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
     def _get_bigbio_sample(sample_id, sample, split) -> dict:
 
         passage_text = sample.get("txt", "")
-        entities = _get_entities_from_sample(sample_id, sample, split)
-        relations = _get_relations_from_sample(sample_id, sample, split)
+        entities, entity_ids = _get_entities_from_sample(sample_id, sample, split)
+        relations = _get_relations_from_sample(sample_id, sample, split, entity_ids)
         return {
             "id": sample_id,
             "document_id": sample_id,
