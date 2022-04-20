@@ -136,12 +136,12 @@ class TestDataLoader(unittest.TestCase):
                     self.test_passages_offsets(dataset_bigbio)
                 with self.subTest("Check entity offsets"):
                     self.test_entities_offsets(dataset_bigbio)
-                    self.test_entities_multilable_db_id(dataset_bigbio)
+                    self.test_entities_multilabel_db_id(dataset_bigbio)
                 with self.subTest("Check events offsets"):
                     self.test_events_offsets(dataset_bigbio)
                 with self.subTest("Check coref offsets"):
                     self.test_coref_ids(dataset_bigbio)
-                with self.subTest("Check mult-label `type`"):
+                with self.subTest("Check multi-label `type`"):
                     self.test_multilabel_type(dataset_bigbio)
 
             elif schema == "QA":
@@ -543,7 +543,7 @@ class TestDataLoader(unittest.TestCase):
                             answer in example["choices"]
                         ), f"example has an answer that is not present in 'choices' {example}"
 
-    def test_entities_multilable_db_id(self, dataset_bigbio: DatasetDict):
+    def test_entities_multilabel_db_id(self, dataset_bigbio: DatasetDict):
         """
         Check if `db_id` of `normalized` field in entities have multiple values joined with common connectors.
         """
