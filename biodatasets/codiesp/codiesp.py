@@ -98,11 +98,25 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="codiesp_source",
+            name="codiesp_D_source",
             version=SOURCE_VERSION,
-            description="CodiEsp source schema",
+            description="CodiEsp source schema for the Diagnosis Coding subtask",
             schema="source",
-            subset_id="codiesp",
+            subset_id="codiesp_d",
+        ),
+        BigBioConfig(
+            name="codiesp_P_source",
+            version=SOURCE_VERSION,
+            description="CodiEsp source schema for the Procedure Coding sub-task",
+            schema="source",
+            subset_id="codiesp_p",
+        ),
+        BigBioConfig(
+            name="codiesp_X_source",
+            version=SOURCE_VERSION,
+            description="CodiEsp source schema for the Explainable AI sub-task",
+            schema="source",
+            subset_id="codiesp_x",
         ),
         BigBioConfig(
             name="codiesp_D_bigbio_text",
@@ -131,20 +145,28 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        if self.config.schema == "source":
+        if self.config.schema == "source" and self.config.name != "codiesp_X_source":
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "task_d_labels": [datasets.Value("string")],
-                    "task_p_labels": [datasets.Value("string")],
+                    "labels": datasets.Sequence(datasets.Value("string")),
+                },
+            )
+
+        elif self.config.schema == "source" and self.config.name == "codiesp_X_source":
+            features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "document_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
                     "task_x": [
                         {
                             "label": datasets.Value("string"),
                             "code": datasets.Value("string"),
                             "text": datasets.Value("string"),
-                            "spans": datasets.Sequence([datasets.Value("int32")]),
+                            "spans": datasets.Sequence(datasets.Value("int32")),
                         }
                     ],
                 },
@@ -208,7 +230,7 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
         for task in ["codiesp_d", "codiesp_p", "codiesp_x"]:
             paths[task] = Path(os.path.join(filepath, f"{split}{task[-1].upper()}.tsv"))
 
-        if self.config.subset_id == "codiesp_d" or self.config.subset_id == "codiesp_p":
+        if self.config.name == "codiesp_D_bigbio_text" or self.config.name == "codiesp_P_bigbio_text":
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
             file_codes_dict = defaultdict(list)
@@ -226,7 +248,7 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 }
                 yield guid, example
 
-        elif self.config.subset_id == "codiesp_x":
+        elif self.config.name == "codiesp_X_bigbio_kb":
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
             example = {}
@@ -245,42 +267,42 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 example["relations"] = []
                 yield guid, example
 
-        elif self.config.subset_id == "codiesp":
-            dfs = {}
-            task_dicts = {}
-            for task in ["codiesp_d", "codiesp_p", "codiesp_x"]:
-                dfs[task] = pd.read_csv(paths[task], sep="\t", header=None)
-                file_codes_dict = defaultdict(list)
-                if task != "codiesp_x":
-                    for idx, row in dfs[task].iterrows():
-                        file, code = row[0], row[1]
-                        file_codes_dict[file].append(code)
-                else:
-                    for idx, row in dfs[task].iterrows():
-                        file, label, code, text, spans = row[0], row[1], row[2], row[3], row[4]
-                        appearances = spans.split(";")
-                        spans = []
-                        for a in appearances:
-                            spans.append([int(a.split()[0]), int(a.split()[1])])
-                        file_codes_dict[file].append({"label": label, "code": code, "text": text, "spans": spans})
-                task_dicts[task] = file_codes_dict
+        elif self.config.name == "codiesp_D_source" or self.config.name == "codiesp_P_source":
+            df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
-            # Iterate over the files from the task D dataset, since it is a superset of the other two
-            for guid, (file, codes) in enumerate(task_dicts["codiesp_d"].items()):
+            file_codes_dict = defaultdict(list)
+            for idx, row in df.iterrows():
+                file, code = row[0], row[1]
+                file_codes_dict[file].append(code)
+
+            for guid, (file, codes) in enumerate(file_codes_dict.items()):
                 example = {
                     "id": guid,
                     "document_id": file,
                     "text": Path(os.path.join(paths["text_files"], f"{file}.txt")).read_text(),
-                    "task_d_labels": codes,
-                    "task_p_labels": [],
-                    "task_x": {"label": "", "code": "", "text": "", "spans": []},
+                    "labels": codes,
                 }
 
-                if file in task_dicts["codiesp_p"]:
-                    example["task_p_labels"] = task_dicts["codiesp_p"][file]
+                yield guid, example
 
-                if file in task_dicts["codiesp_x"]:
-                    example["task_x"] = task_dicts["codiesp_x"][file]
+        elif self.config.name == "codiesp_X_source":
+            df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
+            file_codes_dict = defaultdict(list)
+            for idx, row in df.iterrows():
+                file, label, code, text, spans = row[0], row[1], row[2], row[3], row[4]
+                appearances = spans.split(";")
+                spans = []
+                for a in appearances:
+                    spans.append([int(a.split()[0]), int(a.split()[1])])
+                file_codes_dict[file].append({"label": label, "code": code, "text": text, "spans": spans[0]})
+
+            for guid, (file, codes) in enumerate(file_codes_dict.items()):
+                example = {
+                    "id": guid,
+                    "document_id": file,
+                    "text": Path(os.path.join(paths["text_files"], f"{file}.txt")).read_text(),
+                    "task_x": file_codes_dict[file],
+                }
 
                 yield guid, example
 
