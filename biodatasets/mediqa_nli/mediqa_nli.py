@@ -28,8 +28,9 @@ unseen dataset for scoring each participant submission.
 
 This script expects the filepath to the zip archive containing the MEDIQA NLI Dataset on the users
 local machine, e.g. local/path/to/mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip for version
-1.0.1. This loader script will read the archive files directly (i.e. the user should not uncompress,
-untar or unzip any of the files). The uncompressed directory should contain the following files:
+1.0.1, that is passed to `datasets.load_datset` via the `data_dir` kwarg. This loader script will
+read the archive files directly (i.e. the user should not uncompress, untar or unzip any of the
+files). The uncompressed directory should contain the following files:
 
 mednli-for-shared-task-at-acl-bionlp-2019-1.0.1
 ├── mednli_bionlp19_shared_task.jsonl
