@@ -94,7 +94,20 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 def _read_data(datapaths):
+    """
+    This function does the following:
+    1) Loads all three sub data sets;
+    2) Preprocesses original sentences to get rid of brackets;
+    3) Extracts entities, entity types and their char offsets;
+    4) Returns data dict per sample/sentence.
+    """
+
     def find_type(s, e):
+        """
+        Matching entity type from brackets/braces/parentheses.
+        :param s: left/open bracket/brace/parenthese
+        :param e: right/closed left bracket/brace/parenthese
+        """
         if (s == "(") and (e == ")"):
             return "Disorder and Finding"
         elif (s == "[") and (e == "]"):
@@ -104,8 +117,8 @@ def _read_data(datapaths):
         else:
             return ""
 
-    pattern = r"{[^{}]+}|\[[^\[\]]+\]|\([^\(\)]+\)"
-    pattern2 = r"(?<=[\[{(])\s+|\s+(?=[\]})])"
+    _ents = r"{[^{}]+}|\[[^\[\]]+\]|\([^\(\)]+\)"
+    _spaces = r"(?<=[\[{(])\s+|\s+(?=[\]})])"
     documents = []
     s_id = 0
     for filepath in datapaths:
@@ -120,14 +133,26 @@ def _read_data(datapaths):
         with open(filepath, encoding="utf-8") as f:
             for _, row in enumerate(f):
                 sentence = row.replace("\n", "")
-                sentence = re.sub(pattern2, "", sentence)
-                matches = re.findall(pattern, sentence, overlapped=True)
+                # Remove extra white spaces within the brackets:
+                sentence = re.sub(_spaces, "", sentence)
+                # In the original data, entities are wrapped with brackets/braces/parentheses.
+                # Here we identify entities with brackets:
+                matches = re.findall(_ents, sentence, overlapped=True)
+                # Remove brackets/braces/parentheses
                 words = [re.sub(r"[{}\[\]\(\)]", "", m) for m in matches]
+                # Match entity types
                 types = [find_type(match[0], match[-1]) for match in matches]
+                # Add space to the entity and the word on its left (if there isn't a space in between), e.g.
+                # "jukdom(KOL)(lungfunktionsundersökning)" -> "jukdom (KOL) (lungfunktionsundersökning)"
                 clean_sent = re.sub(r"(\w|\)|\]|})([\(\[{])", "\\1 \\2", sentence)
+                # Add space to the entity and the word on its right (if there isn't a space in between), e.g.
+                # "(kronisk bronkit)och" -> "(kronisk bronkit) och"
                 clean_sent = re.sub(r"([\)\]}])(\w|\(|\[|{)", "\\1 \\2", clean_sent)
+                # Remove the brackets/braces/parentheses around each entity
                 clean_sent = re.sub(r"[{}\[\]\(\)]", "", clean_sent)
 
+                # Remove brackets/braces/parentheses from sentences and find the char offsets of each entity
+                # in the cleaned sentence
                 try:
                     targets = [
                         {
@@ -137,14 +162,18 @@ def _read_data(datapaths):
                         }
                         for m in map(lambda word: re.search(f"(^|[^\w]+)({word})($|[^\w]+)", clean_sent), words)
                     ]
+                # Skip wrongly formatted entities
+                # e.g. "rån patienter med (Barretts ){e)s)o)f)a)g)u)s),} påverkas av korta pulse"
+                # e.g. "let samt (imperforerad ){a)n)u)s).} Möten mellan himmel och jord"
+                # I have decided to ignore these cases since they are difficult to fix and would require the use
+                # of regex thus increase processing time.
                 except:
-                    continue  # skip wrongly formatted sentences, e.g. (Barretts ){e)s)o)f)a)g)u)s),}
+                    continue
 
                 if targets:
                     documents.append(
                         {
                             "sid": "s" + str(s_id),
-                            "row": row.replace("\n", ""),
                             "sentence": clean_sent,
                             "entities": [
                                 {
@@ -195,7 +224,6 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "sid": datasets.Value("string"),
-                    "row": datasets.Value("string"),
                     "sentence": datasets.Value("string"),
                     "entities": [
                         {
@@ -237,12 +265,7 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _get_source_sample(sample):
-        return {
-            "sid": sample["sid"],
-            "row": sample["row"],
-            "sentence": sample["sentence"],
-            "entities": sample["entities"],
-        }
+        return {"sid": sample["sid"], "sentence": sample["sentence"], "entities": sample["entities"]}
 
     @staticmethod
     def _get_bigbio_sample(sample_id, sample):
@@ -284,7 +307,3 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
             elif self.config.schema == "bigbio_kb":
                 yield _id, self._get_bigbio_sample(_id, sample)
             _id += 1
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
