@@ -25,6 +25,15 @@ natural language processing (BioNLP) 2019. The dataset provided herein is a test
 hypothesis pairs for the NLI challenge in the MEDIQA shared task. Participants of the shared task
 are expected to use the MedNLI data for development of their models and this dataset was used as an
 unseen dataset for scoring each participant submission.
+
+This script expects the filepath to the zip archive containing the MEDIQA NLI Dataset on the users
+local machine, e.g. local/path/to/mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip for version
+1.0.1. This loader script will read the archive files directly (i.e. the user should not uncompress,
+untar or unzip any of the files). The uncompressed directory should contain the following files:
+
+mednli-for-shared-task-at-acl-bionlp-2019-1.0.1
+├── mednli_bionlp19_shared_task.jsonl
+├── mednli_bionlp19_shared_task_ground_truth.csv
 """
 
 import json
@@ -32,11 +41,11 @@ import os
 from typing import Dict, List, Tuple
 
 import datasets
+import pandas as pd
 
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
-import pandas as pd
 
 _CITATION = """\
 @misc{https://doi.org/10.13026/gtv4-g455,
@@ -134,7 +143,9 @@ class MEDIQANLIDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = self.config.data_dir
+            data_dir = os.path.join(
+                dl_manager.extract(self.config.data_dir), "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1"
+            )
 
         return [
             datasets.SplitGenerator(
