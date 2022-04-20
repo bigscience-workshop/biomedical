@@ -14,21 +14,7 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+The RadGraph dataset is derived from radiology reports and is designed for named entity recognition and relatation extraction.
 """
 
 import json
