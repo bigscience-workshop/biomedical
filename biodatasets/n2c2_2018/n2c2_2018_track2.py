@@ -149,14 +149,6 @@ N2C2_2018_RELATION_LABELS = sorted(
 
 
 def _form_id(sample_id, entity_id, split):
-    # return "{}-{}-{}-{}-{}-{}".format(
-    #     sample_id,
-    #     entity_type,
-    #     entity_id,
-    #     split,
-    #     start_token,
-    #     end_token,
-    # )
     return "{}-{}-{}".format(
         sample_id,
         entity_id,
