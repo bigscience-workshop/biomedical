@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and Ayush Singh (singhay).
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 
 """
 A dataset loader for the n2c2 2018 Adverse Drug Events and Medication Extraction dataset.
@@ -291,15 +292,6 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
     SOURCE_CONFIG_NAME = _DATASETNAME + "_" + SOURCE
     BIGBIO_CONFIG_NAME = _DATASETNAME + "_" + BIGBIO_KB
 
@@ -367,13 +359,9 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
         else:
             data_dir = self.config.data_dir
 
-        # Not all datasets have predefined canonical train/val/test splits.
-        # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
-
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "file_path": os.path.join(data_dir, "training_20180910.zip"),
                     "split": datasets.Split.TRAIN,
@@ -425,7 +413,6 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
         samples = _read_zip(file_path)
 
         _id = 0
-
         for sample_id, sample in samples.items():
 
             if self.config.name == N2C2AdverseDrugEventsMedicationExtractionDataset.SOURCE_CONFIG_NAME:
