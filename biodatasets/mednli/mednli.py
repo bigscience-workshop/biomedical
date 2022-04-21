@@ -139,14 +139,14 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            _ = dl_manager.extract(
+            extract_dir = dl_manager.extract(
                 os.path.join(
                     self.config.data_dir,
                     "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0.zip",
                 )
             )
             data_dir = os.path.join(
-                self.config.data_dir, "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0"
+                extract_dir, "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0"
             )
 
         return [
