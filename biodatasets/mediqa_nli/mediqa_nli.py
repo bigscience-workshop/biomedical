@@ -142,10 +142,10 @@ class MEDIQANLIDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            _ = dl_manager.extract(
+            extract_dir = dl_manager.extract(
                 os.path.join(self.config.data_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip")
             )
-            data_dir = os.path.join(self.config.data_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1")
+            data_dir = os.path.join(extract_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1")
 
         return [
             datasets.SplitGenerator(
