@@ -1,7 +1,5 @@
 # coding=utf-8
-# Copyright 2022 The HuggingFace Datasets Authors and
-#
-# * Ayush Singh (singhay)
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -158,19 +156,10 @@ def _read_zip(file_path, samples=None):
 
 
 class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
-    """i2b2 2018 cohort selection task"""
+    """i2b2 2018 track 1 cohort selection task"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
 
     _SOURCE_CONFIG_NAME = _DATASETNAME + "_" + SOURCE
     _BIGBIO_CONFIG_NAME = _DATASETNAME + "_" + BIGBIO_TEXT
@@ -246,17 +235,14 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "file_path": os.path.join(data_dir, "train.zip"),
-                    "split": str(datasets.Split.TRAIN),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "file_path": os.path.join(data_dir, "n2c2-t1_gold_standard_test_data.zip"),
-                    "split": str(datasets.Split.TEST),
                 },
             ),
         ]
