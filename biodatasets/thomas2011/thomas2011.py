@@ -132,7 +132,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             name="thomas2011_bigbio_kb",
             version=BIGBIO_VERSION,
             description="Thomas et al 2011 BigBio schema",
-            schema="bigbio_[bigbio_schema_name]",
+            schema="bigbio_kb",
             subset_id="thomas2011",
         ),
     ]
@@ -226,37 +226,38 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "doc_id": row[0],
                     "covered_text": row[1],
                     "resolved_name": row[2],
-                    "offsets": [row[3], row[4]],
+                    "offsets": [(int(row[3]), int(row[4]))],
                     "dbSNP_id": row[5],
                     "protein_or_nucleotide_sequence_mutation": row[6]
                 }
         elif self.config.schema == "bigbio_kb":
             cols = ["doc_id", "covered_text", "resolved_name", "off1", "off2",
                     "dbSNP_id", "protein_or_nucleotide_sequence_mutation"]
-            df = pd.DataFrame(data_ann, cols)
+            df = pd.DataFrame(data_ann, columns=cols)
             uid = 0
             for id_ in df.doc_id.unique():
-                entities = []
+                elist = []
                 for row in df.loc[df.doc_id==id_].itertuples():
                     uid += 1
                     if row.protein_or_nucleotide_sequence_mutation == 'PSM':
                         ent_type = 'Protein Sequence Mutation'
                     else:
                         ent_type = 'Nucleotide Sequence Mutation'
-                    entities.append({
-                        'id': uid,
-                        'type': 'SNP',
-                        'text': row.covered_text,
-                        'offsets': [row.off1,row.off2],
-                        "normalized": [{
-                            'db_name': 'https://www.ncbi.nlm.nih.gov/snp/',
-                            'db_id': row.dbSNP_id
-                        }]
+                    elist.append({
+                        'id': str(uid),
+                        'type': ent_type,
+                        'text': [row.covered_text],
+                        'offsets': [[int(row.off1), int(row.off2)]],
+                        "normalized": [{'db_name': 'dbSNP', 'db_id': row.dbSNP_id}]
                     })
                 yield id_, {
                     "id": id_,  # uid is an unique identifier for every record that starts from 1
-                    "document_id": row[0],
-                    "entities": entities,
+                    "document_id": str(row[0]),
+                    "entities": elist,
+                    "passages": [],
+                    "events": [],
+                    "coreferences": [],
+                    "relations": []
                 }
 
 # This template is based on the following template from the datasets package:
