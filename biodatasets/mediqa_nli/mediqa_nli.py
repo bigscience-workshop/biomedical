@@ -26,15 +26,13 @@ hypothesis pairs for the NLI challenge in the MEDIQA shared task. Participants o
 are expected to use the MedNLI data for development of their models and this dataset was used as an
 unseen dataset for scoring each participant submission.
 
-This script expects the filepath to the zip archive containing the MEDIQA NLI Dataset on the users
-local machine, e.g. local/path/to/mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip for version
-1.0.1, that is passed to `datasets.load_datset` via the `data_dir` kwarg. This loader script will
-read the archive files directly (i.e. the user should not uncompress, untar or unzip any of the
-files). The uncompressed directory should contain the following files:
+The files comprising this dataset must be on the users local machine in a single directory that is
+passed to `datasets.load_datset` via the `data_dir` kwarg. This loader script will read the archive
+files directly (i.e. the user should not uncompress, untar or unzip any of the files). For example,
+if `data_dir` is `"mediqa_nli"` it should contain the following files:
 
-mednli-for-shared-task-at-acl-bionlp-2019-1.0.1
-├── mednli_bionlp19_shared_task.jsonl
-├── mednli_bionlp19_shared_task_ground_truth.csv
+mediqa_nli
+├── mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip
 """
 
 import json
@@ -144,9 +142,10 @@ class MEDIQANLIDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = os.path.join(
-                dl_manager.extract(self.config.data_dir), "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1"
+            _ = dl_manager.extract(
+                os.path.join(self.config.data_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip")
             )
+            data_dir = os.path.join(self.config.data_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1")
 
         return [
             datasets.SplitGenerator(
