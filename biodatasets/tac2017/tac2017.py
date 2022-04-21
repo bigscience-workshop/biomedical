@@ -223,31 +223,126 @@ class Tac2017Dataset(datasets.GeneratorBasedBuilder):
         # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
 
         # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
+        train_fpaths = {
+            'train_xml/ADCETRIS.xml',
+            'train_xml/BEPREVE.xml',
+            'train_xml/CLEVIPREX.xml',
+            'train_xml/DYSPORT.xml',
+            'train_xml/FERRIPROX.xml',
+            'train_xml/ILARIS.xml',
+            'train_xml/KALYDECO.xml',
+            'train_xml/ONFI.xml',
+            'train_xml/SAPHRIS.xml',
+            'train_xml/TIVICAY.xml',
+            'train_xml/VIZAMYL.xml',
+            'train_xml/ZYKADIA.xml',
+            'train_xml/ADREVIEW.xml',
+            'train_xml/BESIVANCE.xml',
+            'train_xml/COARTEM.xml',
+            'train_xml/EDARBI.xml',
+            'train_xml/FIRAZYR.xml',
+            'train_xml/IMBRUVICA.xml',
+            'train_xml/KYPROLIS.xml',
+            'train_xml/OTEZLA.xml',
+            'train_xml/SIMPONI.xml',
+            'train_xml/TOVIAZ.xml',
+            'train_xml/VORAXAZE.xml',
+            'train_xml/ZYTIGA.xml',
+            'train_xml/AFINITOR.xml',
+            'train_xml/BLINCYTO.xml',
+            'train_xml/COMETRIQ.xml',
+            'train_xml/ELIQUIS.xml',
+            'train_xml/FULYZAQ.xml',
+            'train_xml/INLYTA.xml',
+            'train_xml/LUMIZYME.xml',
+            'train_xml/PICATO.xml',
+            'train_xml/SIRTURO.xml',
+            'train_xml/TREANDA.xml',
+            'train_xml/XALKORI.xml',
+            'train_xml/AMPYRA.xml',
+            'train_xml/BOSULIF.xml',
+            'train_xml/DALVANCE.xml',
+            'train_xml/ENTEREG.xml',
+            'train_xml/GADAVIST.xml',
+            'train_xml/INTELENCE.xml',
+            'train_xml/MULTAQ.xml',
+            'train_xml/POTIGA.xml',
+            'train_xml/STENDRA.xml',
+            'train_xml/TRULICITY.xml',
+            'train_xml/XEOMIN.xml',
+            'train_xml/AMYVID.xml',
+            'train_xml/BREO.xml',
+            'train_xml/DATSCAN.xml',
+            'train_xml/EOVIST.xml',
+            'train_xml/GILENYA.xml',
+            'train_xml/INVOKANA.xml',
+            'train_xml/NATAZIA.xml',
+            'train_xml/PRADAXA.xml',
+            'train_xml/STRIBILD.xml',
+            'train_xml/TUDORZA.xml',
+            'train_xml/XIAFLEX.xml',
+            'train_xml/APTIOM.xml',
+            'train_xml/CARBAGLU.xml',
+            'train_xml/DIFICID.xml',
+            'train_xml/ERWINAZE.xml',
+            'train_xml/GILOTRIF.xml',
+            'train_xml/JARDIANCE.xml',
+            'train_xml/NESINA.xml',
+            'train_xml/PRISTIQ.xml',
+            'train_xml/TAFINLAR.xml',
+            'train_xml/ULESFIA.xml',
+            'train_xml/XTANDI.xml',
+            'train_xml/ARCAPTA.xml',
+            'train_xml/CERDELGA.xml',
+            'train_xml/DOTAREM.xml',
+            'train_xml/EYLEA.xml',
+            'train_xml/GRANIX.xml',
+            'train_xml/JEVTANA.xml',
+            'train_xml/NEURACEQ.xml',
+            'train_xml/PROLIA.xml',
+            'train_xml/TANZEUM.xml',
+            'train_xml/ULORIC.xml',
+            'train_xml/YERVOY.xml',
+            'train_xml/BELEODAQ.xml',
+            'train_xml/CHOLINE.xml',
+            'train_xml/DUAVEE.xml',
+            'train_xml/FANAPT.xml',
+            'train_xml/HALAVEN.xml',
+            'train_xml/JUBLIA.xml',
+            'train_xml/NORTHERA.xml',
+            'train_xml/PROMACTA.xml',
+            'train_xml/TECFIDERA.xml',
+            'train_xml/VICTRELIS.xml',
+            'train_xml/ZERBAXA.xml',
+            'train_xml/BENLYSTA.xml',
+            'train_xml/CIMZIA.xml',
+            'train_xml/DUREZOL.xml',
+            'train_xml/FARXIGA.xml',
+            'train_xml/HORIZANT.xml',
+            'train_xml/KALBITOR.xml',
+            'train_xml/NULOJIX.xml',
+            'train_xml/QUTENZA.xml',
+            'train_xml/TEFLARO.xml',
+            'train_xml/VIMIZIM.xml',
+            'train_xml/ZYDELIG.xml'
+        }
 
         # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
 
         # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
 
-        # TODO: KEEP if your dataset is PUBLIC; remove if not
-        # urls = _URLS[_DATASETNAME]
-        # data_dir = dl_manager.download_and_extract(urls)
-        # Not all datasets have predefined canonical train/val/test splits.
-        # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
-        if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
-        else:
-            data_dir = self.config.data_dir
-            
+        urls = _URLS[_DATASETNAME]
+        data_dir = dl_manager.download_and_extract(urls)
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
-                gen_kwargs={
-                    "files": os.listdir(data_dir),
+                gen_kwargs= {
+                    "files": [os.path.join(data_dir, path) for path in train_fpaths],
                     "split": "train",
                 },
             ),
-        ]
+        ]  
+        
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
@@ -260,11 +355,11 @@ class Tac2017Dataset(datasets.GeneratorBasedBuilder):
         # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
+        print(files)
 
         if self.config.schema == "source":
             for file in files:
-                fpath = os.path.join(self.config.data_dir, file)
-                with open(fpath) as xml_file:
+                with open(file) as xml_file:
                     tree = ET.parse(xml_file)
                     label = tree.getroot()
                     #print(label.attrib["drug"])
@@ -275,9 +370,9 @@ class Tac2017Dataset(datasets.GeneratorBasedBuilder):
                             text = child
                             for section in text:
                                 example["section"] = section
-                                #print(section.attrib["id"])
-                                #print(section.text)
-                    yield uid, example
+                                print(section.attrib["id"])
+                                print(section.text)
+                    #yield uid, example
                     uid +=1
 
             # # TODO: yield (key, example) tuples in the original dataset schema
