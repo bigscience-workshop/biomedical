@@ -16,8 +16,8 @@
 """
 A dataset loading script for the CODIESP corpus.
 
-The CODIESP dataset is a collection of 1,000 manually selected clinical 
-case studies in Spanish that was designed for the Clinical Case Coding 
+The CODIESP dataset is a collection of 1,000 manually selected clinical
+case studies in Spanish that was designed for the Clinical Case Coding
 in Spanish Shared Task, as part of the CLEF 2020 conference. This community
 task was divided into 3 sub-tasks: diagnosis coding (CodiEsp-D), procedure
 coding (CodiEsp-P) and Explainable AI (CodiEsp-X).
@@ -45,13 +45,13 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "cantemist"
+_DATASETNAME = "codiesp"
 
 _DESCRIPTION = """\
 Synthetic corpus of 1,000 manually selected clinical case studies in Spanish that was designed for \
 the Clinical Case Coding in Spanish Shared Task, as part of the CLEF 2020 conference.
 
-The goal of the task was to automatically assign ICD10 codes (CIE-10, in Spanish) to clinical case documents, 
+The goal of the task was to automatically assign ICD10 codes (CIE-10, in Spanish) to clinical case documents,
 being evaluated against manually generated ICD10 codifications. The CodiEsp corpus was selected manually by \
 practicing physicians and clinical documentalists and annotated by clinical coding professionals meeting strict \
 quality criteria. They reached an inter-annotator agreement of 88.6\% for diagnosis coding, 88.9\% for procedure \
@@ -60,11 +60,11 @@ coding and 80.5\% for the textual reference annotation.
 The final collection of 1,000 clinical cases that make up the corpus had a total of 16,504 sentences and \
 396,988 words. All documents are in Spanish language and CIE10 is the coding terminology (the Spanish version \
 of ICD10-CM and ICD10-PCS). The CodiEsp corpus has been randomly sampled into three subsets. \
-The train set contains 500 clinical cases, while the development and test sets have 250 clinical cases each. 
+The train set contains 500 clinical cases, while the development and test sets have 250 clinical cases each.
 
 The CodiEsp track was divided into three sub-tracks (2 main and 1 exploratory):
 
-CodiEsp-D: The Diagnosis Coding sub-task, which requires automatic ICD10-CM [CIE10-Diagnóstico] code assignment. 
+CodiEsp-D: The Diagnosis Coding sub-task, which requires automatic ICD10-CM [CIE10-Diagnóstico] code assignment.
 
 CodiEsp-P: The Procedure Coding sub-task, which requires automatic ICD10-PCS [CIE10-Procedimiento] code assignment.
 
@@ -75,7 +75,7 @@ present the reference in the text that supports the code predictions.
 For further information, please visit https://temu.bsc.es/codiesp or send an email to encargo-pln-life@bsc.es
 """
 
-_HOMEPAGE = "https://temu.bsc.es/codiesp/index.php/2019/09/19/datasets/"
+_HOMEPAGE = "https://temu.bsc.es/codiesp/"
 
 _LICENSE = "Creative Commons Attribution 4.0 International"
 
@@ -83,7 +83,9 @@ _URLS = {
     "codiesp": "https://zenodo.org/record/3837305/files/codiesp.zip?download=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION,
+                    Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.4.0"
 
@@ -251,20 +253,39 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
         elif self.config.name == "codiesp_X_bigbio_kb":
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
-            example = {}
-            for guid, row in df.iterrows():
+            task_x_dict = defaultdict(list)
+            for idx, row in df.iterrows():
                 file, label, code, text, spans = row[0], row[1], row[2], row[3], row[4]
+
                 appearances = spans.split(";")
                 spans = []
                 for a in appearances:
-                    spans.append([int(a.split()[0]), int(a.split()[1])])
-                example["id"] = str(guid)
-                example["document_id"] = file
-                example["passages"] = [{"id": label, "type": code, "text": [text], "offsets": spans}]
-                example["entities"] = []
-                example["events"] = []
-                example["coreferences"] = []
-                example["relations"] = []
+                    spans.append((int(a.split()[0]), int(a.split()[1])))
+
+                task_x_dict[file].append({"label": label, "code": code, "text": text, "spans": spans})
+
+            for guid, (file, data) in enumerate(task_x_dict.items()):
+                example = {
+                    "id": str(guid),
+                    "document_id": file,
+                    "passages": [],
+                    "entities": [],
+                    "events": [],
+                    "coreferences": [],
+                    "relations": []
+                }
+
+                for idx, d in enumerate(data):
+                    example["entities"].append({
+                                            "id": str(guid)+str(idx),
+                                            "type": d["label"],
+                                            "text": [d["text"]],
+                                            "offsets": d["spans"],
+                                            "normalized": [{"db_name": "ICD10-PCS",
+                                            "db_id": d["code"],
+                                            }]
+                                        })
+
                 yield guid, example
 
         elif self.config.name == "codiesp_D_source" or self.config.name == "codiesp_P_source":
