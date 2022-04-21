@@ -24,6 +24,14 @@ MIMIC-III. More specifically, to minimize the risks to patient privacy, we worke
 notes corresponding to the deceased patients. The clinicians in our team suggested the Past Medical
 History to be the most informative section of a clinical note, from which useful inferences can be
 drawn about the patient.
+
+The files comprising this dataset must be on the users local machine in a single directory that is
+passed to `datasets.load_datset` via the `data_dir` kwarg. This loader script will read the archive
+files directly (i.e. the user should not uncompress, untar or unzip any of the files). For example,
+if `data_dir` is `"mednli"` it should contain the following files:
+
+mednli
+├── mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0.zip
 """
 
 import json
@@ -131,7 +139,15 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
         if self.config.data_dir is None:
             raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
-            data_dir = self.config.data_dir
+            _ = dl_manager.extract(
+                os.path.join(
+                    self.config.data_dir,
+                    "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0.zip",
+                )
+            )
+            data_dir = os.path.join(
+                self.config.data_dir, "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0"
+            )
 
         return [
             datasets.SplitGenerator(
