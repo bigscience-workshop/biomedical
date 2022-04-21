@@ -115,24 +115,28 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "radgraph_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
         if self.config.schema == "source":
             features = datasets.Features( 
                 {
-                    "report_id" : {
-                        "text": datasets.Value("string"),
-                        "entities": {
-                            "entity_id": {
-                                "tokens": datasets.Value("string"),
-                                "label": datasets.Value("string"),
-                                "start_ix": datasets.Value("int32"),
-                                "end_ix": datasets.Value("int32"),
-                                "relations": [[datasets.Value("string")]]
-                            },
+                    "report_id" : datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                    "entities": [
+                        {
+                            "entity_id": datasets.Value("string"),
+                            "tokens": datasets.Value("string"),
+                            "label": datasets.Value("string"),
+                            "start_ix": datasets.Value("int32"),
+                            "end_ix": datasets.Value("int32"),
+                            "relations": [ 
+                                {
+                                    "type": datasets.Value("string"), # e.g. "modify"
+                                    "arg": datasets.Value("string") # e.g. "7"
+                                }
+                            ]
                         },
-                        "data_source": datasets.Value("string"),
-                        "data_split": datasets.Value("string"),
-                    }
+                    ],
+                    "data_source": datasets.Value("string"),
+                    "data_split": datasets.Value("string"),
                 }
             )
 
@@ -224,15 +228,16 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
                 data = json.load(json_file)
                 uid = 0
                 for chart_id in data:
+                    print(chart_id)
                     example = {}
                     chart_data = data[chart_id]
                     example = { 
-                        chart_id: {
+                            "report_id": chart_id,
                             "text" : chart_data["text"],
-                            "entities" : chart_data["entities"],
+                            "entities" : [{"entity_id":"", "tokens": "", "label": "", "start_ix": 3, "end_ix":2, "relations":[["apple"]]}],
+                            #"entities" : chart_data["entities"],
                             "data_source" : chart_data["data_source"],
                             "data_split": chart_data["data_split"]
-                        }
                     }
                     yield uid, example
                     uid +=1
