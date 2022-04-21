@@ -38,11 +38,11 @@ permitted.
 
 """
 
-import os
 import csv
+import os
 from pathlib import Path
 from shutil import rmtree
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
 import pandas as pd
@@ -73,7 +73,7 @@ SNPs are associated with unambiguous dbSNP identifiers.
 
 _HOMEPAGE = "http://www.scai.fraunhofer.de/snp-normalization-corpus.html"
 
-_LICENSE = '''
+_LICENSE = """
 LICENSE
 1. Copyright of abstracts - Due to license restriction of PubMed(R) this corpus contains only annotations. 
 To facilitate a reproduction of the original corpus, we include the exact position in the text, 
@@ -86,14 +86,18 @@ Also the additional rules are subject to these agreement.
 
 3. Copyright of annotations
 The annotations are published for academic use only and usage for development of commercial products is not permitted.
-'''
+"""
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
 
 class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
     """Corpus consists of 296 Medline citations."""
@@ -139,10 +143,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "thomas2011_source"
 
-    _ENTITY_TYPES = {
-        'Nucleotide Sequence Mutation',
-        'Protein Sequence Mutation'
-    }
+    _ENTITY_TYPES = {"Nucleotide Sequence Mutation", "Protein Sequence Mutation"}
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -160,7 +161,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "resolved_name": datasets.Value("string"),
                     "offsets": datasets.Sequence([datasets.Value("int32")]),
                     "dbSNP_id": datasets.Value("string"),
-                    "protein_or_nucleotide_sequence_mutation": datasets.Value("string")
+                    "protein_or_nucleotide_sequence_mutation": datasets.Value("string"),
                 }
             )
         elif self.config.schema == "bigbio_kb":
@@ -195,14 +196,16 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             elif x.is_dir():
                 rmtree(x)
 
-        return [datasets.SplitGenerator(
+        return [
+            datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "data_files": [str(f) for f in list(data_dir.glob("*.txt"))],
                     "split": "train",
                 },
-            )]
+            )
+        ]
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
@@ -228,28 +231,37 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "resolved_name": row[2],
                     "offsets": [(int(row[3]), int(row[4]))],
                     "dbSNP_id": row[5],
-                    "protein_or_nucleotide_sequence_mutation": row[6]
+                    "protein_or_nucleotide_sequence_mutation": row[6],
                 }
         elif self.config.schema == "bigbio_kb":
-            cols = ["doc_id", "covered_text", "resolved_name", "off1", "off2",
-                    "dbSNP_id", "protein_or_nucleotide_sequence_mutation"]
+            cols = [
+                "doc_id",
+                "covered_text",
+                "resolved_name",
+                "off1",
+                "off2",
+                "dbSNP_id",
+                "protein_or_nucleotide_sequence_mutation",
+            ]
             df = pd.DataFrame(data_ann, columns=cols)
             uid = 0
             for id_ in df.doc_id.unique():
                 elist = []
-                for row in df.loc[df.doc_id==id_].itertuples():
+                for row in df.loc[df.doc_id == id_].itertuples():
                     uid += 1
-                    if row.protein_or_nucleotide_sequence_mutation == 'PSM':
-                        ent_type = 'Protein Sequence Mutation'
+                    if row.protein_or_nucleotide_sequence_mutation == "PSM":
+                        ent_type = "Protein Sequence Mutation"
                     else:
-                        ent_type = 'Nucleotide Sequence Mutation'
-                    elist.append({
-                        'id': str(uid),
-                        'type': ent_type,
-                        'text': [row.covered_text],
-                        'offsets': [[int(row.off1), int(row.off2)]],
-                        "normalized": [{'db_name': 'dbSNP', 'db_id': row.dbSNP_id}]
-                    })
+                        ent_type = "Nucleotide Sequence Mutation"
+                    elist.append(
+                        {
+                            "id": str(uid),
+                            "type": ent_type,
+                            "text": [row.covered_text],
+                            "offsets": [[int(row.off1), int(row.off2)]],
+                            "normalized": [{"db_name": "dbSNP", "db_id": row.dbSNP_id}],
+                        }
+                    )
                 yield id_, {
                     "id": id_,  # uid is an unique identifier for every record that starts from 1
                     "document_id": str(row[0]),
@@ -257,8 +269,9 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "passages": [],
                     "events": [],
                     "coreferences": [],
-                    "relations": []
+                    "relations": [],
                 }
+
 
 # This template is based on the following template from the datasets package:
 # https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
