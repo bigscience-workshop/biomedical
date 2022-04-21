@@ -80,7 +80,9 @@ _LICENSE = "Creative Commons Attribution 4.0 International License"
 
 # NOTE: Data can only be obtained (locally) by first filling out form to provide
 # information about usage context under this link: http://www.nii.ac.jp/dsc/idr/en/ntcir/ntcir.html
-_URLS = {}
+_URLS = {
+    _DATASETNAME: "ntcir13_MedWeb_taskdata.zip",
+}
 
 _SUPPORTED_TASKS = [
     Tasks.TRANSLATION,
@@ -191,10 +193,12 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
-        else:
-            data_dir = self.config.data_dir
+
+        raw_data_dir = dl_manager.download_and_extract(
+            str(Path(self.config.data_dir) / _URLS[_DATASETNAME])
+        )
+
+        data_dir = Path(raw_data_dir) / "MedWeb_TestCollection"
 
         if self.config.schema == "source":
             filepaths = {
