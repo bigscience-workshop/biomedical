@@ -202,9 +202,9 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
             for key, example in data.iterrows():
                 example = example.to_dict()
                 example_ = {}
-                example_["id"] = str(key)
-                example_["question_id"] = ""
-                example_["document_id"] = ""
+                example_["id"] = key
+                example_["question_id"] = key
+                example_["document_id"] = key
                 example_["question"] = example["question"]
                 example_["type"] = "multiple_choice"
                 example_["choices"] = [value for value in example["options"].values()]
