@@ -88,7 +88,14 @@ Also the additional rules are subject to these agreement.
 The annotations are published for academic use only and usage for development of commercial products is not permitted.
 """
 
-_URLS = ["http://github.com/rockt/SETH/zipball/master/"]
+# 
+
+# this is a backup url in case the official one will stop working
+# _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
+_URLS = {
+    "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
+    "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz"
+}
 
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
@@ -156,7 +163,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "doc_id": datasets.Value("string"),
+                    "pmid": datasets.Value("string"),
                     "covered_text": datasets.Value("string"),
                     "resolved_name": datasets.Value("string"),
                     "offsets": datasets.Sequence([datasets.Value("int32")]),
@@ -179,29 +186,30 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         # Download gets entire git repo containing unused data from other datasets
-        repo_dir = Path(dl_manager.download_and_extract(_URLS[0]))
-        data_dir = repo_dir / "data"
-        data_dir.mkdir(exist_ok=True)
+        # repo_dir = Path(dl_manager.download_and_extract(_URLS[0]))
+        # data_dir = repo_dir / "data"
+        # data_dir.mkdir(exist_ok=True)
 
         # Find the relevant files from Verspor2013 and move them to a new directory
-        thomas2011_files = repo_dir.glob("*/*/*thomas2011/**/*")
-        for file in thomas2011_files:
-            if file.is_file() and "README" not in str(file):
-                file.rename(data_dir / file.name)
+        # thomas2011_files = repo_dir.glob("*/*/*thomas2011/**/*")
+        # for file in thomas2011_files:
+        #    if file.is_file() and "README" not in str(file):
+        #        file.rename(data_dir / file.name)
 
         # Delete all unused files and directories from the original download
-        for x in repo_dir.glob("[!data]*"):
-            if x.is_file():
-                x.unlink()
-            elif x.is_dir():
-                rmtree(x)
+        #for x in repo_dir.glob("[!data]*"):
+        #    if x.is_file():
+        #        x.unlink()
+        #    elif x.is_dir():
+        #        rmtree(x)
 
+        data_dir = dl_manager.download_and_extract(_URLS[self.config.schema])
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
+                name=datasets.Split.TEST,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "data_files": [str(f) for f in list(data_dir.glob("*.txt"))],
+                    "filepath": os.path.join(data_dir, 'annotations.txt'),
                     "split": "train",
                 },
             )
@@ -210,13 +218,12 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-    def _generate_examples(self, data_files, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath: str, split: str) -> Tuple[int, Dict]:
 
         """Yields examples as (key, example) tuples."""
-        if split == "train":
-            ann_tsv = data_files[0]
+        if split == "test":
             data_ann = []
-            with open(ann_tsv, encoding="utf-8") as ann_tsv_file:
+            with open(filepath, encoding="utf-8") as ann_tsv_file:
                 csv_reader_code = csv.reader(
                     ann_tsv_file, quotechar="'", delimiter="\t", quoting=csv.QUOTE_ALL, skipinitialspace=True
                 )
