@@ -20,10 +20,12 @@ The CODIESP dataset is a collection of 1,000 manually selected clinical
 case studies in Spanish that was designed for the Clinical Case Coding
 in Spanish Shared Task, as part of the CLEF 2020 conference. This community
 task was divided into 3 sub-tasks: diagnosis coding (CodiEsp-D), procedure
-coding (CodiEsp-P) and Explainable AI (CodiEsp-X).
+coding (CodiEsp-P) and Explainable AI (CodiEsp-X). The script can also load
+an additional dataset of abstracts with ICD10 codes.
 """
 
 import os
+import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -60,7 +62,10 @@ coding and 80.5\% for the textual reference annotation.
 The final collection of 1,000 clinical cases that make up the corpus had a total of 16,504 sentences and \
 396,988 words. All documents are in Spanish language and CIE10 is the coding terminology (the Spanish version \
 of ICD10-CM and ICD10-PCS). The CodiEsp corpus has been randomly sampled into three subsets. \
-The train set contains 500 clinical cases, while the development and test sets have 250 clinical cases each.
+The train set contains 500 clinical cases, while the development and test sets have 250 clinical cases each. \
+In addition to these, a collection of 176,294 abstracts from Lilacs and Ibecs with the corresponding ICD10 \
+codes (ICD10-CM and ICD10-PCS) was provided by the task organizers. Every abstract has at least one associated \
+code, with an average of 2.5 ICD10 codes per abstract.
 
 The CodiEsp track was divided into three sub-tracks (2 main and 1 exploratory):
 
@@ -81,6 +86,7 @@ _LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLS = {
     "codiesp": "https://zenodo.org/record/3837305/files/codiesp.zip?download=1",
+    "extra":   "https://zenodo.org/record/3606662/files/abstractsWithCIE10_v2.zip?download=1",
 }
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION,
@@ -121,6 +127,20 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
             subset_id="codiesp_x",
         ),
         BigBioConfig(
+            name="codiesp_extra_mesh_source",
+            version=SOURCE_VERSION,
+            description="Abstracts from Lilacs and Ibecs with MESH Codes",
+            schema="source",
+            subset_id="codiesp_extra_mesh",
+        ),
+        BigBioConfig(
+            name="codiesp_extra_cie_source",
+            version=SOURCE_VERSION,
+            description="Abstracts from Lilacs and Ibecs with CIE10 Codes",
+            schema="source",
+            subset_id="codiesp_extra_cie",
+        ),
+        BigBioConfig(
             name="codiesp_D_bigbio_text",
             version=BIGBIO_VERSION,
             description="CodiEsp BigBio schema for the Diagnosis Coding subtask",
@@ -140,6 +160,20 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
             description="CodiEsp BigBio schema for the Explainable AI sub-task",
             schema="bigbio_kb",
             subset_id="codiesp_x",
+        ),
+        BigBioConfig(
+            name="codiesp_extra_mesh_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="Abstracts from Lilacs and Ibecs with MESH Codes",
+            schema="bigbio_text",
+            subset_id="codiesp_extra_mesh",
+        ),
+        BigBioConfig(
+            name="codiesp_extra_cie_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="Abstracts from Lilacs and Ibecs with CIE10 Codes",
+            schema="bigbio_text",
+            subset_id="codiesp_extra_cie",
         ),
     ]
 
@@ -196,31 +230,42 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
         call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
         """
 
-        data_dir = dl_manager.download_and_extract(_URLS["codiesp"])
+        data_dir = dl_manager.download_and_extract(_URLS)
 
-        return [
-            datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": Path(os.path.join(data_dir, "final_dataset_v4_to_publish/train")),
-                    "split": "train",
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={
-                    "filepath": Path(os.path.join(data_dir, "final_dataset_v4_to_publish/test")),
-                    "split": "test",
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={
-                    "filepath": Path(os.path.join(data_dir, "final_dataset_v4_to_publish/dev")),
-                    "split": "dev",
-                },
-            ),
-        ]
+        if "extra" in self.config.name:
+            return [
+                datasets.SplitGenerator(
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={
+                        "filepath": Path(os.path.join(data_dir["extra"], "abstractsWithCIE10_v2.json")),
+                        "split":    "train",
+                    },
+                )
+            ]
+        else:
+            return [
+                datasets.SplitGenerator(
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={
+                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/train")),
+                        "split": "train",
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.TEST,
+                    gen_kwargs={
+                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/test")),
+                        "split": "test",
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.VALIDATION,
+                    gen_kwargs={
+                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/dev")),
+                        "split": "dev",
+                    },
+                ),
+            ]
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """
@@ -228,9 +273,10 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
         Method parameters are unpacked from `gen_kwargs` as given in `_split_generators`.
         """
 
-        paths = {"text_files": Path(os.path.join(filepath, "text_files"))}
-        for task in ["codiesp_d", "codiesp_p", "codiesp_x"]:
-            paths[task] = Path(os.path.join(filepath, f"{split}{task[-1].upper()}.tsv"))
+        if "extra" not in self.config.name:
+            paths = {"text_files": Path(os.path.join(filepath, "text_files"))}
+            for task in ["codiesp_d", "codiesp_p", "codiesp_x"]:
+                paths[task] = Path(os.path.join(filepath, f"{split}{task[-1].upper()}.tsv"))
 
         if self.config.name == "codiesp_D_bigbio_text" or self.config.name == "codiesp_P_bigbio_text":
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
@@ -281,8 +327,9 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                                             "type": d["label"],
                                             "text": [d["text"]],
                                             "offsets": d["spans"],
-                                            "normalized": [{"db_name": "ICD10-PCS",
-                                            "db_id": d["code"],
+                                            "normalized": [{
+                                                "db_name": "ICD10-PCS" if d["label"]=="PROCEDIMIENTO" else "ICD10-CM",
+                                                "db_id": d["code"],
                                             }]
                                         })
 
@@ -326,6 +373,30 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 }
 
                 yield guid, example
+
+        elif "extra" in self.config.name:
+            with open(filepath) as file: 
+                json_data=json.load(file)
+
+            if "mesh" in self.config.name:
+                for guid, article in enumerate(json_data["articles"]):
+                    example = {
+                        "id": str(guid),
+                        "document_id": article["pmid"],
+                        "text": str(article["title"]) + " <SEP> " + str(article["abstractText"]),
+                        "labels": [mesh['Code'] for mesh in article['Mesh']],
+                    }
+                    yield guid, example
+
+            else: # CIE ID codes
+                for guid, article in enumerate(json_data["articles"]):
+                    example = {
+                        "id": str(guid),
+                        "document_id": article["pmid"],
+                        "text": str(article["title"]) + " <SEP> " + str(article["abstractText"]),
+                        "labels": [code for mesh in article['Mesh'] if 'CIE' in mesh for code in mesh['CIE']],
+                    }
+                    yield guid, example
 
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
