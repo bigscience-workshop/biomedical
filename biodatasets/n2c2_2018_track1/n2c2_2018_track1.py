@@ -137,9 +137,8 @@ SOURCE = "source"
 BIGBIO_TEXT = "bigbio_text"
 
 
-def _read_zip(file_path, samples=None):
-    if samples is None:
-        samples = defaultdict(dict)
+def _read_zip(file_path):
+    samples = defaultdict(dict)
     with zipfile.ZipFile(file_path) as zf:
         for info in zf.infolist():
 
