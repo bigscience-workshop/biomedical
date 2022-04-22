@@ -56,17 +56,12 @@ EDAD_SUJETO_ASISTENCIA, NOMBRE_SUJETO_ASISTENCIA, NOMBRE_PERSONAL_SANITARIO, \
 SEXO_SUJETO_ASISTENCIA, CALLE, PAIS, ID_SUJETO_ASISTENCIA, CORREO, ID_TITULACION_PERSONAL_SANITARIO,\
 ID_ASEGURAMIENTO, HOSPITAL, FAMILIARES_SUJETO_ASISTENCIA, INSTITUCION, ID_CONTACTO ASISTENCIAL,\
 NUMERO_TELEFONO, PROFESION, NUMERO_FAX, OTROS_SUJETO_ASISTENCIA, CENTRO_SALUD, ID_EMPLEO_PERSONAL_SANITARIO
-
-The PharmaCoNER corpus contains around 495 thousand words with an average of 494 words per clinical case.
-The 1,000 clinical case reports have been randomly sampled into 3 subsets. 
-The training set contains 500 clinical cases, while the development \
-and test sets contain 250 clinical cases each.
     
 For further information, please visit https://temu.bsc.es/meddocan/ or send an email to encargo-pln-life@bsc.es
 """
 
 
-_HOMEPAGE = "https://temu.bsc.es/meddocan/index.php/datasets/"
+_HOMEPAGE = "https://temu.bsc.es/meddocan/"
 
 _LICENSE = "Creative Commons Attribution 4.0 International"
 
