@@ -12,24 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# TODO: FIXME: Add a description
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
+BioASQ Task A On Biomedical Text Classification is based on the standard process
+followed by PubMed to index journal abstracts. This task uses PubMed documents,
+written in English, along with annotated MeSH terms (by human curators)
+that are to be inferred from the documents.
 
-When modifying it for your dataset, look for TODO items that offer specific instructions.
+Note that the main difference between datasets from different years, apart from the size,
+is the MeSH terms used. For example the 2015 training datasets contain articles
+where MeSH 2015 have been assigned. Also, for 2014, 2015 and 2016 there are two
+versions of the training data available. The small version (wrt size) consists of
+articles that belong to the pool of journals that the BioASQ team used to select the
+articles for the test data (this was a subset of the available journals). The bigger
+version consists of articles from every available journal. Since 2017 articles for the
+test data will be selected from all available journals, so only one corresponding training data
+set will be available. The evaluation of the results during each year of the challenge
+is performed using the corresponding version of the MeSH terms, thus their usage is highly
+recommended. The training datasets of previous years of the challenge are also available
+for reference reasons. Note that not every MeSH term is covered in the datasets.
 
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+Fore more information about the challenge, the organisers and the relevant
+publications please visit: http://bioasq.org/
 """
 
 import ijson
@@ -66,6 +69,7 @@ _CITATION = """\
 _DATASETNAME = "bioasq_task_a"
 
 # TODO: Find description and copy it
+_BIOASQ_2013A_DESCRIPTION = ""
 _BIOASQ_2014A_DESCRIPTION = ""
 _BIOASQ_2014bA_DESCRIPTION = ""
 
@@ -83,6 +87,7 @@ _BIOASQ_2021A_DESCRIPTION = ""
 _BIOASQ_2022A_DESCRIPTION = ""
 
 _DESCRIPTION = {
+    "bioasq_2013a": _BIOASQ_2013A_DESCRIPTION,
     "bioasq_2014a": _BIOASQ_2014A_DESCRIPTION,
     "bioasq_2014ba": _BIOASQ_2014bA_DESCRIPTION,
     "bioasq_2015a": _BIOASQ_2015A_DESCRIPTION,
@@ -103,8 +108,8 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 # See http://participants-area.bioasq.org/accounts/register/
 _LICENSE = "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html"
 
-# TODO: FIXME: Add bioasq 2013
 _URLS = {
+    "bioasq_2013a": "allMeSH.zip",
     "bioasq_2014a": "allMeSH.zip",
     "bioasq_2014ba": "allMeSH_limitjournals.zip",
     "bioasq_2015a": "allMeSH.zip",
@@ -138,6 +143,7 @@ class BioasqTaskADataset(datasets.GeneratorBasedBuilder):
     # BioASQ A 2014 through BioASQ A 2022
     BUILDER_CONFIGS = []
     for year in ((
+        "2013",
         "2014",
         "2014b",
         "2015",
@@ -204,6 +210,7 @@ class BioasqTaskADataset(datasets.GeneratorBasedBuilder):
         train_data_dir = dl_manager.download_and_extract(Path(data_dir) / url)
 
         subset_filepaths = {
+            "bioasq_2013a": "allMeSH.json",
             "bioasq_2014a": "allMeSH.json",
             "bioasq_2014ba": "allMeSH_limitjournals.json",
             "bioasq_2015a": "allMeSH.json",
@@ -231,14 +238,13 @@ class BioasqTaskADataset(datasets.GeneratorBasedBuilder):
 
     def _generate_articles(self, filepath):
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-            if self.config.subset_id in ("bioasq_2014a", "bioasq_2014ba", "bioasq_2015a", "bioasq_2015ba"):
+            if self.config.subset_id in ("bioasq_2013a", "bioasq_2014a", "bioasq_2014ba", "bioasq_2015a", "bioasq_2015ba"):
                 article_index = 0
 
                 for line in f:
                     try:
                         record = json.loads(line.rstrip(",\n"))
                     except json.decoder.JSONDecodeError:
-                        # TODO: FIXME: Nicer handling of these lines
                         if "'articles'" in line:
                             continue
                         else:
