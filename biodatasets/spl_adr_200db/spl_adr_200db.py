@@ -61,7 +61,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import datasets
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -234,7 +233,6 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepaths": tuple(data_files),
-                    "split": "train",
                 },
             ),
         ]
@@ -357,7 +355,7 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
             "coreferences": [],
         }
 
-    def _generate_examples(self, filepaths: Tuple[Path], split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepaths: Tuple[Path]) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         for file_index, drug_filename in enumerate(filepaths):
