@@ -261,7 +261,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
 
         tags = sample.get("tags", None)
         if tags:
-            labels = [name + "-" + met_status for name, met_status in tags.items()]
+            labels = N2C22018CohortSelectionDataset.LABEL_CLASS_NAMES
         else:
             labels = []
 
