@@ -203,7 +203,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == SOURCE:
             labels = {
                 key: datasets.ClassLabel(names=["met", "not met"])
-                for key in N2C22018CohortSelectionDataset.LABEL_CLASS_NAMES
+                for key in self.LABEL_CLASS_NAMES
             }
             features = datasets.Features(
                 {
@@ -273,9 +273,9 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
         _id = 0
         for sample_id, sample in samples.items():
 
-            if self.config.name == N2C22018CohortSelectionDataset._SOURCE_CONFIG_NAME:
+            if self.config.name == self._SOURCE_CONFIG_NAME:
                 yield _id, self._get_source_sample(sample_id, sample)
-            elif self.config.name == N2C22018CohortSelectionDataset._BIGBIO_CONFIG_NAME:
+            elif self.config.name == self._BIGBIO_CONFIG_NAME:
                 yield _id, self._get_bigbio_sample(sample_id, sample)
 
             _id += 1
