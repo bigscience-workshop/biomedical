@@ -93,8 +93,8 @@ The annotations are published for academic use only and usage for development of
 # this is a backup url in case the official one will stop working
 # _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 _URLS = {
-    "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
-    "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz"
+    "source" : "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
+    "bigbio_kb" : "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz"
 }
 
 _SUPPORTED_TASKS = [
