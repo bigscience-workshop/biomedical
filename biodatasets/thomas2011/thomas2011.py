@@ -210,7 +210,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(data_dir, 'annotations.txt'),
-                    "split": "train",
+                    "split": "test",
                 },
             )
         ]
