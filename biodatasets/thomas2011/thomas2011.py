@@ -163,7 +163,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             features = datasets.Features(
                 {
-                    "pmid": datasets.Value("string"),
+                    "doc_id": datasets.Value("string"),
                     "covered_text": datasets.Value("string"),
                     "resolved_name": datasets.Value("string"),
                     "offsets": datasets.Sequence([datasets.Value("int32")]),
