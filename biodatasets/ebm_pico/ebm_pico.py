@@ -21,10 +21,9 @@ aggregated to reduce noise. Test labels are collected from medical professionals
 
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict, Union
+from typing import Dict, List, Tuple, Union
 
 import datasets
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -53,8 +52,8 @@ _CITATION = """\
 _DATASETNAME = "ebm_pico"
 
 _DESCRIPTION = """\
-This corpus release contains 4,993 abstracts annotated with (P)articipants, 
-(I)nterventions, and (O)utcomes. Training labels are sourced from AMT workers and 
+This corpus release contains 4,993 abstracts annotated with (P)articipants,
+(I)nterventions, and (O)utcomes. Training labels are sourced from AMT workers and
 aggregated to reduce noise. Test labels are collected from medical professionals.
 """
 
@@ -62,9 +61,7 @@ _HOMEPAGE = "https://github.com/bepnye/EBM-NLP"
 
 _LICENSE = "UNKNOWN"
 
-_URLS = {
-    _DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"
-}
+_URLS = {_DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -136,8 +133,8 @@ def _get_entities_pico(
             multiple_indices = _partition(indices, split_indices)
 
             for _indices in multiple_indices:
-                high_level_type = LABEL_DECODERS['starting_spans'][annotation_type][1]
-                fine_grained_type = LABEL_DECODERS['hierarchical_labels'][annotation_type][annotations[_indices[0]]]
+                high_level_type = LABEL_DECODERS["starting_spans"][annotation_type][1]
+                fine_grained_type = LABEL_DECODERS["hierarchical_labels"][annotation_type][annotations[_indices[0]]]
                 annotation_text = " ".join([tokenized[ind] for ind in _indices])
 
                 char_start = document_content.find(annotation_text)
@@ -179,7 +176,7 @@ class EbmPico(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "ebm_pico_bigbio_kb"
+    DEFAULT_CONFIG_NAME = "ebm_pico_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -220,9 +217,7 @@ class EbmPico(datasets.GeneratorBasedBuilder):
         data_dir = dl_manager.download_and_extract(urls)
 
         documents_folder = Path(data_dir) / "ebm_nlp_2_00" / "documents"
-        annotations_folder = (
-            Path(data_dir) / "ebm_nlp_2_00" / "annotations" / "aggregated"
-        )
+        annotations_folder = Path(data_dir) / "ebm_nlp_2_00" / "annotations" / "aggregated"
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
@@ -242,14 +237,13 @@ class EbmPico(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(
-        self, documents_folder, annotations_folder, split_folder: str
-    ) -> Tuple[int, Dict]:
+    def _generate_examples(self, documents_folder, annotations_folder, split_folder: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         annotation_types = ["interventions", "outcomes", "participants"]
 
         docs_path = os.path.join(
-            annotations_folder, f"hierarchical_labels/{annotation_types[0]}/{split_folder}/"
+            annotations_folder,
+            f"hierarchical_labels/{annotation_types[0]}/{split_folder}/",
         )
         documents_in_split = os.listdir(docs_path)
 
@@ -258,20 +252,15 @@ class EbmPico(datasets.GeneratorBasedBuilder):
             document_id = document.split(".")[0]
             with open(f"{documents_folder}/{document_id}.tokens") as fp:
                 tokenized = fp.read().splitlines()
-
-            with open(f"{documents_folder}/{document_id}.txt") as fp:
-                document_content : str = " ".join(fp.read().splitlines())
-
             document_content = " ".join(tokenized)
+
             annotation_dict = {}
             for annotation_type in annotation_types:
                 try:
                     with open(
                         f"{annotations_folder}/hierarchical_labels/{annotation_type}/{split_folder}/{document}"
                     ) as fp:
-                        annotation_dict[annotation_type] = [
-                            int(x) for x in fp.read().splitlines()
-                        ]
+                        annotation_dict[annotation_type] = [int(x) for x in fp.read().splitlines()]
                 except OSError:
                     annotation_dict[annotation_type] = []
 
@@ -320,7 +309,7 @@ class EbmPico(datasets.GeneratorBasedBuilder):
                 for ent in ents:
                     entity = {
                         "id": uid,
-                        "type": f'{ent["high_level_annotation_type"]}_{ent["fine_grained_annotation_type"]}',#ent["annotation_type"],
+                        "type": f'{ent["high_level_annotation_type"]}_{ent["fine_grained_annotation_type"]}',
                         "text": [ent["annotation_text"]],
                         "offsets": [[ent["char_start"], ent["char_end"]]],
                         "normalized": [{"db_name": None, "db_id": None}],
@@ -328,16 +317,4 @@ class EbmPico(datasets.GeneratorBasedBuilder):
                     data["entities"].append(entity)
                     uid += 1
 
-                if split_folder == "test/gold":
-                    breakpoint()
                 yield uid, data
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python ebm_pico.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
