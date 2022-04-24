@@ -80,7 +80,15 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class EpicQaDataset(datasets.GeneratorBasedBuilder):
-    """EpicQA"""
+    """
+    EpicQA
+
+    In response to the COVID-19 pandemic, the Epidemic Question
+    Answering (EPIC-QA) track challenges teams to develop systems
+    capable of automatically answering ad-hoc questions about the
+    disease COVID-19, its causal virus SARS-CoV-2, related corona
+    viruses, and the recommended response to the pandemic.
+    """
 
     DEFAULT_CONFIG_NAME = "epic_qa_research_source"
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
