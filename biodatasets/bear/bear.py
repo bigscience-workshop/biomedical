@@ -57,7 +57,13 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class BearDataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """
+    BEAR: A Corpus of Biomedical Entities and Relations
+
+    A dataset of 2100 Twitter posts annotated with 14 different types of
+    biomedical entities (e.g., disease, treatment, risk factor, etc.)
+    and 20 relation types (including caused, treated, worsens, etc.).
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
