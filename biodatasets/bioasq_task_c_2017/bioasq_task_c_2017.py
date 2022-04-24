@@ -21,9 +21,9 @@ from typing import List
 
 import datasets
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from biomed_datasets.utils import schemas
+from biomed_datasets.utils.configs import BigBioConfig
+from biomed_datasets.utils.constants import Tasks
 
 _CITATION = """\
 @article{nentidis-etal-2017-results,

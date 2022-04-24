@@ -13,11 +13,12 @@ from typing import Dict, Iterable, Iterator, List, Optional, Union
 import datasets
 from datasets import DatasetDict, Features
 
-from utils.constants import Tasks
-from utils.schemas import (entailment_features, kb_features, pairs_features,
-                           qa_features, text2text_features, text_features)
+from biomed_datasets.utils.constants import Tasks
+from biomed_datasets.utils.schemas import (
+    entailment_features, kb_features, pairs_features,
+    qa_features, text2text_features, text_features)
 
-sys.path.append(str(Path(__file__).parent.parent))
+#sys.path.append(str(Path(__file__).parent.parent))
 
 import logging
 
