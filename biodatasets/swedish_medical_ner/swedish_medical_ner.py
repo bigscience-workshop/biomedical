@@ -31,10 +31,10 @@ It can be found in Hugging Face Datasets: https://huggingface.co/datasets/swedis
 """
 
 import os
+import re
 from typing import Dict, List, Tuple
 
 import datasets
-import regex as re
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -91,106 +91,6 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
-
-def _read_data(datapaths):
-    """
-    This function does the following:
-    1) Loads all three sub data sets;
-    2) Preprocesses original sentences to get rid of brackets;
-    3) Extracts entities, entity types and their char offsets;
-    4) Returns data dict per sample/sentence.
-    """
-
-    def find_type(s, e):
-        """
-        Matching entity type from brackets/braces/parentheses.
-        :param s: left/open bracket/brace/parenthese
-        :param e: right/closed left bracket/brace/parenthese
-        """
-        if (s == "(") and (e == ")"):
-            return "Disorder and Finding"
-        elif (s == "[") and (e == "]"):
-            return "Pharmaceutical Drug"
-        elif (s == "{") and (e == "}"):
-            return "Body Structure"
-        else:
-            return ""
-
-    _ents = r"{[^{}]+}|\[[^\[\]]+\]|\([^\(\)]+\)"
-    _spaces = r"(?<=[\[{(])\s+|\s+(?=[\]})])"
-    documents = []
-    s_id = 0
-    for filepath in datapaths:
-        db_id = 1
-        if db_id == 1:
-            db_name = "wiki"
-        elif db_id == 2:
-            db_name = "LT"
-        else:
-            db_name = "1177"
-
-        with open(filepath, encoding="utf-8") as f:
-            for _, row in enumerate(f):
-                sentence = row.replace("\n", "")
-                # Remove extra white spaces within the brackets:
-                sentence = re.sub(_spaces, "", sentence)
-                # In the original data, entities are wrapped with brackets/braces/parentheses.
-                # Here we identify entities with brackets:
-                matches = re.findall(_ents, sentence, overlapped=True)
-                # Remove brackets/braces/parentheses
-                words = [re.sub(r"[{}\[\]\(\)]", "", m) for m in matches]
-                # Match entity types
-                types = [find_type(match[0], match[-1]) for match in matches]
-                # Add space to the entity and the word on its left (if there isn't a space in between), e.g.
-                # "jukdom(KOL)(lungfunktionsundersökning)" -> "jukdom (KOL) (lungfunktionsundersökning)"
-                clean_sent = re.sub(r"(\w|\)|\]|})([\(\[{])", "\\1 \\2", sentence)
-                # Add space to the entity and the word on its right (if there isn't a space in between), e.g.
-                # "(kronisk bronkit)och" -> "(kronisk bronkit) och"
-                clean_sent = re.sub(r"([\)\]}])(\w|\(|\[|{)", "\\1 \\2", clean_sent)
-                # Remove the brackets/braces/parentheses around each entity
-                clean_sent = re.sub(r"[{}\[\]\(\)]", "", clean_sent)
-
-                # Remove brackets/braces/parentheses from sentences and find the char offsets of each entity
-                # in the cleaned sentence
-                try:
-                    targets = [
-                        {
-                            "start": m.start(2),
-                            "end": m.end(2),
-                            "text": clean_sent[m.start(2) : m.end(2)],
-                        }
-                        for m in map(lambda word: re.search(f"(^|[^\w]+)({word})($|[^\w]+)", clean_sent), words)
-                    ]
-                # Skip wrongly formatted entities
-                # e.g. "rån patienter med (Barretts ){e)s)o)f)a)g)u)s),} påverkas av korta pulse"
-                # e.g. "let samt (imperforerad ){a)n)u)s).} Möten mellan himmel och jord"
-                # I have decided to ignore these cases since they are difficult to fix and would require the use
-                # of regex thus increase processing time.
-                except:
-                    continue
-
-                if targets:
-                    documents.append(
-                        {
-                            "sid": "s" + str(s_id),
-                            "sentence": clean_sent,
-                            "entities": [
-                                {
-                                    "start": targets[i]["start"],
-                                    "end": targets[i]["end"],
-                                    "text": targets[i]["text"],
-                                    "type": types[i],
-                                }
-                                for i in range(len(targets))
-                            ],
-                            "normalized": {"db_name": db_name, "db_id": "d" + str(db_id)},
-                        }
-                    )
-                s_id += 1
-        db_id += 1
-
-    return documents
 
 
 class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
@@ -264,46 +164,138 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_source_sample(sample):
-        return {"sid": sample["sid"], "sentence": sample["sentence"], "entities": sample["entities"]}
+    def get_type(text):
+        """
+        Tagging format per the dataset authors
+        - Prenthesis, (): Disorder and Finding
+        - Brackets, []: Pharmaceutical Drug
+        - Curly brackets, {}: Body Structure
+
+        """
+        if text[0] == "(":
+            return "disorder_finding"
+        elif text[1] == "[":
+            return "pharma_drug"
+        return "body_structure"
 
     @staticmethod
-    def _get_bigbio_sample(sample_id, sample):
-        return {
-            "id": str(sample_id),
-            "document_id": sample["sid"],
-            "passages": [
-                {
-                    "id": sample["sid"] + "-passage-0",
-                    "type": "sentence",
-                    "text": [sample["sentence"]],
-                    "offsets": [[0, len(sample["sentence"])]],
-                }
-            ],
-            "entities": [
-                {
-                    "id": sample["sid"] + "-entity-" + str(i),
-                    "text": [ent["text"]],
-                    "offsets": [[ent["start"], ent["end"]]],
-                    "type": ent["type"],
-                    "normalized": [sample["normalized"]],
-                }
-                for i, ent in enumerate(sample["entities"])
-            ],
+    def get_source_example(uid, tagged):
+
+        ents, text = zip(*tagged)
+        text = list(text)
+
+        # build offsets
+        offsets = []
+        curr = 0
+        for span in text:
+            offsets.append((curr, curr + len(span)))
+            curr = curr + len(span)
+
+        text = "".join(text)
+        doc = {"sid": "s" + str(uid), "sentence": text, "entities": []}
+
+        # Create entities
+        for i, (start, end) in enumerate(offsets):
+            if ents[i] is not None:
+                doc["entities"].append(
+                    {
+                        "start": start,
+                        "end": end,
+                        "text": text[start:end],
+                        "type": ents[i],
+                    }
+                )
+
+        return uid, doc
+
+    @staticmethod
+    def get_bigbio_example(uid, dbid, tagged, remove_markup=True):
+
+        if dbid == 1:
+            db_name = "wiki"
+        elif dbid == 2:
+            db_name = "LT"
+        else:
+            db_name = "1177"
+
+        doc = {
+            "id": str(uid),
+            "document_id": "s" + str(uid),
+            "passages": [],
+            "entities": [],
             "events": [],
             "coreferences": [],
             "relations": [],
         }
 
+        ents, text = zip(*tagged)
+        text = list(text)
+        if remove_markup:
+            for i in range(len(ents)):
+                if ents[i] is not None:
+                    text[i] = re.sub(r"[(){}\[\]]", "", text[i]).strip()
+
+        # build offsets
+        offsets = []
+        curr = 0
+        for span in text:
+            offsets.append((curr, curr + len(span)))
+            curr = curr + len(span)
+
+        # Create passage
+        passage = "".join(text)
+        doc["passages"].append(
+            {"id": str(uid) + "-passage-0", "type": "sentence", "text": [passage], "offsets": [[0, len(passage)]]}
+        )
+
+        # Create entities
+        ii = 0
+        for i, (start, end) in enumerate(offsets):
+            if ents[i] is not None:
+                doc["entities"].append(
+                    {
+                        "id": str(uid) + "-entity-" + str(ii),
+                        "type": ents[i],
+                        "text": [passage[start:end]],
+                        "offsets": [[start, end]],
+                        "normalized": [
+                            {
+                                "db_id": "d" + str(dbid),
+                                "db_name": db_name,
+                            }
+                        ],
+                    }
+                )
+                ii += 1
+
+        return uid, doc
+
     def _generate_examples(self, data_dir, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        _id = 0
-        samples = _read_data(data_dir)
-        for sample in samples:
-            if self.config.schema == "source":
-                yield _id, self._get_source_sample(sample)
+        entity_rgx = re.compile(r"[(].+?[)]|[\[].+?[\]]|[{].+?[}]")
 
-            elif self.config.schema == "bigbio_kb":
-                yield _id, self._get_bigbio_sample(_id, sample)
-            _id += 1
+        uid = 0
+        dbid = 0
+        for fpath in data_dir:
+            dbid += 1
+            with open(fpath, "rt", encoding="utf-8") as file:
+                for i, row in enumerate(file):
+                    row = row.replace("\n", "")
+                    if row:
+                        curr = 0
+                        stack = []
+                        # match entities and build spans for sentence string
+                        for m in entity_rgx.finditer(row):
+                            span = m.group()
+                            if m.start() != 0:
+                                stack.append([None, row[curr : m.start()]])
+                            stack.append((self.get_type(span), span))
+                            curr = m.start() + len(span)
+                        stack.append([None, row[curr:]])
+
+                        if self.config.schema == "source":
+                            yield self.get_source_example(uid, stack)
+                        elif self.config.schema == "bigbio_kb":
+                            yield self.get_bigbio_example(uid, dbid, stack)
+                        uid += 1
