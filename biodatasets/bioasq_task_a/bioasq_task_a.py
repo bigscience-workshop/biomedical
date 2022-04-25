@@ -269,11 +269,11 @@ class BioasqTaskADataset(datasets.GeneratorBasedBuilder):
                     try:
                         record = json.loads(line.rstrip(",\n"))
                     except json.decoder.JSONDecodeError:
-                        if "'articles'" in line:
-                            continue
-                        else:
-                            print("FAILED:", line)
-                            continue
+                        # NOTE: First and last line of 2013, 2014 do not contain valid JSON,
+                        # but also not any relevant data (first line has a single quote
+                        # and the term 'articles=[' and the last line contains
+                        # closing brackets. We skip these irrelevant lines.
+                        continue
                     else:
                         yield article_index, record
                         article_index += 1
