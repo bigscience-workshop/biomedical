@@ -357,7 +357,12 @@ def generate_bigbio_passages(example, uid):
 
 
 def parse_genia_to_bigbio_entity(entity, uid, text="", relative_offset=0, offset=0):
-    relative_offset = text.index(entity["text"], relative_offset)
+    try:
+        relative_offset = text.index(entity["text"], relative_offset)
+    except ValueError:
+        # Skip duplicated annotations:
+        # <cons lex="tumour_cell" sem="G#cell_type"><cons lex="tumour_cell" sem="G#cell_type">tumour cells</cons></cons>
+        return None, None
     new_relative_offset = relative_offset + len(entity["text"])
     return {
         "id": next(uid),
