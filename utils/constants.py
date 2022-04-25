@@ -1,5 +1,8 @@
 from enum import Enum
+from types import SimpleNamespace
 
+
+BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"
