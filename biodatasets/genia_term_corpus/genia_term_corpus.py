@@ -378,9 +378,10 @@ def generate_bigbio_entities(example, uid):
                     entity,
                     uid,
                     text=sentence["text"],
-                    relative_offset=relative_offsets.get(entity["text"], 0),
+                    relative_offset=relative_offsets.get((entity["text"], entity["lex"], entity["sem"]), 0),
                     offset=sentence_offset,
                 )
-                relative_offsets[entity["text"]] = new_relative_offset
-                yield bigbio_entity
+                if bigbio_entity:
+                    relative_offsets[(entity["text"], entity["lex"], entity["sem"])] = new_relative_offset
+                    yield bigbio_entity
             sentence_offset += len(sentence["text"]) + 1
