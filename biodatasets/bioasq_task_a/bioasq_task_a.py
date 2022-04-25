@@ -68,23 +68,47 @@ _CITATION = """\
 
 _DATASETNAME = "bioasq_task_a"
 
-# TODO: Find description and copy it
-_BIOASQ_2013A_DESCRIPTION = ""
-_BIOASQ_2014A_DESCRIPTION = ""
-_BIOASQ_2014bA_DESCRIPTION = ""
+_DESCRIPTION_TEMPLATE = """\
+The data are intended to be used as training data for BioASQ 10 A, which will take place during {year}.
+There is one file containing the data:
+ - {filename}
 
-_BIOASQ_2015A_DESCRIPTION = ""
-_BIOASQ_2015bA_DESCRIPTION = ""
+The training data sets for this task are available for downloading. They
+contain annotated articles from PubMed, where annotated means that MeSH terms
+have been assigned to the articles by the human curators in PubMed. Table 1
+provides information about the provided datasets. Note that the main difference
+between those datasets among the different years, apart from the size, is the
+MeSH terms used. For example the 2015 training datasets contain articles where
+MeSH 2015 have been assigned. Also, for 2014, 2015 and 2016 there are two
+versions (a and b) of the training data available. The small version (wrt size) consists
+of articles that belong to the pool of journals that the BioASQ team used to
+select the articles for the test data (this was a subset of the available journals).
+The bigger version consists of articles from every available
+journal. Since 2017 articles for the test data will be selected from all
+available journals, so only one corresponding training data set will be
+available. The evaluation of the results during each year of the challenge is
+performed using the corresponding version of the MeSH terms, thus their usage
+is highly recommended. The training datasets of previous years of the challenge
+are also available for reference reasons. Note that not every MeSH term is
+covered in the datasets.
+""".format
+_BIOASQ_2013A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2013, filename="allMeSH.zip")
 
-_BIOASQ_2016A_DESCRIPTION = ""
-_BIOASQ_2016bA_DESCRIPTION = ""
+_BIOASQ_2014A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2014, filename="allMeSH.zip")
+_BIOASQ_2014bA_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2014, filename="allMeSH_limitjournals.zip")
 
-_BIOASQ_2017A_DESCRIPTION = ""
-_BIOASQ_2018A_DESCRIPTION = ""
-_BIOASQ_2019A_DESCRIPTION = ""
-_BIOASQ_2020A_DESCRIPTION = ""
-_BIOASQ_2021A_DESCRIPTION = ""
-_BIOASQ_2022A_DESCRIPTION = ""
+_BIOASQ_2015A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2015, filename="allMeSH.zip")
+_BIOASQ_2015bA_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2015, filename="allMeSH_limitjournals.zip")
+
+_BIOASQ_2016A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2016, filename="allMeSH_2016.zip")
+_BIOASQ_2016bA_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2016, filename="allMeSH_limitjournals_2016.zip")
+
+_BIOASQ_2017A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2017, filename="allMeSH_2017.json")
+_BIOASQ_2018A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2018, filename="allMeSH_2018.json")
+_BIOASQ_2019A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2019, filename="allMeSH_2019.json")
+_BIOASQ_2020A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2020, filename="allMeSH_2020.json")
+_BIOASQ_2021A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2021, filename="allMeSH_2021.json")
+_BIOASQ_2022A_DESCRIPTION = _DESCRIPTION_TEMPLATE(year=2022, filename="allMeSH_2022.json")
 
 _DESCRIPTION = {
     "bioasq_2013a": _BIOASQ_2013A_DESCRIPTION,
