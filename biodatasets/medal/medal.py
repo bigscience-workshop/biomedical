@@ -19,7 +19,7 @@ a large medical text dataset curated for abbreviation disambiguation, designed f
 pre-training in the medical domain. This script loads the MeDAL dataset in the bigbio KB schema and/or source schema.
 """
 
-import csv
+import pandas as pd
 from typing import Dict, List, Tuple
 
 import datasets
@@ -194,57 +194,59 @@ pre-training in the medical domain."""
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        with open(filepath, encoding="utf-8") as f:
-            data = csv.reader(f)
-            # Skip header
-            next(data)
+        with open(filepath, encoding="utf-8") as file:
+            data = pd.read_csv(
+                file,
+                sep=",",
+                dtype={"ABSTRACT_ID": str, "TEXT": str, "LOCATION": int, "LABEL": str},
+            )
 
             if self.config.schema == "source":
-                for id_, row in enumerate(data):
+                for id_, row in enumerate(data.itertuples()):
                     yield id_, {
-                        "abstract_id": int(row[0]),
-                        "text": row[1],
-                        "location": [int(row[2])],
-                        "label": [row[3]],
+                        "abstract_id": int(row.ABSTRACT_ID),
+                        "text": row.TEXT,
+                        "location": [row.LOCATION],
+                        "label": [row.LABEL],
                     }
             elif self.config.schema == "bigbio_kb":
                 uid = 0  # global unique id
-                for id_, row in enumerate(data):
-                    result = self._generate_offsets(row[1], int(row[2]))
-
+                for id_, row in enumerate(data.itertuples()):
+                    offsets = self._generate_offsets(row.TEXT, row.LOCATION)
                     example = {
-                        "id": uid,
-                        "document_id": int(row[0]),
+                        "id": str(uid),
+                        "document_id": row.ABSTRACT_ID,
                         "passages": [],
                         "entities": [],
                         "relations": [],
                         "events": [],
                         "coreferences": [],
                     }
-
                     uid += 1
 
                     example["passages"].append(
-                        {"id": uid, "type": "PubMed abstract", "text": [row[1]], "offsets": [(0, len(row[1]))]}
+                        {
+                            "id": str(uid),
+                            "type": "PubMed abstract",
+                            "text": [row.TEXT],
+                            "offsets": [(0, len(row.TEXT))],
+                        }
                     )
-
                     uid += 1
 
                     example["entities"].append(
                         {
-                            "id": uid,
+                            "id": str(uid),
                             "type": "abbreviation",
-                            "text": [row[1]],
-                            "offsets": [result],
+                            "text": [row.TEXT],
+                            "offsets": [offsets],
                             "normalized": [
                                 {
                                     "db_name": "medal",
-                                    "db_id": [row[3]],
+                                    "db_id": row.LABEL,
                                 }
                             ],
                         }
                     )
-
                     uid += 1
-
                     yield id_, example
