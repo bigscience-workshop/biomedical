@@ -80,11 +80,9 @@ _HOMEPAGE = "https://github.com/olofmogren/biomedical-ner-data-swedish/"
 _LICENSE = "Creative Commons Attribution-ShareAlike 4.0 International Public License (CC BY-SA 4.0)"
 
 _URLS = {
-    _DATASETNAME: [
-        "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/Wiki_annotated_60.txt",
-        "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/LT_annotated_60.txt",
-        "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/1177_annotated_sentences.txt",
-    ],
+    "swedish_medical_ner_wiki": "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/Wiki_annotated_60.txt",
+    "swedish_medical_ner_lt": "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/LT_annotated_60.txt",
+    "swedish_medical_ner_1177": "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/1177_annotated_sentences.txt",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
@@ -94,27 +92,35 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
-    """Swedish medical named entity recognition"""
+    """
+    Swedish medical named entity recognition
+
+    The dataset contains three subsets, namely "wiki", "lt" and "1177".
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    BUILDER_CONFIGS = [
-        BigBioConfig(
-            name="swedish_medical_ner_source",
-            version=SOURCE_VERSION,
-            description="swedish_medical_ner source schema",
-            schema="source",
-            subset_id="swedish_medical_ner",
-        ),
-        BigBioConfig(
-            name="swedish_medical_ner_bigbio_kb",
-            version=BIGBIO_VERSION,
-            description="swedish_medical_ner BigBio schema",
-            schema="bigbio_kb",
-            subset_id="swedish_medical_ner",
-        ),
-    ]
+    BUILDER_CONFIGS = []
+    for subset in ["wiki", "lt", "1177"]:
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"swedish_medical_ner_{subset}_source",
+                version=SOURCE_VERSION,
+                description="swedish_medical_ner source schema",
+                schema="source",
+                subset_id=f"swedish_medical_ner_{subset}",
+            )
+        )
+        BUILDER_CONFIGS.append(
+            BigBioConfig(
+                name=f"swedish_medical_ner_{subset}_bigbio_kb",
+                version=BIGBIO_VERSION,
+                description="swedish_medical_ner BigBio schema",
+                schema="bigbio_kb",
+                subset_id=f"swedish_medical_ner_{subset}",
+            )
+        )
 
     DEFAULT_CONFIG_NAME = "swedish_medical_ner_source"
 
@@ -150,14 +156,14 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
+        urls = _URLS
+        filepath = dl_manager.download_and_extract(urls[self.config.subset_id])
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "data_dir": data_dir,
+                    "filepath": filepath,
                     "split": "train",
                 },
             ),
@@ -209,15 +215,7 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
         return uid, doc
 
     @staticmethod
-    def get_bigbio_example(uid, dbid, tagged, remove_markup=True):
-
-        if dbid == 1:
-            db_name = "wiki"
-        elif dbid == 2:
-            db_name = "LT"
-        else:
-            db_name = "1177"
-
+    def get_bigbio_example(uid, tagged, remove_markup=True):
         doc = {
             "id": str(uid),
             "document_id": "s" + str(uid),
@@ -258,44 +256,36 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
                         "type": ents[i],
                         "text": [passage[start:end]],
                         "offsets": [[start, end]],
-                        "normalized": [
-                            {
-                                "db_id": "d" + str(dbid),
-                                "db_name": db_name,
-                            }
-                        ],
+                        "normalized": [],
                     }
                 )
                 ii += 1
 
         return uid, doc
 
-    def _generate_examples(self, data_dir, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         entity_rgx = re.compile(r"[(].+?[)]|[\[].+?[\]]|[{].+?[}]")
 
         uid = 0
-        dbid = 0
-        for fpath in data_dir:
-            dbid += 1
-            with open(fpath, "rt", encoding="utf-8") as file:
-                for i, row in enumerate(file):
-                    row = row.replace("\n", "")
-                    if row:
-                        curr = 0
-                        stack = []
-                        # match entities and build spans for sentence string
-                        for m in entity_rgx.finditer(row):
-                            span = m.group()
-                            if m.start() != 0:
-                                stack.append([None, row[curr : m.start()]])
-                            stack.append((self.get_type(span), span))
-                            curr = m.start() + len(span)
-                        stack.append([None, row[curr:]])
+        with open(filepath, "rt", encoding="utf-8") as file:
+            for i, row in enumerate(file):
+                row = row.replace("\n", "")
+                if row:
+                    curr = 0
+                    stack = []
+                    # match entities and build spans for sentence string
+                    for m in entity_rgx.finditer(row):
+                        span = m.group()
+                        if m.start() != 0:
+                            stack.append([None, row[curr : m.start()]])
+                        stack.append((self.get_type(span), span))
+                        curr = m.start() + len(span)
+                    stack.append([None, row[curr:]])
 
-                        if self.config.schema == "source":
-                            yield self.get_source_example(uid, stack)
-                        elif self.config.schema == "bigbio_kb":
-                            yield self.get_bigbio_example(uid, dbid, stack)
-                        uid += 1
+                    if self.config.schema == "source":
+                        yield self.get_source_example(uid, stack)
+                    elif self.config.schema == "bigbio_kb":
+                        yield self.get_bigbio_example(uid, stack)
+                    uid += 1
