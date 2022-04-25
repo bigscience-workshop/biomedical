@@ -25,7 +25,32 @@ covering three languages (Japanese, English, and Chinese), and annotated with ei
 labels such as influenza, diarrhea/stomachache, hay fever, cough/sore throat, headache,
 fever, runny nose, and cold.
 
-For more information, see:
+The dataset consists of a single archive file:
+    - ntcir13_MedWeb_taskdata.zip
+
+which can be obtained after filling out a form to provide information about the
+usage context under this URL: http://www.nii.ac.jp/dsc/idr/en/ntcir/ntcir.html
+
+The zip archive contains a folder with name 'MedWeb_TestCollection'.
+Inside this folder, there are the following individual data files:
+├── NTCIR-13_MedWeb_en_test.xlsx
+├── NTCIR-13_MedWeb_en_training.xlsx
+├── NTCIR-13_MedWeb_ja_test.xlsx
+├── NTCIR-13_MedWeb_ja_training.xlsx
+├── NTCIR-13_MedWeb_zh_test.xlsx
+└── NTCIR-13_MedWeb_zh_training.xlsx
+
+The excel sheets contain a training and test split for each of the languages
+('en' stands for 'english', 'ja' stands for 'japanese' and 'zh' stands for
+(simplified) chinese).
+
+The archive file containing this dataset must be on the users local machine
+in a single directory that is passed to `datasets.load_dataset` via
+the `data_dir` kwarg. This loader script will read this archive file
+directly (i.e. the user should not uncompress, untar or unzip any of
+the files).
+
+For more information on this dataset, see:
 http://research.nii.ac.jp/ntcir/permission/ntcir-13/perm-en-MedWeb.html
 """
 
