@@ -329,13 +329,12 @@ def parse_genia_to_bigbio(example, uid):
     document = {
         "id": next(uid),
         "document_id": example["document_id"],
+        "passages": list(generate_bigbio_passages(example, uid)),
+        "entities": list(generate_bigbio_entities(example, uid)),
+        "events": [],
+        "coreferences": [],
+        "relations": [],
     }
-    passages = list(generate_bigbio_passages(example, uid))
-    document["passages"] = passages
-    document["entities"] = list(generate_bigbio_entities(example, passages, uid))
-    document["events"] = []
-    document["coreferences"] = []
-    document["relations"] = []
     return document
 
 
@@ -357,21 +356,31 @@ def generate_bigbio_passages(example, uid):
         yield passage
 
 
-def parse_genia_to_bigbio_entity(entity, uid, text="", offset=0):
-    relative_offset = text.index(entity["text"])
+def parse_genia_to_bigbio_entity(entity, uid, text="", relative_offset=0, offset=0):
+    relative_offset = text.index(entity["text"], relative_offset)
+    new_relative_offset = relative_offset + len(entity["text"])
     return {
         "id": next(uid),
-        "offsets": [[offset + relative_offset, offset + relative_offset + len(entity["text"])]],
+        "offsets": [[offset + relative_offset, offset + new_relative_offset]],
         "text": [entity["text"]],
         "type": entity["sem"],
         "normalized": [],
-    }
+    }, new_relative_offset
 
 
-def generate_bigbio_entities(example, passages, uid):
-    for passage in passages:
-        for sentence in example[passage["type"]]:
+def generate_bigbio_entities(example, uid):
+    sentence_offset = 0
+    for type in ["title", "abstract"]:
+        for sentence in example[type]:
+            relative_offsets = {}
             for entity in sentence["entities"]:
-                yield parse_genia_to_bigbio_entity(
-                    entity, uid, text=passage["text"][0], offset=passage["offsets"][0][0]
+                bigbio_entity, new_relative_offset = parse_genia_to_bigbio_entity(
+                    entity,
+                    uid,
+                    text=sentence["text"],
+                    relative_offset=relative_offsets.get(entity["text"], 0),
+                    offset=sentence_offset,
                 )
+                relative_offsets[entity["text"]] = new_relative_offset
+                yield bigbio_entity
+            sentence_offset += len(sentence["text"]) + 1
