@@ -15,10 +15,11 @@
 
 """
 This dataset contains 225 annotated article titles/abstracts taken from PubMed.
-Each entry is annotated in XML format with tagged protein entities, and as such
-the dataset is suitable for the task of Named Entity Recognition. 
+Each entry is annotated in XML format with tagged protein entities and protein interactions,
+and as such the dataset is suitable for the task of Named Entity Recognition and 
+Relation Extraction
 
-Dataset was downloaded from https://www.cs.utexas.edu/ftp/mooney/bio-data/proteins.tar.gz
+Dataset was downloaded from https://www.cs.utexas.edu/ftp/mooney/bio-data/interactions.tar.gz
 and parsed into the bigbio_kb schema format. Because the orginal paper doesn't
 share analysis code, and doesn't list an explicit schema, the schema for
 "source" is also parsed into bigbio_kb. 
@@ -29,16 +30,17 @@ Bunescu, Razvan et al. Artificial intelligence in medicine. 33, 2 139-155. 2005.
 """
 
 import os
-from glob import glob
-from collections import defaultdict
 import re
-from typing import List, Tuple, Dict
-from xml.sax.handler import EntityResolver
+from collections import defaultdict
+from glob import glob
+from typing import Dict, List, Tuple
 from xml.etree import ElementTree
+from xml.sax.handler import EntityResolver
 
-from bs4 import BeautifulSoup
 import datasets
+from bs4 import BeautifulSoup
 from yaml import parse
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -75,12 +77,14 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-NEXT_ID = {'val': 1}
+NEXT_ID = {"val": 1}
+
 
 def gen_id():
-    new_id = NEXT_ID['val']
-    NEXT_ID['val'] += 1
+    new_id = NEXT_ID["val"]
+    NEXT_ID["val"] += 1
     return new_id
+
 
 def _get_example_text(example: dict) -> str:
     """
@@ -91,86 +95,92 @@ def _get_example_text(example: dict) -> str:
 
 
 def fix_offsets(entries):
-    '''
+    """
     In some cases, entity and passage offsets would be off by one on their starting indices,
-    and sometimes their end indices as well. This wasn't happening in my original scratch 
+    and sometimes their end indices as well. This wasn't happening in my original scratch
     notebook, and I couldn't diagnose what was happening, but it may be because of the way
-    the example text is constructed in the test. As a result, I'm just passing back through the 
+    the example text is constructed in the test. As a result, I'm just passing back through the
     entries and manually checking for those slightly misaligned offsets and correcting them.
-    '''
+    """
     for entry in entries:
         fulltext = _get_example_text(entry)
-        for passage in entry['passages']:
-            for ix, offset_text in enumerate(zip(passage['offsets'], passage['text'])):
+        for passage in entry["passages"]:
+            for ix, offset_text in enumerate(zip(passage["offsets"], passage["text"])):
                 offset, text = offset_text
                 start, end = offset
                 if fulltext[start:end] != text:
-                    if fulltext[start - 1 : end-1] == text:
-                        passage['offsets'][ix] = [start - 1 , end - 1]
-                    elif fulltext[start -1 : end] == text:
-                        passage['offset'][ix] = [start -1, end]
-                    elif fulltext[start +1 : end + 1] == text:
-                        passage['offsets'][ix] = [start +1, end + 1]
-                    elif fulltext[start +1 : end] == text:
-                        passage['offsets'][ix] = [start +1, end]
+                    if fulltext[start - 1 : end - 1] == text:
+                        passage["offsets"][ix] = [start - 1, end - 1]
+                    elif fulltext[start - 1 : end] == text:
+                        passage["offset"][ix] = [start - 1, end]
+                    elif fulltext[start + 1 : end + 1] == text:
+                        passage["offsets"][ix] = [start + 1, end + 1]
+                    elif fulltext[start + 1 : end] == text:
+                        passage["offsets"][ix] = [start + 1, end]
                     elif fulltext[start + 2 : end + 2] == text:
-                        passage['offsets'][ix] = [start +2, end+2]
-        for entity in entry['entities']:
-            for ix, offset_text in enumerate(zip(entity['offsets'], entity['text'])):
+                        passage["offsets"][ix] = [start + 2, end + 2]
+        for entity in entry["entities"]:
+            for ix, offset_text in enumerate(zip(entity["offsets"], entity["text"])):
                 offset, text = offset_text
                 start, end = offset
                 if fulltext[start:end] != text:
-                    if fulltext[start - 1 : end-1] == text:
-                        entity['offsets'][ix] = [start - 1 , end - 1]
-                    elif fulltext[start -1 : end] == text:
-                        entity['offset'][ix] = [start -1, end]
-                    elif fulltext[start +1 : end + 1] == text:
-                        entity['offsets'][ix] = [start +1, end + 1]
-                    elif fulltext[start +1 : end] == text:
-                        entity['offsets'][ix] = [start +1, end]
+                    if fulltext[start - 1 : end - 1] == text:
+                        entity["offsets"][ix] = [start - 1, end - 1]
+                    elif fulltext[start - 1 : end] == text:
+                        entity["offset"][ix] = [start - 1, end]
+                    elif fulltext[start + 1 : end + 1] == text:
+                        entity["offsets"][ix] = [start + 1, end + 1]
+                    elif fulltext[start + 1 : end] == text:
+                        entity["offsets"][ix] = [start + 1, end]
 
-                start, end = entity['offsets'][ix]
+                start, end = entity["offsets"][ix]
                 if fulltext[start:end] != text:
                     print(len(text))
                     print(len(fulltext[start:end]))
     return entries
 
+
 def load(fpath):
-    with open(fpath, 'r') as f:
+    with open(fpath, "r") as f:
         content = f.read()
     return content
 
-def wrap_xml(xml_text: str, tag='root') -> str:
-    '''
-    The standard libary xml module requires that xml have some kind of root element. 
+
+def wrap_xml(xml_text: str, tag="root") -> str:
+    """
+    The standard libary xml module requires that xml have some kind of root element.
     This wraps the <ArticleTitle></ArticleTitle><AbstractText></AbstractText> of the
     PubMed abstracts in a <root> element for the etree parser.
-    '''
+    """
     xml_text = f"<{tag}>{xml_text}</{tag}>"
     return xml_text
 
-def passages_to_xml(text):
-    ti_ix = text.find('TI - ')
-    ab_ix = text.find('AB - ')
-    ad_ix = text.rfind('AD -')
 
-    ti_slice = text[ti_ix: ab_ix]
-    ab_slice = text[ab_ix: ad_ix]
+def passages_to_xml(text):
+    ti_ix = text.find("TI - ")
+    ab_ix = text.find("AB - ")
+    ad_ix = text.rfind("AD -")
+
+    ti_slice = text[ti_ix:ab_ix]
+    ab_slice = text[ab_ix:ad_ix]
     ad_slice = text[ad_ix:]
 
-    ti_node = wrap_xml(ti_slice, 'ArticleTitle')
-    ab_node = wrap_xml(ab_slice, 'AbstractText')
-    ad_node = wrap_xml(ad_slice, 'ADText')
+    ti_node = wrap_xml(ti_slice, "ArticleTitle")
+    ab_node = wrap_xml(ab_slice, "AbstractText")
+    ad_node = wrap_xml(ad_slice, "ADText")
 
     xml_text = wrap_xml(f"{ti_node}{ab_node}{ad_node}")
     return xml_text
 
+
 def fix_prot_pairs(xml_text):
-    return re.sub('<p(\d)  pair=(\d+) >', lambda match: f'<p{match.group(1)}  pair="{match.group(2)}">', xml_text)
+    return re.sub("<p(\d)  pair=(\d+) >", lambda match: f'<p{match.group(1)}  pair="{match.group(2)}">', xml_text)
+
 
 def fix_whitespace(xml_text):
-    '''In the dataset, all XML tags are followed by two whitespace characters. This removes those two characters.'''
-    return re.sub('(<.*?>)  ', lambda match: match.group(1), xml_text)
+    """In the dataset, all XML tags are followed by two whitespace characters. This removes those two characters."""
+    return re.sub("(<.*?>)  ", lambda match: match.group(1), xml_text)
+
 
 def preprocess_xml_text(text):
     xml_text = fix_prot_pairs(text)
@@ -178,11 +188,13 @@ def preprocess_xml_text(text):
     xml_text = fix_whitespace(xml_text)
     return xml_text
 
+
 def loadtree(fpath):
     text = load(fpath)
     xml_text = preprocess_xml_text(text)
     tree = ElementTree.fromstring(xml_text)
     return tree
+
 
 def textify(t):
     s = []
@@ -192,54 +204,48 @@ def textify(t):
         s.extend(textify(child))
     if t.tail:
         s.append(t.tail)
-    return ''.join(s)
+    return "".join(s)
 
 
 def process_passage(node, start_idx):
 
-    if node.tag == 'ArticleTitle':
-        _type = 'title'
-    elif node.tag == 'AbstractText':
-        _type = 'abstract'
-    elif node.tag == 'ADText':
-        _type = 'ad'
+    if node.tag == "ArticleTitle":
+        _type = "title"
+    elif node.tag == "AbstractText":
+        _type = "abstract"
+    elif node.tag == "ADText":
+        _type = "ad"
     else:
-        raise ValueError(f'node.tag should be one of ["ArticleTitle", "AbstracText", "ADText"]. Received node.tag == {node.tag}')
+        raise ValueError(
+            f'node.tag should be one of ["ArticleTitle", "AbstracText", "ADText"]. Received node.tag == {node.tag}'
+        )
 
     _text = textify(node)
     _offsets = [start_idx, start_idx + len(_text)]
 
-    passage = {
-        'id': gen_id(),
-        'type': _type,
-        'text': [_text],
-        'offsets': [_offsets]
-    }
+    passage = {"id": gen_id(), "type": _type, "text": [_text], "offsets": [_offsets]}
     return passage
 
+
 def get_passages(t):
-    
-    state = {
-        'current_idx': 0,
-        'str_chunks': [],
-        'passages': []
-    }
-    
+
+    state = {"current_idx": 0, "str_chunks": [], "passages": []}
+
     def _textify(t):
         if t.text:
-            state['str_chunks'].append(t.text)
-            state['current_idx'] += len(t.text)
+            state["str_chunks"].append(t.text)
+            state["current_idx"] += len(t.text)
         for child in t:
-            if child.tag in ['ArticleTitle', 'AbstractText', "ADText"]:
-                parsed_passage = process_passage(child, start_idx=state['current_idx'])
-                state['passages'].append(parsed_passage)
+            if child.tag in ["ArticleTitle", "AbstractText", "ADText"]:
+                parsed_passage = process_passage(child, start_idx=state["current_idx"])
+                state["passages"].append(parsed_passage)
             _textify(child)
         if t.tail:
-            state['str_chunks'].append(t.tail)
-            state['current_idx'] += len(t.tail)
-            
+            state["str_chunks"].append(t.tail)
+            state["current_idx"] += len(t.tail)
+
     _textify(t)
-    return state 
+    return state
 
 
 def textify_prot(t):
@@ -250,114 +256,110 @@ def textify_prot(t):
         s.append(t.text)
     for child in t:
         s.extend(textify(child))
-        
-    return ''.join(s)
+
+    return "".join(s)
 
 
 def process_entity(node, start_idx):
 
-    if not hasattr(node, 'tag'):
-        return 
-    
-    if node.tag == 'prot':
-        _type = 'protein'
+    if not hasattr(node, "tag"):
+        return
+
+    if node.tag == "prot":
+        _type = "protein"
     else:
         raise ValueError(f'node.tag should be one of ["prot"]. Received node.tag == {node.tag}')
 
-        
     _text = textify_prot(node)
     _offsets = [start_idx, start_idx + len(_text)]
 
-    entity = {
-        'id': gen_id(),
-        'type': _type,
-        'text': [_text],
-        'offsets': [_offsets],
-        'normalized': []
-    }
+    entity = {"id": gen_id(), "type": _type, "text": [_text], "offsets": [_offsets], "normalized": []}
     return entity
 
 
 def get_entities_and_relations(t):
-    
-    state = {
-        'current_idx': 0,
-        'str_chunks': [],
-        'entities': [],
-        'pairs': defaultdict(lambda: {"id": gen_id(), "type": "protein-protein interaction", "normalized": []})
-    }
-    
-    def _textify(t, parent_tag='root'):
-        if t.text:
-            state['str_chunks'].append(t.text)
-            state['current_idx'] += len(t.text)
-        for child in t:
-            if child.tag in ['p1', 'p2']:
-                n = child.tag[1]
-                pair_num = child.get('pair')
-                prot = child.find('prot')
-                if prot:
-                    entity = process_entity(prot, start_idx=state['current_idx'])
-                    state['pairs'][pair_num][f'arg{n}_id'] = entity['id']
-                    state['entities'].append(entity)
 
-            if child.tag in ['prot'] and parent_tag not in ['p1', 'p2']:
-                parsed_entity = process_entity(child, start_idx=state['current_idx'])
-                state['entities'].append(parsed_entity)
-                
+    state = {
+        "current_idx": 0,
+        "str_chunks": [],
+        "entities": [],
+        "pairs": defaultdict(lambda: {"id": gen_id(), "type": "protein-protein interaction", "normalized": []}),
+    }
+
+    def _textify(t, parent_tag="root"):
+        if t.text:
+            state["str_chunks"].append(t.text)
+            state["current_idx"] += len(t.text)
+        for child in t:
+            if child.tag in ["p1", "p2"]:
+                n = child.tag[1]
+                pair_num = child.get("pair")
+                prot = child.find("prot")
+                if prot:
+                    entity = process_entity(prot, start_idx=state["current_idx"])
+                    state["pairs"][pair_num][f"arg{n}_id"] = entity["id"]
+                    state["entities"].append(entity)
+
+            if child.tag in ["prot"] and parent_tag not in ["p1", "p2"]:
+                parsed_entity = process_entity(child, start_idx=state["current_idx"])
+                state["entities"].append(parsed_entity)
+
             _textify(child, parent_tag=t.tag)
         if t.tail:
-            state['str_chunks'].append(t.tail)
-            state['current_idx'] += len(t.tail)
-            
+            state["str_chunks"].append(t.tail)
+            state["current_idx"] += len(t.tail)
+
     _textify(t)
     relations = []
-    for relation in state['pairs'].values():
-        if 'arg1_id' in relation and 'arg2_id' in relation:
+    for relation in state["pairs"].values():
+        if "arg1_id" in relation and "arg2_id" in relation:
             relations.append(relation)
 
-    state['relations'] = relations
-    del state['pairs']
-    return state 
+    state["relations"] = relations
+    del state["pairs"]
+    return state
+
 
 def parse_article(fpath, fulltext=False):
-    
-    doc_id = re.search('_.*?(\d+)', fpath).group(1)
+
+    doc_id = re.search("_.*?(\d+)", fpath).group(1)
 
     text = load(fpath)
     xml_text = preprocess_xml_text(text)
     t = ElementTree.fromstring(xml_text)
-    
+
     entities_relations = get_entities_and_relations(t)
-    entities = entities_relations['entities']
-    relations = entities_relations['relations']
-    passages = get_passages(t)['passages']
-    result =  {
+    entities = entities_relations["entities"]
+    relations = entities_relations["relations"]
+    passages = get_passages(t)["passages"]
+    result = {
         "id": gen_id(),
         "document_id": doc_id,
-        'passages': passages,
-        'entities': entities,
-        'events': [],
-        'coreferences': [],
-        'relations': relations
+        "passages": passages,
+        "entities": entities,
+        "events": [],
+        "coreferences": [],
+        "relations": relations,
     }
 
     if fulltext:
         fulltext = textify(t)
-        result['fulltext'] = fulltext
+        result["fulltext"] = fulltext
 
     return result
 
 
 class AIMedInteractionsDataset(datasets.GeneratorBasedBuilder):
     """
-    This dataset contains 225 annotated article titles/abstracts taken from PubMed.
-    Each entry is annotated in XML format with tagged protein entities, and as such
-    the dataset is suitable for the task of Named Entity Recognition. 
+    This dataset contains annotated article titles/abstracts.
+    Each entry is annotated in XML format with tagged protein entities and protein interactions,
+    and as such the dataset is suitable for the task of Named Entity Recognition and
+    Relation Extraction
 
-    The dataset was originally collated and analyzed in the following paper:
-    Comparative experiments on learning information extractors for proteins and their interactions.
-    Bunescu, Razvan et al. Artificial intelligence in medicine. 33, 2 139-155. 2005.
+    Dataset was downloaded from https://www.cs.utexas.edu/ftp/mooney/bio-data/interactions.tar.gz
+    and parsed into the bigbio_kb schema format. Because the orginal paper doesn't
+    share analysis code, and doesn't list an explicit schema, the schema for
+    "source" is also parsed into bigbio_kb.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -413,11 +415,11 @@ class AIMedInteractionsDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         fpaths = glob(data_dir[0] + "/*/**")
         # Downloaded data contains a corrupted, duplicate file
-        fpaths = [x for x in fpaths if ('abstract' in x)]
-        
+        fpaths = [x for x in fpaths if ("abstract" in x)]
+
         entries = [parse_article(p, False) for p in fpaths]
         entries = fix_offsets(entries)
-    
+
         if self.config.schema == "source":
             for key, example in enumerate(entries):
                 yield key, example

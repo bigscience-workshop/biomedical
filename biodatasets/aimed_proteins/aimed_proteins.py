@@ -29,15 +29,16 @@ Bunescu, Razvan et al. Artificial intelligence in medicine. 33, 2 139-155. 2005.
 """
 
 import os
-from glob import glob
 import re
-from typing import List, Tuple, Dict
-from xml.sax.handler import EntityResolver
+from glob import glob
+from typing import Dict, List, Tuple
 from xml.etree import ElementTree
+from xml.sax.handler import EntityResolver
 
-from bs4 import BeautifulSoup
 import datasets
+from bs4 import BeautifulSoup
 from yaml import parse
+
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
@@ -124,9 +125,7 @@ def process_passage(node, start_idx, _id=0):
     elif node.tag == "AbstractText":
         _type = "abstract"
     else:
-        raise ValueError(
-            f'node.tag should be one of ["ArticleTitle", "AbstracText"]. Received node.tag == {node.tag}'
-        )
+        raise ValueError(f'node.tag should be one of ["ArticleTitle", "AbstracText"]. Received node.tag == {node.tag}')
 
     _text = textify(node)
     _offsets = [start_idx, start_idx + len(_text)]
@@ -161,7 +160,7 @@ def get_passages(t):
 
 
 def textify_prot(t):
-    """Handles textifying proteins. Basically just leaves out the tag's tail attribute. """
+    """Handles textifying proteins. Basically just leaves out the tag's tail attribute."""
     child_tags = [c.tag for c in t]
     s = []
     if t.text:
@@ -172,13 +171,11 @@ def textify_prot(t):
 
 
 def process_entity(node, start_idx, _id=0):
-    '''Converts an ElementTree node representing an entity to the appropriate schema.'''
+    """Converts an ElementTree node representing an entity to the appropriate schema."""
     if node.tag == "prot":
         _type = "protein"
     else:
-        raise ValueError(
-            f'node.tag should be one of ["prot"]. Received node.tag == {node.tag}'
-        )
+        raise ValueError(f'node.tag should be one of ["prot"]. Received node.tag == {node.tag}')
     _text = textify_prot(node)
     _offsets = [start_idx, start_idx + len(_text)]
     entity = {
@@ -229,7 +226,7 @@ def parse_article(fpath, _id=0, fulltext=False):
             "entities": entities,
             "events": [],
             "coreferences": [],
-            "relations": []
+            "relations": [],
         }
         if fulltext:
             result["fulltext"] = textify(t)
@@ -250,46 +247,48 @@ def fix_ids(entries, test_offsets=True):
             next_id += 1
     return entries
 
+
 def fix_offsets(entries):
-    '''
+    """
     In some cases, entity and passage offsets would be off by one on their starting indices,
-    and sometimes their end indices as well. This wasn't happening in my original scratch 
+    and sometimes their end indices as well. This wasn't happening in my original scratch
     notebook, and I couldn't diagnose what was happening, but it may be because of the way
-    the example text is constructed in the test. As a result, I'm just passing back through the 
+    the example text is constructed in the test. As a result, I'm just passing back through the
     entries and manually checking for those slightly misaligned offsets and correcting them.
-    '''
+    """
     for entry in entries:
         fulltext = _get_example_text(entry)
-        for passage in entry['passages']:
-            for ix, offset_text in enumerate(zip(passage['offsets'], passage['text'])):
+        for passage in entry["passages"]:
+            for ix, offset_text in enumerate(zip(passage["offsets"], passage["text"])):
                 offset, text = offset_text
                 start, end = offset
                 if fulltext[start:end] != text:
-                    if fulltext[start - 1 : end-1] == text:
-                        passage['offsets'][ix] = [start - 1 , end - 1]
-                    elif fulltext[start -1 : end] == text:
-                        passage['offset'][ix] = [start -1, end]
-        for entity in entry['entities']:
-            for ix, offset_text in enumerate(zip(entity['offsets'], entity['text'])):
+                    if fulltext[start - 1 : end - 1] == text:
+                        passage["offsets"][ix] = [start - 1, end - 1]
+                    elif fulltext[start - 1 : end] == text:
+                        passage["offset"][ix] = [start - 1, end]
+        for entity in entry["entities"]:
+            for ix, offset_text in enumerate(zip(entity["offsets"], entity["text"])):
                 offset, text = offset_text
                 start, end = offset
                 if fulltext[start:end] != text:
-                    if fulltext[start - 1 : end-1] == text:
-                        entity['offsets'][ix] = [start - 1 , end - 1]
-                    elif fulltext[start -1 : end] == text:
-                        entity['offset'][ix] = [start -1, end]
+                    if fulltext[start - 1 : end - 1] == text:
+                        entity["offsets"][ix] = [start - 1, end - 1]
+                    elif fulltext[start - 1 : end] == text:
+                        entity["offset"][ix] = [start - 1, end]
 
-                start, end = entity['offsets'][ix]
+                start, end = entity["offsets"][ix]
                 if fulltext[start:end] != text:
                     print(len(text))
                     print(len(fulltext[start:end]))
     return entries
 
+
 class AIMedProteinsDataset(datasets.GeneratorBasedBuilder):
     """
     This dataset contains 225 annotated article titles/abstracts taken from PubMed.
     Each entry is annotated in XML format with tagged protein entities, and as such
-    the dataset is suitable for the task of Named Entity Recognition. 
+    the dataset is suitable for the task of Named Entity Recognition.
 
     The dataset was originally collated and analyzed in the following paper:
     Comparative experiments on learning information extractors for proteins and their interactions.
@@ -349,14 +348,14 @@ class AIMedProteinsDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         fpaths = glob(data_dir[0] + "/*/**")
         # Downloaded data contains a corrupted, duplicate file
-        fpaths = [x for x in fpaths if ('abstract' in x) and ("2-14~" not in x)]
+        fpaths = [x for x in fpaths if ("abstract" in x) and ("2-14~" not in x)]
         entries = [parse_article(fpath, 0, True) for fpath in fpaths]
         entries = fix_ids(entries)
-        entries = fix_entity_offsets(entries)
+        entries = fix_offsets(entries)
         for entry in entries:
-            if 'fulltext' in entry:
-                del entry['fulltext']
-    
+            if "fulltext" in entry:
+                del entry["fulltext"]
+
         if self.config.schema == "source":
             for key, example in enumerate(entries):
                 yield key, example
