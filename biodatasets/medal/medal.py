@@ -156,16 +156,16 @@ pre-training in the medical domain."""
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={"filepath": dl_dir["train"], "split": "train"},
             ),
-            # datasets.SplitGenerator(
-            #     name=datasets.Split.TEST,
-            #     # These kwargs will be passed to _generate_examples
-            #     gen_kwargs={"filepath": dl_dir["test"], "split": "test"},
-            # ),
-            # datasets.SplitGenerator(
-            #     name=datasets.Split.VALIDATION,
-            #     # These kwargs will be passed to _generate_examples
-            #     gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
-            # ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                # These kwargs will be passed to _generate_examples
+                gen_kwargs={"filepath": dl_dir["test"], "split": "test"},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                # These kwargs will be passed to _generate_examples
+                gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
+            ),
         ]
 
     def _generate_offsets(self, text, location):
