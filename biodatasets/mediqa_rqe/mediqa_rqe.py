@@ -21,10 +21,10 @@ from pathlib import Path
 from typing import Dict, Iterator, Tuple
 from xml.etree import ElementTree as ET
 
-import biomed_datasets.utils.parsing as parsing
-import biomed_datasets.utils.schemas as schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+import bigbio.utils.parsing as parsing
+import bigbio.utils.schemas as schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{MEDIQA2019,

@@ -26,10 +26,10 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-import biomed_datasets.utils.parsing as parse
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+import bigbio.utils.parsing as parse
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{ohta-etal-2012-open,

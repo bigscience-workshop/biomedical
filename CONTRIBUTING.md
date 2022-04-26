@@ -100,7 +100,7 @@ To start, copy [templates/template.py](templates/template.py) to your `biomedica
     cp templates/template.py biodatasets/<dataset_name>/<dataset_name>.py
 
 For the `_info_` function, you will need to define `features` for your
-`DatasetInfo` object. For the `bigbio` config, choose the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](biomed_datasets/utils/schemas/).
+`DatasetInfo` object. For the `bigbio` config, choose the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](bigbio/utils/schemas/).
 
 You will use this schema in the `_generate_examples` return value.
 
@@ -108,13 +108,13 @@ Populate the information in the dataset according to this schema; some fields ma
 
 To enable quality control, please add the following line in your file before the class definition:
 ```python
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils.constants import Tasks
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 ```
 
 If your dataset is in a standard format, please use a recommended parser if available:
 - BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
-- BRAT: Use [our custom brat parser](biomed_datasets/utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+- BRAT: Use [our custom brat parser](bigbio/utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
 
 If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
 

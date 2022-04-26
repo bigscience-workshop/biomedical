@@ -118,7 +118,7 @@ We understand that some biomedical datasets are not publicly available due to da
 
 If your dataset is in a standard format, please use a recommended parser if available:
 - BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
-- BRAT: Use [our custom brat parser](biomed_datasets/utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
+- BRAT: Use [our custom brat parser](bigbio/utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
 
 If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
 

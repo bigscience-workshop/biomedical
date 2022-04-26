@@ -69,9 +69,9 @@ from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "n2c2_2011"
 

@@ -19,10 +19,10 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
-from biomed_datasets.utils.parsing import parse_brat_file
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
+from bigbio.utils.parsing import parse_brat_file
 
 _CITATION = """\
 @InProceedings{Shardlow2018,

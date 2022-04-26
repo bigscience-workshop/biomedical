@@ -18,9 +18,9 @@ Parallel corpus of full-text articles in Portuguese, English and Spanish from Sc
 from typing import IO, Any, Generator, List, Optional, Tuple
 
 import datasets
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{soares2018large,

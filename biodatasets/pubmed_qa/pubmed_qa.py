@@ -23,10 +23,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
 
-import biomed_datasets.utils.parsing as parsing
-import biomed_datasets.utils.schemas as schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import BigBioValues, Tasks
+import bigbio.utils.parsing as parsing
+import bigbio.utils.schemas as schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import BigBioValues, Tasks
 
 _CITATION = """\
 @inproceedings{jin2019pubmedqa,

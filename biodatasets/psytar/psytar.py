@@ -49,9 +49,9 @@ from typing import Dict, List, Tuple
 import datasets
 import pandas as pd
 
-from biomed_datasets.utils import parsing, schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import parsing, schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @article{Zolnoori2019,

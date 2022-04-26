@@ -24,9 +24,9 @@ from typing import Dict, Iterator, List, Tuple
 import datasets
 from bioc import pubtator
 
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @article{Dogan2014NCBIDC,

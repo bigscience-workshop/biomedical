@@ -23,9 +23,9 @@ from pydoc import doc
 from typing import List, Tuple, Dict, Iterator
 
 import datasets
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 import itertools
 
 _CITATION = """\

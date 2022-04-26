@@ -26,9 +26,9 @@ import os
 from typing import List, Tuple, Dict
 
 import datasets
-from biomed_datasets.utils import schemas
-from biomed_datasets.utils.configs import BigBioConfig
-from biomed_datasets.utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 import xml.dom.minidom as xml
 
 _CITATION = """\
