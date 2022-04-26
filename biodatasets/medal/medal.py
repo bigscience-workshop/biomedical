@@ -156,16 +156,16 @@ pre-training in the medical domain."""
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={"filepath": dl_dir["train"], "split": "train"},
             ),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                # These kwargs will be passed to _generate_examples
-                gen_kwargs={"filepath": dl_dir["test"], "split": "test"},
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                # These kwargs will be passed to _generate_examples
-                gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
-            ),
+            # datasets.SplitGenerator(
+            #     name=datasets.Split.TEST,
+            #     # These kwargs will be passed to _generate_examples
+            #     gen_kwargs={"filepath": dl_dir["test"], "split": "test"},
+            # ),
+            # datasets.SplitGenerator(
+            #     name=datasets.Split.VALIDATION,
+            #     # These kwargs will be passed to _generate_examples
+            #     gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
+            # ),
         ]
 
     def _generate_offsets(self, text, location):
@@ -180,16 +180,17 @@ pre-training in the medical domain."""
 
         Returns
         -------
-        tuple (int, int)
-            offsets
+        dict 
+            "word": str,
+            "offsets": tuple (int, int)
         """
         words = text.split(" ")
         word = words[location]
         offset_start = sum(len(word) for word in words[0:location]) + location
         offset_end = offset_start + len(word)
 
-        # return offset_start
-        return (offset_start, offset_end)
+        # return word and offsets
+        return {"word":word, "offsets":(offset_start, offset_end)}
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
@@ -212,7 +213,7 @@ pre-training in the medical domain."""
             elif self.config.schema == "bigbio_kb":
                 uid = 0  # global unique id
                 for id_, row in enumerate(data.itertuples()):
-                    offsets = self._generate_offsets(row.TEXT, row.LOCATION)
+                    word_offsets = self._generate_offsets(row.TEXT, row.LOCATION)
                     example = {
                         "id": str(uid),
                         "document_id": row.ABSTRACT_ID,
@@ -232,14 +233,15 @@ pre-training in the medical domain."""
                             "offsets": [(0, len(row.TEXT))],
                         }
                     )
+
                     uid += 1
 
                     example["entities"].append(
                         {
                             "id": str(uid),
                             "type": "abbreviation",
-                            "text": [row.TEXT],
-                            "offsets": [offsets],
+                            "text": [word_offsets["word"]],
+                            "offsets": [word_offsets["offsets"]],
                             "normalized": [
                                 {
                                     "db_name": "medal",
