@@ -240,7 +240,3 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
         for key, example in self._read_example_from_file(filepath):
             example = self._parse_example_to_kb_schema(example)
             yield key, example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
