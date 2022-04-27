@@ -66,7 +66,7 @@ _URLS = {
     _DATASETNAME: "https://drive.google.com/uc?export=download&confirm=t&id=1a_95N5zQQoUCq8IBNVZgziHbeM-QxG2t",
 }
 
-_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.QUESTION_ANSWERING]
+_SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -81,13 +81,6 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="head_qa_source",
-            version=SOURCE_VERSION,
-            description="HeadQA both languages source schema",
-            schema="source",
-            subset_id="head_qa",
-        ),
-        BigBioConfig(
             name="head_qa_en_source",
             version=SOURCE_VERSION,
             description="HeadQA English source schema",
@@ -100,13 +93,6 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
             description="HeadQA Spanish source schema",
             schema="source",
             subset_id="head_qa_es",
-        ),
-        BigBioConfig(
-            name="head_qa_bigbio_t2t",
-            version=BIGBIO_VERSION,
-            description="HeadQA Translation BigBio schema",
-            schema="bigbio_t2t",
-            subset_id="head_qa",
         ),
         BigBioConfig(
             name="head_qa_en_bigbio_qa",
@@ -127,32 +113,7 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "head_qa_en_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-        if self.config.schema == "source" and self.config.subset_id == "head_qa":
-            features = datasets.Features(
-                {
-                    "name": datasets.Value("string"),
-                    "year": datasets.Value("string"),
-                    "category": datasets.Value("string"),
-                    "qid": datasets.Value("int32"),
-                    "qtext": {
-                        "en": datasets.Value("string"),
-                        "es": datasets.Value("string"),
-                    },
-                    "ra": datasets.Value("int32"),
-                    "image": datasets.Image(),
-                    "answers": [
-                        {
-                            "aid": datasets.Value("int32"),
-                            "atext": {
-                                "en": datasets.Value("string"),
-                                "es": datasets.Value("string"),
-                            },
-                        }
-                    ],
-                }
-            )
-        elif self.config.schema == "source" and self.config.subset_id in ["head_qa_en", "head_qa_es"]:
+        if self.config.schema == "source":
             features = datasets.Features(
                 {
                     "name": datasets.Value("string"),
@@ -170,8 +131,6 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
                     ],
                 }
             )
-        elif self.config.schema == "bigbio_t2t":
-            features = schemas.text2text_features
         elif self.config.schema == "bigbio_qa":
             features = schemas.qa_features
 
@@ -189,63 +148,43 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
+        if self.config.subset_id == "head_qa_en":
+            file_path = os.path.join("HEAD_EN", "train_HEAD_EN.json")
+        elif self.config.subset_id == "head_qa_es":
+            file_path = os.path.join("HEAD", "train_HEAD.json")
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "data_dir": data_dir,
-                    "en_path": os.path.join(data_dir, "HEAD_EN", "train_HEAD_EN.json"),
-                    "es_path": os.path.join(data_dir, "HEAD", "train_HEAD.json"),
+                    "file_path": os.path.join(data_dir, file_path),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "data_dir": data_dir,
-                    "en_path": os.path.join(data_dir, "HEAD_EN", "test_HEAD_EN.json"),
-                    "es_path": os.path.join(data_dir, "HEAD", "test_HEAD.json"),
+                    "file_path": os.path.join(data_dir, file_path),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
                     "data_dir": data_dir,
-                    "en_path": os.path.join(data_dir, "HEAD_EN", "dev_HEAD_EN.json"),
-                    "es_path": os.path.join(data_dir, "HEAD", "dev_HEAD.json"),
+                    "file_path": os.path.join(data_dir, file_path),
                 },
             ),
         ]
 
-    def _generate_examples(self, data_dir, en_path, es_path) -> Tuple[int, Dict]:
+    def _generate_examples(self, data_dir, file_path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        if self.config.schema == "source" and self.config.subset_id == "head_qa":
-            for key, example in self._merge_documents(
-                self._generate_source_documents(data_dir, en_path), self._generate_source_documents(data_dir, es_path)
-            ):
+        if self.config.schema == "source":
+            for key, example in self._generate_source_documents(data_dir, file_path):
                 yield key, example
-
-        elif self.config.schema == "source" and self.config.subset_id in ["head_qa_en", "head_qa_es"]:
-            if self.config.subset_id == "head_qa_en":
-                filepath = en_path
-            elif self.config.subset_id == "head_qa_es":
-                filepath = es_path
-            for key, example in self._generate_source_documents(data_dir, filepath):
-                yield key, example
-
-        elif self.config.schema == "bigbio_t2t":
-            for key, example in self._merge_documents(
-                self._generate_source_documents(data_dir, en_path), self._generate_source_documents(data_dir, es_path)
-            ):
-                for key_t2t, example_t2t in self._generate_source_to_t2t(example):
-                    yield key_t2t, example_t2t
-
         elif self.config.schema == "bigbio_qa":
-            if self.config.subset_id == "head_qa_en":
-                filepath = en_path
-            elif self.config.subset_id == "head_qa_es":
-                filepath = es_path
-            for key, example in self._generate_source_documents(data_dir, filepath):
+            for key, example in self._generate_source_documents(data_dir, file_path):
                 yield key, self._source_to_qa(example)
 
     def _generate_source_documents(self, data_dir, filepath):
@@ -280,70 +219,15 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
                     "answers": answers,
                 }
 
-    def _merge_documents(self, gen_en, gen_es):
-        for (doc_en_id, doc_en), (doc_es_id, doc_es) in zip(gen_en, gen_es):
-            assert doc_en_id == doc_es_id, "ohno"
-            self._assert_eq_doc(doc_en, doc_es)
-
-            doc_merge = doc_en.copy()
-            doc_merge["qtext"] = {"en": doc_en["qtext"], "es": doc_es["qtext"]}
-            answers = []
-            for answer_en, answer_es in zip(doc_en["answers"], doc_es["answers"]):
-                assert answer_en["aid"] == answer_es["aid"], "ohno"
-                answers.append(
-                    {
-                        "aid": answer_en["aid"],
-                        "atext": {
-                            "en": answer_en["atext"],
-                            "es": answer_es["atext"],
-                        },
-                    }
-                )
-            doc_merge["answers"] = answers
-            yield doc_en_id, doc_merge
-
-    def _assert_eq_doc(self, doc1, doc2):
-        doc1 = doc1.copy()
-        doc2 = doc2.copy()
-        doc1.pop("qtext")
-        doc1.pop("answers")
-        doc2.pop("qtext")
-        doc2.pop("answers")
-        assert doc1 == doc2, f"ohno {doc1} {doc2}"
-
     def _source_to_qa(self, example):
         example_ = {}
         example_["id"] = example["name"] + "_qid_" + str(example["qid"])
         example_["question_id"] = example["qid"]
         example_["document_id"] = ""
         example_["question"] = example["qtext"]
-        example_["type"] = example["category"]
+        example_["type"] = "multiple_choice"
         example_["choices"] = [answer["atext"] for answer in example["answers"]]
         example_["context"] = ""
         example_["answer"] = [next(filter(lambda answer: answer["aid"] == example["ra"], example["answers"]))["atext"]]
 
         return example_
-
-    def _generate_source_to_t2t(self, example):
-        id = example["name"] + "_qid_" + str(example["qid"])
-        example_ = {
-            "id": id,
-            "document_id": "",
-            "text_1": example["qtext"]["en"],
-            "text_2": example["qtext"]["es"],
-            "text_1_name": "en",
-            "text_2_name": "es",
-        }
-        yield id, example_
-
-        for answer in example["answers"]:
-            id = example["name"] + "_qid_" + str(example["qid"]) + "_aid_" + str(answer["aid"])
-            example_ = {
-                "id": id,
-                "document_id": "",
-                "text_1": answer["atext"]["en"],
-                "text_2": answer["atext"]["es"],
-                "text_1_name": "en",
-                "text_2_name": "es",
-            }
-            yield id, example_
