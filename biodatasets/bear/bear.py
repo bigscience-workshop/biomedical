@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 import datasets
+import jsonlines
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -140,10 +140,8 @@ class BearDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         uid = 0
         input_file = filepath
-        with open(input_file, "r") as file:
-            for line in file:
-                document: Dict = json.loads(line)
-
+        with jsonlines.open(input_file, "r") as file:
+            for document in file:
                 document_id: str = document.pop("doc_id")
                 document_text: str = document.pop("doc_text")
                 entities: Dict[str, Dict[str, Union[str, int]]] = document.pop("entities", {})
@@ -205,8 +203,6 @@ class BearDataset(datasets.GeneratorBasedBuilder):
         # Capture Relations
         _relations = []
         for id, relation_values in enumerate(relations):
-            if not relation_values:
-                continue
             end_entity = relation_values.pop("end_entity")
             rel_tag = relation_values.pop("rel_tag")
             start_entity = relation_values.pop("start_entity")
@@ -267,8 +263,6 @@ class BearDataset(datasets.GeneratorBasedBuilder):
         # Capture Relations
         _relations = []
         for id, relation_values in enumerate(relations):
-            if not relation_values:
-                continue
             end_entity = relation_values.pop("end_entity")
             rel_tag = relation_values.pop("rel_tag")
             start_entity = relation_values.pop("start_entity")
