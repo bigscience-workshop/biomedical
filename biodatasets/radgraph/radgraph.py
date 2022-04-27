@@ -115,6 +115,7 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "radgraph_source"
 
     def _info(self) -> datasets.DatasetInfo:
+        
         if self.config.schema == "source":
             features = datasets.Features( 
                 {
@@ -127,19 +128,20 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
                             "label": datasets.Value("string"),
                             "start_ix": datasets.Value("int32"),
                             "end_ix": datasets.Value("int32"),
+                            "labeler": datasets.Value("string"),
                             "relations": [ 
                                 {
+                                    "relation_id": datasets.Value("string"),
                                     "type": datasets.Value("string"), # e.g. "modify"
                                     "arg": datasets.Value("string") # e.g. "7"
-                                }
-                            ]
+                                },
+                            ],
                         },
                     ],
                     "data_source": datasets.Value("string"),
-                    "data_split": datasets.Value("string"),
+                    "data_split": datasets.Value("string")
                 }
             )
-
         # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
 
         # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
@@ -157,7 +159,7 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
             license=_LICENSE,
             citation=_CITATION,
         )
-
+        
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
@@ -194,65 +196,141 @@ class RadgraphDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _get_radgraph_entity(self, entity_id, entity_data, labeler):
+        """Build radgraph entity from source entity JSON.
+        
+        Parameters
+        ----------
+        entity_id : string
+            entity identifier from source data
+        entity_data: dict
+            entity record consisting of entity tokens, label, start index and end index
+        labeler: string
+            labeler identifier from source data
+        
+        Returns
+        -------
+        dict
+            entity information
+        """
+        return {
+                "labeler" : labeler,
+                "entity_id": entity_id,
+                "tokens": entity_data["tokens"],
+                "label": entity_data["label"],
+                "start_ix": entity_data["start_ix"],
+                "end_ix": entity_data["end_ix"] 
+                }
+
+    def _get_radgraph_relations(self, relations_data, uid):
+        """Build entity relations from source entity relations JSON.
+
+        Parameters
+        ----------
+        relations_data: list
+            list of relation records where each record is also a list, where the first element is the relation type, and the second element is the entity ID it refers to
+        uid: int
+            unique identifier
+        
+        Returns
+        -------
+        int
+            unique identifier
+        dict
+            relations information
+        """
+        relations = []
+        for relation_list in relations_data:
+            relation = {
+                "relation_id": str(uid),
+                "type": relation_list[0],
+                "arg": relation_list[1]
+            }
+            relations.append(relation)
+            uid +=1
+        return(uid, relations)
+
+    def _parse_train_dev_data(self, data, chart_id, uid):
+        """Parse train or dev JSON, return example"""
+        example = {}
+        entities = []
+        chart_data = data[chart_id]
+        example = { 
+                "report_id": chart_id,
+                "text" : chart_data["text"],
+                "data_source" : chart_data["data_source"],
+                "data_split": chart_data["data_split"]
+        }
+        for entity_id in chart_data["entities"]:
+            entity_data = chart_data["entities"][entity_id]
+            entity = self._get_radgraph_entity(entity_id, entity_data, "")
+            uid, relations = self._get_radgraph_relations(entity_data["relations"], uid)
+            
+            entity["relations"] = relations
+            entities.append(entity)
+
+        example["entities"] = entities
+
+        return(uid, example)
+
+    def _parse_test_data(self, data, chart_id, uid):
+        """Parse test JSON, return example"""
+        example = {}
+        entities = []
+        chart_data = data[chart_id]
+        
+        example = { 
+                "report_id": chart_id,
+                "text" : chart_data["text"],
+                "data_source" : chart_data["data_source"],
+                "data_split": chart_data["data_split"],
+        }
+
+        for entity_id in chart_data["labeler_1"]["entities"]:
+            entity_data = chart_data["labeler_1"]["entities"][entity_id]
+            entity = self._get_radgraph_entity(entity_id, entity_data, "labeler_1")
+            uid, relations = self._get_radgraph_relations(entity_data["relations"], uid)
+
+            entity["relations"] = relations
+            entities.append(entity)
+
+        for entity_id in chart_data["labeler_2"]["entities"]:
+            entity_data = chart_data["labeler_2"]["entities"][entity_id]
+
+            entity = self._get_radgraph_entity(entity_id, entity_data, "labeler_2")
+            uid, relations = self._get_radgraph_relations(entity_data["relations"], uid)
+            
+            entity["relations"] = relations
+            entities.append(entity)
+
+        example["entities"] = entities
+
+        return(uid, example)
+
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
     # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
-
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
-
-        '''
-        "report_id": {
-                        "text": datasets.Value("string"),
-                        "entities": {
-                            "entity_id": {
-                                "tokens": datasets.Value("string"),
-                                "label": datasets.Value("string"),
-                                "start_ix": datasets.Value("int32"),
-                                "end_ix": datasets.Value("int32"),
-                                "relations": [[datasets.Value("string")]]
-                            },
-                        },
-                        "data_source": datasets.Value("string"),
-                        "data_split": datasets.Value("string"),
-                    }
-        '''
-
+        
         if self.config.schema == "source":
             with open(filepath) as json_file:
                 data = json.load(json_file)
                 uid = 0
-                for chart_id in data:
-                    print(chart_id)
-                    example = {}
-                    chart_data = data[chart_id]
-                    example = { 
-                            "report_id": chart_id,
-                            "text" : chart_data["text"],
-                            "entities" : [{"entity_id":"", "tokens": "", "label": "", "start_ix": 3, "end_ix":2, "relations":[["apple"]]}],
-                            #"entities" : chart_data["entities"],
-                            "data_source" : chart_data["data_source"],
-                            "data_split": chart_data["data_split"]
-                    }
-                    yield uid, example
-                    uid +=1
+                if "train" in filepath or "dev" in filepath:   
+                    for chart_id in data:
+                        uid, example = self._parse_train_dev_data(data, chart_id, uid)
+                        yield uid, example
+                        uid +=1
+                elif "test" in filepath:
+                    
+                    for chart_id in data:
+                        uid, example = self._parse_test_data(data, chart_id, uid)
+                        yield uid, example
+                        uid +=1
 
         # elif self.config.schema == "bigbio_kb":
         #     # TODO: yield (key, example) tuples in the bigbio schema
         #     for key, example in thing:
         #         yield key, example
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-#if __name__ == "__main__":
-#    datasets.load_dataset(__file__)
