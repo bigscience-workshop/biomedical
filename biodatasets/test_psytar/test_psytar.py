@@ -40,8 +40,6 @@ This dataset can be used for:
 
 In the source schema, systematic annotation with UMLS and SNOMED-CT concepts are provided.
 """
-from functools import partial
-from dataclasses import asdict
 
 import re
 from pathlib import Path
@@ -51,7 +49,7 @@ import datasets
 import pandas as pd
 
 from bigbio.utils import parsing, schemas
-from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.configs import BigBioConfig, default_BigBioConfig
 from bigbio.utils.constants import Tasks
 
 _CITATION = """\
@@ -137,11 +135,16 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "psytar_source"
-    for config in BUILDER_CONFIGS:
-        if config.name == DEFAULT_CONFIG_NAME:
-            kwargs = asdict(config)
+    BUILDER_CONFIG_CLASS = default_BigBioConfig(
+        DEFAULT_CONFIG_NAME, BUILDER_CONFIGS
+        )
 
-    BUILDER_CONFIG_CLASS = partial(BigBioConfig, **kwargs)
+    # This works
+    #for config in BUILDER_CONFIGS:
+    #    if config.name == DEFAULT_CONFIG_NAME:
+    #        kwargs = asdict(config)
+
+    #BUILDER_CONFIG_CLASS = partial(BigBioConfig, **kwargs)
 
     # This also works
     #BUILDER_CONFIG_CLASS = partial(BigBioConfig, name=DEFAULT_CONFIG_NAME, schema="source")
