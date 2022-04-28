@@ -3,28 +3,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import glob
+import importlib
 import datasets
 from datasets import load_dataset
-
-# data = load_dataset("biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
-# import os
-
-st.title('BigBIO datasets')
-
-# Add a selectbox to the sidebar:
-
-st.sidebar.header('Dataset Name')
-
-file_paths = glob.glob('./biodatasets/*')
-
-files = [i.split('/')[2] for i in file_paths]
-
-dataset_name = st.sidebar.selectbox(
-    'Name of dataset',
-    tuple(files)
-)
-
-schema_select = st.sidebar.selectbox("Schema", ("Source Schema", "BigBio Schema"))
 
 
 # This code snippet is from the datasets viewer to display the details in a clean way.
@@ -42,17 +23,42 @@ def render_features(features):
     return features
 
 
+
+def task_subtypes():
+    files = glob.glob("./biodatasets/*")
+    task_dataset = {}
+    for i in files:
+        dataset_name = i.split('/')[-1]
+        try:
+            module = importlib.import_module(f'biodatasets.{dataset_name}.{dataset_name}')
+            task_dataset[dataset_name] = module._SUPPORTED_TASKS
+        except ModuleNotFoundError:
+            continue
+
+    all_tasks = []
+    for k,v in task_dataset.items():
+        all_tasks.append(v)
+    all_tasks = sum(all_tasks, [])
+    all_tasks = set(all_tasks)
+
+    from collections import defaultdict
+    result_dict = defaultdict(list)
+    for key, value in task_dataset.items():
+        for task_subset in task_dataset[key]:
+            if task_subset in all_tasks:
+                result_dict[task_subset].append(key)
+    return result_dict
+
+    
+
+
+
 def load_ds(dataset_name):
     path = f"biodatasets/{dataset_name}/{dataset_name}.py"
-    module_path = datasets.load.prepare_module(path, dataset=True)
-    builder_cls = datasets.load.import_main_class(module_path[0], dataset=True)
-    # st.write(builder_cls.BUILDER_CONFIGS[0].name, builder_cls.BUILDER_CONFIGS[1].name)
-    
-    # st.write(builder_cls.B
+    module = datasets.load.dataset_module_factory(path)
+    builder_cls = datasets.load.import_main_class(module.module_path)
     st.write("Source Version: ", builder_cls.SOURCE_VERSION)
-    # st.write("Homepage", builder_cls.HOMEPAGE)
     st.write("BigBio Version: ", builder_cls.BIGBIO_VERSION)
-    # st.write("Supported Tasks", builder_cls.SUPPORTED_TASKS)
     if schema_select=="Source Schema":
         st.write("Source Schema: ", builder_cls.BUILDER_CONFIGS[0].schema)
         st.write("Source Subset ID: ", builder_cls.BUILDER_CONFIGS[0].subset_id)
@@ -85,5 +91,23 @@ def load_ds(dataset_name):
         st.write("Loading some sample data")
         st.write(big_bio_data[val][0:10])
 
+
+
+results_dict = task_subtypes()
+options = st.sidebar.selectbox(
+     'Select Dataset By Task Type',
+     results_dict.keys())
+
+
+st.title('BigBIO datasets')
+
+st.sidebar.header('Dataset Name')
+
+dataset_name = st.sidebar.selectbox(
+    'Name of dataset',
+    tuple(results_dict[options])
+)
+
+schema_select = st.sidebar.selectbox("Schema", ("Source Schema", "BigBio Schema"))
 
 data = load_ds(dataset_name)
