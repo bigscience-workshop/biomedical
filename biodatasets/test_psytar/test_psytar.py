@@ -41,8 +41,9 @@ This dataset can be used for:
 In the source schema, systematic annotation with UMLS and SNOMED-CT concepts are provided.
 """
 from functools import partial
+from dataclasses import asdict
+
 import re
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -136,7 +137,14 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "psytar_source"
-    BUILDER_CONFIG_CLASS = partial(BigBioConfig, name=DEFAULT_CONFIG_NAME, schema="source")
+    for config in BUILDER_CONFIGS:
+        if config.name == DEFAULT_CONFIG_NAME:
+            kwargs = asdict(config)
+
+    BUILDER_CONFIG_CLASS = partial(BigBioConfig, **kwargs)
+
+    # This also works
+    #BUILDER_CONFIG_CLASS = partial(BigBioConfig, name=DEFAULT_CONFIG_NAME, schema="source")
 
     _ENTITY_TYPES = {
         "ADR",  # Adverse Drug Reaction
