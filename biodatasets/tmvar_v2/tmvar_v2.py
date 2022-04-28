@@ -18,14 +18,17 @@
 This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds. It can be used for NER tasks
 """
 
+
+from distutils.command.config import config
+from multiprocessing.sharedctypes import Value
 import os
 from pydoc import doc
 from typing import List, Tuple, Dict, Iterator
 
 import datasets
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 import itertools
 
 _CITATION = """\
@@ -43,7 +46,7 @@ publisher={Oxford University Press}
 
 _DATASETNAME = "tmvar_v2"
 
-_DESCRIPTION = """This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them.
+_DESCRIPTION = """This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
 It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"

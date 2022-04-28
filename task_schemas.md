@@ -25,7 +25,7 @@ We have defined a set of lightwieght, task-specific schema to help simplify prog
 
 ## Knowledge Base
 
-[Schema Template](bigbio/utils/schemas/kb.py)
+[Schema Template](utils/schemas/kb.py)
 
 This is a simple container format with minimal nesting that supports a range of common knowledge base construction / information extraction tasks.
 
@@ -158,7 +158,7 @@ Passages capture document structure, such as the title and abstact sections of a
 ```
 
 ## Question Answering
-- [Schema Template](bigbio/utils/schemas/qa.py)
+- [Schema Template](utils/schemas/qa.py)
 - Examples: [BioASQ Task B](examples/bioasq_task_b.py)
 
 ```
@@ -176,7 +176,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Textual Entailment
 
-- [Schema Template](bigbio/utils/schemas/entailment.py)
+- [Schema Template](utils/schemas/entailment.py)
 - Examples: [SciTail](examples/scitail.py)
 
 ```
@@ -191,7 +191,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Text Pairs
 
-- [Schema Template](bigbio/utils/schemas/pairs.py)
+- [Schema Template](utils/schemas/pairs.py)
 - Examples: [MQP](examples/mqp.py)
 
 ```
@@ -207,7 +207,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 ## Text to Text
 
-- [Schema Template](bigbio/utils/schemas/text_to_text.py)
+- [Schema Template](utils/schemas/text_to_text.py)
 - Examples: [ParaMed](examples/paramed.py)
 
 ```
@@ -223,7 +223,7 @@ Passages capture document structure, such as the title and abstact sections of a
 
 
 ## Text
-- [Schema Template](bigbio/utils/schemas/text.py)
+- [Schema Template](utils/schemas/text.py)
 
 ```
 {

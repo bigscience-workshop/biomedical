@@ -20,10 +20,10 @@ import bioc
 from bioc import biocxml
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
-from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
+from utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _CITATION = """\
 @Article{islamaj2021nlm,

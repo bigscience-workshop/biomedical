@@ -18,10 +18,10 @@ from typing import List
 
 import datasets
 
-from bigbio.utils import schemas
+from utils import schemas
 
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 import json
 

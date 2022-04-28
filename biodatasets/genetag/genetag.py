@@ -27,9 +27,9 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @article{Tanabe2005,

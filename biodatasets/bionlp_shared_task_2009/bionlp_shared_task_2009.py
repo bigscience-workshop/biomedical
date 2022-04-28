@@ -19,10 +19,10 @@ from typing import List
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
-from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
+from utils import schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
+from utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
 _CITATION = """\
 @inproceedings{kim-etal-2009-overview,

@@ -18,9 +18,9 @@ import json
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.constants import Tasks
-from bigbio.utils.configs import BigBioConfig
+from utils import schemas
+from utils.constants import Tasks
+from utils.configs import BigBioConfig
 
 _CITATION = """\
 @article{welbl-etal-2018-constructing,

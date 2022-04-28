@@ -21,16 +21,16 @@ from pathlib import Path
 from typing import Dict, Iterator, Tuple
 from xml.etree import ElementTree as ET
 
-import bigbio.utils.parsing as parsing
-import bigbio.utils.schemas as schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+import utils.parsing as parsing
+import utils.schemas as schemas
+from utils.configs import BigBioConfig
+from utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{MEDIQA2019,
   author    = {Asma {Ben Abacha} and Chaitanya Shivade and Dina Demner{-}Fushman},
-  title     = {Overview of the MEDIQA 2019 Shared Task on Textual Inference, Question Entailment and Question Answering},
-  booktitle = {ACL-BioNLP 2019},
+  title     = {Overview of the MEDIQA 2019 Shared Task on Textual Inference, Question Entailment and Question Answering}, 
+  booktitle = {ACL-BioNLP 2019},  
   year      = {2019}
 }
 """
@@ -38,8 +38,8 @@ _CITATION = """\
 _DATASETNAME = "mediqa_rqe"
 
 _DESCRIPTION = """\
-The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).
-Mailing List: https://groups.google.com/forum/#!forum/bionlp-mediqa
+The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).  
+Mailing List: https://groups.google.com/forum/#!forum/bionlp-mediqa 
 
 The objective of the RQE task is to identify entailment between two questions in the context of QA. We use the following definition of question entailment: “a question A entails a question B if every answer to B is also a complete or partial answer to A” [1]
     [1] A. Ben Abacha & D. Demner-Fushman. “Recognizing Question Entailment for Medical Question Answering”. AMIA 2016.
@@ -79,13 +79,13 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
             subset_id="mediqa_rqe_bigbio_te",
         )
     ]
-
+    
     DEFAULT_CONFIG_NAME = "mediqa_rqe_source"
 
     def _info(self):
         if self.config.schema == "source":
             features = datasets.Features(
-                {
+                {                    
                     "pid": datasets.Value("string"),
                     "value": datasets.Value("string"),
                     "chq": datasets.Value("string"),
@@ -125,7 +125,7 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
                     "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml"
                 }
             )
-        ]
+        ]            
 
     def _generate_examples(self, filepath: Path) -> Iterator[Tuple[str, Dict]]:
         dom = ET.parse(filepath).getroot()
@@ -134,9 +134,9 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
             value = row.attrib['value']
             chq = row.find('chq').text
             faq = row.find('faq').text
-
+            
             if self.config.schema == "source":
-                yield pid, {
+                yield pid, {                    
                     "pid": pid,
                     "value": value,
                     "chq": chq,
@@ -149,3 +149,4 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
                     "hypothesis": faq,
                     "label": value,
                 }
+
