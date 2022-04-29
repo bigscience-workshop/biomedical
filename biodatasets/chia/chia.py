@@ -22,10 +22,10 @@ from typing import Dict, Iterator, List, Tuple
 
 import datasets
 
-import utils.parsing as parsing
-import utils.schemas as schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+import bigbio.utils.parsing as parsing
+import bigbio.utils.schemas as schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @article{kury2020chia,

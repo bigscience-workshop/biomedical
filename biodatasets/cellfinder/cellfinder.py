@@ -25,10 +25,10 @@ from typing import Dict, Iterator, Tuple
 
 import datasets
 
-import utils.parsing as parsing
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+import bigbio.utils.parsing as parsing
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{neves2012annotating,
