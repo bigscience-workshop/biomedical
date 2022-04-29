@@ -20,9 +20,9 @@ from typing import Dict, List, Tuple
 import datasets
 import jsonlines
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{cattan2021scico,
@@ -167,7 +167,7 @@ class ScicoDataset(datasets.GeneratorBasedBuilder):
         sub_list_length = len(sub_list)
         possible_start_indices = [i for i, token in enumerate(super_list) if token == sub_list[0]]
         for index in possible_start_indices:
-            if super_list[index:(index + sub_list_length)] == sub_list:
+            if super_list[index: (index + sub_list_length)] == sub_list:
                 return index
 
     def _to_bigbio_example(self, sample: Dict) -> Dict:
@@ -214,7 +214,7 @@ class ScicoDataset(datasets.GeneratorBasedBuilder):
 
             entity_id = f"{id}_doc_{mention_doc_id}_entity_{i}"
             cluster_id = f"{id}_cluster_{cluster_id}"
-            entity_text = " ".join(flatten_tokens[start:(end + 1)])
+            entity_text = " ".join(flatten_tokens[start: (end + 1)])
             entity_offset_start = len(" ".join(flatten_tokens[0:start]))
             if entity_offset_start > 0:
                 entity_offset_start += 1
