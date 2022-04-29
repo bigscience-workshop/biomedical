@@ -19,9 +19,9 @@ from typing import Any, Dict, List, Union
 
 import datasets
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 logger = datasets.utils.logging.get_logger(__name__)
 
