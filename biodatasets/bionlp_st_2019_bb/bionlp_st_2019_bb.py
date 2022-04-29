@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import datasets
 
@@ -53,7 +53,6 @@ _CITATION = """\
     corpus characteristics, and the challenge organization. We also provide an
     analysis of the results obtained by participants, and inspect the evolution
     of the results since the last edition in 2016.",
-    
 }
 """
 
@@ -170,7 +169,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="bionlp_st_2019_bb",
         ),
-        #todo bigbio-kb
+        # todo bigbio-kb
         BigBioConfig(
             name="bionlp_st_2019_bb_bigbio_kb",
             version=BIGBIO_VERSION,
@@ -182,10 +181,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2019_bb_kb+ner_source"
 
-    _ENTITY_TYPES = {'Habitat',
-                     'Microorganism',
-                     'Phenotype',
-                     'Geographical'}
+    _ENTITY_TYPES = {"Habitat", "Microorganism", "Phenotype", "Geographical"}
 
     def _info(self):
         """
@@ -271,7 +267,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
-        version = self.config.name.split('_')[-2]
+        version = self.config.name.split("_")[-2]
         my_urls = _URLs[self.config.schema][version]
         data_files = {
             "train": Path(dl_manager.download_and_extract(my_urls["train"])) / f"BioNLP-OST-2019_BB-{version}_train",
@@ -311,8 +307,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
 
-    def parse_brat_file(self, txt_file: Path, annotation_file_suffixes: List[str] = None,
-                        parse_notes: bool = False) -> Dict:
+    def parse_brat_file(
+        self, txt_file: Path, annotation_file_suffixes: List[str] = None, parse_notes: bool = False
+    ) -> Dict:
         """
         Parse a brat file into the schema defined below.
         `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
@@ -408,7 +405,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
         example = {}
         example["document_id"] = txt_file.with_suffix("").name
-        with txt_file.open(encoding='utf-8') as f:
+        with txt_file.open(encoding="utf-8") as f:
             example["text"] = f.read()
 
         # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
@@ -417,15 +414,13 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             annotation_file_suffixes = [".a1", ".a2", ".ann"]
 
         if len(annotation_file_suffixes) == 0:
-            raise AssertionError(
-                "At least one suffix for the to-be-read annotation files should be given!"
-            )
+            raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
 
         ann_lines = []
         for suffix in annotation_file_suffixes:
             annotation_file = txt_file.with_suffix(suffix)
             if annotation_file.exists():
-                with annotation_file.open(encoding='utf-8') as f:
+                with annotation_file.open(encoding="utf-8") as f:
                     ann_lines.extend(f.readlines())
 
         example["text_bound_annotations"] = []
@@ -448,7 +443,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                 fields = line.split("\t")
                 ann["id"] = fields[0]
                 ann["type"] = fields[1].split()[0]
-                if ann["type"] in ['Title', 'Paragraph']:
+                if ann["type"] in ["Title", "Paragraph"]:
                     break
                 ann["offsets"] = []
                 span_str = parsing.remove_prefix(fields[1], (ann["type"] + " "))
@@ -463,7 +458,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                     i = 0
                     for start, end in ann["offsets"]:
                         chunk_len = end - start
-                        ann["text"].append(text[i:chunk_len + i])
+                        ann["text"].append(text[i: chunk_len + i])
                         i += chunk_len
                         while i < len(text) and text[i] == " ":
                             i += 1
@@ -546,9 +541,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
                 info = fields[1].split()
 
-                ann["ref_id"] = info[1].split(':')[-1]
+                ann["ref_id"] = info[1].split(":")[-1]
                 ann["resource_name"] = info[0]
-                ann["cuid"] = ''.join(info[2].split(":")[1:])
+                ann["cuid"] = "".join(info[2].split(":")[1:])
                 example["normalizations"].append(ann)
 
             elif parse_notes and line.startswith("#"):
