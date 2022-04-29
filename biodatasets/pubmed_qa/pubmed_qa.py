@@ -23,10 +23,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
 
-import utils.parsing as parsing
-import utils.schemas as schemas
-from utils.configs import BigBioConfig
-from utils.constants import BigBioValues, Tasks
+import bigbio.utils.parsing as parsing
+import bigbio.utils.schemas as schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import BigBioValues, Tasks
 
 _CITATION = """\
 @inproceedings{jin2019pubmedqa,
@@ -42,16 +42,16 @@ _DATASETNAME = "pubmed_qa"
 
 _DESCRIPTION = """\
 PubMedQA is a novel biomedical question answering (QA) dataset collected from PubMed abstracts.
-The task of PubMedQA is to answer research biomedical questions with yes/no/maybe using the corresponding abstracts. 
-PubMedQA has 1k expert-annotated (PQA-L), 61.2k unlabeled (PQA-U) and 211.3k artificially generated QA instances (PQA-A). 
+The task of PubMedQA is to answer research biomedical questions with yes/no/maybe using the corresponding abstracts.
+PubMedQA has 1k expert-annotated (PQA-L), 61.2k unlabeled (PQA-U) and 211.3k artificially generated QA instances (PQA-A).
 
 Each PubMedQA instance is composed of:
-  (1) a question which is either an existing research article title or derived from one, 
-  (2) a context which is the corresponding PubMed abstract without its conclusion, 
+  (1) a question which is either an existing research article title or derived from one,
+  (2) a context which is the corresponding PubMed abstract without its conclusion,
   (3) a long answer, which is the conclusion of the abstract and, presumably, answers the research question, and
   (4) a yes/no/maybe answer which summarizes the conclusion.
 
-PubMedQA is the first QA dataset where reasoning over biomedical research texts, 
+PubMedQA is the first QA dataset where reasoning over biomedical research texts,
 especially their quantitative contents, is required to answer the questions.
 
 PubMedQA datasets comprise of 3 different subsets:
@@ -118,7 +118,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             subset_id="pubmed_qa_unlabeled"
         ),
     ] + [
-        # PQA-L Source Schema        
+        # PQA-L Source Schema
         BigBioConfig(
             name=f"pubmed_qa_labeled_fold{i}_source",
             version=datasets.Version(_SOURCE_VERSION),
@@ -194,7 +194,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                         "filepath": data_dir / "pqal_test_set.json"
                     }
                 )
-            ]            
+            ]
         elif self.config.subset_id == 'pubmed_qa_artificial':
             return [
                 datasets.SplitGenerator(
@@ -209,7 +209,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                         "filepath": data_dir / "pqaa_dev_set.json"
                     }
                 )
-            ]            
+            ]
         else: # if self.config.subset_id == 'pubmed_qa_unlabeled'
             return [
                 datasets.SplitGenerator(
@@ -233,7 +233,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     row["YEAR"] = None
                     row["reasoning_required_pred"] = None
                     row["reasoning_free_pred"] = None
-                    
+
                 yield id, row
         elif self.config.schema == "bigbio_qa":
             for id, row in data.items():
@@ -251,6 +251,6 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "choices": [],
                     "context": ' '.join(row['CONTEXTS']),
                     "answer": answers,
-                }         
-                
+                }
+
                 yield id, qa_row
