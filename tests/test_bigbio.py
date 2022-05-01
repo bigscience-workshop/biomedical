@@ -233,7 +233,13 @@ class TestDataLoader(unittest.TestCase):
         Tests each example in a split has a unique ID.
         """
         logger.info("Checking global ID uniqueness")
-        for split in dataset_bigbio.values():
+        for split_name, split in dataset_bigbio.items():
+
+            # skip entire split
+            if split_name in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping unique ID check on {split_name}")
+                continue  
+
             ids_seen = set()
             for example in split:
                 self._assert_ids_globally_unique(example, ids_seen=ids_seen)
@@ -277,9 +283,16 @@ class TestDataLoader(unittest.TestCase):
         """
         logger.info("Checking if referenced IDs are properly mapped")
         for split in dataset_bigbio.values():
+
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping referenced ids on {split}")
+                continue  
+
             for example in split:
                 referenced_ids = set()
                 existing_ids = set()
+
 
                 referenced_ids.update(self._get_referenced_ids(example))
                 existing_ids.update(self._get_existing_referable_ids(example))
@@ -310,6 +323,11 @@ class TestDataLoader(unittest.TestCase):
         """  # noqa
         logger.info("KB ONLY: Checking passage offsets")
         for split in dataset_bigbio:
+
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping passage offsets on {split}")
+                continue  
 
             if "passages" in dataset_bigbio[split].features:
 
@@ -413,6 +431,11 @@ class TestDataLoader(unittest.TestCase):
 
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping entities offsets on {split}")
+                continue  
+
             if "entities" in dataset_bigbio[split].features:
 
                 for example in dataset_bigbio[split]:
@@ -449,6 +472,11 @@ class TestDataLoader(unittest.TestCase):
 
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping events offsets on {split}")
+                continue  
+
             if "events" in dataset_bigbio[split].features:
 
                 for example in dataset_bigbio[split]:
@@ -483,6 +511,11 @@ class TestDataLoader(unittest.TestCase):
         logger.info("KB ONLY: Checking coref offsets")
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping coref ids on {split}")
+                continue  
+
             if "coreferences" in dataset_bigbio[split].features:
 
                 for example in dataset_bigbio[split]:
@@ -503,23 +536,41 @@ class TestDataLoader(unittest.TestCase):
         logger.info("QA ONLY: Checking multiple choice")
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping multiple-choice on {split}")
+                continue  
+
             for example in dataset_bigbio[split]:
 
-                if len(example["choices"]) > 0:
-                    # can change "==" to "in" if we include ranking later
-                    assert (
-                        example["type"] == "multiple_choice"
-                    ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
+                if ("choices" in self.BYPASS_KEYS) or ( (split, "choices") in self.BYPASS_SPLIT_KEY_PAIRS):
 
-                if example["type"] == "multiple_choice":
-                    assert (
-                        len(example["choices"]) > 0
-                    ), f"type is 'multiple_choice' but no values in 'choices' {example}"
+                    logger.warning("Skipping multiple choice for key=choices, split='{split}'")
+                    continue
+                else:
 
-                    for answer in example["answer"]:
+                    if len(example["choices"]) > 0:
+                        # can change "==" to "in" if we include ranking later
                         assert (
-                            answer in example["choices"]
-                        ), f"answer is not present in 'choices' {example}"
+                            example["type"] == "multiple_choice"
+                        ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
+
+                    if example["type"] == "multiple_choice":
+                        assert (
+                            len(example["choices"]) > 0
+                        ), f"type is 'multiple_choice' but no values in 'choices' {example}"
+
+
+                        if ("answer" in self.BYPASS_KEYS) or ( (split, "answer") in self.BYPASS_SPLIT_KEY_PAIRS):
+
+                            logger.warning("Skipping multiple choice for key=answer, split='{split}'")
+                            continue
+                            
+                        else:
+                            for answer in example["answer"]:
+                                assert (
+                                    answer in example["choices"]
+                                ), f"answer is not present in 'choices' {example}"
 
 
     def test_entities_multilabel_db_id(self, dataset_bigbio: DatasetDict):
@@ -534,11 +585,24 @@ class TestDataLoader(unittest.TestCase):
         # one warning is enough to prompt a cleaning pass
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping entities multilabel db on {split}")
+                continue
+
+
             if warning_raised:
                 break
 
             if "entities" not in dataset_bigbio[split].features:
+                continue
 
+            if "entities" in self.BYPASS_KEYS:
+                logger.warning(f"Skipping multilabel type for key = entities")
+                continue
+
+            if (split, "entities") in self.BYPASS_SPLIT_KEY_PAIRS:
+                logger.warning(f"Skipping multilabel type for key=entities, split='{split}'")
                 continue
 
             for example in dataset_bigbio[split]:
@@ -551,17 +615,14 @@ class TestDataLoader(unittest.TestCase):
                 for entity in example["entities"]:
 
                     if warning_raised:
-
                         break
 
                     normalized = entity.get("normalized", [])
-
                     entity_id = entity["id"]
 
                     for norm in normalized:
 
                         db_id = norm["db_id"]
-
                         match = re.search(_CONNECTORS, db_id)
 
                         if match is not None:
@@ -590,7 +651,20 @@ class TestDataLoader(unittest.TestCase):
 
         for split in dataset_bigbio:
 
+            # skip entire split
+            if split in self.BYPASS_SPLITS:
+                logger.info(f"\tSkipping multilabel type on {split}")
+                continue  
+
             for feature_name in features_with_type:
+
+                if feature_name in self.BYPASS_KEYS:
+                    logger.warning(f"Skipping multilabel type for key = '{feature_name}'")
+                    continue
+
+                if (split, feature_name) in self.BYPASS_SPLIT_KEY_PAIRS:
+                    logger.warning(f"Skipping multilabel type for splitkey = '{(split, feature_name)}'")
+                    continue
 
                 if (
                     feature_name not in dataset_bigbio[split].features
@@ -601,17 +675,14 @@ class TestDataLoader(unittest.TestCase):
                 for example in dataset_bigbio[split]:
 
                     if warning_raised[feature_name]:
-
                         break
 
                     example_id = example["id"]
-
                     features = example[feature_name]
 
                     for feature in features:
 
                         feature_type = feature["type"]
-
                         match = re.search(_CONNECTORS, feature_type)
 
                         if match is not None:
@@ -644,6 +715,12 @@ class TestDataLoader(unittest.TestCase):
 
         split_to_feature_counts = self.get_feature_statistics(features=features)
 
+        # Skip ALL bypassed keys
+        for key in self.BYPASS_KEYS:
+            if key in non_empty_features:
+                logger.warning(f"Skipping schema for key = '{key}'")
+                non_empty_features.remove(key)
+
         for split_name, split in self.dataset.items():
             print(split_name)
             print("=" * 10)
@@ -652,9 +729,24 @@ class TestDataLoader(unittest.TestCase):
             print()
 
         for split_name, split in self.dataset.items():
+
+            # Skip entire data split
+            if split_name in self.BYPASS_SPLITS:
+                logger.info(f"Skipping schema on {split_name}")
+                continue  
+
+            logger.info("Testing schema for: " + str(split_name))
             self.assertEqual(split.info.features, features)
+
             for non_empty_feature in non_empty_features:
-                if split_to_feature_counts[split_name][non_empty_feature] == 0:
+
+                # Args for BYPASS_SPLIT_KEY_PAIRS
+                split_key = [split_name, non_empty_feature]
+                if split_key in self.BYPASS_SPLIT_KEY_PAIRS:
+                    logger.info(f"Skipping schema for '{split_key}'")
+                    continue
+
+                if (split_to_feature_counts[split_name][non_empty_feature] == 0):
                     raise AssertionError(
                         f"Required key '{non_empty_feature}' does not have any instances"
                     )
@@ -697,6 +789,7 @@ class TestDataLoader(unittest.TestCase):
             logger.warning(
                 f"Split and key pairs ignored ='{self.BYPASS_SPLIT_KEY_PAIRS}'"
             )
+            self.BYPASS_SPLIT_KEY_PAIRS = [i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS]
 
 
 
