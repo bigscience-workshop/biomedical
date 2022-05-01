@@ -91,7 +91,7 @@ class TestDataLoader(unittest.TestCase):
     DATA_DIR: Optional[str]
     BYPASS_SPLITS: List[str]
     BYPASS_KEYS: List[str]
-    BYPASS_SPLIT_AND_KEY: List[str]
+    BYPASS_SPLIT_KEY_PAIRS: List[str]
 
     def runTest(self):
 
@@ -99,6 +99,7 @@ class TestDataLoader(unittest.TestCase):
         logger.info(f"self.NAME: {self.NAME}")
         logger.info(f"self.DATA_DIR: {self.DATA_DIR}")
 
+        self._warn_bypass()
 
         logger.info("importing module .... ")
         module_name = self.PATH
@@ -703,6 +704,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(description="Unit tests for BigBio dataloaders.")
+
     parser.add_argument(
         "dataloader_path",
         type=str,
@@ -763,5 +765,5 @@ if __name__ == "__main__":
         TestDataLoader.DATA_DIR = args.data_dir
         TestDataLoader.BYPASS_SPLITS = args.bypass_splits
         TestDataLoader.BYPASS_KEYS = args.bypass_keys
-        TestDataLoader.BYPASS_SPLIT_AND_KEY = args.bypass_split_and_key
+        TestDataLoader.BYPASS_SPLIT_KEY_PAIRS = args.bypass_split_key_pairs
         unittest.TextTestRunner().run(TestDataLoader())
