@@ -52,7 +52,7 @@ _HOMEPAGE = "https://nlp.cs.vcu.edu/data.html#mayosrs"
 _LICENSE = "Unknown"
 
 _URLS = {
-    "mayosrs": [
+    _DATASETNAME: [
         "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.gold",
         "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.terms",
     ]

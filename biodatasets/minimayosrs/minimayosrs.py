@@ -52,7 +52,7 @@ _HOMEPAGE = "https://nlp.cs.vcu.edu/data.html#minimayosrs"
 _LICENSE = "Unknown"
 
 _URLS = {
-    "minimayosrs": [
+    _DATASETNAME: [
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.terms",
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.physicians",
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.coders",
