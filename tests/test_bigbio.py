@@ -695,7 +695,7 @@ class TestDataLoader(unittest.TestCase):
 
         if len(self.BYPASS_SPLIT_KEY_PAIRS) > 0:
             logger.warning(
-                f"Split and key pairs ignored ='{self.BYPASS_SPLIT_AND_KEY}'"
+                f"Split and key pairs ignored ='{self.BYPASS_SPLIT_KEY_PAIRS}'"
             )
 
 
