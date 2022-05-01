@@ -291,7 +291,7 @@ class TestDataLoader(unittest.TestCase):
         for split_name, split in dataset_bigbio.items():
 
             # skip entire split
-            if split in self.BYPASS_SPLITS:
+            if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping referenced ids on {split_name}")
                 continue  
 
@@ -751,8 +751,8 @@ class TestDataLoader(unittest.TestCase):
 
             for non_empty_feature in non_empty_features:
 
-                if self._skipkey_or_keysplit(non_empty_feature, split):
-                    logger.warning(f"Skipping multilabel type for splitkey = '{(split, non_empty_feature)}'")
+                if self._skipkey_or_keysplit(non_empty_feature, split_name):
+                    logger.warning(f"Skipping multilabel type for splitkey = '{(split_name, non_empty_feature)}'")
                     continue
 
                 if (split_to_feature_counts[split_name][non_empty_feature] == 0):
@@ -806,7 +806,7 @@ class TestDataLoader(unittest.TestCase):
         if key in self.BYPASS_KEYS:
             flag = True
 
-        if (split, key) in self.BYPASS_SPLIT_KEY_PAIRS:
+        if [split, key] in self.BYPASS_SPLIT_KEY_PAIRS:
             flag = True
 
         return flag
