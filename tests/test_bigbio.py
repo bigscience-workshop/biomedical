@@ -89,6 +89,9 @@ class TestDataLoader(unittest.TestCase):
     PATH: str
     NAME: str
     DATA_DIR: Optional[str]
+    BYPASS_SPLITS: List[str]
+    BYPASS_KEYS: List[str]
+    BYPASS_SPLIT_AND_KEY: List[str]
 
     def runTest(self):
 
@@ -680,6 +683,21 @@ class TestDataLoader(unittest.TestCase):
         ):
             self.assertEqual(len(field), 1)
 
+    def _warn_bypass(self):
+        """ Warn if keys, data splits, or schemas are skipped """
+
+        if len(self.BYPASS_SPLITS) > 0:
+            logger.warning(f"Splits ignored = '{self.BYPASS_SPLITS}'")
+
+        if len(self.BYPASS_KEYS) > 0:
+            logger.warning(f"Keys ignored = '{self.BYPASS_KEYS}'")
+
+        if len(self.BYPASS_SPLIT_KEY_PAIRS) > 0:
+            logger.warning(
+                f"Split and key pairs ignored ='{self.BYPASS_SPLIT_AND_KEY}'"
+            )
+
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -701,6 +719,31 @@ if __name__ == "__main__":
         help="use to run on a single config name (default is to run on all config names)",
     )
 
+    parser.add_argument(
+        "--bypass_splits",
+        default=[],
+        required=False,
+        nargs="*",
+        help="Skip a data split (e.g. 'train', 'dev') from testing. List all splits as space separated (ex: --bypass_splits train dev)",
+    )
+
+    parser.add_argument(
+        "--bypass_keys",
+        default=[],
+        required=False,
+        nargs="*",
+        help="Skip a required key (e.g. 'entities' for NER) from testing. List all keys as space separated (ex: --bypass_keys entities events)",
+    )
+
+    parser.add_argument(
+        "--bypass_split_key_pairs",
+        default=[],
+        required=False,
+        nargs="*",
+        help="Skip a key in a data split (e.g. skip 'entities' in 'test'). List all key-pairs comma separated. (ex: --bypass_split_key_pairs test,entities train, events)",
+    )
+
+
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
@@ -718,4 +761,7 @@ if __name__ == "__main__":
         TestDataLoader.PATH = args.dataloader_path
         TestDataLoader.NAME = config_name
         TestDataLoader.DATA_DIR = args.data_dir
+        TestDataLoader.BYPASS_SPLITS = args.bypass_splits
+        TestDataLoader.BYPASS_KEYS = args.bypass_keys
+        TestDataLoader.BYPASS_SPLIT_AND_KEY = args.bypass_split_and_key
         unittest.TextTestRunner().run(TestDataLoader())
