@@ -19,10 +19,11 @@ nine medical coders and three physicians from the Mayo Clinic.
 """
 
 import csv
-import requests
 from typing import Dict, List, Tuple
 
 import datasets
+import requests
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -121,11 +122,13 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         urls = _URLS[_DATASETNAME]
+
         def custom_download(src_url: str, dst_path: str):
-            cookies = {'NotificationDone': "true"}
+            cookies = {"NotificationDone": "true"}
             response = requests.get(src_url, cookies=cookies)
             with open(dst_path, "w") as handle:
                 handle.write(response.text)
+
         data_dir = dl_manager.download_custom(urls, custom_download)
 
         return [
