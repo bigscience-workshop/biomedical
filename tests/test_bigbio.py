@@ -698,7 +698,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_name",
         type=str,
-        help="use to run on a single config name (defualt is to run on all config names)",
+        help="use to run on a single config name (default is to run on all config names)",
     )
 
     args = parser.parse_args()
