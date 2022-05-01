@@ -298,6 +298,16 @@ class TestDataLoader(unittest.TestCase):
                 existing_ids.update(self._get_existing_referable_ids(example))
 
                 for ref_id, ref_type in referenced_ids:
+
+                    if ref_type in self.BYPASS_KEYS:
+                        logger.warning(f"\tSkipping referenced ids on {ref_type}")
+                        continue
+
+                    if (split, ref_type) in self.BYPASS_SPLIT_KEY_PAIRS:
+                        split_keys = (split, ref_type)
+                        logger.warning(f"\tSkipping referenced ids on {split_keys}")
+                        continue
+
                     if ref_type == "event":
                         if not (
                             (ref_id, "entity") in existing_ids
@@ -327,6 +337,14 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping passage offsets on {split}")
+                continue  
+
+            if "passages" in self.BYPASS_KEYS:
+                logger.warning(f"Skipping passages offsets")
+                continue
+
+            if (split, "passages") in self.BYPASS_SPLIT_KEY_PAIRS:
+                logger.warning(f"Skipping passages offsets for split='{split}'")
                 continue  
 
             if "passages" in dataset_bigbio[split].features:
@@ -434,6 +452,14 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping entities offsets on {split}")
+                continue
+
+            if "entities" in self.BYPASS_KEYS:
+                logger.warning(f"Skipping entities offsets")
+                continue
+
+            if (split, "entities") in self.BYPASS_SPLIT_KEY_PAIRS:
+                logger.warning(f"Skipping entities offsets for split='{split}'")
                 continue  
 
             if "entities" in dataset_bigbio[split].features:
@@ -477,6 +503,14 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping events offsets on {split}")
                 continue  
 
+            if "events" in self.BYPASS_KEYS:
+                logger.warning(f"Skipping events offsets")
+                continue
+
+            if (split, "events") in self.BYPASS_SPLIT_KEY_PAIRS:
+                logger.warning(f"Skipping events offsets for split='{split}'")
+                continue
+
             if "events" in dataset_bigbio[split].features:
 
                 for example in dataset_bigbio[split]:
@@ -515,6 +549,14 @@ class TestDataLoader(unittest.TestCase):
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping coref ids on {split}")
                 continue  
+
+            if "coreferences" in self.BYPASS_KEYS:
+                logger.warning(f"Skipping coreferences id")
+                continue
+
+            if (split, "coreferences") in self.BYPASS_SPLIT_KEY_PAIRS:
+                logger.warning(f"Skipping coreferences id for split='{split}'")
+                continue
 
             if "coreferences" in dataset_bigbio[split].features:
 
@@ -565,7 +607,7 @@ class TestDataLoader(unittest.TestCase):
 
                             logger.warning("Skipping multiple choice for key=answer, split='{split}'")
                             continue
-                            
+
                         else:
                             for answer in example["answer"]:
                                 assert (
