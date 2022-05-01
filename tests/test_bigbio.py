@@ -752,7 +752,7 @@ class TestDataLoader(unittest.TestCase):
             for non_empty_feature in non_empty_features:
 
                 if self._skipkey_or_keysplit(non_empty_feature, split_name):
-                    logger.warning(f"Skipping schema for splitkey = '{(split_name, non_empty_feature)}'")
+                    logger.warning(f"Skipping schema for split, key = '{(split_name, non_empty_feature)}'")
                     continue
 
                 if (split_to_feature_counts[split_name][non_empty_feature] == 0):
