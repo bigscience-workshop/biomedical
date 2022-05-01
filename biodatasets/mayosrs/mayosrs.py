@@ -19,6 +19,7 @@ nine medical coders and three physicians from the Mayo Clinic.
 """
 
 import csv
+import requests
 from typing import Dict, List, Tuple
 
 import datasets
@@ -51,14 +52,10 @@ _HOMEPAGE = "https://nlp.cs.vcu.edu/data.html#mayosrs"
 _LICENSE = "Unknown"
 
 _URLS = {
-    "source": [
+    "mayosrs": [
         "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.gold",
         "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.terms",
-    ],
-    "bigbio_pairs": [
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.gold",
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.terms",
-    ],
+    ]
 }
 
 _SUPPORTED_TASKS = [
@@ -123,8 +120,13 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        urls = _URLS[self.config.schema]
-        data_dir = dl_manager.download_and_extract(urls)
+        urls = _URLS[_DATASETNAME]
+        def custom_download(src_url: str, dst_path: str):
+            cookies = {'NotificationDone': "true"}
+            response = requests.get(src_url, cookies=cookies)
+            with open(dst_path, "w") as handle:
+                handle.write(response.text)
+        data_dir = dl_manager.download_custom(urls, custom_download)
 
         return [
             datasets.SplitGenerator(

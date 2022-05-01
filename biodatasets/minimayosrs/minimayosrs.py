@@ -19,6 +19,7 @@ nine medical coders and three physicians from the Mayo Clinic.
 """
 
 import csv
+import requests
 from typing import Dict, List, Tuple
 
 import datasets
@@ -51,12 +52,7 @@ _HOMEPAGE = "https://nlp.cs.vcu.edu/data.html#minimayosrs"
 _LICENSE = "Unknown"
 
 _URLS = {
-    "source": [
-        "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.terms",
-        "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.physicians",
-        "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.coders",
-    ],
-    "bigbio_pairs": [
+    "minimayosrs": [
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.terms",
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.physicians",
         "https://nlp.cs.vcu.edu/data/similarity-data/MiniMayoSRS.coders",
@@ -130,8 +126,13 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        urls = _URLS[self.config.schema]
-        data_dir = dl_manager.download_and_extract(urls)
+        urls = _URLS[_DATASETNAME]
+        def custom_download(src_url: str, dst_path: str):
+            cookies = {'NotificationDone': "true"}
+            response = requests.get(src_url, cookies=cookies)
+            with open(dst_path, "w") as handle:
+                handle.write(response.text)
+        data_dir = dl_manager.download_custom(urls, custom_download)
 
         return [
             datasets.SplitGenerator(
