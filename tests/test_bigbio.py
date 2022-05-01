@@ -1,5 +1,7 @@
 """
 Unit-tests to ensure tasks adhere to big-bio schema.
+
+NOTE: If bypass keys/splits present, statistics are STILL printed.
 """
 import argparse
 from collections import defaultdict
@@ -92,6 +94,7 @@ class TestDataLoader(unittest.TestCase):
     BYPASS_SPLITS: List[str]
     BYPASS_KEYS: List[str]
     BYPASS_SPLIT_KEY_PAIRS: List[str]
+
 
     def runTest(self):
 
@@ -228,6 +231,7 @@ class TestDataLoader(unittest.TestCase):
             for elem in collection:
                 self._assert_ids_globally_unique(elem, ids_seen)
 
+
     def test_are_ids_globally_unique(self, dataset_bigbio: DatasetDict):
         """
         Tests each example in a split has a unique ID.
@@ -235,7 +239,7 @@ class TestDataLoader(unittest.TestCase):
         logger.info("Checking global ID uniqueness")
         for split_name, split in dataset_bigbio.items():
 
-            # skip entire split
+            # Skip entire data split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping unique ID check on {split_name}")
                 continue  
@@ -244,6 +248,7 @@ class TestDataLoader(unittest.TestCase):
             for example in split:
                 self._assert_ids_globally_unique(example, ids_seen=ids_seen)
         logger.info("Found {} unique IDs".format(len(ids_seen)))
+
 
     def _get_referenced_ids(self, example):
         referenced_ids = []
@@ -265,6 +270,7 @@ class TestDataLoader(unittest.TestCase):
 
         return referenced_ids
 
+
     def _get_existing_referable_ids(self, example):
         existing_ids = []
 
@@ -282,29 +288,24 @@ class TestDataLoader(unittest.TestCase):
         Checks if referenced IDs are correctly labeled.
         """
         logger.info("Checking if referenced IDs are properly mapped")
-        for split in dataset_bigbio.values():
+        for split_name, split in dataset_bigbio.items():
 
             # skip entire split
             if split in self.BYPASS_SPLITS:
-                logger.info(f"\tSkipping referenced ids on {split}")
+                logger.info(f"\tSkipping referenced ids on {split_name}")
                 continue  
 
             for example in split:
                 referenced_ids = set()
                 existing_ids = set()
 
-
                 referenced_ids.update(self._get_referenced_ids(example))
                 existing_ids.update(self._get_existing_referable_ids(example))
 
                 for ref_id, ref_type in referenced_ids:
 
-                    if ref_type in self.BYPASS_KEYS:
-                        logger.warning(f"\tSkipping referenced ids on {ref_type}")
-                        continue
-
-                    if (split, ref_type) in self.BYPASS_SPLIT_KEY_PAIRS:
-                        split_keys = (split, ref_type)
+                    if self._skipkey_or_keysplit(ref_type, split_name):
+                        split_keys = (split_name, ref_type)
                         logger.warning(f"\tSkipping referenced ids on {split_keys}")
                         continue
 
@@ -339,11 +340,7 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping passage offsets on {split}")
                 continue  
 
-            if "passages" in self.BYPASS_KEYS:
-                logger.warning(f"Skipping passages offsets")
-                continue
-
-            if (split, "passages") in self.BYPASS_SPLIT_KEY_PAIRS:
+            if self._skipkey_or_keysplit("passages", split):
                 logger.warning(f"Skipping passages offsets for split='{split}'")
                 continue  
 
@@ -454,11 +451,7 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping entities offsets on {split}")
                 continue
 
-            if "entities" in self.BYPASS_KEYS:
-                logger.warning(f"Skipping entities offsets")
-                continue
-
-            if (split, "entities") in self.BYPASS_SPLIT_KEY_PAIRS:
+            if self._skipkey_or_keysplit("entities", split):
                 logger.warning(f"Skipping entities offsets for split='{split}'")
                 continue  
 
@@ -503,13 +496,9 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping events offsets on {split}")
                 continue  
 
-            if "events" in self.BYPASS_KEYS:
-                logger.warning(f"Skipping events offsets")
-                continue
-
-            if (split, "events") in self.BYPASS_SPLIT_KEY_PAIRS:
+            if self._skipkey_or_keysplit("events", split):
                 logger.warning(f"Skipping events offsets for split='{split}'")
-                continue
+                continue  
 
             if "events" in dataset_bigbio[split].features:
 
@@ -550,13 +539,9 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping coref ids on {split}")
                 continue  
 
-            if "coreferences" in self.BYPASS_KEYS:
-                logger.warning(f"Skipping coreferences id")
-                continue
-
-            if (split, "coreferences") in self.BYPASS_SPLIT_KEY_PAIRS:
-                logger.warning(f"Skipping coreferences id for split='{split}'")
-                continue
+            if self._skipkey_or_keysplit("coreferences", split):
+                logger.warning(f"Skipping coreferences ids for split='{split}'")
+                continue  
 
             if "coreferences" in dataset_bigbio[split].features:
 
@@ -585,10 +570,10 @@ class TestDataLoader(unittest.TestCase):
 
             for example in dataset_bigbio[split]:
 
-                if ("choices" in self.BYPASS_KEYS) or ( (split, "choices") in self.BYPASS_SPLIT_KEY_PAIRS):
-
+                if self._skipkey_or_keysplit("choices", split):
                     logger.warning("Skipping multiple choice for key=choices, split='{split}'")
                     continue
+
                 else:
 
                     if len(example["choices"]) > 0:
@@ -603,8 +588,7 @@ class TestDataLoader(unittest.TestCase):
                         ), f"type is 'multiple_choice' but no values in 'choices' {example}"
 
 
-                        if ("answer" in self.BYPASS_KEYS) or ( (split, "answer") in self.BYPASS_SPLIT_KEY_PAIRS):
-
+                        if self._skipkey_or_keysplit("answer", split):
                             logger.warning("Skipping multiple choice for key=answer, split='{split}'")
                             continue
 
@@ -632,20 +616,15 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping entities multilabel db on {split}")
                 continue
 
-
             if warning_raised:
                 break
 
             if "entities" not in dataset_bigbio[split].features:
                 continue
 
-            if "entities" in self.BYPASS_KEYS:
-                logger.warning(f"Skipping multilabel type for key = entities")
-                continue
-
-            if (split, "entities") in self.BYPASS_SPLIT_KEY_PAIRS:
-                logger.warning(f"Skipping multilabel type for key=entities, split='{split}'")
-                continue
+            if self._skipkey_or_keysplit("entities", split):
+                logger.warning(f"Skipping multilabel entities for split='{split}'")
+                continue  
 
             for example in dataset_bigbio[split]:
 
@@ -700,11 +679,7 @@ class TestDataLoader(unittest.TestCase):
 
             for feature_name in features_with_type:
 
-                if feature_name in self.BYPASS_KEYS:
-                    logger.warning(f"Skipping multilabel type for key = '{feature_name}'")
-                    continue
-
-                if (split, feature_name) in self.BYPASS_SPLIT_KEY_PAIRS:
+                if self._skipkey_or_keysplit(feature_name, split):
                     logger.warning(f"Skipping multilabel type for splitkey = '{(split, feature_name)}'")
                     continue
 
@@ -757,12 +732,6 @@ class TestDataLoader(unittest.TestCase):
 
         split_to_feature_counts = self.get_feature_statistics(features=features)
 
-        # Skip ALL bypassed keys
-        for key in self.BYPASS_KEYS:
-            if key in non_empty_features:
-                logger.warning(f"Skipping schema for key = '{key}'")
-                non_empty_features.remove(key)
-
         for split_name, split in self.dataset.items():
             print(split_name)
             print("=" * 10)
@@ -782,10 +751,8 @@ class TestDataLoader(unittest.TestCase):
 
             for non_empty_feature in non_empty_features:
 
-                # Args for BYPASS_SPLIT_KEY_PAIRS
-                split_key = [split_name, non_empty_feature]
-                if split_key in self.BYPASS_SPLIT_KEY_PAIRS:
-                    logger.info(f"Skipping schema for '{split_key}'")
+                if self._skipkey_or_keysplit(non_empty_feature, split):
+                    logger.warning(f"Skipping multilabel type for splitkey = '{(split, non_empty_feature)}'")
                     continue
 
                 if (split_to_feature_counts[split_name][non_empty_feature] == 0):
@@ -833,7 +800,16 @@ class TestDataLoader(unittest.TestCase):
             )
             self.BYPASS_SPLIT_KEY_PAIRS = [i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS]
 
+    def _skipkey_or_keysplit(self, key: str, split: str):
+        """Check if key or (split, key) pair should be omitted"""
+        flag = False
+        if key in self.BYPASS_KEYS:
+            flag = True
 
+        if (split, key) in self.BYPASS_SPLIT_KEY_PAIRS:
+            flag = True
+
+        return flag
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
