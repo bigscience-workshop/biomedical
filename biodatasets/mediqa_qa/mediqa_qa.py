@@ -21,16 +21,16 @@ from pathlib import Path
 from typing import Dict, Iterator, Tuple
 import xml.etree.ElementTree as ET
 
-import utils.parsing as parsing
-import utils.schemas as schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+import bigbio.utils.parsing as parsing
+import bigbio.utils.schemas as schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{MEDIQA2019,
   author    = {Asma {Ben Abacha} and Chaitanya Shivade and Dina Demner{-}Fushman},
-  title     = {Overview of the MEDIQA 2019 Shared Task on Textual Inference, Question Entailment and Question Answering}, 
-  booktitle = {ACL-BioNLP 2019},  
+  title     = {Overview of the MEDIQA 2019 Shared Task on Textual Inference, Question Entailment and Question Answering},
+  booktitle = {ACL-BioNLP 2019},
   year      = {2019}
 }
 """
@@ -38,11 +38,11 @@ _CITATION = """\
 _DATASETNAME = "mediqa_qa"
 
 _DESCRIPTION = """\
-The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).  
+The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).
 Mailing List: https://groups.google.com/forum/#!forum/bionlp-mediqa
 
 In the QA task, participants are tasked to:
-- filter/classify the provided answers (1: correct, 0: incorrect). 
+- filter/classify the provided answers (1: correct, 0: incorrect).
 - re-rank the answers.
 """
 
@@ -80,7 +80,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             subset_id="mediqa_qa_bigbio_qa",
         )
     ]
-    
+
     DEFAULT_CONFIG_NAME = "mediqa_qa_source"
 
     def _info(self):
@@ -144,14 +144,14 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TestSet-wLabels.xml"
                 }
             )
-        ]            
+        ]
 
     def _generate_examples(self, filepath: Path) -> Iterator[Tuple[str, Dict]]:
         dom = ET.parse(filepath).getroot()
         for row in dom.iterfind('Question'):
             qid = row.attrib['QID']
             question_text = row.find('QuestionText').text
-            
+
             answer_list = row.find('AnswerList')
             aids, sys_ranks, ref_ranks, ref_scores, answer_urls, answer_texts = [], [], [], [], [], []
             for answer in answer_list.findall('Answer'):
@@ -161,7 +161,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                 ref_scores.append(int(answer.attrib['ReferenceScore']))
                 answer_urls.append(answer.find('AnswerURL').text)
                 answer_texts.append(answer.find('AnswerText').text)
-            
+
             if self.config.schema == "source":
                 yield qid, {
                     "QUESTION": {
@@ -177,7 +177,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                                     "AnswerURL": ans_url,
                                     "AnswerText": ans_text
                                 }
-                            } for (aid, sys_rank, ref_rank, ref_score, ans_url, ans_text) in 
+                            } for (aid, sys_rank, ref_rank, ref_score, ans_url, ans_text) in
                             zip(aids, sys_ranks, ref_ranks, ref_scores, answer_urls, answer_texts)
                         ]
                     }
@@ -193,4 +193,3 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "context": '',
                     "answer": answer_texts,
                 }
-
