@@ -25,7 +25,7 @@ from utils.constants import Tasks
 _CITATION = """\
 @inproceedings{chen2021overview, 
     title={Overview of the BioCreative VII LitCovid Track: multi-label topic classification for COVID-19 literature annotation}, 
-    author={Chen, Qingyu and Allot, Alexis and Leaman, Robert and Do{\u{g}}an, Rezarta Islamaj and Lu, Zhiyong}, 
+    author={Chen, Qingyu and Allot, Alexis and Leaman, Robert and Do{\\u{g}}an, Rezarta Islamaj and Lu, Zhiyong}, 
     booktitle={Proceedings of the seventh BioCreative challenge evaluation workshop}, year={2021} 
 }
 """
