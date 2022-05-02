@@ -17,14 +17,15 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-from bioc import biocxml
 import datasets
+from bioc import biocxml
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
+_LOCAL = False
 _CITATION = """\
 @Article{islamaj2021nlm,
 title={NLM-Chem, a new resource for chemical entity recognition in PubMed full text literature},
