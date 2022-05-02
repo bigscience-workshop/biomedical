@@ -23,38 +23,10 @@ from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
 _CITATION = """\
-@article{10.1093/nar/gkaa952,
-    author = {Chen, Qingyu and Allot, Alexis and Lu, Zhiyong},
-    title = "{LitCovid: an open database of COVID-19 literature}",
-    journal = {Nucleic Acids Research},
-    volume = {49},
-    number = {D1},
-    pages = {D1534-D1540},
-    year = {2020},
-    month = {11},
-    abstract = "{
-        Since the outbreak of the current pandemic in 2020, there has been a rapid
-        growth of published articles on COVID-19 and SARS-CoV-2, with about 10 000
-        new articles added each month. This is causing an increasingly serious
-        information overload, making it difficult for scientists, healthcare
-        professionals and the general public to remain up to date on the latest
-        SARS-CoV-2 and COVID-19 research. Hence, we developed LitCovid
-        (https://www.ncbi.nlm.nih.gov/research/coronavirus/), a curated literature
-        hub, to track up-to-date scientific information in PubMed. LitCovid is
-        updated daily with newly identified relevant articles organized into curated
-        categories. To support manual curation, advanced machine-learning and
-        deep-learning algorithms have been developed, evaluated and integrated into
-        the curation workflow. To the best of our knowledge, LitCovid is the
-        first-of-its-kind COVID-19-specific literature resource, with all of its
-        collected articles and curated data freely available. Since its release,
-        LitCovid has been widely used, with millions of accesses by users worldwide
-        for various information needs, such as evidence synthesis, drug discovery and
-        text and data mining, among others.
-    }",
-    issn = {0305-1048},
-    doi = {10.1093/nar/gkaa952},
-    url = {https://doi.org/10.1093/nar/gkaa952},
-    eprint = {https://academic.oup.com/nar/article-pdf/49/D1/D1534/35364553/gkaa952.pdf},
+@inproceedings{chen2021overview, 
+    title={Overview of the BioCreative VII LitCovid Track: multi-label topic classification for COVID-19 literature annotation}, 
+    author={Chen, Qingyu and Allot, Alexis and Leaman, Robert and Do{\u{g}}an, Rezarta Islamaj and Lu, Zhiyong}, 
+    booktitle={Proceedings of the seventh BioCreative challenge evaluation workshop}, year={2021} 
 }
 """
 
@@ -67,7 +39,7 @@ text of over 30 thousand COVID-19-related articles and their metadata
 manually reviewed and articles annotated by in-house models.
 """
 
-_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/media/store/files/2021/TRACK5_pos_1_BC7_submission_221.pdf"
+_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-5/"
 
 _LICENSE = "Unknown"
 
