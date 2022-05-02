@@ -6,10 +6,10 @@ Implements a dummy KB dataloader to verify implementation of tests
 
 import datasets
 
-from tests.dummy import dummy_features
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
-from utils.schemas import kb_features
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
+from bigbio.utils.schemas import kb_features
+from tests.dummy import dummy
 
 _CITATION = ""
 _DATASETNAME = ""
@@ -29,26 +29,19 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-_DATASETS_SPLITS = {
+_DATASETS_SPLITS: dict = {
     "train": datasets.Split.TRAIN,
     "dev": datasets.Split.VALIDATION,
     "test": datasets.Split.TEST,
 }
 
+
 _GLOBAL_UNIQUE_IDS = {
-    "splits": ["train", "dev", "test"],
-    "examples": [
-        {
-            "id": 0,
-            "document_id": 0,
-            "passages": [dummy_features.DummyPassage(uid=0)],
-            "entities": [dummy_features.DummyEntity(uid=1)],
-            "relations": [],
-            "coreferences": [],
-            "events": [],
-        }
-    ],
+    # uid=1 is assigned to passage
+    split: {"examples": [dummy.DummyKBExample(uid=1, document_id=1)]}
+    for split in ["train", "dev", "test"]
 }
+
 
 TESTS = {"global_unique_ids": _GLOBAL_UNIQUE_IDS}
 
@@ -64,21 +57,10 @@ class DummyDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name=name + "_source",
-            version=datasets.Version(_SOURCE_VERSION),
-            description=name,
-            schema="source",
-            subset_id=name,
-        )
-        for name, specs in TESTS.items()
-    ]
-
-    BUILDER_CONFIGS += [
-        BigBioConfig(
             name=name + "_bigbio_kb",
             version=datasets.Version(_SOURCE_VERSION),
             description=name,
-            schema="bigbio_kb",
+            schema="source",
             subset_id=name,
         )
         for name, specs in TESTS.items()
@@ -97,13 +79,16 @@ class DummyDataset(datasets.GeneratorBasedBuilder):
 
     @property
     def test_name(self):
+        """
+        Get base name of test
+        """
 
-        return self.config.name.replace("_source", "").replace("_bigbio_kb", "")
+        return self.config.name.replace("_bigbio_kb", "")
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
 
-        specs = TESTS[self.test_name]
+        test = TESTS[self.test_name]
 
         return [
             datasets.SplitGenerator(
@@ -113,7 +98,7 @@ class DummyDataset(datasets.GeneratorBasedBuilder):
                     "split": split,
                 },
             )
-            for split in specs["splits"]
+            for split in test.keys()
         ]
 
     def _generate_examples(
@@ -122,9 +107,9 @@ class DummyDataset(datasets.GeneratorBasedBuilder):
     ):
         """Yields examples as (key, example) tuples."""
 
-        specs = TESTS[self.test_name]
+        test = TESTS[self.test_name]
 
-        examples = specs["examples"]
+        examples = test[split]["examples"]
 
         for example in examples:
 
