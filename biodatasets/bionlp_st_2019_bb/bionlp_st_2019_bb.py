@@ -18,9 +18,9 @@ from typing import Dict, List
 
 import datasets
 
-from utils import parsing, schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import parsing, schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "bionlp_st_2019_bb"
 _SOURCE_VIEW_NAME = "source"
