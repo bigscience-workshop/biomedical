@@ -61,9 +61,9 @@ from typing import Dict, List, Tuple
 import datasets
 import pandas as pd
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @article{,
