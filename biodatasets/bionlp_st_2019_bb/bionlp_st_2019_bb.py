@@ -408,8 +408,12 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
         example = {}
         example["document_id"] = txt_file.with_suffix("").name
-        with txt_file.open(encoding="utf-8") as f:
-            example["text"] = f.read()
+        with txt_file.open() as f:
+            if self.config.schema == "bigbio_kb":
+                example["text"] = f.read().replace('\u00A0', " ").replace("\n", " ")
+            else:
+                example["text"] = f.read()
+
 
         # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
         # for event extraction
