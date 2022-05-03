@@ -53,7 +53,7 @@ _LICENSE = "MIT License"
 
 _URLs = {_DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"}
 
-_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
