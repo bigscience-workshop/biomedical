@@ -141,7 +141,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
                 for id_, row in data.iterrows():
                     yield id_, {
                         "id": id_,  # uid is an unique identifier for every record that starts from 1
-                        "document_id": "NULL",
+                        "document_id": id_,
                         "text_1": row["text_1"],
                         "text_2": row["text_2"],
                         "label": str(row["label"]),
