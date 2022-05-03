@@ -408,9 +408,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
         example = {}
         example["document_id"] = txt_file.with_suffix("").name
-        with txt_file.open() as f:
+        with txt_file.open(encoding="utf-8") as f:
             if self.config.schema == "bigbio_kb":
-                example["text"] = f.read().replace('\u00A0', " ").replace("\n", " ")
+                example["text"] = f.read().replace(u"\u00A0", " ").replace("\n", " ")
             else:
                 example["text"] = f.read()
 
@@ -427,7 +427,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         for suffix in annotation_file_suffixes:
             annotation_file = txt_file.with_suffix(suffix)
             if annotation_file.exists():
-                with annotation_file.open() as f:
+                with annotation_file.open(encoding="utf8") as f:
                     ann_lines.extend(f.readlines())
 
         example["text_bound_annotations"] = []
@@ -465,12 +465,18 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                     i = 0
                     for start, end in ann["offsets"]:
                         chunk_len = end - start
-                        ann["text"].append(text[i: chunk_len + i])
+                        if self.config.schema == "bigbio_kb":
+                            ann["text"].append(text[i: chunk_len + i].replace(u"\u00A0", " "))
+                        else:
+                            ann["text"].append(text[i: chunk_len + i])
                         i += chunk_len
                         while i < len(text) and text[i] == " ":
                             i += 1
                 else:
-                    ann["text"] = [text]
+                    if self.config.schema == "bigbio_kb":
+                        ann["text"] = [text.replace(u"\u00A0", " ")]
+                    else:
+                        ann["text"] = [text]
 
                 example["text_bound_annotations"].append(ann)
 
