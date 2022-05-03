@@ -139,7 +139,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
 
         with open(filepath, encoding="utf-8") as csv_file:
             csv_reader = csv.reader(
-                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_NONE, skipinitialspace=True
             )
             next(csv_reader, None)  # remove column headers
             for id_, row in enumerate(csv_reader):
