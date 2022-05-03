@@ -146,7 +146,7 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
             for id_, row in data.iterrows():
                 yield id_, {
                     "id": id_,
-                    "document_id": "NULL",
+                    "document_id": id_,
                     "text_1": row["text_1"],
                     "text_2": row["text_2"],
                     "label": str((row["label_physicians"] + row["label_coders"]) / 2),
