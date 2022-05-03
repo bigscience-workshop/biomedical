@@ -34,7 +34,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LOCAL = False
+_LOCAL = True
 _CITATION = """\
 @article{tsatsaronis2015overview,
 	title        = {
