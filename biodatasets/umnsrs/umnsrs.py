@@ -172,7 +172,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
             for id_, row in data.iterrows():
                 yield id_, {
                     "id": id_,
-                    "document_id": "NULL",
+                    "document_id": id_,
                     "text_1": row["text_1"],
                     "text_2": row["text_2"],
                     "label": row["mean_score"],
