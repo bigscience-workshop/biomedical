@@ -162,5 +162,5 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                         "document_id": "NULL",
                         "text_1": word1,
                         "text_2": word2,
-                        "label": str(score),
+                        "label": str(score.strip()),
                     }
