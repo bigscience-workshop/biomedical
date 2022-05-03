@@ -103,11 +103,13 @@ _URLs = {
             "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
         },
     },
-    "bigbio": {
-        "train": "https://drive.google.com/uc?export=download&id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L",
-        "dev": "https://drive.google.com/uc?export=download&id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG",
-        "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
-    },
+    "bigbio_kb": {
+        "kb+ner": {
+            "train": "https://drive.google.com/uc?export=download&id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L",
+            "dev": "https://drive.google.com/uc?export=download&id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG",
+            "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
+        },
+    }
 }
 
 _SUPPORTED_TASKS = [
@@ -169,7 +171,6 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="bionlp_st_2019_bb",
         ),
-        # todo bigbio-kb
         BigBioConfig(
             name="bionlp_st_2019_bb_bigbio_kb",
             version=BIGBIO_VERSION,
@@ -268,6 +269,8 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
         version = self.config.name.split("_")[-2]
+        if version == 'bigbio':
+            version = 'kb+ner'
         my_urls = _URLs[self.config.schema][version]
         data_files = {
             "train": Path(dl_manager.download_and_extract(my_urls["train"])) / f"BioNLP-OST-2019_BB-{version}_train",
@@ -420,7 +423,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         for suffix in annotation_file_suffixes:
             annotation_file = txt_file.with_suffix(suffix)
             if annotation_file.exists():
-                with annotation_file.open(encoding="utf-8") as f:
+                with annotation_file.open() as f:
                     ann_lines.extend(f.readlines())
 
         example["text_bound_annotations"] = []
@@ -444,7 +447,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                 ann["id"] = fields[0]
                 ann["type"] = fields[1].split()[0]
                 if ann["type"] in ["Title", "Paragraph"]:
-                    break
+                    continue
                 ann["offsets"] = []
                 span_str = parsing.remove_prefix(fields[1], (ann["type"] + " "))
                 text = fields[2]
@@ -558,5 +561,4 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                 ann["type"] = info[0]
                 ann["ref_id"] = info[1]
                 example["notes"].append(ann)
-
         return example
