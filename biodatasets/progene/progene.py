@@ -20,9 +20,9 @@ from typing import Dict, Iterable, Iterator, List, Tuple
 
 import datasets
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @inproceedings{faessler-etal-2020-progene,
@@ -121,7 +121,7 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS
         dl_dir = dl_manager.download_and_extract(urls)
-        dataset_dir = os.path.join(dl_dir, "progene", "crossvalidation_data")
+        dataset_dir = os.path.join(dl_dir, "crossvalidation_data")
         dataset_dir = pathlib.Path(dataset_dir)
         splits = []
         for split_num in range(0, 10):
