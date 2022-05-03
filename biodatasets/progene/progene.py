@@ -24,21 +24,23 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-# TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-  author    = {Faessler, Erik  and
+@inproceedings{faessler-etal-2020-progene,
+    title = "{P}ro{G}ene - A Large-scale, High-Quality Protein-Gene Annotated Benchmark Corpus",
+    author = "Faessler, Erik  and
       Modersohn, Luise  and
       Lohr, Christina  and
-      Hahn, Udo},
-  title     = {Proceedings of the 12th Language Resources and Evaluation Conference},
-  journal   = {},
-  volume    = {},
-  year      = {2020},
-  url       = {https://aclanthology.org/2020.lrec-1.564},
-  doi       = {https://doi.org/10.5281/zenodo.3698568},
-  biburl    = {},
-  bibsource = {}
+      Hahn, Udo",
+    booktitle = "Proceedings of the 12th Language Resources and Evaluation Conference",
+    month = may,
+    year = "2020",
+    address = "Marseille, France",
+    publisher = "European Language Resources Association",
+    url = "https://aclanthology.org/2020.lrec-1.564",
+    pages = "4585--4596",
+    abstract = "Genes and proteins constitute the fundamental entities of molecular genetics. We here introduce ProGene (formerly called FSU-PRGE), a corpus that reflects our efforts to cope with this important class of named entities within the framework of a long-lasting large-scale annotation campaign at the Jena University Language {\&} Information Engineering (JULIE) Lab. We assembled the entire corpus from 11 subcorpora covering various biological domains to achieve an overall subdomain-independent corpus. It consists of 3,308 MEDLINE abstracts with over 36k sentences and more than 960k tokens annotated with nearly 60k named entity mentions. Two annotators strove for carefully assigning entity mentions to classes of genes/proteins as well as families/groups, complexes, variants and enumerations of those where genes and proteins are represented by a single class. The main purpose of the corpus is to provide a large body of consistent and reliable annotations for supervised training and evaluation of machine learning algorithms in this relevant domain. Furthermore, we provide an evaluation of two state-of-the-art baseline systems {---} BioBert and flair {---} on the ProGene corpus. We make the evaluation datasets and the trained models available to encourage comparable evaluations of new methods in the future.",
+    language = "English",
+    ISBN = "979-10-95546-34-4",
 }
 """
 
@@ -55,7 +57,8 @@ _HOMEPAGE = "https://zenodo.org/record/3698568#.YlVHqdNBxeg"
 
 _LICENSE = "Creative Commons Attribution 4.0 International"
 
-_URLS = "https://zenodo.org/record/3698568/files/progene.zip"
+# using custom url: original distribution includes trained models (>25GB) and original dataset license allow for redistribution
+_URLS = "https://huggingface.co/datasets/bigscience-biomedical/progene/resolve/main/crossvalidation_data.zip"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
