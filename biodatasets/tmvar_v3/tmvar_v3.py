@@ -19,16 +19,10 @@ In addition, it contains variant normalization options such as allele-specific i
 It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
 
 
-from distutils.command.config import config
-from multiprocessing.sharedctypes import Value
-import os
-from pydoc import doc
-from typing import List, Tuple, Dict, Iterator
-
 import datasets
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 import itertools
 from bioc import pubtator
 
@@ -149,7 +143,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
+    def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
 
         url = _URLS[_DATASETNAME]
@@ -163,7 +157,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
             )
         ]
 
-    def get_normalizations(self, id, type):
+    def get_normalizations(self, id, type, doc_id):
         """
         Given a type and a number of normalizations ids, this function returns a dictionary of the normalized ids
         """
@@ -205,7 +199,9 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                         continue
                     base_dict[db_name].append(db_id)
                 else:
-                    logger.warn(f"Malformed normalization. Type: {type}, Number: {id}")
+                    logger.warn(
+                        f"Malformed normalization in Document {doc_id}. Type: {type}, Number: {id}"
+                    )
                     continue
         return base_dict
 
@@ -232,7 +228,11 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                         "offsets": [[mention.start, mention.end]],
                         "text": [mention.text],
                         "semantic_type_id": [mention.type],
-                        "normalized": self.get_normalizations(mention.id, mention.type),
+                        "normalized": self.get_normalizations(
+                            mention.id,
+                            mention.type,
+                            doc.pmid,
+                        ),
                     }
                     for mention in doc.annotations
                 ]
@@ -270,7 +270,9 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                         "offsets": [[mention.start, mention.end]],
                         "text": [mention.text],
                         "type": [mention.type],
-                        "normalized": self.get_normalizations(mention.id, mention.type),
+                        "normalized": self.get_normalizations(
+                            mention.id, mention.type, doc.pmid
+                        ),
                     }
                     for mention in doc.annotations
                 ]
@@ -295,7 +297,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                 document["coreferences"] = []
                 yield document
 
-    def _generate_examples(self, filepath) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath):
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
