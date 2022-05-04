@@ -158,7 +158,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
                         os.path.join(folder_path, filename), "r", encoding="latin"
                     ) as f:
                         lines = f.readlines()
-                    return key, {
+                    yield key, {
                         "pmid": filename[:-4],
                         "title": title,
                         "abstract": abstract,
