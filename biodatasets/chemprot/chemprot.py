@@ -181,7 +181,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
 
-            relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
+            relations = self._get_relations(os.path.join(filepath, relation_file))
 
             # NOTE: Not all relations have a gold standard (i.e. annotated by human curators).
             empty_reln = [
@@ -203,7 +203,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
-            relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
+            relations = self._get_relations(os.path.join(filepath, relation_file))
 
             uid = 0
             for id_, pmid in enumerate(abstracts.keys()):
@@ -228,9 +228,11 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 ]
                 uid += 1
 
+                entity_to_id = {}
                 for entity in entities[pmid]:
                     _text = entity["text"]
                     entity.update({"text": [_text]})
+                    entity_to_id[entity["id"]] = str(uid)
                     entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
@@ -238,16 +240,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     data["entities"].append(entity)
                     uid += 1
 
-                empty_reln = [
-                    {
-                        "type": None,
-                        "arg1": None,
-                        "arg2": None,
-                    }
-                ]
-                for relation in relations.get(pmid, empty_reln):
-                    relation["arg1_id"] = relation.pop("arg1")
-                    relation["arg2_id"] = relation.pop("arg2")
+                for relation in relations.get(pmid, []):
+                    relation["arg1_id"] = entity_to_id[relation.pop("arg1")]
+                    relation["arg2_id"] = entity_to_id[relation.pop("arg2")]
                     relation.update({"id": str(uid)})
                     relation.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
                     data["relations"].append(relation)
@@ -315,7 +310,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         return entities, entity_id
 
     @staticmethod
-    def _get_relations(rel_filename: str, ent_dict: Dict[str, str]) -> Dict[str, str]:
+    def _get_relations(rel_filename: str) -> Dict[str, str]:
         """
         For each document in the ChemProt corpus, create an annotation for the gold-standard relationships.
 
@@ -346,18 +341,11 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
             ann = {
                 "type": label,
-                "arg1": ent_dict.get(arg1, None),
-                "arg2": ent_dict.get(arg2, None),
+                "arg1": arg1,
+                "arg2": arg2,
             }
 
             relations[pmid].append(ann)
 
         return relations
 
-
-if __name__ == "__main__":
-    from datasets import load_dataset
-
-    # ds = load_dataset(__file__)
-    ds = load_dataset(__file__)
-    print(ds)
