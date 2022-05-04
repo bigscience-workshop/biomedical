@@ -279,7 +279,6 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                 db_id_mapping = {
                     "dbSNP": "dbSNP",
                     "CorrespondingGene": "NCBI Gene",
-                    "tmVar": "dbSNP",
                 }
                 for entity in document["entities"]:
                     normalized_bigbio_kb = []
