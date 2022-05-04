@@ -1,9 +1,8 @@
 from enum import Enum
+from types import SimpleNamespace
 
 
-class BigBioValues(Enum):
-    NULL = "<BB-NULL-VALUE>"        # to represent missing data
-
+BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"

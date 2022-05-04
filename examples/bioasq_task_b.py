@@ -29,9 +29,9 @@ import os
 import re
 
 import datasets
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
 _CITATION = """\
 @article{tsatsaronis2015overview,
@@ -379,7 +379,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class BioasqDataset(datasets.GeneratorBasedBuilder):
+class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
     """
     BioASQ Task B On Biomedical Semantic QA.
     Creates configs for BioASQ2 through BioASQ10.
@@ -463,7 +463,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         We combine these files into a single test set file 9Bx_golden.json
         """
         version = re.search(r"bioasq_([0-9]+)b", self.config.subset_id).group(1)
-        gold_fpath = os.path.join(data_dir, f"Task{version}BGoldenEnriched/bx_golden.json")
+        gold_fpath = os.path.join(
+            data_dir, f"Task{version}BGoldenEnriched/bx_golden.json"
+        )
 
         if not os.path.exists(gold_fpath):
             # combine all gold json files
@@ -482,10 +484,15 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
 
         train_dir, test_dir = dl_manager.download_and_extract(
-            [os.path.join(self.config.data_dir, _url) for _url in _URLs[self.config.subset_id]]
+            [
+                os.path.join(self.config.data_dir, _url)
+                for _url in _URLs[self.config.subset_id]
+            ]
         )
         gold_fpath = self._dump_gold_json(test_dir)
 
@@ -506,7 +513,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(train_dir, train_fpaths[self.config.subset_id]),
+                    "filepath": os.path.join(
+                        train_dir, train_fpaths[self.config.subset_id]
+                    ),
                     "split": "train",
                 },
             ),
@@ -528,7 +537,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
             # summary question types only have an ideal answer, so use that for bigbio
             if self.config.schema == "bigbio_qa":
                 exact_answer = (
-                    record["ideal_answer"] if isinstance(record["ideal_answer"], list) else [record["ideal_answer"]]
+                    record["ideal_answer"]
+                    if isinstance(record["ideal_answer"], list)
+                    else [record["ideal_answer"]]
                 )
 
         elif record["type"] == "list":
@@ -536,7 +547,9 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
         elif record["type"] == "factoid":
             # older version of bioasq sometimes represent this as as string
             exact_answer = (
-                record["exact_answer"] if isinstance(record["exact_answer"], list) else [record["exact_answer"]]
+                record["exact_answer"]
+                if isinstance(record["exact_answer"], list)
+                else [record["exact_answer"]]
             )
         return exact_answer
 
@@ -562,6 +575,8 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                     }
 
         elif self.config.schema == "bigbio_qa":
+            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records 
+            cache = set()
             with open(filepath, encoding="utf-8") as file:
                 uid = 0
                 data = json.load(file)
@@ -570,14 +585,18 @@ class BioasqDataset(datasets.GeneratorBasedBuilder):
                     if "snippets" not in record:
                         continue
                     for i, snippet in enumerate(record["snippets"]):
-                        yield uid, {
-                            "id": f'{record["id"]}_{i}',
-                            "document_id": snippet["document"],
-                            "question_id": record["id"],
-                            "question": record["body"],
-                            "type": record["type"],
-                            "choices": [],
-                            "context": snippet["text"],
-                            "answer": self._get_exact_answer(record),
-                        }
-                        uid += 1
+                        key = f'{record["id"]}_{i}'
+                        # ignore duplicate records
+                        if key not in cache:
+                            cache.add(key)
+                            yield uid, {
+                                "id": key,
+                                "document_id": snippet["document"],
+                                "question_id": record["id"],
+                                "question": record["body"],
+                                "type": record["type"],
+                                "choices": [],
+                                "context": snippet["text"],
+                                "answer": self._get_exact_answer(record),
+                            }
+                            uid += 1
