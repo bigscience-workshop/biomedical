@@ -14,7 +14,7 @@ from typing import Optional, Union
 import datasets
 from bibgio.utils.constants import Tasks
 
-_SCHEMA_TO_TASKS = {
+_SCHEMA_TO_TASKS: dict = {
     "bigbio_kb": [
         Tasks.NAMED_ENTITY_RECOGNITION,
         Tasks.NAMED_ENTITY_DISAMBIGUATION,
@@ -28,6 +28,8 @@ _SCHEMA_TO_TASKS = {
     "bigbio_t2t": [Tasks.PARAPHRASING, Tasks.TRANSLATION, Tasks.SUMMARIZATION],
     "bigbio_text": [Tasks.TEXT_CLASSIFICATION],
 }
+
+_HUGE: dict = {}
 
 
 class BigBioDataloader:
