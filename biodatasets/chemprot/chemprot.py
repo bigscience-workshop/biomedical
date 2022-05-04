@@ -52,7 +52,7 @@ _URLs = {
     "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -137,7 +137,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(sample_path, "chemprot_sample"),
                     "abstract_file": "chemprot_sample_abstracts.tsv",
                     "entity_file": "chemprot_sample_entities.tsv",
-                    "relation_file": "chemprot_sample_gold_standard.tsv",
+                    "relation_file": "chemprot_sample_relations.tsv",
                     "split": "sample",
                 },
             ),
@@ -147,7 +147,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(train_path, "chemprot_training"),
                     "abstract_file": "chemprot_training_abstracts.tsv",
                     "entity_file": "chemprot_training_entities.tsv",
-                    "relation_file": "chemprot_training_gold_standard.tsv",
+                    "relation_file": "chemprot_training_relations.tsv",
                     "split": "train",
                 },
             ),
@@ -157,7 +157,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(test_path, "chemprot_test_gs"),
                     "abstract_file": "chemprot_test_abstracts_gs.tsv",
                     "entity_file": "chemprot_test_entities_gs.tsv",
-                    "relation_file": "chemprot_test_gold_standard.tsv",
+                    "relation_file": "chemprot_test_relations_gs.tsv",
                     "split": "test",
                 },
             ),
@@ -167,7 +167,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(dev_path, "chemprot_development"),
                     "abstract_file": "chemprot_development_abstracts.tsv",
                     "entity_file": "chemprot_development_entities.tsv",
-                    "relation_file": "chemprot_development_gold_standard.tsv",
+                    "relation_file": "chemprot_development_relations.tsv",
                     "split": "dev",
                 },
             ),
@@ -236,7 +236,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
-                    entity.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
+                    entity["normalized"] = []
                     data["entities"].append(entity)
                     uid += 1
 
@@ -244,7 +244,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     relation["arg1_id"] = entity_to_id[relation.pop("arg1")]
                     relation["arg2_id"] = entity_to_id[relation.pop("arg2")]
                     relation.update({"id": str(uid)})
-                    relation.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
+                    relation["normalized"] = []
                     data["relations"].append(relation)
                     uid += 1
 
@@ -312,11 +312,40 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
     @staticmethod
     def _get_relations(rel_filename: str) -> Dict[str, str]:
         """
+        For each document in the ChemProt corpus, create an annotation for all relationships.
+        """
+        with open(rel_filename, "r") as f:
+            contents = [i.strip() for i in f.readlines()]
+
+        relations = {}
+
+        for line in contents:
+            pmid, label, _, _, arg1, arg2 = line.split("\t")
+            arg1 = arg1.split("Arg1:")[-1]
+            arg2 = arg2.split("Arg2:")[-1]
+
+            if pmid not in relations:
+                relations[pmid] = []
+
+            ann = {
+                "type": label,
+                "arg1": arg1,
+                "arg2": arg2,
+            }
+
+            relations[pmid].append(ann)
+
+        return relations
+
+    @staticmethod
+    def _get_relations_gs(rel_filename: str) -> Dict[str, str]:
+        """
         For each document in the ChemProt corpus, create an annotation for the gold-standard relationships.
 
         The columns include:
         (1) PMID
         (2) Relationship Label (CPR)
+        (3) Used in shared task
         (3) Interactor Argument 1 Entity Identifier
         (4) Interactor Argument 2 Entity Identifier
 
