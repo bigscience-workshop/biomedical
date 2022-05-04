@@ -22,6 +22,7 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{chen2021overview, 
     title={Overview of the BioCreative VII LitCovid Track: multi-label topic classification for COVID-19 literature annotation}, 

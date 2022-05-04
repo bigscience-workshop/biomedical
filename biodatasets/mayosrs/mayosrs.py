@@ -26,6 +26,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{pedersen2007measures,
   title={Measures of semantic similarity and relatedness in the biomedical domain},

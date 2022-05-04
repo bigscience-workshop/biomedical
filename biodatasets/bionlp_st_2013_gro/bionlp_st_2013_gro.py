@@ -27,6 +27,7 @@ _DATASETNAME = "bionlp_st_2013_gro"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{kim-etal-2013-gro,
     title = "{GRO} Task: Populating the Gene Regulation Ontology with events and relations",

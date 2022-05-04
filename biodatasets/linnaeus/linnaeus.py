@@ -34,6 +34,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @Article{gerner2010linnaeus,
 title={LINNAEUS: a species name identification system for biomedical literature},

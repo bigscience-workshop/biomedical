@@ -53,6 +53,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @conference {396,
     title = {Overview of BioASQ 2021-MESINESP track. Evaluation of

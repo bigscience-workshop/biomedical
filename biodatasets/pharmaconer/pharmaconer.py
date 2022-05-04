@@ -31,6 +31,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{,
     title = "PharmaCoNER: Pharmacological Substances, Compounds and proteins Named Entity Recognition track",

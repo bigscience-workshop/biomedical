@@ -29,6 +29,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{zlabinger-etal-2020-effective,
     title = "Effective Crowd-Annotation of Participants, Interventions, and Outcomes in the Text of Clinical Trial Reports",

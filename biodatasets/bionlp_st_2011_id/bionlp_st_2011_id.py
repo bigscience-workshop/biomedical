@@ -26,6 +26,7 @@ _DATASETNAME = "bionlp_st_2011_id"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2011-overview,
     title = "Overview of the Infectious Diseases ({ID}) task of {B}io{NLP} Shared Task 2011",

@@ -39,6 +39,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{cohan:naacl19,
   author    = {Arman Cohan and Waleed Ammar and Madeleine van Zuylen and Field Cady},

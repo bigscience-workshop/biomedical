@@ -45,6 +45,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @misc{mohan2019medmentions,
       title={MedMentions: A Large Biomedical Corpus Annotated with UMLS Concepts},

@@ -30,6 +30,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
 @article{article,
 author = {Chiu, Billy and Pyysalo, Sampo and Vulić, Ivan and Korhonen, Anna},

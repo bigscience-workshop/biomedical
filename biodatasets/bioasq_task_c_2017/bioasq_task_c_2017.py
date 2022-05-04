@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
 import json
 import os
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from typing import List
 
 import datasets
@@ -25,6 +25,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{nentidis-etal-2017-results,
   author    = {Nentidis, Anastasios  and Bougiatiotis, Konstantinos  and Krithara, Anastasia  and
@@ -62,6 +63,7 @@ _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+
 @dataclass
 class BioASQTaskC2017BigBioConfig(BigBioConfig):
     schema: str = "source"
@@ -96,7 +98,7 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             subset_id="bioasq_task_c_2017",
         ),
     ]
-    
+
     BUILDER_CONFIG_CLASS = BioASQTaskC2017BigBioConfig
 
     def _info(self) -> datasets.DatasetInfo:
@@ -133,7 +135,9 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -174,7 +178,9 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
                     "id": str(pmid),
                     "pmid": pmid,
                     "pmcid": article["pmcid"],
-                    "grantList": [{"agency": grant["agency"]} for grant in article["grantList"]],
+                    "grantList": [
+                        {"agency": grant["agency"]} for grant in article["grantList"]
+                    ],
                 }
 
         elif self.config.schema == "bigbio_text":

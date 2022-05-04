@@ -34,6 +34,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{verspoor2013annotating,
 title={Annotating the biomedical literature for the human variome},

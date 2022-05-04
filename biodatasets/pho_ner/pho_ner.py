@@ -21,6 +21,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """@inproceedings{PhoNER_COVID19,
     author    = {Thinh Hung Truong and Mai Hoang Dao and Dat Quoc Nguyen},  
     title     = {COVID-19 Named Entity Recognition for Vietnamese}, 

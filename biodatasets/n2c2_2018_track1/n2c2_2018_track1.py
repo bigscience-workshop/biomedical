@@ -45,6 +45,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/StubbsFSHU19,
   author    = {
@@ -232,7 +233,9 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
         if self.config.data_dir is None or self.config.name is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir and name kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir and name kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -246,7 +249,9 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "file_path": os.path.join(data_dir, "n2c2-t1_gold_standard_test_data.zip"),
+                    "file_path": os.path.join(
+                        data_dir, "n2c2-t1_gold_standard_test_data.zip"
+                    ),
                 },
             ),
         ]
@@ -265,11 +270,16 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
 
         tags = sample.get("tags", None)
         if tags:
-            labels = [name for name, met_status in tags.items() if met_status == 'met']
+            labels = [name for name, met_status in tags.items() if met_status == "met"]
         else:
             labels = []
 
-        return {"id": sample_id, "document_id": sample_id, "text": sample.get("txt", ""), "labels": labels}
+        return {
+            "id": sample_id,
+            "document_id": sample_id,
+            "text": sample.get("txt", ""),
+            "labels": labels,
+        }
 
     def _generate_examples(self, file_path) -> (int, dict):
         samples = _read_zip(file_path)
@@ -283,4 +293,3 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
                 yield _id, self._get_bigbio_sample(sample_id, sample)
 
             _id += 1
-

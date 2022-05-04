@@ -32,6 +32,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @Inproceedings{,
     author = {Asma {Ben Abacha} and Dina Demner-Fushman},

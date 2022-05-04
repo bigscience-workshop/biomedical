@@ -59,6 +59,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/UzunerSC10,
   author    = {
@@ -140,7 +141,9 @@ BIGBIO_KB = "bigbio_kb"
 
 TEXT_DATA_FIELDNAME = "txt"
 MEDICATIONS_DATA_FIELDNAME = "med"
-OFFSET_PATTERN = r"(.+?)=\"(.+?)\"( .+)?"  # captures -> do="500" 102:6 102:6 and mo="nm"
+OFFSET_PATTERN = (
+    r"(.+?)=\"(.+?)\"( .+)?"  # captures -> do="500" 102:6 102:6 and mo="nm"
+)
 BINARY_PATTERN = r"(.+?)=\"(.+?)\""
 ENTITY_ID = "entity_id"
 MEDICATION = "m"
@@ -159,7 +162,9 @@ NOT_MENTIONED = "nm"
 def _read_train_test_data_from_tar_gz(data_dir):
     samples = defaultdict(dict)
 
-    with tarfile.open(os.path.join(data_dir, "train.test.released.8.17.09.tar.gz"), "r:gz") as tf:
+    with tarfile.open(
+        os.path.join(data_dir, "train.test.released.8.17.09.tar.gz"), "r:gz"
+    ) as tf:
         for member in tf.getmembers():
             if member.name != "train.test.released.8.17.09":
                 _, sample_id = os.path.split(member.name)
@@ -176,7 +181,9 @@ def _get_train_set(data_dir, train_test_set):
     train_sample_ids = set()
 
     # Read training set IDs
-    with tarfile.open(os.path.join(data_dir, "training.sets.released.tar.gz"), "r:gz") as tf:
+    with tarfile.open(
+        os.path.join(data_dir, "training.sets.released.tar.gz"), "r:gz"
+    ) as tf:
         for member in tf.getmembers():
             if member.name not in list(map(str, range(1, 11))):
                 _, sample_id = os.path.split(member.name)
@@ -200,7 +207,9 @@ def _get_test_set(train_set, train_test_set):
 
 
 def _add_entities_to_train_set(data_dir, train_set):
-    with zipfile.ZipFile(os.path.join(data_dir, "training.ground.truth.01.06.11.2009.zip")) as zf:
+    with zipfile.ZipFile(
+        os.path.join(data_dir, "training.ground.truth.01.06.11.2009.zip")
+    ) as zf:
         for info in zf.infolist():
             base, filename = os.path.split(info.filename)
             _, ext = os.path.splitext(filename)
@@ -209,11 +218,15 @@ def _add_entities_to_train_set(data_dir, train_set):
             # Extract sample id from filename pattern `379569_gold.entries`
             sample_id = filename.split(".")[0].split("_")[0]
             if ext == "entries":
-                train_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = zf.read(info).decode("utf-8")
+                train_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = zf.read(info).decode(
+                    "utf-8"
+                )
 
 
 def _add_entities_to_test_set(data_dir, test_set):
-    with tarfile.open(os.path.join(data_dir, "annotations_ground_truth.tar.gz"), "r:gz") as tf:
+    with tarfile.open(
+        os.path.join(data_dir, "annotations_ground_truth.tar.gz"), "r:gz"
+    ) as tf:
         for member in tf.getmembers():
             if "converted.noduplicates.sorted" in member.name:
                 base, filename = os.path.split(member.name)
@@ -224,11 +237,16 @@ def _add_entities_to_test_set(data_dir, test_set):
                 if ext == "m":
                     with tf.extractfile(member) as fp:
                         content_bytes = fp.read()
-                    test_set[sample_id][MEDICATIONS_DATA_FIELDNAME] = content_bytes.decode("utf-8")
+                    test_set[sample_id][
+                        MEDICATIONS_DATA_FIELDNAME
+                    ] = content_bytes.decode("utf-8")
 
 
 def _make_empty_schema_dict_with_text(text):
-    return {"text": text, "offsets": [{"start_line": 0, "start_token": 0, "end_line": 0, "end_token": 0}]}
+    return {
+        "text": text,
+        "offsets": [{"start_line": 0, "start_token": 0, "end_line": 0, "end_token": 0}],
+    }
 
 
 def _ct_match_to_dict(c_match: Match) -> dict:
@@ -261,7 +279,7 @@ def _ct_match_to_dict(c_match: Match) -> dict:
             """
             offset = offsets.split(" ")
             for i in range(0, len(offset), 2):
-                start, end = offset[i: i + 2]
+                start, end = offset[i : i + 2]
                 start_line, start_token = start.split(":")
                 end_line, end_token = end.split(":")
 
@@ -368,13 +386,25 @@ def _get_entities_from_sample(sample_id, sample, split):
     # parsed concepts (sort is just a convenience)
     med_parsed = sorted(
         [_parse_line(line) for line in med_lines],
-        key=lambda x: (x[MEDICATION]["offsets"][0]["start_line"], x[MEDICATION]["offsets"][0]["start_token"]),
+        key=lambda x: (
+            x[MEDICATION]["offsets"][0]["start_line"],
+            x[MEDICATION]["offsets"][0]["start_token"],
+        ),
     )
 
     for ii_cp, cp in enumerate(med_parsed):
-        for entity_type in {MEDICATION, DOSAGE, DURATION, REASON, FREQUENCY, MODE_OF_ADMIN}:
+        for entity_type in {
+            MEDICATION,
+            DOSAGE,
+            DURATION,
+            REASON,
+            FREQUENCY,
+            MODE_OF_ADMIN,
+        }:
             offsets, texts = [], []
-            for txt, offset in zip(cp[entity_type]["text"].split("..."), cp[entity_type]["offsets"]):
+            for txt, offset in zip(
+                cp[entity_type]["text"].split("..."), cp[entity_type]["offsets"]
+            ):
                 # annotations can span multiple lines
                 # we loop over all lines and build up the character offsets
                 for ii_line in range(offset["start_line"], offset["end_line"] + 1):
@@ -382,7 +412,9 @@ def _get_entities_from_sample(sample_id, sample, split):
                     # character offset to the beginning of the line
                     # line length of each line + 1 new line character for each line
                     # need to subtract 1 from offset["start_line"] because line index starts at 1 in dataset
-                    start_line_off = sum(text_line_lengths[: ii_line - 1]) + (ii_line - 1)
+                    start_line_off = sum(text_line_lengths[: ii_line - 1]) + (
+                        ii_line - 1
+                    )
 
                     # offsets for each token relative to the beginning of the line
                     # "one two" -> [(0,3), (4,6)]
@@ -390,17 +422,27 @@ def _get_entities_from_sample(sample_id, sample, split):
                     try:
                         # if this is a single line annotation
                         if ii_line == offset["start_line"] == offset["end_line"]:
-                            start_off = start_line_off + tokoff[offset["start_token"]][0]
+                            start_off = (
+                                start_line_off + tokoff[offset["start_token"]][0]
+                            )
                             end_off = start_line_off + tokoff[offset["end_token"]][1]
 
                         # if multi-line and on first line
                         # end_off gets a +1 for new line character
-                        elif (ii_line == offset["start_line"]) and (ii_line != offset["end_line"]):
-                            start_off = start_line_off + tokoff[offset["start_token"]][0]
-                            end_off = start_line_off + text_line_lengths[ii_line - 1] + 1
+                        elif (ii_line == offset["start_line"]) and (
+                            ii_line != offset["end_line"]
+                        ):
+                            start_off = (
+                                start_line_off + tokoff[offset["start_token"]][0]
+                            )
+                            end_off = (
+                                start_line_off + text_line_lengths[ii_line - 1] + 1
+                            )
 
                         # if multi-line and on last line
-                        elif (ii_line != offset["start_line"]) and (ii_line == offset["end_line"]):
+                        elif (ii_line != offset["start_line"]) and (
+                            ii_line == offset["end_line"]
+                        ):
                             end_off += tokoff[offset["end_token"]][1]
 
                         # if mult-line and not on first or last line
@@ -554,7 +596,9 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None or self.config.name is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir and name kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir and name kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -576,11 +620,19 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_source_sample(sample_id, sample) -> Dict[str, Union[str, List[Dict[str, str]]]]:
+    def _get_source_sample(
+        sample_id, sample
+    ) -> Dict[str, Union[str, List[Dict[str, str]]]]:
         entities = []
         if MEDICATIONS_DATA_FIELDNAME in sample:
-            entities = list(map(_parse_line, sample[MEDICATIONS_DATA_FIELDNAME].splitlines()))
-        return {"doc_id": sample_id, "text": sample.get(TEXT_DATA_FIELDNAME, ""), "entities": entities}
+            entities = list(
+                map(_parse_line, sample[MEDICATIONS_DATA_FIELDNAME].splitlines())
+            )
+        return {
+            "doc_id": sample_id,
+            "text": sample.get(TEXT_DATA_FIELDNAME, ""),
+            "entities": entities,
+        }
 
     @staticmethod
     def _get_bigbio_sample(
