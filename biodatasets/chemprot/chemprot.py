@@ -65,11 +65,18 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="chemprot_source",
+            name="chemprot_full_source",
             version=SOURCE_VERSION,
             description="chemprot source schema",
             schema="source",
-            subset_id="chemprot",
+            subset_id="chemprot_full",
+        ),
+        BigBioConfig(
+            name="chemprot_shared_task_eval_source",
+            version=SOURCE_VERSION,
+            description="chemprot source schema with only the relation types that were used in the shared task evaluation",
+            schema="source",
+            subset_id="chemprot_shared_task_eval",
         ),
         BigBioConfig(
             name="chemprot_bigbio_kb",
@@ -138,6 +145,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "abstract_file": "chemprot_sample_abstracts.tsv",
                     "entity_file": "chemprot_sample_entities.tsv",
                     "relation_file": "chemprot_sample_relations.tsv",
+                    "gold_standard_file": "chemprot_sample_gold_standard.tsv",
                     "split": "sample",
                 },
             ),
@@ -148,6 +156,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "abstract_file": "chemprot_training_abstracts.tsv",
                     "entity_file": "chemprot_training_entities.tsv",
                     "relation_file": "chemprot_training_relations.tsv",
+                    "gold_standard_file": "chemprot_training_gold_standard.tsv",
                     "split": "train",
                 },
             ),
@@ -158,6 +167,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "abstract_file": "chemprot_test_abstracts_gs.tsv",
                     "entity_file": "chemprot_test_entities_gs.tsv",
                     "relation_file": "chemprot_test_relations_gs.tsv",
+                    "gold_standard_file": "chemprot_test_gold_standard.tsv",
                     "split": "test",
                 },
             ),
@@ -168,38 +178,36 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "abstract_file": "chemprot_development_abstracts.tsv",
                     "entity_file": "chemprot_development_entities.tsv",
                     "relation_file": "chemprot_development_relations.tsv",
+                    "gold_standard_file": "chemprot_development_gold_standard.tsv",
                     "split": "dev",
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
+    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file,
+                           gold_standard_file, split):
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
-
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
 
-            relations = self._get_relations(os.path.join(filepath, relation_file))
+            if self.config.subset_id == "chemprot_full":
+                relations = self._get_relations(os.path.join(filepath, relation_file))
+            elif self.config.subset_id == "chemprot_shared_task_eval":
+                relations = self._get_relations_gs(os.path.join(filepath, gold_standard_file))
+            else:
+                raise ValueError(self.config)
 
-            # NOTE: Not all relations have a gold standard (i.e. annotated by human curators).
-            empty_reln = [
-                {
-                    "type": None,
-                    "arg1": None,
-                    "arg2": None,
-                }
-            ]
             for id_, pmid in enumerate(abstracts.keys()):
                 yield id_, {
                     "pmid": pmid,
                     "text": abstracts[pmid],
                     "entities": entities[pmid],
-                    "relations": relations.get(pmid, empty_reln),
+                    "relations": relations.get(pmid, []),
                 }
 
-        if self.config.schema == "bigbio_kb":
+        elif self.config.schema == "bigbio_kb":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
