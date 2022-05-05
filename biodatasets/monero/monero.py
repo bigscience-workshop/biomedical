@@ -216,7 +216,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
         ]
         entities = []
         for i, (l, s, e) in enumerate(entities_with_token_offsets):
-            cs, ce = offsets[s][0], offsets[e][1] + 1
+            cs, ce = offsets[s][0], offsets[e][1]
             entity = {
                 "id": f"{doc_id}-E{i}",
                 "text": [text[cs:ce]],
