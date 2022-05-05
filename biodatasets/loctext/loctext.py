@@ -207,8 +207,8 @@ class LocTextDataset(datasets.GeneratorBasedBuilder):
         for r in example["relations"]:
             relation = {
                 "id": f"{sourceid}-{r['id']}",
-                "arg1_id": r["subj"],
-                "arg2_id": r["obj"],
+                "arg1_id": f"{sourceid}-{r['subj']}",
+                "arg2_id": f"{sourceid}-{r['obj']}",
                 "type": r["pred"],
                 "normalized": [],
             }
@@ -224,7 +224,3 @@ class LocTextDataset(datasets.GeneratorBasedBuilder):
         }
         example = data
         return key, example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
