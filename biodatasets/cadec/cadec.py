@@ -291,7 +291,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                 anns.append(ann)
         elif code_system == "meddra":
             # remove offsets
-            concepts = re.sub(r"( ([0-9]+) ([0-9]+))+$", "", fields[1])
+            concepts = re.sub(r"\s(([0-9]+)\s([0-9]+);?)+$", "", fields[1])
             concepts = concepts.split(" + ")
             for concept in concepts:
                 ann = base_ann.copy()
