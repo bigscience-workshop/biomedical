@@ -18,10 +18,11 @@ MayoSRS consists of 101 clinical term pairs whose relatedness was determined by
 nine medical coders and three physicians from the Mayo Clinic.
 """
 
-import csv
 from typing import Dict, List, Tuple
 
 import datasets
+import pandas as pd
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -46,24 +47,13 @@ MayoSRS consists of 101 clinical term pairs whose relatedness was determined by
 nine medical coders and three physicians from the Mayo Clinic.
 """
 
-_HOMEPAGE = "https://nlp.cs.vcu.edu/data.html#mayosrs"
+_HOMEPAGE = "https://conservancy.umn.edu/handle/11299/196265"
 
-_LICENSE = "Unknown"
+_LICENSE = "CC0 1.0 Universal"
 
-_URLS = {
-    "source": [
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.gold",
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.terms",
-    ],
-    "bigbio_pairs": [
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.gold",
-        "https://nlp.cs.vcu.edu/data/similarity-data/MayoSRS.terms",
-    ],
-}
+_URLS = {_DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"}
 
-_SUPPORTED_TASKS = [
-    Tasks.SEMANTIC_SIMILARITY
-]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -123,14 +113,14 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        urls = _URLS[self.config.schema]
-        data_dir = dl_manager.download_and_extract(urls)
+        urls = _URLS[_DATASETNAME]
+        filepath = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": data_dir,
+                    "filepath": filepath,
                     "split": "train",
                 },
             )
@@ -140,55 +130,21 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
 
         if split == "train":
-            code = filepath[0]
-            texts = filepath[1]
 
-            data_code = []
-            with open(code, encoding="utf-8") as csv_file:
-                csv_reader_code = csv.reader(
-                    csv_file, quotechar='"', delimiter=",", quoting=csv.QUOTE_ALL, skipinitialspace=True
-                )
-                for id_, row in enumerate(csv_reader_code):
-                    label, code1, code2 = row[0].split("<>")
-                    data_code.append([label, code1, code2])
-
-            data_texts = []
-            with open(texts, encoding="utf-8") as csv_file:
-                csv_reader_texts = csv.reader(
-                    csv_file, quotechar='"', delimiter=",", quoting=csv.QUOTE_ALL, skipinitialspace=True
-                )
-
-                for id_, row in enumerate(csv_reader_texts):
-                    text_1, text_2 = row[0].split("<>")
-                    data_texts.append([text_1, text_2])
-
-            data = []
-            for i in range(len(data_code)):
-                data.append(sum(list(zip(data_texts, data_code))[i], []))
+            data = pd.read_csv(filepath, sep=",", header=0, names=["label", "code_1", "code_2", "text_1", "text_2"])
 
             if self.config.schema == "source":
-                for id_, row in enumerate(data):
-                    text_1, text_2, label, code_1, code_2 = row
-
-                    yield id_, {
-                        "text_1": text_1,
-                        "text_2": text_2,
-                        "label": float(label),
-                        "code_1": code_1,
-                        "code_2": code_2,
-                    }
+                for id_, row in data.iterrows():
+                    yield id_, row.to_dict()
 
             elif self.config.schema == "bigbio_pairs":
-                uid = 0
-                for id_, row in enumerate(data):
-                    uid += 1
-                    text_1, text_2, label, _, _ = row
+                for id_, row in data.iterrows():
                     yield id_, {
-                        "id": uid,  # uid is an unique identifier for every record that starts from 1
-                        "document_id": "NULL",
-                        "text_1": text_1,
-                        "text_2": text_2,
-                        "label": str(label),
+                        "id": id_,  # uid is an unique identifier for every record that starts from 1
+                        "document_id": id_,
+                        "text_1": row["text_1"],
+                        "text_2": row["text_2"],
+                        "label": str(row["label"]),
                     }
 
         else:

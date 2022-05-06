@@ -575,6 +575,8 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     }
 
         elif self.config.schema == "bigbio_qa":
+            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records 
+            cache = set()
             with open(filepath, encoding="utf-8") as file:
                 uid = 0
                 data = json.load(file)
@@ -583,14 +585,18 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     if "snippets" not in record:
                         continue
                     for i, snippet in enumerate(record["snippets"]):
-                        yield uid, {
-                            "id": f'{record["id"]}_{i}',
-                            "document_id": snippet["document"],
-                            "question_id": record["id"],
-                            "question": record["body"],
-                            "type": record["type"],
-                            "choices": [],
-                            "context": snippet["text"],
-                            "answer": self._get_exact_answer(record),
-                        }
-                        uid += 1
+                        key = f'{record["id"]}_{i}'
+                        # ignore duplicate records
+                        if key not in cache:
+                            cache.add(key)
+                            yield uid, {
+                                "id": key,
+                                "document_id": snippet["document"],
+                                "question_id": record["id"],
+                                "question": record["body"],
+                                "type": record["type"],
+                                "choices": [],
+                                "context": snippet["text"],
+                                "answer": self._get_exact_answer(record),
+                            }
+                            uid += 1
