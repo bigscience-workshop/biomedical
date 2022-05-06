@@ -94,7 +94,28 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2013_ge_source"
 
-    _ENTITY_TYPES = {"Protein", "Entity"}
+    # _ENTITY_TYPES = {
+    #     "Protein",
+    #     "Entity",
+    # }
+    _ENTITY_TYPES = [
+        "Phosphorylation",
+        "Acetylation",
+        "Localization",
+        "Ubiquitination",
+        "Anaphora",
+        "Transcription",
+        "Protein_catabolism",
+        "Gene_expression",
+        "Negative_regulation",
+        "Regulation",
+        "Protein_modification",
+        "Protein",
+        "Entity",
+        "Positive_regulation",
+        "Binding",
+        "Deacetylation",
+    ]
 
     def _info(self):
         """
@@ -119,7 +140,9 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -163,8 +186,12 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -183,7 +210,9 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
