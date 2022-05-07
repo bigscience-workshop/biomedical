@@ -26,6 +26,7 @@ _DATASETNAME = "bionlp_st_2019_bb"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{bossy-etal-2019-bacteria,
     title = "Bacteria Biotope at {B}io{NLP} Open Shared Tasks 2019",
