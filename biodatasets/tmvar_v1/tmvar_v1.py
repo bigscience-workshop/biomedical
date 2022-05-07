@@ -29,6 +29,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 import itertools
 
+_LOCAL = False
 _CITATION = """\
 @article{wei2013tmvar,
   title={tmVar: a text mining approach for extracting sequence variants in biomedical literature},

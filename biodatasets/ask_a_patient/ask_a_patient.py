@@ -24,6 +24,7 @@ from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "ask_a_patient"
 
+_LOCAL = False
 _CITATION = """
 @inproceedings{limsopatham-collier-2016-normalising,
     title = "Normalising Medical Concepts in Social Media Texts by Learning Semantic Representation",

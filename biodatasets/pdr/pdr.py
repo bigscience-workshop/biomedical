@@ -30,6 +30,7 @@ import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{kim2019corpus,
   title={A corpus of plant--disease relations in the biomedical domain},

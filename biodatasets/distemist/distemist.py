@@ -23,6 +23,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @dataset{luis_gasco_2022_6458455,
   author       = {Luis Gasco and Eulàlia Farré and Miranda-Escalada, Antonio and Salvador Lima and Martin Krallinger},

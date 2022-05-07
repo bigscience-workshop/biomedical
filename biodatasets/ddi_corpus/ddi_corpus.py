@@ -29,6 +29,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{HERREROZAZO2013914,
     title        = {The DDI corpus: An annotated corpus with pharmacological substances and drug–drug interactions},

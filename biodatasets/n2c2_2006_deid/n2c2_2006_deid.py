@@ -70,6 +70,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/14/5/550/720189
+_LOCAL = True
 _CITATION = """\
 @article{,
     author = {
@@ -165,11 +166,15 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -220,7 +225,12 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
                 document["entities"] = entities_
 
                 document["passages"] = [
-                    {"id": next(uid), "type": "full_text", "text": [full_text], "offsets": [[0, len(full_text)]]},
+                    {
+                        "id": next(uid),
+                        "type": "full_text",
+                        "text": [full_text],
+                        "offsets": [[0, len(full_text)]],
+                    },
                 ]
 
                 # additional fields required that can be empty
@@ -236,7 +246,9 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
 
         # There is an issue with the train file. There is a bad tag in line 25722
         if filename == "deid_surrogate_train_all_version2.zip":
-            bad_tag = """<PHI TYPE="DATE">25th of July<PHI TYPE="DOCTOR">""".encode("utf-8")
+            bad_tag = """<PHI TYPE="DATE">25th of July<PHI TYPE="DOCTOR">""".encode(
+                "utf-8"
+            )
             replacement_tag = """<PHI TYPE="DATE">25th of July</PHI>""".encode("utf-8")
             file = file.replace(bad_tag, replacement_tag, 1)
 
@@ -283,11 +295,17 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
                 full_text_with_tags=full_text_with_tags, phi_list=phi_xml_tags
             )
 
-            document_dict = {"record_id": document.attrib["ID"], "text": clean_text, "phi": entities}
+            document_dict = {
+                "record_id": document.attrib["ID"],
+                "text": clean_text,
+                "phi": entities,
+            }
 
             yield document_dict
 
-    def _extract_tags_text_spans(self, full_text_with_tags: str, phi_list: List[et.Element]) -> List[Dict]:
+    def _extract_tags_text_spans(
+        self, full_text_with_tags: str, phi_list: List[et.Element]
+    ) -> List[Dict]:
         """
         Method to extract all PHI tags from within the XML
         Note: There are entities with the same text but different tags.
@@ -311,7 +329,9 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
 
             # Substitute in the original text to eliminate the current tag
             # only replace the first occurrence
-            full_text_with_tags = re.sub(pattern=phi_regex, repl=entity_text, string=full_text_with_tags, count=1)
+            full_text_with_tags = re.sub(
+                pattern=phi_regex, repl=entity_text, string=full_text_with_tags, count=1
+            )
 
             # check that the text within the span is the same as the entity text
             if entity_text != full_text_with_tags[entity_start:entity_end]:
@@ -319,7 +339,12 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
 
             # save the entities
             entities.append(
-                {"text": [entity_text], "type": entity_type, "offsets": [[entity_start, entity_end]], "normalized": []}
+                {
+                    "text": [entity_text],
+                    "type": entity_type,
+                    "offsets": [[entity_start, entity_end]],
+                    "normalized": [],
+                }
             )
 
         # clean the last remaining tag

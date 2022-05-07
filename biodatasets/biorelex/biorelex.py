@@ -38,6 +38,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
 @inproceedings{,
     title = "{B}io{R}el{E}x 1.0: Biological Relation Extraction Benchmark",

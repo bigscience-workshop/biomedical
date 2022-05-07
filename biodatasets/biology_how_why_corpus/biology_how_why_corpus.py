@@ -31,6 +31,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 import xml.dom.minidom as xml
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{,
   title={Discourse Complements Lexical Semantics for Non-factoid Answer Reranking},

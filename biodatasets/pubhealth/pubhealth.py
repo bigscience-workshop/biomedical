@@ -30,6 +30,7 @@ from bigbio.utils.constants import Tasks
 
 logger = datasets.utils.logging.get_logger(__name__)
 
+_LOCAL = False
 _CITATION = """\
 @article{kotonya2020explainable,
   title={Explainable automated fact-checking for public health claims},

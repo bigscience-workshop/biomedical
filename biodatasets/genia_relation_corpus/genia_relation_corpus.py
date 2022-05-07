@@ -33,6 +33,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2009-static,
     title = "Static Relations: a Piece in the Biomedical Information Extraction Puzzle",

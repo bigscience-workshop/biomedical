@@ -32,6 +32,7 @@ from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "biosses"
 
+_LOCAL = False
 _CITATION = """
 @article{souganciouglu2017biosses,
   title={BIOSSES: a semantic sentence similarity estimation system for the biomedical domain},

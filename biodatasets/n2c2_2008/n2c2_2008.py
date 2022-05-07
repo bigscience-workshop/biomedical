@@ -76,6 +76,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "n2c2_2008"
 
 # https://academic.oup.com/jamia/article/16/4/561/766997
+_LOCAL = True
 _CITATION = """\
 @article{,
     author = {
@@ -206,13 +207,17 @@ def _read_xml(partition, data_dir):
         for document in root.findall("./doc"):
             assert document.attrib["id"] not in documents
             documents[document.attrib["id"]] = {}
-            documents[document.attrib["id"]]["text"] = document.findall("./text")[0].text
+            documents[document.attrib["id"]]["text"] = document.findall("./text")[
+                0
+            ].text
 
     annotation_files = tuple()
     if partition == "train":
         with open(data_dir / "obesity_standoff_annotations_training.xml") as t1, open(
             data_dir / "obesity_standoff_annotations_training_addendum.xml"
-        ) as t2, open(data_dir / "obesity_standoff_annotations_training_addendum2.xml") as t3, open(
+        ) as t2, open(
+            data_dir / "obesity_standoff_annotations_training_addendum2.xml"
+        ) as t3, open(
             data_dir / "obesity_standoff_annotations_training_addendum3.xml"
         ) as t4:
             train1 = t1.read().strip()
@@ -286,7 +291,9 @@ class N2C22008ObesityDataset(datasets.GeneratorBasedBuilder):
                     "text": datasets.Value("string"),
                     "labels": [
                         {
-                            "annotation": datasets.ClassLabel(names=["textual", "intuitive"]),
+                            "annotation": datasets.ClassLabel(
+                                names=["textual", "intuitive"]
+                            ),
                             "disease_name": datasets.ClassLabel(names=_disease_names),
                             "label": datasets.ClassLabel(names=_CLASS_NAMES),
                         }
@@ -305,11 +312,15 @@ class N2C22008ObesityDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 

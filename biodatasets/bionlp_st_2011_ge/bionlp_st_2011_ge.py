@@ -26,6 +26,7 @@ _DATASETNAME = "bionlp_st_2011_ge"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{10.5555/2107691.2107693,
 author = {Kim, Jin-Dong and Wang, Yue and Takagi, Toshihisa and Yonezawa, Akinori},

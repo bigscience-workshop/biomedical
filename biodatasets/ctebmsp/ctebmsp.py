@@ -33,6 +33,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{CampillosLlanos2021,
   author    = {Leonardo Campillos-Llanos and

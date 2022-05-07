@@ -31,6 +31,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2012-open,
   author    = {Ohta, Tomoko and Pyysalo, Sampo and Tsujii, Jun{'}ichi and Ananiadou, Sophia},
