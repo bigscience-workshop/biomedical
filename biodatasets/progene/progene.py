@@ -24,6 +24,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{faessler-etal-2020-progene,
     title = "{P}ro{G}ene - A Large-scale, High-Quality Protein-Gene Annotated Benchmark Corpus",
