@@ -329,22 +329,14 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         )
 
     # separate entities and event triggers
-    unified_example["entities"] = []
-    id_to_event_trigger = {}
-    for ann in brat_parse["text_bound_annotations"]:
-        if ann["type"] in entity_types:
-            entity_ann = ann.copy()
-            entity_ann["id"] = id_prefix + entity_ann["id"]
-            entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
-            unified_example["entities"].append(entity_ann)
-        else:
-            id_to_event_trigger[ann["id"]] = ann
-
     unified_example["events"] = []
+    non_event_ann = brat_parse["text_bound_annotations"].copy()
     for event in brat_parse["events"]:
         event = event.copy()
         event["id"] = id_prefix + event["id"]
-        trigger = id_to_event_trigger[event["trigger"]]
+        trigger = next(tr for tr in brat_parse["text_bound_annotations"] if tr['id'] == event["trigger"])
+        if trigger in non_event_ann:
+            non_event_ann.remove(trigger)
         event["trigger"] = {
             "text": trigger["text"].copy(),
             "offsets": trigger["offsets"].copy(),
@@ -353,7 +345,13 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
             argument["ref_id"] = id_prefix + argument["ref_id"]
 
         unified_example["events"].append(event)
-
+    unified_example["entities"] = []
+    anno_ids = [ref_id['id'] for ref_id in non_event_ann]
+    for ann in non_event_ann:
+        entity_ann = ann.copy()
+        entity_ann["id"] = id_prefix + entity_ann["id"]
+        entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
+        unified_example["entities"].append(entity_ann)
     # massage relations
     unified_example["relations"] = []
     for ann in brat_parse["relations"]:
@@ -374,7 +372,7 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         for ref_id in ann["ref_ids"]:
             if not ref_id.startswith("T"):  # not textbound -> no entity
                 is_entity_cluster = False
-            elif ref_id in id_to_event_trigger:  # event trigger -> no entity
+            elif ref_id not in anno_ids:  # event trigger -> no entity
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
