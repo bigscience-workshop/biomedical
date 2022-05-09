@@ -1,9 +1,6 @@
 import datasets
 import os
 
-import pandas as pd
-import numpy as np
-
 from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
