@@ -57,7 +57,7 @@ _URLS = {_DATASETNAME: "http://gcancer.org/pdr/Plant-Disease_Corpus.tar.gz"}
 
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
+    # Tasks.RELATION_EXTRACTION,
     Tasks.EVENT_EXTRACTION,
     Tasks.COREFERENCE_RESOLUTION,
 ]
@@ -209,12 +209,18 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                 elif self.config.subset_id == "pdr":
                     # Provide merged version of annotator 1 and 2
                     annotator1 = parsing.parse_brat_file(file, [".ann"])
-                    annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1, _ENTITY_TYPES)
+                    annotator1 = parsing.brat_parse_to_bigbio_kb(
+                        annotator1, _ENTITY_TYPES
+                    )
 
                     annotator2 = parsing.parse_brat_file(file, [".ann2"])
-                    annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2, _ENTITY_TYPES)
+                    annotator2 = parsing.brat_parse_to_bigbio_kb(
+                        annotator2, _ENTITY_TYPES
+                    )
 
-                    example = self._merge_annotations_by_intersection(file, annotator1, annotator2)
+                    example = self._merge_annotations_by_intersection(
+                        file, annotator1, annotator2
+                    )
 
                 example["text"] = example["passages"][0]["text"][0]
                 example.pop("id", None)
@@ -233,12 +239,16 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                 annotator2 = parsing.parse_brat_file(file, [".ann2"])
                 annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2, _ENTITY_TYPES)
 
-                merged_annotation = self._merge_annotations_by_intersection(file, annotator1, annotator2)
+                merged_annotation = self._merge_annotations_by_intersection(
+                    file, annotator1, annotator2
+                )
                 merged_annotation["id"] = merged_annotation["document_id"]
 
                 yield merged_annotation["id"], merged_annotation
 
-    def _merge_annotations_by_intersection(self, file: Path, example_ann1: Dict, example_ann2: Dict) -> Dict:
+    def _merge_annotations_by_intersection(
+        self, file: Path, example_ann1: Dict, example_ann2: Dict
+    ) -> Dict:
         """
         Merges the two given examples by only keeping annotations on which both annotators agree.
         """
@@ -253,11 +263,16 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
         entity_id = 1
         for entity1 in example_ann1["entities"]:
             for entity2 in example_ann2["entities"]:
-                if self._overlaps(entity1, entity2) and entity1["type"] == entity2["type"]:
+                if (
+                    self._overlaps(entity1, entity2)
+                    and entity1["type"] == entity2["type"]
+                ):
                     text_entity1 = "".join(entity1["text"])
                     text_entity2 = "".join(entity2["text"])
 
-                    longer_entity = entity1 if len(text_entity1) > len(text_entity2) else entity2
+                    longer_entity = (
+                        entity1 if len(text_entity1) > len(text_entity2) else entity2
+                    )
                     merged_entity_id = id_prefix + f"E{entity_id}"
                     entity_id += 1
 
@@ -305,11 +320,19 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
 
             for (trigger1, theme1, cause1) in events_1:
                 for (trigger2, theme2, cause2) in events_2:
-                    if theme1 == theme2 and cause1 == cause2 and self._overlaps(trigger1, trigger2):
+                    if (
+                        theme1 == theme2
+                        and cause1 == cause2
+                        and self._overlaps(trigger1, trigger2)
+                    ):
                         trigger1_text = "".join(trigger1["text"])
                         trigger2_text = "".join(trigger2["text"])
 
-                        longer_trigger = trigger1 if len(trigger1_text) >= len(trigger2_text) else trigger2
+                        longer_trigger = (
+                            trigger1
+                            if len(trigger1_text) >= len(trigger2_text)
+                            else trigger2
+                        )
                         events.append(
                             {
                                 "id": id_prefix + f"T{event_id}",
@@ -325,15 +348,26 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                         break
 
         # Find all coreferences the annotators agree on
-        coferences_ann1 = self._map_coreferences(example_ann1, a1_entity_to_merged_entity)
-        coferences_ann2 = self._map_coreferences(example_ann2, a2_entity_to_merged_entity)
+        coferences_ann1 = self._map_coreferences(
+            example_ann1, a1_entity_to_merged_entity
+        )
+        coferences_ann2 = self._map_coreferences(
+            example_ann2, a2_entity_to_merged_entity
+        )
         coreferences = []
         coreference_id = 1
 
         for _, entity_ids1 in coferences_ann1.items():
             for _, entity_ids2 in coferences_ann2.items():
-                if entity_ids1.intersection(entity_ids2) == entity_ids1.union(entity_ids2):
-                    coreferences.append({"id": id_prefix + f"CO{coreference_id}", "entity_ids": list(entity_ids1)})
+                if entity_ids1.intersection(entity_ids2) == entity_ids1.union(
+                    entity_ids2
+                ):
+                    coreferences.append(
+                        {
+                            "id": id_prefix + f"CO{coreference_id}",
+                            "entity_ids": list(entity_ids1),
+                        }
+                    )
                     coreference_id += 1
 
         merged_example = example_ann1.copy()
@@ -383,7 +417,9 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
             common_theme_id = entity_id_mapping[theme_id]
             common_cause_id = entity_id_mapping[cause_id]
 
-            event_map[event["type"]].append((event["trigger"], common_theme_id, common_cause_id))
+            event_map[event["type"]].append(
+                (event["trigger"], common_theme_id, common_cause_id)
+            )
 
         return event_map
 
@@ -394,7 +430,13 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
         """
         id_to_corefs = defaultdict(set)
         for coreference in annotation["coreferences"]:
-            entity_ids = set([entity_mapping[id] for id in coreference["entity_ids"] if id in entity_mapping])
+            entity_ids = set(
+                [
+                    entity_mapping[id]
+                    for id in coreference["entity_ids"]
+                    if id in entity_mapping
+                ]
+            )
 
             # Are both id's also in the merged version?
             if len(entity_ids) > 1:
