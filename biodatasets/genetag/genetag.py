@@ -31,6 +31,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{Tanabe2005,
   author    = {Lorraine Tanabe and Natalie Xie and Lynne H Thom and Wayne Matten and W John Wilbur},

@@ -22,10 +22,12 @@ import os
 from typing import Dict, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
@@ -52,7 +54,11 @@ _URLs = {
     "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [
+    Tasks.RELATION_EXTRACTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -125,10 +131,18 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
         # Extract each of the individual folders
         # NOTE: omitting "extract" call cause it uses a new folder
-        train_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_training.zip"))
-        test_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_test_gs.zip"))
-        dev_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_development.zip"))
-        sample_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_sample.zip"))
+        train_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_training.zip")
+        )
+        test_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_test_gs.zip")
+        )
+        dev_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_development.zip")
+        )
+        sample_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_sample.zip")
+        )
 
         return [
             datasets.SplitGenerator(
@@ -173,15 +187,21 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file, split):
+    def _generate_examples(
+        self, filepath, abstract_file, entity_file, relation_file, split
+    ):
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
-            entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
+            entities, entity_id = self._get_entities(
+                os.path.join(filepath, entity_file)
+            )
 
-            relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
+            relations = self._get_relations(
+                os.path.join(filepath, relation_file), entity_id
+            )
 
             # NOTE: Not all relations have a gold standard (i.e. annotated by human curators).
             empty_reln = [
@@ -202,8 +222,12 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "bigbio_kb":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
-            entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
-            relations = self._get_relations(os.path.join(filepath, relation_file), entity_id)
+            entities, entity_id = self._get_entities(
+                os.path.join(filepath, entity_file)
+            )
+            relations = self._get_relations(
+                os.path.join(filepath, relation_file), entity_id
+            )
 
             uid = 0
             for id_, pmid in enumerate(abstracts.keys()):
@@ -234,7 +258,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
-                    entity.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
+                    entity.update(
+                        {"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]}
+                    )
                     data["entities"].append(entity)
                     uid += 1
 
@@ -249,7 +275,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     relation["arg1_id"] = relation.pop("arg1")
                     relation["arg2_id"] = relation.pop("arg2")
                     relation.update({"id": str(uid)})
-                    relation.update({"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]})
+                    relation.update(
+                        {"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]}
+                    )
                     data["relations"].append(relation)
                     uid += 1
 
@@ -268,7 +296,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             contents = [i.strip() for i in f.readlines()]
 
         # PMID is the first column, Abstract is last
-        return {doc.split("\t")[0]: "\n".join(doc.split("\t")[1:]) for doc in contents}  # Includes title as line 1
+        return {
+            doc.split("\t")[0]: "\n".join(doc.split("\t")[1:]) for doc in contents
+        }  # Includes title as line 1
 
     @staticmethod
     def _get_entities(ents_filename: str) -> Tuple[Dict[str, str]]:

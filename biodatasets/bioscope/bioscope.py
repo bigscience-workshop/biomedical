@@ -37,6 +37,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{vincze2008bioscope,
   title={The BioScope corpus: biomedical texts annotated for uncertainty, negation and their scopes},

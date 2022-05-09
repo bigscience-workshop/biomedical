@@ -24,6 +24,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{10.1093/jamia/ocv037,
     author = {Kors, Jan A and Clematide, Simon and Akhondi,

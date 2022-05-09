@@ -30,6 +30,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{pakhomov2010semantic,
   title={Semantic similarity and relatedness between clinical terms: an experimental study},

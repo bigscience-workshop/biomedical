@@ -52,6 +52,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
 @article{,
   author    = {Thomas, Philippe and Klinger, Roman and Furlong, Laura and Hofmann-Apitius, Martin and Friedrich, Christoph},

@@ -69,6 +69,7 @@ from typing import Dict, List, Match, Tuple
 
 import datasets
 from datasets import Features, Value
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -76,6 +77,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "n2c2_2011"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
+_LOCAL = True
 _CITATION = """\
 @article{,
     author = {
@@ -138,7 +140,9 @@ def _read_tar_gz(file_path, samples=None):
             sample_id = filename.split(".")[0]
 
             if ext in ["txt", "con", "pairs", "chains"]:
-                samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + member.name
+                samples[sample_id][f"{ext}_source"] = (
+                    os.path.basename(file_path) + "|" + member.name
+                )
                 with tf.extractfile(member) as fp:
                     content_bytes = fp.read()
                 content = content_bytes.decode("utf-8")
@@ -158,8 +162,12 @@ def _read_zip(file_path, samples=None):
             ext = ext[1:]  # get rid of dot
             sample_id = filename.split(".")[0]
 
-            if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith("."):
-                samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + info.filename
+            if ext in ["txt", "con", "pairs", "chains"] and not filename.startswith(
+                "."
+            ):
+                samples[sample_id][f"{ext}_source"] = (
+                    os.path.basename(file_path) + "|" + info.filename
+                )
                 content = zf.read(info).decode("utf-8")
                 samples[sample_id][ext] = content
 
@@ -271,7 +279,9 @@ def _get_corefs_from_sample(sample_id, sample, sample_entity_ids, split):
             )
             for entity in cp
         ]
-        coref_entity_ids = [ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids]
+        coref_entity_ids = [
+            ent_id for ent_id in coref_entity_ids if ent_id in sample_entity_ids
+        ]
         coref = {
             "id": coref_id,
             "entity_ids": coref_entity_ids,
@@ -441,10 +451,14 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 

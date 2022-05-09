@@ -28,6 +28,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 import itertools
 
+_LOCAL = False
 _CITATION = """\
 @article{wei2018tmvar,
 title={tmVar 2.0: integrating genomic variant information from literature with dbSNP and ClinVar for precision medicine},

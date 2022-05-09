@@ -30,6 +30,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{10.5555/1289189.1289260,
 author = {Ohta, Tomoko and Tateisi, Yuka and Kim, Jin-Dong},

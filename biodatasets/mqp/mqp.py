@@ -27,6 +27,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
@@ -49,13 +50,12 @@ the question prepared by medical professional. Paraphrased versions were labelle
 but contextually similar ) or dissimilar (syntactically may look similar but contextually dissimilar). Labels 1: similar, 0: dissimilar
 """
 
-_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
+_HOMEPAGE = "https://github.com/curai/medical-question-pair-dataset"
 
-_LICENSE = ""
+_LICENSE = "Unknown"
 
 _URLs = {
-    "source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
-    "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
+    _DATASETNAME: "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
 }
 
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
@@ -114,7 +114,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        my_urls = _URLs[self.config.schema]
+        my_urls = _URLs[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(my_urls)
 
         return [

@@ -28,6 +28,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{Dogan2014NCBIDC,
     title        = {NCBI disease corpus: A resource for disease name recognition and concept normalization},

@@ -29,6 +29,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{kolarik:lrec-ws08,
   author    = {Kol{\'a}{\vr}ik, Corinna and Klinger, Roman and Friedrich, Christoph M and Hofmann-Apitius, Martin and Fluck, Juliane},

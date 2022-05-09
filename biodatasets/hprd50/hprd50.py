@@ -41,6 +41,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
 @article{,
   author    = {Katrin Fundel, Robert Kuffner, Ralf Zimmer},

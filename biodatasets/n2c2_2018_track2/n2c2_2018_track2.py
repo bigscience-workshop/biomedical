@@ -48,6 +48,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/HenryBFSU20,
   author    = {
@@ -133,7 +134,17 @@ RELATION, RELATIONS = "relation", "relations"
 START, END = "start", "end"
 
 N2C2_2018_NER_LABELS = sorted(
-    ["Drug", "Frequency", "Reason", "ADE", "Dosage", "Duration", "Form", "Route", "Strength"]
+    [
+        "Drug",
+        "Frequency",
+        "Reason",
+        "ADE",
+        "Dosage",
+        "Duration",
+        "Form",
+        "Route",
+        "Strength",
+    ]
 )
 N2C2_2018_RELATION_LABELS = sorted(
     [
@@ -150,11 +161,7 @@ N2C2_2018_RELATION_LABELS = sorted(
 
 
 def _form_id(sample_id, entity_id, split):
-    return "{}-{}-{}".format(
-        sample_id,
-        entity_id,
-        split
-    )
+    return "{}-{}-{}".format(sample_id, entity_id, split)
 
 
 def _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text):
@@ -200,7 +207,9 @@ def _get_annotations(annotation_file):
             tag_type, tag_start, _, _, tag_end = tag_m.split(" ")
         else:
             print(line)
-        tags[tag_id] = _build_concept_dict(tag_id, tag_start, tag_end, tag_type, tag_text)
+        tags[tag_id] = _build_concept_dict(
+            tag_id, tag_start, tag_end, tag_type, tag_text
+        )
 
     for line_num, line in enumerate(filter(lambda l: l.strip().startswith("R"), lines)):
         rel_id, rel_m = line.strip().split("\t")
@@ -229,7 +238,10 @@ def _read_zip(file_path):
                 if ext == TEXT_EXT:
                     samples[sample_id][ext] = content
                 else:
-                    samples[sample_id][TAGS], samples[sample_id][RELATIONS] = _get_annotations(content)
+                    (
+                        samples[sample_id][TAGS],
+                        samples[sample_id][RELATIONS],
+                    ) = _get_annotations(content)
 
     return samples
 
@@ -239,7 +251,7 @@ def _get_entities_from_sample(sample_id, sample, split):
     entity_ids = set()
     text = sample[TEXT_EXT]
     for entity in sample[TAGS]:
-        text_slice = text[entity[START]: entity[END]]
+        text_slice = text[entity[START] : entity[END]]
         text_slice_norm_1 = text_slice.replace("\n", "").lower()
         text_slice_norm_2 = text_slice.replace("\n", " ").lower()
         match = text_slice_norm_1 == entity[TEXT] or text_slice_norm_2 == entity[TEXT]
@@ -335,7 +347,9 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
                             ID: datasets.Value("string"),
                             "arg1_id": datasets.Value("string"),
                             "arg2_id": datasets.Value("string"),
-                            RELATION: datasets.ClassLabel(names=N2C2_2018_RELATION_LABELS),
+                            RELATION: datasets.ClassLabel(
+                                names=N2C2_2018_RELATION_LABELS
+                            ),
                         }
                     ],
                 }
@@ -355,7 +369,9 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None or self.config.name is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir and name kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir and name kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -415,9 +431,15 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
         _id = 0
         for sample_id, sample in samples.items():
 
-            if self.config.name == N2C2AdverseDrugEventsMedicationExtractionDataset.SOURCE_CONFIG_NAME:
+            if (
+                self.config.name
+                == N2C2AdverseDrugEventsMedicationExtractionDataset.SOURCE_CONFIG_NAME
+            ):
                 yield _id, self._get_source_sample(sample_id, sample)
-            elif self.config.name == N2C2AdverseDrugEventsMedicationExtractionDataset.BIGBIO_CONFIG_NAME:
+            elif (
+                self.config.name
+                == N2C2AdverseDrugEventsMedicationExtractionDataset.BIGBIO_CONFIG_NAME
+            ):
                 yield _id, self._get_bigbio_sample(sample_id, sample, split)
 
             _id += 1

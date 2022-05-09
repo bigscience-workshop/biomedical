@@ -30,6 +30,7 @@ from bigbio.utils.constants import Tasks
 
 logger = datasets.utils.logging.get_logger(__name__)
 
+_LOCAL = False
 _CITATION = """\
 @article{kotonya2020explainable,
   title={Explainable automated fact-checking for public health claims},
@@ -53,7 +54,7 @@ _LICENSE = "MIT License"
 
 _URLs = {_DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"}
 
-_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -139,7 +140,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
 
         with open(filepath, encoding="utf-8") as csv_file:
             csv_reader = csv.reader(
-                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_NONE, skipinitialspace=True
             )
             next(csv_reader, None)  # remove column headers
             for id_, row in enumerate(csv_reader):

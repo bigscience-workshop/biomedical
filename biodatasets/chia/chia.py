@@ -27,6 +27,7 @@ import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{kury2020chia,
   title={Chia, a large annotated corpus of clinical trial eligibility criteria},

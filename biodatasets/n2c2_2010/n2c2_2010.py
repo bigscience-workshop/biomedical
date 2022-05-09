@@ -54,6 +54,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/UzunerSSD11,
   author    = {
@@ -119,7 +120,9 @@ def _read_tar_gz(file_path: str, samples=None):
             sample_id = filename.split(".")[0]
 
             if ext in ["txt", "ast", "con", "rel"]:
-                samples[sample_id][f"{ext}_source"] = os.path.basename(file_path) + "|" + member.name
+                samples[sample_id][f"{ext}_source"] = (
+                    os.path.basename(file_path) + "|" + member.name
+                )
 
                 with tf.extractfile(member) as fp:
                     content_bytes = fp.read()
@@ -213,7 +216,11 @@ def _parse_ast_line(line: str) -> dict:
 
     """
     c_part, t_part, a_part = line.split(DELIMITER)
-    c_match, t_match, a_match = re.match(C_PATTERN, c_part), re.match(T_PATTERN, t_part), re.match(A_PATTERN, a_part)
+    c_match, t_match, a_match = (
+        re.match(C_PATTERN, c_part),
+        re.match(T_PATTERN, t_part),
+        re.match(A_PATTERN, a_part),
+    )
     return {
         "text": c_match.group(1),
         "start_line": int(c_match.group(2)),
@@ -282,7 +289,9 @@ def _get_relations_from_sample(sample_id, sample, split):
             rel["concept_2"]["end_line"],
             rel["concept_2"]["end_token"],
         )
-        a["id"] = sample_id + "_" + a["arg1_id"] + "_" + rel["relation"] + "_" + a["arg2_id"]
+        a["id"] = (
+            sample_id + "_" + a["arg1_id"] + "_" + rel["relation"] + "_" + a["arg2_id"]
+        )
         a["normalized"] = []
         a["type"] = rel["relation"]
         relations.append(a)
@@ -501,7 +510,9 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
         if self.config.data_dir is None or self.config.name is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir and name kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir and name kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -529,7 +540,9 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
             "doc_id": sample_id,
             "text": sample.get("txt", ""),
             "concepts": list(map(_parse_con_line, sample.get("con", "").splitlines())),
-            "assertions": list(map(_parse_ast_line, sample.get("ast", "").splitlines())),
+            "assertions": list(
+                map(_parse_ast_line, sample.get("ast", "").splitlines())
+            ),
             "relations": list(map(_parse_rel_line, sample.get("rel", "").splitlines())),
             "unannotated": sample.get("unannotated", ""),
             "metadata": {
@@ -566,10 +579,16 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, data_dir, split) -> (int, dict):
         if split == "train":
-            samples = _read_tar_gz(os.path.join(data_dir, "concept_assertion_relation_training_data.tar.gz"))
+            samples = _read_tar_gz(
+                os.path.join(
+                    data_dir, "concept_assertion_relation_training_data.tar.gz"
+                )
+            )
         elif split == "test":
             # This file adds con, ast and rel
-            samples = _read_tar_gz(os.path.join(data_dir, "reference_standard_for_test_data.tar.gz"))
+            samples = _read_tar_gz(
+                os.path.join(data_dir, "reference_standard_for_test_data.tar.gz")
+            )
             # This file adds txt to already existing samples
             samples = _read_tar_gz(os.path.join(data_dir, "test_data.tar.gz"), samples)
 

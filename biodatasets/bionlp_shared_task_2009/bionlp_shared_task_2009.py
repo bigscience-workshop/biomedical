@@ -24,6 +24,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{kim-etal-2009-overview,
     title = "Overview of {B}io{NLP}{'}09 Shared Task on Event Extraction",
