@@ -29,6 +29,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @proceedings{DBLP:conf/sepln/2018ibereval,
   author    = {Paolo Rosso and

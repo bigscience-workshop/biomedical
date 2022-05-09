@@ -53,6 +53,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{Zolnoori2019,
   author    = {Maryam Zolnoori and
@@ -192,8 +193,12 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
                                     "drug": datasets.Value("string"),
                                     "class": datasets.Value("string"),
                                     "entity_type": datasets.Value("string"),
-                                    "UMLS": datasets.Sequence([datasets.Value("string")]),
-                                    "SNOMED": datasets.Sequence([datasets.Value("string")]),
+                                    "UMLS": datasets.Sequence(
+                                        [datasets.Value("string")]
+                                    ),
+                                    "SNOMED": datasets.Sequence(
+                                        [datasets.Value("string")]
+                                    ),
                                 }
                             ],
                         }
@@ -216,7 +221,9 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -283,11 +290,15 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
         )
 
         sentence_df = sentence_df.dropna(subset=["sentences"])
-        sentence_df = sentence_df.loc[sentence_df.sentences.apply(lambda x: len(x.strip())) > 0]
+        sentence_df = sentence_df.loc[
+            sentence_df.sentences.apply(lambda x: len(x.strip())) > 0
+        ]
         sentence_df = sentence_df.fillna(0)
 
         sentence_df[["ADR", "WD", "EF", "INF", "SSI", "DI"]] = (
-            sentence_df[["ADR", "WD", "EF", "INF", "SSI", "DI"]].replace(re.compile("[!* ]+"), 1).astype(int)
+            sentence_df[["ADR", "WD", "EF", "INF", "SSI", "DI"]]
+            .replace(re.compile("[!* ]+"), 1)
+            .astype(int)
         )
 
         sentence_df["sentence_index"] = sentence_df["sentence_index"].astype("int32")
@@ -296,7 +307,9 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
         return sentence_df
 
     def _read_samples_xlsx(self, filepath: Path) -> pd.DataFrame:
-        samples_df = pd.read_excel(filepath, sheet_name="Sample", dtype={"drug_id": str})
+        samples_df = pd.read_excel(
+            filepath, sheet_name="Sample", dtype={"drug_id": str}
+        )
         samples_df["age"] = samples_df["age"].fillna(0).astype(int)
         samples_df["drug_id"] = samples_df["drug_id"].astype("str")
 
@@ -307,7 +320,9 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
         identified_entities = {}
 
         for sheet in sheet_names:
-            identified_entities[sheet] = pd.read_excel(filepath, sheet_name=sheet + "_Identified")
+            identified_entities[sheet] = pd.read_excel(
+                filepath, sheet_name=sheet + "_Identified"
+            )
             identified_entities[sheet]["bigbio_kb"] = identified_entities[sheet].apply(
                 lambda x: self._columns_to_bigbio_kb(x, sheet), axis=1
             )
@@ -332,13 +347,19 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
 
             # Correcting column names
             if sheet_short in ["WD"]:
-                _df_mapping = _df_mapping.rename(columns={"sentence_id": "sentence_index"})
+                _df_mapping = _df_mapping.rename(
+                    columns={"sentence_id": "sentence_index"}
+                )
 
             # Changing column names to allow concatenation
-            _df_mapping = _df_mapping.rename(columns={self.TYPE_TO_COLNAME[sheet_short]: "entity"})
+            _df_mapping = _df_mapping.rename(
+                columns={self.TYPE_TO_COLNAME[sheet_short]: "entity"}
+            )
 
             # Putting UMLS and SNOMED annotations in a single column
-            _df_mapping["UMLS"] = _df_mapping.apply(lambda x: self._standards_columns_to_list(x), axis=1)
+            _df_mapping["UMLS"] = _df_mapping.apply(
+                lambda x: self._standards_columns_to_list(x), axis=1
+            )
             _df_mapping["SNOMED"] = _df_mapping.apply(
                 lambda x: self._standards_columns_to_list(x, standard="SNOMED"), axis=1
             )
@@ -354,13 +375,17 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
     def _convert_xlsx_to_source(self, filepath: Path) -> Dict:
         # Read XLSX files
         df_sentences = self._read_sentence_xlsx(filepath)
-        df_sentences["label"] = df_sentences.apply(lambda x: self._extract_labels(x), axis=1)
+        df_sentences["label"] = df_sentences.apply(
+            lambda x: self._extract_labels(x), axis=1
+        )
         df_mappings = self._identified_mapped_xlsx_to_df(filepath)
         df_samples = self._read_samples_xlsx(filepath)
 
         # Configure indices
         df_samples = df_samples.set_index("drug_id").sort_index()
-        df_sentences = df_sentences.set_index(["drug_id", "sentence_index"]).sort_index()
+        df_sentences = df_sentences.set_index(
+            ["drug_id", "sentence_index"]
+        ).sort_index()
         df_mappings = df_mappings.set_index(["drug_id", "sentence_index"]).sort_index()
 
         # Iterate over samples
@@ -373,7 +398,9 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
                 for sentence_row_id, sentence in df_sentence_selection.iterrows():
                     entities = []
                     try:
-                        df_mapped_selection = df_mappings.loc[sample_row_id, sentence_row_id]
+                        df_mapped_selection = df_mappings.loc[
+                            sample_row_id, sentence_row_id
+                        ]
 
                         # Iterate over entities per sentence
                         for mapped_row_id, row in df_mapped_selection.iterrows():

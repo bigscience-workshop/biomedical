@@ -23,6 +23,7 @@ from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "sciq"
 
+_LOCAL = False
 _CITATION = """
 @inproceedings{welbl-etal-2017-crowdsourcing,
     title = "Crowdsourcing Multiple Choice Science Questions",

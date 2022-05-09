@@ -30,6 +30,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
 @article{article,
 author = {Chiu, Billy and Pyysalo, Sampo and Vulić, Ivan and Korhonen, Anna},
@@ -159,8 +160,8 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
                 elif self.config.schema == "bigbio_pairs":
                     yield id_, {
                         "id": str(id_),
-                        "document_id": "NULL",
+                        "document_id": str(id_),
                         "text_1": word1,
                         "text_2": word2,
-                        "label": str(score),
+                        "label": str(score.strip()),
                     }

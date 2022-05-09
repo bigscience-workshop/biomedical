@@ -43,9 +43,9 @@ Instructions on how to load locally:
 4) Set kwarg data_dir of load_datasets to the path of the directory
 """
 
-from dataclasses import dataclass
 import itertools as it
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -55,6 +55,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{,
   title    = "Developing a test collection for biomedical word sense
@@ -105,7 +106,7 @@ class NlmWsdBigBioConfig(BigBioConfig):
     description: str = "NLM-WSD basic reviewed source schema"
     subset_id: str = "nlm_wsd_reviewed"
 
-            
+
 class NlmWsdDataset(datasets.GeneratorBasedBuilder):
     """Biomedical Word Sense Disambiguation (WSD)."""
 
@@ -195,7 +196,9 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = Path(self.config.data_dir)
             umls_dir = dl_manager.download_and_extract(data_dir / _URLS["UMLS"])
@@ -204,7 +207,9 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
                 ann_dir = dl_manager.download_and_extract(data_dir / _URLS["reviewed"])
                 ann_dir = Path(ann_dir) / "Reviewed_Results"
             else:
-                ann_dir = dl_manager.download_and_extract(data_dir / _URLS["non_reviewed"])
+                ann_dir = dl_manager.download_and_extract(
+                    data_dir / _URLS["non_reviewed"]
+                )
                 ann_dir = Path(ann_dir) / "Non-Reviewed_Results"
 
         return [
@@ -253,10 +258,19 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
             type = [x.split(", ")[1] for x in type]
             m = re.search(r"(?<=\().+(?=\))", concept)
             if m is None:
-                choices.append({"label": label, "concept": concept, "type": type, "cui": ""})
+                choices.append(
+                    {"label": label, "concept": concept, "type": type, "cui": ""}
+                )
             else:
                 concept = m.group()
-                choices.append({"label": label, "concept": concept, "type": type, "cui": umls_map[concept]})
+                choices.append(
+                    {
+                        "label": label,
+                        "concept": concept,
+                        "type": type,
+                        "cui": umls_map[concept],
+                    }
+                )
 
         file_path = dir / f"{dir.name}_set"
         with file_path.open() as f:
@@ -315,19 +329,31 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
 
         citation = example["citation"]
         document_["passages"] = [
-            {"id": next(self.uid), "type": "", "text": [citation["text"]], "offsets": [[0, len(citation["text"])]]}
+            {
+                "id": next(self.uid),
+                "type": "",
+                "text": [citation["text"]],
+                "offsets": [[0, len(citation["text"])]],
+            }
         ]
         choices = {x["label"]: x["cui"] for x in example["choices"]}
         types = {x["label"]: x["type"][0] for x in example["choices"]}
 
-        db_id = "" if example["label"] in ["None", "UNDEF"] else choices[example["label"]]
+        db_id = (
+            "" if example["label"] in ["None", "UNDEF"] else choices[example["label"]]
+        )
         type = "" if example["label"] in ["None", "UNDEF"] else types[example["label"]]
         document_["entities"] = [
             {
                 "id": next(self.uid),
                 "type": type,
                 "text": [citation["ambiguous_word_alias"]],
-                "offsets": [[int(citation["offsets_ambiguity"][0]), int(citation["offsets_ambiguity"][1]) + 1]],
+                "offsets": [
+                    [
+                        int(citation["offsets_ambiguity"][0]),
+                        int(citation["offsets_ambiguity"][1]) + 1,
+                    ]
+                ],
                 "normalized": [{"db_name": "UMLS", "db_id": db_id}],
             }
         ]

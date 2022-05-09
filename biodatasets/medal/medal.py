@@ -30,6 +30,7 @@ from bigbio.utils.constants import Tasks
 
 logger = datasets.logging.get_logger(__name__)
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{,
     title = {MeDAL\: Medical Abbreviation Disambiguation Dataset for Natural Language Understanding Pretraining},

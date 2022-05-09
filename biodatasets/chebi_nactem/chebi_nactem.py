@@ -24,6 +24,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import parse_brat_file
 
+_LOCAL = False
 _CITATION = """\
 @InProceedings{Shardlow2018,
 author = {Shardlow, M J and Nguyen, N and Owen, G and O'Donovan, C and Leach, A and McNaught, J and Turner,

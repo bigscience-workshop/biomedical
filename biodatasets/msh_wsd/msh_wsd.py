@@ -29,10 +29,10 @@ Note from the Author how to load dataset:
 2) Set kwarg data_dir to the directory containing MSHCorpus.zip
 """
 
-from dataclasses import dataclass
 import itertools as it
-import re
 import os
+import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -42,6 +42,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @article{,
     author={Jimeno-Yepes, Antonio J.
@@ -87,6 +88,7 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 @dataclass
 class MshWsdBigBioConfig(BigBioConfig):
     schema: str = "source"
@@ -94,6 +96,7 @@ class MshWsdBigBioConfig(BigBioConfig):
     version: datasets.Version = datasets.Version(_SOURCE_VERSION)
     description: str = "MSH-WSD source schema"
     subset_id: str = "msh_wsd"
+
 
 class MshWsdDataset(datasets.GeneratorBasedBuilder):
     """Biomedical Word Sense Disambiguation (WSD)."""
@@ -157,9 +160,13 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
-            data_dir = dl_manager.download_and_extract(os.path.join(self.config.data_dir, "MSHCorpus.zip"))
+            data_dir = dl_manager.download_and_extract(
+                os.path.join(self.config.data_dir, "MSHCorpus.zip")
+            )
 
         return [
             datasets.SplitGenerator(
@@ -178,7 +185,10 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
             concepts = f.readlines()
         concepts = [x.strip().split("\t") for x in concepts]
 
-        concept_map = {cuis[0]: {f"M{num}": cui for num, cui in enumerate(cuis[1:], 1)} for cuis in concepts}
+        concept_map = {
+            cuis[0]: {f"M{num}": cui for num, cui in enumerate(cuis[1:], 1)}
+            for cuis in concepts
+        }
 
         files = list(data_dir.glob("*arff"))
         for guid, file in enumerate(files):
@@ -221,7 +231,10 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
         yield {
             "ambiguous_word": amb_word,
             "sentences": sentences,
-            "choices": [{"label": key, "concept": value} for key, value in concept_map[amb_word].items()],
+            "choices": [
+                {"label": key, "concept": value}
+                for key, value in concept_map[amb_word].items()
+            ],
         }
 
     def _source_to_kb(self, document):
@@ -234,7 +247,12 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
             document_["id"] = next(self.uid)
             document_["document_id"] = sentence["pmid"]
             document_["passages"] = [
-                {"id": next(self.uid), "type": "", "text": [sentence["text"]], "offsets": [[0, len(sentence["text"])]]}
+                {
+                    "id": next(self.uid),
+                    "type": "",
+                    "text": [sentence["text"]],
+                    "offsets": [[0, len(sentence["text"])]],
+                }
             ]
             document_["entities"] = [
                 {
@@ -242,7 +260,9 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
                     "type": "ambiguous_word",
                     "text": [document["ambiguous_word"]],
                     "offsets": [self._parse_offset(sentence["text"])],
-                    "normalized": [{"db_name": "MeSH", "db_id": choices[sentence["label"]]}],
+                    "normalized": [
+                        {"db_name": "MeSH", "db_id": choices[sentence["label"]]}
+                    ],
                 }
             ]
             yield document_

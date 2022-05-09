@@ -29,6 +29,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{pyysalo2014anatomical,
   title={Anatomical entity mention recognition at literature scale},

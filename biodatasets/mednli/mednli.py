@@ -44,6 +44,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @misc{https://doi.org/10.13026/c2rs98,
     title        = {MedNLI — A Natural Language Inference Dataset For The Clinical Domain},
@@ -137,7 +138,9 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             extract_dir = dl_manager.extract(
                 os.path.join(
@@ -146,7 +149,8 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
                 )
             )
             data_dir = os.path.join(
-                extract_dir, "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0"
+                extract_dir,
+                "mednli-a-natural-language-inference-dataset-for-the-clinical-domain-1.0.0",
             )
 
         return [

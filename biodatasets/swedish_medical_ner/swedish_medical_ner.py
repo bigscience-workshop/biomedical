@@ -42,6 +42,7 @@ from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "swedish_medical_ner"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{almgren-etal-2016-named,
     author = {

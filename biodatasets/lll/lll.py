@@ -36,8 +36,9 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Tasks, BigBioValues
 
+_LOCAL = False
 _CITATION = """\
     @article{article,
     author = {Nédellec, C.},
@@ -196,29 +197,43 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                         document_["passages"] = [
                             {
                                 "id": next(uid),
-                                "type": None,
+                                "type": BigBioValues.NULL,
                                 "text": [document["sentence"]],
                                 "offsets": [[0, len(document["sentence"])]],
                             }
                         ]
 
-                        document_["entities"] = [
-                            {
-                                "id": f"{document_['id']}-{word['id']}",
-                                "type": None,
-                                "text": [word["text"]],
-                                "offsets": [[word["offsets"][0], word["offsets"][1]]],
-                                "normalized": [],
-                            }
-                            for word in document["words"]
-                        ]
+                        id_to_word = {i["id"]: i for i in document["words"]}
+                        document_["entities"] = []
+                        for agent in document["agents"]:
+                            word = id_to_word[agent["ref_id"]]
+                            document_["entities"].append(
+                                {
+                                    "id": f"{document_['id']}-agent-{word['id']}",
+                                    "type": "agent",
+                                    "text": [word["text"]],
+                                    "offsets": [[word["offsets"][0], word["offsets"][1]]],
+                                    "normalized": [],
+                                }
+                            )
+                        for agent in document["targets"]:
+                            word = id_to_word[agent["ref_id"]]
+                            document_["entities"].append(
+                                {
+                                    "id": f"{document_['id']}-target-{word['id']}",
+                                    "type": "target",
+                                    "text": [word["text"]],
+                                    "offsets": [[word["offsets"][0], word["offsets"][1]]],
+                                    "normalized": [],
+                                }
+                            )
 
                         document_["relations"] = [
                             {
                                 "id": next(uid),
                                 "type": "genic_interaction",
-                                "arg1_id": f"{document_['id']}-{relation['ref_id1']}",
-                                "arg2_id": f"{document_['id']}-{relation['ref_id2']}",
+                                "arg1_id": f"{document_['id']}-agent-{relation['ref_id1']}",
+                                "arg2_id": f"{document_['id']}-target-{relation['ref_id2']}",
                                 "normalized": [
                                     {
                                         "db_name": None,

@@ -66,6 +66,7 @@ from xml.etree.ElementTree import Element
 
 import datasets
 from datasets import Features, Value
+
 # TODO: home page has a list of publications but its not clear which to choose
 # https://muchmore.dfki.de/papers1.htm
 # to start, chose the one below.
@@ -74,6 +75,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{,
   author={Paul Buitelaar and Thierry Declerck and Bogdan Sacaleanu and {\vS}pela Vintar and Diana Raileanu and C. Crispi},
@@ -320,7 +322,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             concepts = []
             for xconcept in xumlsterm.findall("./concept"):
 
-                mshs = [{"code": xmsh.get("code")} for xmsh in xconcept.findall("./msh")]
+                mshs = [
+                    {"code": xmsh.get("code")} for xmsh in xconcept.findall("./msh")
+                ]
 
                 concept = {
                     "id": xconcept.get("id"),
@@ -348,7 +352,10 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
         ewnterms = []
         for xewnterm in xewnterms.findall("./ewnterm"):
 
-            senses = [{"offset": xsense.get("offset")} for xsense in xewnterm.findall("./sense")]
+            senses = [
+                {"offset": xsense.get("offset")}
+                for xsense in xewnterm.findall("./sense")
+            ]
 
             ewnterm = {
                 "id": xewnterm.get("id"),
@@ -522,9 +529,15 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     ii_wid_from = int(wid_from[1:])
                     ii_wid_to = int(wid_to[1:])
 
-                    tok_text = " ".join(snip_toks[ii_sid - 1][ii_wid_from - 1 : ii_wid_to])
-                    w_from_start, w_from_end = sid_wid_to_text_off(sid, wid_from, snip_txts_lens, snip_toks_lens)
-                    w_to_start, w_to_end = sid_wid_to_text_off(sid, wid_to, snip_txts_lens, snip_toks_lens)
+                    tok_text = " ".join(
+                        snip_toks[ii_sid - 1][ii_wid_from - 1 : ii_wid_to]
+                    )
+                    w_from_start, w_from_end = sid_wid_to_text_off(
+                        sid, wid_from, snip_txts_lens, snip_toks_lens
+                    )
+                    w_to_start, w_to_end = sid_wid_to_text_off(
+                        sid, wid_to, snip_txts_lens, snip_toks_lens
+                    )
 
                     offsets = [(w_from_start, w_to_end)]
                     main_text = text[w_from_start:w_to_end]
@@ -535,7 +548,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                         "offsets": offsets,
                         "text": [tok_text],
                         "type": "umlsterm",
-                        "normalized": [{"db_name": "UMLS", "db_id": cui} for cui in umls_cuis],
+                        "normalized": [
+                            {"db_name": "UMLS", "db_id": cui} for cui in umls_cuis
+                        ],
                     }
                     entities.append(entity)
 
@@ -572,7 +587,9 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             sample_id_prefix = re.sub(".(eng|ger).abstr$", "", file_name)
             sample_id = file_name
             abstract = fp.read().decode(NATIVE_ENCODING)
-            sample_map[sample_id_prefix].append({"language": language, "sample_id": sample_id, "abstract": abstract})
+            sample_map[sample_id_prefix].append(
+                {"language": language, "sample_id": sample_id, "abstract": abstract}
+            )
 
         _id = 0
         for sample_id_prefix, sample_pair in sample_map.items():

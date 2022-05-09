@@ -68,6 +68,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/15/1/14/779738
+_LOCAL = True
 _CITATION = """\
 @article{,
     author = {
@@ -178,11 +179,15 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -212,18 +217,38 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
             samples = _read_zip(path)
             for sample in samples:
                 if self.config.schema == "source":
-                    yield _id, {"document_id": sample[0], "text": sample[1], "label": sample[-1]}
+                    yield _id, {
+                        "document_id": sample[0],
+                        "text": sample[1],
+                        "label": sample[-1],
+                    }
                 elif self.config.schema == "bigbio_text":
-                    yield _id, {"id": sample[0], "document_id": sample[0], "text": sample[1], "labels": [sample[-1]]}
+                    yield _id, {
+                        "id": sample[0],
+                        "document_id": sample[0],
+                        "text": sample[1],
+                        "labels": [sample[-1]],
+                    }
                 _id += 1
 
         elif split == "test":
             _id = 0
-            path = os.path.join(data_dir, "smokers_surrogate_test_all_groundtruth_version2.zip")
+            path = os.path.join(
+                data_dir, "smokers_surrogate_test_all_groundtruth_version2.zip"
+            )
             samples = _read_zip(path)
             for sample in samples:
                 if self.config.schema == "source":
-                    yield _id, {"document_id": sample[0], "text": sample[1], "label": sample[-1]}
+                    yield _id, {
+                        "document_id": sample[0],
+                        "text": sample[1],
+                        "label": sample[-1],
+                    }
                 elif self.config.schema == "bigbio_text":
-                    yield _id, {"id": sample[0], "document_id": sample[0], "text": sample[1], "labels": [sample[-1]]}
+                    yield _id, {
+                        "id": sample[0],
+                        "document_id": sample[0],
+                        "text": sample[1],
+                        "labels": [sample[-1]],
+                    }
                 _id += 1

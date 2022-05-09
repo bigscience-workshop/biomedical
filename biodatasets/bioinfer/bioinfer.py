@@ -27,6 +27,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{pyysalo2007bioinfer,
   title={BioInfer: a corpus for information extraction in the biomedical domain},

@@ -18,10 +18,11 @@ from typing import Dict, List, Tuple
 import datasets
 import pandas as pd
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{chen2021overview, 
     title={Overview of the BioCreative VII LitCovid Track: multi-label topic classification for COVID-19 literature annotation}, 
@@ -108,7 +109,9 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
                     "pub_type": datasets.Sequence(datasets.Value("string")),
                     "authors": datasets.Sequence(datasets.Value("string")),
                     "doi": datasets.Value("string"),
-                    "labels": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
+                    "labels": datasets.Sequence(
+                        datasets.ClassLabel(names=_CLASS_NAMES)
+                    ),
                 }
             )
 
@@ -173,9 +176,15 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
                     "journal": e["journal"],
                     "title": e["title"],
                     "abstract": e["abstract"],
-                    "keywords": e["keywords"].split(";") if e["keywords"] is not None else [],
-                    "pub_type": e["pub_type"].split(";") if e["pub_type"] is not None else [],
-                    "authors": e["authors"].split(";") if e["authors"] is not None else [],
+                    "keywords": e["keywords"].split(";")
+                    if e["keywords"] is not None
+                    else [],
+                    "pub_type": e["pub_type"].split(";")
+                    if e["pub_type"] is not None
+                    else [],
+                    "authors": e["authors"].split(";")
+                    if e["authors"] is not None
+                    else [],
                     "doi": e["doi"],
                     "labels": e["label"].split(";"),
                 }

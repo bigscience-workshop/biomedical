@@ -33,6 +33,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{
   title={Named Entity Recognition, Concept Normalization and Clinical Coding: Overview of the \

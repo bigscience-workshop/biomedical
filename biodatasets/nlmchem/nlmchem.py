@@ -25,6 +25,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
+_LOCAL = False
 _CITATION = """\
 @Article{islamaj2021nlm,
 title={NLM-Chem, a new resource for chemical entity recognition in PubMed full text literature},

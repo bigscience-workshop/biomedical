@@ -23,6 +23,7 @@ import os  # useful for paths
 from typing import Dict, Iterable, List
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -30,6 +31,7 @@ from bigbio.utils.constants import Tasks
 logger = datasets.logging.get_logger(__name__)
 
 
+_LOCAL = False
 _CITATION = """\
 @article{,
   author    = {Liu, Boxiang and Huang, Liang},
@@ -114,7 +116,9 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
 
         my_urls = _URLs[self.config.schema]
         data_dir = os.path.join(dl_manager.download_and_extract(my_urls), _DATA_DIR)

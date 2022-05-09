@@ -22,6 +22,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{Caporaso2007,
 author = {J. Gregory Caporaso and William A Baumgartner and David A Randolph and K. Bretonnel Cohen and

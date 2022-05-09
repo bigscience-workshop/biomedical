@@ -28,6 +28,7 @@ import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import BigBioValues, Tasks
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{jin2019pubmedqa,
   title={PubMedQA: A Dataset for Biomedical Research Question Answering},

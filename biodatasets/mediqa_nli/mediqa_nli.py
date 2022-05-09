@@ -46,6 +46,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @misc{https://doi.org/10.13026/gtv4-g455,
     title        = {MedNLI for Shared Task at ACL BioNLP 2019},
@@ -140,27 +141,42 @@ class MEDIQANLIDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             extract_dir = dl_manager.extract(
-                os.path.join(self.config.data_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip")
+                os.path.join(
+                    self.config.data_dir,
+                    "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1.zip",
+                )
             )
-            data_dir = os.path.join(extract_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1")
+            data_dir = os.path.join(
+                extract_dir, "mednli-for-shared-task-at-acl-bionlp-2019-1.0.1"
+            )
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "examples_filepath": os.path.join(data_dir, "mednli_bionlp19_shared_task.jsonl"),
-                    "ground_truth_filepath": os.path.join(data_dir, "mednli_bionlp19_shared_task_ground_truth.csv"),
+                    "examples_filepath": os.path.join(
+                        data_dir, "mednli_bionlp19_shared_task.jsonl"
+                    ),
+                    "ground_truth_filepath": os.path.join(
+                        data_dir, "mednli_bionlp19_shared_task_ground_truth.csv"
+                    ),
                     "split": "test",
                 },
             ),
         ]
 
-    def _generate_examples(self, examples_filepath: str, ground_truth_filepath: str, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, examples_filepath: str, ground_truth_filepath: str, split: str
+    ) -> Tuple[int, Dict]:
 
-        ground_truth = pd.read_csv(ground_truth_filepath, index_col=0, squeeze=True).to_dict()
+        ground_truth = pd.read_csv(
+            ground_truth_filepath, index_col=0, squeeze=True
+        ).to_dict()
         with open(examples_filepath, "r") as f:
             if self.config.schema == "source":
                 for line in f:

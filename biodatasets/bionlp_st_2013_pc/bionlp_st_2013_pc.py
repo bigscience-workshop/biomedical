@@ -25,6 +25,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2013-overview,
     title = "Overview of the Pathway Curation ({PC}) task of {B}io{NLP} Shared Task 2013",
