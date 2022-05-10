@@ -15,7 +15,7 @@ import unittest
 
 import datasets
 from datasets import DatasetDict, Features
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Tasks, TASK_TO_SCHEMA, VALID_TASKS, VALID_SCHEMAS, SCHEMA_TO_FEATURES
 from bigbio.utils.schemas import (
     entailment_features,
     kb_features,
@@ -28,33 +28,6 @@ from bigbio.utils.schemas import (
 
 logger = logging.getLogger(__name__)
 
-
-_TASK_TO_SCHEMA = {
-    Tasks.NAMED_ENTITY_RECOGNITION: "KB",
-    Tasks.NAMED_ENTITY_DISAMBIGUATION: "KB",
-    Tasks.EVENT_EXTRACTION: "KB",
-    Tasks.RELATION_EXTRACTION: "KB",
-    Tasks.COREFERENCE_RESOLUTION: "KB",
-    Tasks.QUESTION_ANSWERING: "QA",
-    Tasks.TEXTUAL_ENTAILMENT: "TE",
-    Tasks.SEMANTIC_SIMILARITY: "PAIRS",
-    Tasks.PARAPHRASING: "T2T",
-    Tasks.TRANSLATION: "T2T",
-    Tasks.SUMMARIZATION: "T2T",
-    Tasks.TEXT_CLASSIFICATION: "TEXT",
-}
-
-_VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
-_VALID_SCHEMAS = set(_TASK_TO_SCHEMA.values())
-
-_SCHEMA_TO_FEATURES = {
-    "KB": kb_features,
-    "QA": qa_features,
-    "TE": entailment_features,
-    "T2T": text2text_features,
-    "TEXT": text_features,
-    "PAIRS": pairs_features,
-}
 
 _TASK_TO_FEATURES = {
     Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
@@ -117,14 +90,14 @@ class TestDataLoader(unittest.TestCase):
         self._SUPPORTED_TASKS = module._SUPPORTED_TASKS
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
 
-        invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
+        invalid_tasks = set(self._SUPPORTED_TASKS) - VALID_TASKS
         if len(invalid_tasks) > 0:
             raise ValueError(
                 f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
             )
 
         self._MAPPED_SCHEMAS = set(
-            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+            [TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
         )
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
@@ -242,7 +215,7 @@ class TestDataLoader(unittest.TestCase):
             # Skip entire data split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping unique ID check on {split_name}")
-                continue  
+                continue
 
             ids_seen = set()
             for example in split:
@@ -293,7 +266,7 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping referenced ids on {split_name}")
-                continue  
+                continue
 
             for example in split:
                 referenced_ids = set()
@@ -338,11 +311,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping passage offsets on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("passages", split):
                 logger.warning(f"Skipping passages offsets for split='{split}'")
-                continue  
+                continue
 
             if "passages" in dataset_bigbio[split].features:
 
@@ -453,7 +426,7 @@ class TestDataLoader(unittest.TestCase):
 
             if self._skipkey_or_keysplit("entities", split):
                 logger.warning(f"Skipping entities offsets for split='{split}'")
-                continue  
+                continue
 
             if "entities" in dataset_bigbio[split].features:
 
@@ -494,11 +467,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping events offsets on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("events", split):
                 logger.warning(f"Skipping events offsets for split='{split}'")
-                continue  
+                continue
 
             if "events" in dataset_bigbio[split].features:
 
@@ -537,11 +510,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping coref ids on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("coreferences", split):
                 logger.warning(f"Skipping coreferences ids for split='{split}'")
-                continue  
+                continue
 
             if "coreferences" in dataset_bigbio[split].features:
 
@@ -566,7 +539,7 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping multiple-choice on {split}")
-                continue  
+                continue
 
             for example in dataset_bigbio[split]:
 
@@ -624,7 +597,7 @@ class TestDataLoader(unittest.TestCase):
 
             if self._skipkey_or_keysplit("entities", split):
                 logger.warning(f"Skipping multilabel entities for split='{split}'")
-                continue  
+                continue
 
             for example in dataset_bigbio[split]:
 
@@ -675,7 +648,7 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping multilabel type on {split}")
-                continue  
+                continue
 
             for feature_name in features_with_type:
 
@@ -744,7 +717,7 @@ class TestDataLoader(unittest.TestCase):
             # Skip entire data split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"Skipping schema on {split_name}")
-                continue  
+                continue
 
             logger.info("Testing schema for: " + str(split_name))
             self.assertEqual(split.info.features, features)
