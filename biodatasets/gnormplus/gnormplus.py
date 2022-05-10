@@ -58,7 +58,7 @@ PubTator was used as our annotation tool along with BioC formats.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = ""
+_LICENSE = "Unknown"
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
@@ -200,7 +200,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                             {
                                 "text": passage.text,
                                 "type": passage.infons["type"],
-                                "location": {"offset": passage.offset, "length": passage.total_span.length},
+                                "location": {"offset": passage.offset, "length": len(passage.text)},
                             }
                             for passage in document.passages
                         ],
