@@ -52,7 +52,7 @@ They are selected because both have a focus on human genes.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = ""
+_LICENSE = "Unknown"
 
 _URLS = {
     _DATASETNAME: [
@@ -209,8 +209,8 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
                 annot_d[a.tag] = html.escape(a.text)
 
             else:
-                annot_d[a.attrib["key"]] = a_d["infon"]
-
+                annot_d[a.attrib["key"]] = html.escape(a.text)
+                
         return annot_d
 
     def _parse_elem(self, elem: ET.Element) -> dict:
