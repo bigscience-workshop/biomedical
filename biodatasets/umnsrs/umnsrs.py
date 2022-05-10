@@ -86,7 +86,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MayosrsDataset(datasets.GeneratorBasedBuilder):
+class UmnsrsDataset(datasets.GeneratorBasedBuilder):
     """UMNSRS, developed by Pakhomov, et al., contains clinical term pairs whose semantic similarity and
     relatedness were scored by experts."""
 
