@@ -355,6 +355,8 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     # massage relations
     unified_example["relations"] = []
     for ann in brat_parse["relations"]:
+        if ann["head"]["ref_id"] not in anno_ids or ann["tail"]["ref_id"] not in anno_ids:
+            continue
         unified_example["relations"].append(
             {
                 "arg1_id": id_prefix + ann["head"]["ref_id"],
@@ -379,5 +381,4 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
             unified_example["coreferences"].append(
                 {"id": id_prefix + str(i), "entity_ids": entity_ids}
             )
-
     return unified_example
