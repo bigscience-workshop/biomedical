@@ -14,11 +14,6 @@
 # limitations under the License.
 
 
-"""\
-This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds. It can be used for NER tasks
-"""
-
-
 import os
 from pydoc import doc
 from typing import List, Tuple, Dict, Iterator
