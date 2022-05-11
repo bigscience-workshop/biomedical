@@ -110,7 +110,7 @@ _URLs = {
             "dev": "https://drive.google.com/uc?export=download&id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG",
             "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
         },
-    }
+    },
 }
 
 _SUPPORTED_TASKS = [
@@ -183,8 +183,6 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2019_bb_kb+ner_source"
 
-    _ENTITY_TYPES = {"Habitat", "Microorganism", "Phenotype", "Geographical"}
-
     def _info(self):
         """
         - `features` defines the schema of the parsed data set. The schema depends on the
@@ -208,7 +206,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -251,8 +251,12 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                         {
                             "id": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                         }
                     ],
                 },
@@ -268,15 +272,20 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         version = self.config.name.split("_")[-2]
-        if version == 'bigbio':
-            version = 'kb+ner'
+        if version == "bigbio":
+            version = "kb+ner"
         my_urls = _URLs[self.config.schema][version]
         data_files = {
-            "train": Path(dl_manager.download_and_extract(my_urls["train"])) / f"BioNLP-OST-2019_BB-{version}_train",
-            "dev": Path(dl_manager.download_and_extract(my_urls["dev"])) / f"BioNLP-OST-2019_BB-{version}_dev",
-            "test": Path(dl_manager.download_and_extract(my_urls["test"])) / f"BioNLP-OST-2019_BB-{version}_test",
+            "train": Path(dl_manager.download_and_extract(my_urls["train"]))
+            / f"BioNLP-OST-2019_BB-{version}_train",
+            "dev": Path(dl_manager.download_and_extract(my_urls["dev"]))
+            / f"BioNLP-OST-2019_BB-{version}_dev",
+            "test": Path(dl_manager.download_and_extract(my_urls["test"]))
+            / f"BioNLP-OST-2019_BB-{version}_test",
         }
         return [
             datasets.SplitGenerator(
@@ -304,7 +313,7 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    self.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    self.parse_brat_file(txt_file)
                 )
                 example["id"] = str(guid)
                 yield guid, example
@@ -312,7 +321,10 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             raise ValueError(f"Invalid config: {self.config.name}")
 
     def parse_brat_file(
-        self, txt_file: Path, annotation_file_suffixes: List[str] = None, parse_notes: bool = False
+        self,
+        txt_file: Path,
+        annotation_file_suffixes: List[str] = None,
+        parse_notes: bool = False,
     ) -> Dict:
         """
         Parse a brat file into the schema defined below.
@@ -411,10 +423,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         example["document_id"] = txt_file.with_suffix("").name
         with txt_file.open(encoding="utf-8") as f:
             if self.config.schema == "bigbio_kb":
-                example["text"] = f.read().replace(u"\u00A0", " ").replace("\n", " ")
+                example["text"] = f.read().replace("\u00A0", " ").replace("\n", " ")
             else:
                 example["text"] = f.read()
-
 
         # If no specific suffixes of the to-be-read annotation files are given - take standard suffixes
         # for event extraction
@@ -422,7 +433,9 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
             annotation_file_suffixes = [".a1", ".a2", ".ann"]
 
         if len(annotation_file_suffixes) == 0:
-            raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
+            raise AssertionError(
+                "At least one suffix for the to-be-read annotation files should be given!"
+            )
 
         ann_lines = []
         for suffix in annotation_file_suffixes:
@@ -467,15 +480,17 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
                     for start, end in ann["offsets"]:
                         chunk_len = end - start
                         if self.config.schema == "bigbio_kb":
-                            ann["text"].append(text[i: chunk_len + i].replace(u"\u00A0", " "))
+                            ann["text"].append(
+                                text[i : chunk_len + i].replace("\u00A0", " ")
+                            )
                         else:
-                            ann["text"].append(text[i: chunk_len + i])
+                            ann["text"].append(text[i : chunk_len + i])
                         i += chunk_len
                         while i < len(text) and text[i] == " ":
                             i += 1
                 else:
                     if self.config.schema == "bigbio_kb":
-                        ann["text"] = [text.replace(u"\u00A0", " ")]
+                        ann["text"] = [text.replace("\u00A0", " ")]
                     else:
                         ann["text"] = [text]
 

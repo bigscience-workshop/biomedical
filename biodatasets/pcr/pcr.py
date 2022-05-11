@@ -58,8 +58,6 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.EVENT_EXTRACTION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_ENTITY_TYPES = ["Herb", "Chemical"]
-
 
 class PCRDataset(datasets.GeneratorBasedBuilder):
     """
@@ -166,11 +164,15 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 example = parsing.parse_brat_file(file)
-                example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(example)
                 example = self._to_source_example(example)
 
                 # Three documents have incorrect offsets - fix them for fixed_source scheme
-                if self.config.subset_id == "pcr_fixed" and example["document_id"] in ["463", "509", "566"]:
+                if self.config.subset_id == "pcr_fixed" and example["document_id"] in [
+                    "463",
+                    "509",
+                    "566",
+                ]:
                     example = self._fix_example(example)
 
                 yield example["document_id"], example
@@ -181,7 +183,7 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 example = parsing.parse_brat_file(file)
-                example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(example)
 
                 document_id = example["document_id"]
                 example["id"] = document_id
