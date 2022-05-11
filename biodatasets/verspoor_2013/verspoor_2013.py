@@ -108,22 +108,6 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "verspoor_2013_source"
 
-    _ENTITY_TYPES = {
-        "Concepts_Ideas",
-        "Disorder",
-        "Phenomena",
-        "Physiology",
-        "age",
-        "body-part",
-        "cohort-patient",
-        "disease",
-        "ethnicity",
-        "gender",
-        "gene",
-        "mutation",
-        "size",
-    }
-
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
@@ -142,7 +126,9 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -186,8 +172,12 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -255,7 +245,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
             txt_files = data_files["text_files"]
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file)
                 )
                 example["id"] = str(guid)
                 yield guid, example
