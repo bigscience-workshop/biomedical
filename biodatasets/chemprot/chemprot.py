@@ -88,7 +88,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "chemprot_source"
+    DEFAULT_CONFIG_NAME = "chemprot_full_source"
 
     def _info(self):
 

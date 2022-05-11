@@ -65,7 +65,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LOCAL = False
+_LOCAL = True
 _CITATION = """\
 @article{,
   author    = {Shoko Wakamiya, Mizuki Morita, Yoshinobu Kano, Tomoko Ohkuma and Eiji Aramaki},
@@ -220,8 +220,15 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
+        if self.config.data_dir is None:
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
+        else:
+            data_dir = self.config.data_dir
+        
         raw_data_dir = dl_manager.download_and_extract(
-            str(Path(self.config.data_dir) / _URLS[_DATASETNAME])
+            str(Path(data_dir) / _URLS[_DATASETNAME])
         )
 
         data_dir = Path(raw_data_dir) / "MedWeb_TestCollection"
