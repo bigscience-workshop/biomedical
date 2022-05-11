@@ -376,7 +376,7 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     if len(skipped_relations) > 0:
         logger.warning(" The `bigbio_kb` schema allows for relations only between entities." 
                        f" The following relations will not be included in the dataset (for now): "
-                       f"{list(skipped_relations}")
+                       f"{list(skipped_relations)}")
 
     # get coreferences
     unified_example["coreferences"] = []
