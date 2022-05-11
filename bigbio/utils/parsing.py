@@ -356,13 +356,13 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         entity_ann["id"] = id_prefix + entity_ann["id"]
         entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
         unified_example["entities"].append(entity_ann)
+        
     # massage relations
     unified_example["relations"] = []
+    skipped_relations = set()
     for ann in brat_parse["relations"]:
         if ann["head"]["ref_id"] not in anno_ids or ann["tail"]["ref_id"] not in anno_ids:
-            ann_id = ann["id"]
-            logger.warning("The `bigbio_kb` schema allows for relations only between entities." 
-                           f"The relation `{ann_id}` will not be included in the dataset for now.")
+            skipped_relations.add(ann["id"])
             continue
         unified_example["relations"].append(
             {
@@ -373,6 +373,10 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 "normalized": [],
             }
         )
+    if len(skipped_relations) > 0:
+        logger.warning(" The `bigbio_kb` schema allows for relations only between entities." 
+                       f" The following relations will not be included in the dataset (for now): "
+                       f"{list(skipped_relations}")
 
     # get coreferences
     unified_example["coreferences"] = []
