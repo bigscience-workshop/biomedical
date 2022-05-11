@@ -62,21 +62,6 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.2"
 _BIGBIO_VERSION = "1.0.0"
 
-_ENTITY_TYPES = [
-    "Anatomical_system",
-    "Cancer",
-    "Cell",
-    "Cellular_component",
-    "Developing_anatomical_structure",
-    "Immaterial_anatomical_entity",
-    "Multi-tissue_structure",
-    "Organ",
-    "Organism_subdivision",
-    "Organism_substance",
-    "Pathological_formation",
-    "Tissue",
-]
-
 
 class AnatEMDataset(datasets.GeneratorBasedBuilder):
     """The extended Anatomical Entity Mention corpus (AnatEM)"""
@@ -110,7 +95,9 @@ class AnatEMDataset(datasets.GeneratorBasedBuilder):
                     "document_id": datasets.Value("string"),
                     "document_type": datasets.Value("string"),  # Either PMC or PM
                     "text": datasets.Value("string"),
-                    "text_type": datasets.Value("string"),  # Either abstract (for PM) or sec / caption (for PMC)
+                    "text_type": datasets.Value(
+                        "string"
+                    ),  # Either abstract (for PM) or sec / caption (for PMC)
                     "entities": [
                         {
                             "entity_id": datasets.Value("string"),
@@ -175,7 +162,7 @@ class AnatEMDataset(datasets.GeneratorBasedBuilder):
 
                 # Read brat annotations for the given text file and convert example to the BigBio-KB format
                 brat_example = parsing.parse_brat_file(file)
-                kb_example = parsing.brat_parse_to_bigbio_kb(brat_example, _ENTITY_TYPES)
+                kb_example = parsing.brat_parse_to_bigbio_kb(brat_example)
                 kb_example["id"] = kb_example["document_id"]
 
                 # Fix text type annotation for the converted example

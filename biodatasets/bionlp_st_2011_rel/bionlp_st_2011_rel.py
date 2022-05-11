@@ -102,8 +102,6 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_rel_source"
 
-    _ENTITY_TYPES = {"Entity", "Protein"}
-
     _FILE_SUFFIX = [".a1", ".rel", ".ann"]
 
     def _info(self):
@@ -240,8 +238,7 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file, self._FILE_SUFFIX),
-                    entity_types=self._ENTITY_TYPES,
+                    parsing.parse_brat_file(txt_file, self._FILE_SUFFIX)
                 )
                 example["id"] = str(guid)
                 yield guid, example

@@ -99,8 +99,6 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-_ENTITY_TYPES = ["Protein"]
-
 
 class GeniaRelationCorpusDataset(datasets.GeneratorBasedBuilder):
     """GENIA Relation corpus."""
@@ -187,7 +185,11 @@ class GeniaRelationCorpusDataset(datasets.GeneratorBasedBuilder):
                     "data_dir": data_dir[split],
                 },
             )
-            for split in [datasets.Split.TRAIN, datasets.Split.VALIDATION, datasets.Split.TEST]
+            for split in [
+                datasets.Split.TRAIN,
+                datasets.Split.VALIDATION,
+                datasets.Split.TEST,
+            ]
         ]
 
     def _generate_examples(self, data_dir) -> Tuple[int, Dict]:
@@ -197,14 +199,16 @@ class GeniaRelationCorpusDataset(datasets.GeneratorBasedBuilder):
                 if filename.endswith(".txt"):
                     txt_file_path = Path(dirpath, filename)
                     if self.config.schema == "source":
-                        example = parsing.parse_brat_file(txt_file_path, annotation_file_suffixes=[".a1", ".rel"])
+                        example = parsing.parse_brat_file(
+                            txt_file_path, annotation_file_suffixes=[".a1", ".rel"]
+                        )
                         example["id"] = str(guid)
                         for key in ["events", "attributes", "normalizations"]:
                             del example[key]
                         yield guid, example
                     elif self.config.schema == "bigbio_kb":
                         example = parsing.brat_parse_to_bigbio_kb(
-                            parsing.parse_brat_file(txt_file_path), entity_types=_ENTITY_TYPES
+                            parsing.parse_brat_file(txt_file_path)
                         )
                         example["id"] = str(guid)
                         yield guid, example
