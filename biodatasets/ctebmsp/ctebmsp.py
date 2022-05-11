@@ -85,7 +85,9 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
 
-_LICENSE = "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
+_LICENSE = (
+    "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
+)
 
 _URLS = {
     _DATASETNAME: "http://www.lllf.uam.es/ESP/nlpdata/wp2/CT-EBM-SP.zip",
@@ -128,12 +130,6 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "ctebmsp_abstracts_source"
 
     # Entities from the Unified Medical Language System (UMLS) semantic groups
-    _ENTITY_TYPES = {
-        "PROC",
-        "CHEM",
-        "DISO",
-        "ANAT",
-    }
 
     def _info(self) -> datasets.DatasetInfo:
         """
@@ -156,7 +152,9 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -200,8 +198,12 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -262,7 +264,7 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file)
                 )
                 example["id"] = str(guid)
                 yield guid, example

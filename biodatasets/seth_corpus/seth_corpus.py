@@ -21,10 +21,11 @@ on several evaluation corpora of PubMed abstracts. It is freely available and en
 isolated application and evaluation as well as a thorough documentation for integration into other applications.
 The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema """
 
-from typing import Dict, List, Tuple
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -47,7 +48,9 @@ _CITATION = """\
 
 _DATASETNAME = "seth_corpus"
 
-_DESCRIPTION = """SNP named entity recognition corpus consisting of 630 PubMed citations."""
+_DESCRIPTION = (
+    """SNP named entity recognition corpus consisting of 630 PubMed citations."""
+)
 
 _HOMEPAGE = "https://github.com/rockt/SETH"
 
@@ -88,12 +91,6 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "seth_corpus_source"
-
-    _ENTITY_TYPES = {
-        'RS',
-        'SNP',
-        'Gene'
-    }
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -160,9 +157,7 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
                             "ref_id": datasets.Value("string"),
                             "resource_name": datasets.Value("string"),
                             "cuid": datasets.Value("string"),
-                            "text": datasets.Value(
-                                "string"
-                            ),
+                            "text": datasets.Value("string"),
                         }
                     ],
                 },
@@ -196,29 +191,39 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath: Path, corpus_file: str, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepath: Path, corpus_file: str, split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            with open(filepath / corpus_file, encoding='utf-8') as f:
+            with open(filepath / corpus_file, encoding="utf-8") as f:
                 contents = f.readlines()
             for guid, content in enumerate(contents):
                 file_name, text = content.split("\t")
-                example = parsing.parse_brat_file(filepath / "annotations" / f"{file_name}.ann")
+                example = parsing.parse_brat_file(
+                    filepath / "annotations" / f"{file_name}.ann"
+                )
                 example["id"] = str(guid)
                 example["text"] = text
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
-            with open(filepath / corpus_file, encoding='utf-8') as f:
+            with open(filepath / corpus_file, encoding="utf-8") as f:
                 contents = f.readlines()
             for guid, content in enumerate(contents):
                 file_name, text = content.split("\t")
-                example = parsing.parse_brat_file(filepath / "annotations" / f"{file_name}.ann")
-                events = [event for event in example["events"] if event['type'] not in self._ENTITY_TYPES]
+                example = parsing.parse_brat_file(
+                    filepath / "annotations" / f"{file_name}.ann"
+                )
+                events = [
+                    event
+                    for event in example["events"]
+                    if event["type"] not in self._ENTITY_TYPES
+                ]
                 example["events"] = events
                 example["text"] = text
-                example = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(example)
                 example["id"] = str(guid)
                 yield guid, example
         else:

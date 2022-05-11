@@ -151,19 +151,23 @@ _URL_BASE = "http://www.nactem.ac.uk/GENIA/current/Shared-tasks/BioNLP-ST-2009/"
 _URLS = {
     _DATASETNAME: {
         "train": _URL_BASE + "bionlp09_shared_task_training_data_rev2.tar.gz",
-        "test": _URL_BASE + "bionlp09_shared_task_test_data_without_gold_annotation.tar.gz",
+        "test": _URL_BASE
+        + "bionlp09_shared_task_test_data_without_gold_annotation.tar.gz",
         "dev": _URL_BASE + "bionlp09_shared_task_development_data_rev1.tar.gz",
     },
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.EVENT_EXTRACTION, Tasks.COREFERENCE_RESOLUTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.EVENT_EXTRACTION,
+    Tasks.COREFERENCE_RESOLUTION,
+]
 
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
 # https://2011.bionlp-st.org/bionlp-shared-task-2011/genia-event-extraction-genia
-_ENTITY_TYPES = ["Protein", "Entity"]
 
 
 class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
@@ -283,7 +287,9 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, filepath, split) -> (int, dict):
 
         filepath = Path(filepath)
-        txt_files: List[Path] = [file for file in filepath.iterdir() if file.suffix == ".txt"]
+        txt_files: List[Path] = [
+            file for file in filepath.iterdir() if file.suffix == ".txt"
+        ]
 
         if self.config.schema == "source":
             for i, file in enumerate(txt_files):
@@ -293,6 +299,6 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
             for i, file in enumerate(txt_files):
                 brat_content = parse_brat_file(file)
-                kb_example = brat_parse_to_bigbio_kb(brat_content, _ENTITY_TYPES)
+                kb_example = brat_parse_to_bigbio_kb(brat_content)
                 kb_example["id"] = kb_example["document_id"]
                 yield i, kb_example

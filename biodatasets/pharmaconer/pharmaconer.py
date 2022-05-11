@@ -23,10 +23,12 @@ shared task on detecting drug and chemical entities in Spanish medical documents
 """
 
 import os
+from pathlib import Path
+from typing import Dict, List, Tuple
+
 import datasets
 import pandas as pd
-from pathlib import Path
-from typing import List, Tuple, Dict
+
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -90,7 +92,9 @@ pharmacological substances.
 _DESCRIPTIONS = {
     "subtrack_1": _GENERAL_DESCRIPTION + _DESCRIPTION_SUBTRACK_1,
     "subtrack_2": _GENERAL_DESCRIPTION + _DESCRIPTION_SUBTRACK_2,
-    "full_task":  _GENERAL_DESCRIPTION + _DESCRIPTION_SUBTRACK_1 + _DESCRIPTION_SUBTRACK_2,
+    "full_task": _GENERAL_DESCRIPTION
+    + _DESCRIPTION_SUBTRACK_1
+    + _DESCRIPTION_SUBTRACK_2,
 }
 
 _HOMEPAGE = "https://temu.bsc.es/pharmaconer/index.php/datasets/"
@@ -107,6 +111,7 @@ _SOURCE_VERSION = "1.1.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 class PharmaconerDataset(datasets.GeneratorBasedBuilder):
     """Manually annotated collection of clinical case studies from Spanish medical publications."""
 
@@ -115,11 +120,11 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-                name="pharmaconer_source",
-                version=SOURCE_VERSION,
-                description="PharmaCoNER source schema",
-                schema="source",
-                subset_id="full_task",
+            name="pharmaconer_source",
+            version=SOURCE_VERSION,
+            description="PharmaCoNER source schema",
+            schema="source",
+            subset_id="full_task",
         ),
         BigBioConfig(
             name="pharmaconer_bigbio_kb",
@@ -139,13 +144,6 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "pharmaconer_source"
 
-    _ENTITY_TYPES = {
-        'NORMALIZABLES',
-        'PROTEINAS',
-        'NO_NORMALIZABLES',
-        'UNCLEAR'
-    }
-
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
@@ -154,7 +152,7 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "labels": [datasets.Value("string")], # subtrack 2 codes
+                    "labels": [datasets.Value("string")],  # subtrack 2 codes
                     "text_bound_annotations": [  # T line in brat
                         {
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
@@ -211,9 +209,7 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
                             "ref_id": datasets.Value("string"),
                             "resource_name": datasets.Value("string"),
                             "cuid": datasets.Value("string"),
-                            "text": datasets.Value(
-                                "string"
-                            ),
+                            "text": datasets.Value("string"),
                         }
                     ],
                 },
@@ -247,24 +243,54 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepaths": [Path(os.path.join(data_dir, "pharmaconer/train-set_1.1/train/subtrack1")),
-                                 Path(os.path.join(data_dir, "pharmaconer/train-set_1.1/train/subtrack2"))],
+                    "filepaths": [
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/train-set_1.1/train/subtrack1"
+                            )
+                        ),
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/train-set_1.1/train/subtrack2"
+                            )
+                        ),
+                    ],
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepaths": [Path(os.path.join(data_dir, "pharmaconer/test-set_1.1/test/subtrack1")),
-                                 Path(os.path.join(data_dir, "pharmaconer/test-set_1.1/test/subtrack2"))],
+                    "filepaths": [
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/test-set_1.1/test/subtrack1"
+                            )
+                        ),
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/test-set_1.1/test/subtrack2"
+                            )
+                        ),
+                    ],
                     "split": "test",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepaths": [Path(os.path.join(data_dir, "pharmaconer/dev-set_1.1/dev/subtrack1")),
-                                 Path(os.path.join(data_dir, "pharmaconer/dev-set_1.1/dev/subtrack2"))],
+                    "filepaths": [
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/dev-set_1.1/dev/subtrack1"
+                            )
+                        ),
+                        Path(
+                            os.path.join(
+                                data_dir, "pharmaconer/dev-set_1.1/dev/subtrack2"
+                            )
+                        ),
+                    ],
                     "split": "dev",
                 },
             ),
@@ -287,28 +313,32 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
                     subtrack2_df[1] = subtrack2_df[1].apply(str)
                     codes_set = set(subtrack2_df[1].unique().flatten())
                     codes_set.discard("<null>")
-                    example['labels'] = list(codes_set)
-                except Exception: # subtrack 2 has no codes for this document
-                    example['labels'] = []               
+                    example["labels"] = list(codes_set)
+                except Exception:  # subtrack 2 has no codes for this document
+                    example["labels"] = []
                 example["id"] = str(guid)
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
             for guid, (txt_file, tsv_file) in enumerate(zip(txt_files, tsv_files)):
-                example = parsing.brat_parse_to_bigbio_kb(parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(
+                    parsing.parse_brat_file(txt_file)
+                )
                 example["id"] = str(guid)
                 yield guid, example
 
         elif self.config.schema == "bigbio_text":
             for guid, (txt_file, tsv_file) in enumerate(zip(txt_files, tsv_files)):
-                brat = parsing.brat_parse_to_bigbio_kb(parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES)
+                brat = parsing.brat_parse_to_bigbio_kb(
+                    parsing.parse_brat_file(txt_file)
+                )
                 try:
                     subtrack2_df = pd.read_csv(tsv_file, sep="\t", header=None)
                     subtrack2_df[1] = subtrack2_df[1].apply(str)
                     codes_set = set(subtrack2_df[1].unique().flatten())
                     codes_set.discard("<null>")
                     labels = list(codes_set)
-                except Exception: # subtrack 2 has no codes for this document
+                except Exception:  # subtrack 2 has no codes for this document
                     labels = []
                 example = {
                     "id": str(guid),

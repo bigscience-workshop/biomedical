@@ -156,12 +156,6 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "diann_iber_eval_en_source"
 
-    _ENTITY_TYPES = {
-        "Disability",
-        "Neg",
-        "Scope",
-    }
-
     _STUDIES_PATH = {
         "diann_iber_eval_en": ["English"],
         "diann_iber_eval_es": ["Spanish"],
@@ -268,10 +262,16 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                 _s_tag_open, _e_tag_open = x + 1, x + 4
                 _s_tag_close, _e_tag_close = x, x + 2
                 _s_tag_type, _e_tag_type = x + 2, x + 5
-                if charac == "<" and len(xml_str) > x + 4 and xml_str[_s_tag_open:_e_tag_open] in pre_to_translate:
+                if (
+                    charac == "<"
+                    and len(xml_str) > x + 4
+                    and xml_str[_s_tag_open:_e_tag_open] in pre_to_translate
+                ):
                     if not xml_str[_s_tag_open:_e_tag_open] in chest:
                         chest[xml_str[_s_tag_open:_e_tag_open]] = list()
-                    chest[xml_str[_s_tag_open:_e_tag_open]].append({"text": "", "start": x - z, "end": -1})
+                    chest[xml_str[_s_tag_open:_e_tag_open]].append(
+                        {"text": "", "start": x - z, "end": -1}
+                    )
                     state = 4
                     inclu.append(True)
                     z += 1
@@ -333,12 +333,16 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
         keyword_indicators = ["key words", "keywords"]
 
         keyword_list = [
-            line for line in keyword_str.split("\n") if line.strip() != "" and line.lower() not in keyword_indicators
+            line
+            for line in keyword_str.split("\n")
+            if line.strip() != "" and line.lower() not in keyword_indicators
         ]
 
         return {"title": title_str, "keywords": keyword_list}
 
-    def _generate_source_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+    def _generate_source_examples(
+        self, root_dirs: Dict, split: str
+    ) -> Tuple[int, Dict]:
         _id = -1
         for lang_code, root_dir in root_dirs.items():
             print(lang_code, root_dir)
@@ -352,7 +356,9 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                 raw_text = raw_file.read_text()
                 uid = raw_file.stem
 
-                xml_annotation, entities = self._get_annotations_from_uid(dir_files, uid)
+                xml_annotation, entities = self._get_annotations_from_uid(
+                    dir_files, uid
+                )
                 metadata = self._get_metadata_from_uid(dir_files, uid)
                 _id += 1
 
@@ -366,7 +372,9 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                     "metadata": metadata,
                 }
 
-    def _generate_bigbio_kb_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+    def _generate_bigbio_kb_examples(
+        self, root_dirs: Dict, split: str
+    ) -> Tuple[int, Dict]:
         _id = -1
         for lang_code, root_dir in root_dirs.items():
             language = _CODE2LANG[lang_code]
@@ -393,13 +401,14 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                         "equivalences": [],
                         "attributes": [],
                     },
-                    entity_types=self._ENTITY_TYPES,
                 )
 
                 example["id"] = _id
                 yield _id, example
 
-    def _generate_bigbio_t2t_examples(self, root_dirs: Dict, split: str) -> Tuple[int, Dict]:
+    def _generate_bigbio_t2t_examples(
+        self, root_dirs: Dict, split: str
+    ) -> Tuple[int, Dict]:
         sample_map = defaultdict(list)
         for lang_code, root_dir in root_dirs.items():
             language = _CODE2LANG[lang_code]
