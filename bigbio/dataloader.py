@@ -1,8 +1,7 @@
-##!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Meta dataloader to load "load configurations" for all available datasets according to `_SUPPORTED_TASKS`
+Utility for filtering and loading BigBio datasets.
 """
+
 from importlib.machinery import SourceFileLoader
 import logging
 import os
