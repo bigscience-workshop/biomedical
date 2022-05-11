@@ -1,9 +1,12 @@
 from collections import defaultdict
+import logging
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 import bioc
 import datasets
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -345,6 +348,7 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
             argument["ref_id"] = id_prefix + argument["ref_id"]
 
         unified_example["events"].append(event)
+        
     unified_example["entities"] = []
     anno_ids = [ref_id['id'] for ref_id in non_event_ann]
     for ann in non_event_ann:
@@ -356,6 +360,9 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     unified_example["relations"] = []
     for ann in brat_parse["relations"]:
         if ann["head"]["ref_id"] not in anno_ids or ann["tail"]["ref_id"] not in anno_ids:
+            ann_id = ann["id"]
+            logger.warning("The `bigbio_kb` schema allows for relations only between entities." 
+                           f"The relation `{ann_id}` will not be included in the dataset for now.")
             continue
         unified_example["relations"].append(
             {
