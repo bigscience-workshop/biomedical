@@ -1,3 +1,4 @@
+from collections import defaultdict
 from enum import Enum
 from types import SimpleNamespace
 
@@ -46,6 +47,11 @@ TASK_TO_SCHEMA = {
     Tasks.SUMMARIZATION: "T2T",
     Tasks.TEXT_CLASSIFICATION: "TEXT",
 }
+
+SCHEMA_TO_TASKS = defaultdict(set)
+for task, schema in TASK_TO_SCHEMA.items():
+    SCHEMA_TO_TASKS[schema].add(task)
+SCHEMA_TO_TASKS = dict(SCHEMA_TO_TASKS)
 
 VALID_TASKS = set(TASK_TO_SCHEMA.keys())
 VALID_SCHEMAS = set(TASK_TO_SCHEMA.values())
