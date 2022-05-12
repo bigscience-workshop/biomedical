@@ -65,8 +65,6 @@ _SUPPORTED_TASKS = [
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_ENTITY_TYPES = ["Plant", "Disease"]
-
 
 class PDRDataset(datasets.GeneratorBasedBuilder):
     """The corpus of plant-disease relation consists of plants and diseases and their relation to PubMed abstract"""
@@ -199,24 +197,20 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                 if self.config.subset_id == "pdr_annotator1":
                     # Provide annotations of annotator 1
                     example = parsing.parse_brat_file(file, [".ann"])
-                    example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
+                    example = parsing.brat_parse_to_bigbio_kb(example)
 
                 elif self.config.subset_id == "pdr_annotator2":
                     # Provide annotations of annotator 2
                     example = parsing.parse_brat_file(file, [".ann2"])
-                    example = parsing.brat_parse_to_bigbio_kb(example, _ENTITY_TYPES)
+                    example = parsing.brat_parse_to_bigbio_kb(example)
 
                 elif self.config.subset_id == "pdr":
                     # Provide merged version of annotator 1 and 2
                     annotator1 = parsing.parse_brat_file(file, [".ann"])
-                    annotator1 = parsing.brat_parse_to_bigbio_kb(
-                        annotator1, _ENTITY_TYPES
-                    )
+                    annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1)
 
                     annotator2 = parsing.parse_brat_file(file, [".ann2"])
-                    annotator2 = parsing.brat_parse_to_bigbio_kb(
-                        annotator2, _ENTITY_TYPES
-                    )
+                    annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2)
 
                     example = self._merge_annotations_by_intersection(
                         file, annotator1, annotator2
@@ -234,10 +228,10 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 annotator1 = parsing.parse_brat_file(file, [".ann"])
-                annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1, _ENTITY_TYPES)
+                annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1)
 
                 annotator2 = parsing.parse_brat_file(file, [".ann2"])
-                annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2, _ENTITY_TYPES)
+                annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2)
 
                 merged_annotation = self._merge_annotations_by_intersection(
                     file, annotator1, annotator2
