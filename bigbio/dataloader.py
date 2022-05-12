@@ -72,8 +72,9 @@ class BigBioDataloader:
     def __init__(self):
 
         path_to_here = pathlib.Path(__file__).parent.absolute()
-        self.path_to_biodatasets = (path_to_here / ".." / "biodatasets").resolve()
+        self.path_to_biodatasets = (path_to_here / "biodatasets").resolve()
         self.dataloader_scripts = sorted(self.path_to_biodatasets.glob(os.path.join("*", "*.py")))
+        self.dataloader_scripts = [el for el in self.dataloader_scripts if el.name != '__init__.py']
 
         ds_config_helpers = []
         for dataloader_script in self.dataloader_scripts:
