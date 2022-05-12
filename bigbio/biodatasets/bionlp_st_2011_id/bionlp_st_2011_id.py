@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import datasets
 
@@ -97,6 +97,13 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2011_id_source"
+
+    _ROLE_MAPPING = {
+        "Theme1": "Theme",
+        "Theme2": "Theme",
+        "Site1": "Site",
+        "Site2": "Site",
+    }
 
     def _info(self):
         """
@@ -218,6 +225,15 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _standardize_arguments_roles(self, kb_example: Dict) -> Dict:
+
+        for event in kb_example["events"]:
+            for argument in event["arguments"]:
+                role = argument["role"]
+                argument["role"] = self._ROLE_MAPPING.get(role, role)
+
+        return kb_example
+
     def _generate_examples(self, data_files: Path):
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
@@ -231,6 +247,7 @@ class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
                 example = parsing.brat_parse_to_bigbio_kb(
                     parsing.parse_brat_file(txt_file)
                 )
+                example = self._standardize_arguments_roles(example)
                 example["id"] = str(guid)
                 yield guid, example
         else:
