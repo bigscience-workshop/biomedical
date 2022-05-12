@@ -113,6 +113,10 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "cellfinder_source"
+    SPLIT_TO_IDS = {
+        "train": [16316465, 17381551, 17389645, 18162134, 18286199],
+        "test": [15971941, 16623949, 16672070, 17288595, 17967047],
+    }
 
     def _info(self):
         if self.config.schema == "source":
@@ -153,15 +157,53 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_dir": data_dir},
+                gen_kwargs={"data_dir": data_dir, "split": "train"},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={"data_dir": data_dir, "split": "test"},
             ),
         ]
 
-    def _generate_examples(self, data_dir: Path) -> Iterator[Tuple[str, Dict]]:
+    def _is_to_exclude(self, file: Path) -> bool:
+
+        to_exclude = False
+
+        if (
+            file.name.startswith("._")
+            or file.name.endswith(".ann")
+            or file.name == "LICENSE"
+        ):
+            to_exclude = True
+
+        return to_exclude
+
+    def _not_in_split(self, file: Path, split: str) -> bool:
+
+        to_exclude = False
+
+        # SKIP files according to split
+        if self.config.subset_id.endswith("_splits"):
+            file_id = file.stem.split("_")[0]
+        else:
+            file_id = file.stem
+
+        if int(file_id) not in self.SPLIT_TO_IDS[split]:
+            to_exclude = True
+
+        return to_exclude
+
+    def _generate_examples(
+        self, data_dir: Path, split: str
+    ) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
             for file in data_dir.iterdir():
+
                 # Ignore hidden files and annotation files - we just consider the brat text files
-                if file.name.startswith("._") or file.name.endswith(".ann"):
+                if self._is_to_exclude(file=file):
+                    continue
+
+                if self._not_in_split(file=file, split=split):
                     continue
 
                 # Read brat annotations for the given text file and convert example to the source format
@@ -172,8 +214,12 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             for file in data_dir.iterdir():
+
                 # Ignore hidden files and annotation files - we just consider the brat text files
-                if file.name.startswith("._") or file.name.endswith(".ann"):
+                if self._is_to_exclude(file=file):
+                    continue
+
+                if self._not_in_split(file=file, split=split):
                     continue
 
                 # Read brat annotations for the given text file and convert example to the BigBio-KB format
