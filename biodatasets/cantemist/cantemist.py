@@ -79,7 +79,11 @@ _URLS = {
     "cantemist": "https://zenodo.org/record/3978041/files/cantemist.zip?download=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION, Tasks.TEXT_CLASSIFICATION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.TEXT_CLASSIFICATION,
+]
 
 _SOURCE_VERSION = "1.6.0"
 
@@ -117,8 +121,6 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "cantemist_source"
-
-    _ENTITY_TYPES = {"MORFOLOGIA_NEOPLASIA"}
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -228,9 +230,15 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepaths": {
-                        "task1": Path(os.path.join(data_dir, "train-set/cantemist-ner")),
-                        "task2": Path(os.path.join(data_dir, "train-set/cantemist-norm")),
-                        "task3": Path(os.path.join(data_dir, "train-set/cantemist-coding")),
+                        "task1": Path(
+                            os.path.join(data_dir, "train-set/cantemist-ner")
+                        ),
+                        "task2": Path(
+                            os.path.join(data_dir, "train-set/cantemist-norm")
+                        ),
+                        "task3": Path(
+                            os.path.join(data_dir, "train-set/cantemist-coding")
+                        ),
                     },
                     "split": "train",
                 },
@@ -240,8 +248,12 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepaths": {
                         "task1": Path(os.path.join(data_dir, "test-set/cantemist-ner")),
-                        "task2": Path(os.path.join(data_dir, "test-set/cantemist-norm")),
-                        "task3": Path(os.path.join(data_dir, "test-set/cantemist-coding")),
+                        "task2": Path(
+                            os.path.join(data_dir, "test-set/cantemist-norm")
+                        ),
+                        "task3": Path(
+                            os.path.join(data_dir, "test-set/cantemist-coding")
+                        ),
                     },
                     "split": "test",
                 },
@@ -250,12 +262,24 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
                     "filepaths": {
-                        "task1_set1": Path(os.path.join(data_dir, "dev-set1/cantemist-ner")),
-                        "task1_set2": Path(os.path.join(data_dir, "dev-set2/cantemist-ner")),
-                        "task2_set1": Path(os.path.join(data_dir, "dev-set1/cantemist-norm")),
-                        "task2_set2": Path(os.path.join(data_dir, "dev-set2/cantemist-norm")),
-                        "task3_set1": Path(os.path.join(data_dir, "dev-set1/cantemist-coding")),
-                        "task3_set2": Path(os.path.join(data_dir, "dev-set2/cantemist-coding")),
+                        "task1_set1": Path(
+                            os.path.join(data_dir, "dev-set1/cantemist-ner")
+                        ),
+                        "task1_set2": Path(
+                            os.path.join(data_dir, "dev-set2/cantemist-ner")
+                        ),
+                        "task2_set1": Path(
+                            os.path.join(data_dir, "dev-set1/cantemist-norm")
+                        ),
+                        "task2_set2": Path(
+                            os.path.join(data_dir, "dev-set2/cantemist-norm")
+                        ),
+                        "task3_set1": Path(
+                            os.path.join(data_dir, "dev-set1/cantemist-coding")
+                        ),
+                        "task3_set2": Path(
+                            os.path.join(data_dir, "dev-set2/cantemist-coding")
+                        ),
                     },
                     "split": "dev",
                 },
@@ -271,14 +295,18 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
         if split != "dev":
             txt_files_task1 = list(filepaths["task1"].glob("*txt"))
             txt_files_task2 = list(filepaths["task2"].glob("*txt"))
-            tsv_file_task3 = Path(os.path.join(filepaths["task3"], f"{split}-coding.tsv"))
+            tsv_file_task3 = Path(
+                os.path.join(filepaths["task3"], f"{split}-coding.tsv")
+            )
             task3_df = pd.read_csv(tsv_file_task3, sep="\t", header=None)
         else:
             txt_files_task1, txt_files_task2, dfs = [], [], []
             for i in range(1, 3):
                 txt_files_task1 += list(filepaths[f"task1_set{i}"].glob("*txt"))
                 txt_files_task2 += list(filepaths[f"task2_set{i}"].glob("*txt"))
-                tsv_file_task3 = Path(os.path.join(filepaths[f"task3_set{i}"], f"{split}{i}-coding.tsv"))
+                tsv_file_task3 = Path(
+                    os.path.join(filepaths[f"task3_set{i}"], f"{split}{i}-coding.tsv")
+                )
                 df = pd.read_csv(tsv_file_task3, sep="\t", header=0)
                 dfs.append(df)
             task3_df = pd.concat(dfs)
@@ -298,17 +326,24 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
                 if example["document_id"] in task3_dict:
                     example["labels"] = task3_dict[example["document_id"]]
                 else:
-                    example["labels"] = []  # few cases where subtrack 3 has no codes for the current document
+                    example[
+                        "labels"
+                    ] = (
+                        []
+                    )  # few cases where subtrack 3 has no codes for the current document
                 example["id"] = str(guid)
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
             for guid, txt_file in enumerate(txt_files_task2):
                 parsed_brat = parsing.parse_brat_file(txt_file, parse_notes=True)
-                example = parsing.brat_parse_to_bigbio_kb(parsed_brat, entity_types=self._ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(parsed_brat)
                 example["id"] = str(guid)
                 for i in range(0, len(example["entities"])):
-                    normalized_dict = {"db_id": parsed_brat["notes"][i]["text"], "db_name": "eCIE-O-3.1"}
+                    normalized_dict = {
+                        "db_id": parsed_brat["notes"][i]["text"],
+                        "db_name": "eCIE-O-3.1",
+                    }
                     example["entities"][i]["normalized"].append(normalized_dict)
                 yield guid, example
 
@@ -318,7 +353,9 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
                 if parsed_brat["document_id"] in task3_dict:
                     labels = task3_dict[parsed_brat["document_id"]]
                 else:
-                    labels = []  # few cases where subtrack 3 has no codes for the current document
+                    labels = (
+                        []
+                    )  # few cases where subtrack 3 has no codes for the current document
                 example = {
                     "id": str(guid),
                     "document_id": parsed_brat["document_id"],

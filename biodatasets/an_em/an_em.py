@@ -67,25 +67,14 @@ _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/anatomy/data/AnEM-1.0.4.tar.gz",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.COREFERENCE_RESOLUTION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.COREFERENCE_RESOLUTION,
+    Tasks.RELATION_EXTRACTION,
+]
 
 _SOURCE_VERSION = "1.0.4"
 _BIGBIO_VERSION = "1.0.0"
-
-_ENTITY_TYPES = [
-    "Anatomical_system",
-    "Cancer",
-    "Cell",
-    "Cellular_component",
-    "Developing_anatomical_structure",
-    "Immaterial_anatomical_entity",
-    "Multi-tissue_structure",
-    "Organ",
-    "Organism_subdivision",
-    "Organism_substance",
-    "Pathological_formation",
-    "Tissue",
-]
 
 
 class AnEMDataset(datasets.GeneratorBasedBuilder):
@@ -130,7 +119,10 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                         }
                     ],
                     "equivalences": [
-                        {"entity_id": datasets.Value("string"), "ref_ids": datasets.Sequence(datasets.Value("string"))}
+                        {
+                            "entity_id": datasets.Value("string"),
+                            "ref_ids": datasets.Sequence(datasets.Value("string")),
+                        }
                     ],
                     "relations": [
                         {
@@ -171,7 +163,10 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "train-files.list",
+                    "split_path": data_dir
+                    / "AnEM-1.0.4"
+                    / "development"
+                    / "train-files.list",
                     "split": "train",
                 },
             ),
@@ -187,7 +182,10 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "test-files.list",
+                    "split_path": data_dir
+                    / "AnEM-1.0.4"
+                    / "development"
+                    / "test-files.list",
                     "split": "dev",
                 },
             ),
@@ -217,7 +215,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 if (file.suffix != ".txt") or (file.stem not in split_list):
                     continue
                 brat_parsed = parse.parse_brat_file(file)
-                bigbio_kb_example = parse.brat_parse_to_bigbio_kb(brat_parsed, _ENTITY_TYPES)
+                bigbio_kb_example = parse.brat_parse_to_bigbio_kb(brat_parsed)
 
                 bigbio_kb_example["id"] = bigbio_kb_example["document_id"]
 
@@ -249,7 +247,10 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
             "equivalences": [
                 {
                     "entity_id": brat_entity["id"],
-                    "ref_ids": [f"{brat_example['document_id']}_{ids}" for ids in brat_entity["ref_ids"]],
+                    "ref_ids": [
+                        f"{brat_example['document_id']}_{ids}"
+                        for ids in brat_entity["ref_ids"]
+                    ],
                 }
                 for brat_entity in brat_example["equivalences"]
             ],

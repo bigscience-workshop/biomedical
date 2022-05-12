@@ -96,25 +96,6 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "mlee_source"
 
-    _ENTITY_TYPES = {
-        "Anatomical_system",
-        "Cell",
-        "Cellular_component",
-        "DNA_domain_or_region",
-        "Developing_anatomical_structure",
-        "Drug_or_compound",
-        "Gene_or_gene_product",
-        "Immaterial_anatomical_entity",
-        "Multi-tissue_structure",
-        "Organ",
-        "Organism",
-        "Organism_subdivision",
-        "Organism_substance",
-        "Pathological_formation",
-        "Protein_domain_or_region",
-        "Tissue",
-    }
-
     def _info(self):
         """
         Provide information about MLEE:
@@ -270,7 +251,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file)
                 )
                 example["id"] = str(guid)
                 yield guid, example

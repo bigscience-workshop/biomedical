@@ -54,10 +54,14 @@ The CellFinder project aims to create a stem cell data repository by linking inf
 (see https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/).
 """
 
-_HOMEPAGE = "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
+_HOMEPAGE = (
+    "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
+)
 _LICENSE = "CC BY-SA 3.0"
 
-_SOURCE_URL = "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
+_SOURCE_URL = (
+    "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
+)
 _URLS = {
     _DATASETNAME: _SOURCE_URL + "cellfinder1_brat.tar.gz",
     _DATASETNAME + "_splits": _SOURCE_URL + "cellfinder1_brat_sections.tar.gz",
@@ -69,15 +73,6 @@ _SUPPORTED_TASKS = [
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
-
-_ENTITY_TYPES = [
-    "Anatomy",
-    "CellComponent",
-    "CellLine",
-    "CellType",
-    "GeneProtein",
-    "Species",
-]
 
 
 class CellFinderDataset(datasets.GeneratorBasedBuilder):
@@ -183,7 +178,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
                 # Read brat annotations for the given text file and convert example to the BigBio-KB format
                 brat_example = parsing.parse_brat_file(file)
-                kb_example = parsing.brat_parse_to_bigbio_kb(brat_example, _ENTITY_TYPES)
+                kb_example = parsing.brat_parse_to_bigbio_kb(brat_example)
                 kb_example["id"] = kb_example["document_id"]
 
                 # Fix text type annotation for the converted example

@@ -105,8 +105,6 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "cadec_source"
 
-    _ENTITY_TYPES = {"Symptom", "ADR", "Finding", "Disease", "Drug"}
-
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
@@ -176,7 +174,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                 example["events"] = []
                 example["relations"] = []
                 example["equivalences"] = []
-                example = parsing.brat_parse_to_bigbio_kb(example, entity_types=self._ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(example)
                 example["id"] = str(guid)
                 yield guid, example
         else:
@@ -194,7 +192,9 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             example["text_bound_annotations"] = []
             example["normalizations"] = []
             for annotation in ["original", "meddra", "sct"]:
-                annotation_path = Path(corpus_path, annotation, txt_file.with_suffix(".ann").name)
+                annotation_path = Path(
+                    corpus_path, annotation, txt_file.with_suffix(".ann").name
+                )
                 self._populate_example(example, annotation, annotation_path)
             yield guid, example
 

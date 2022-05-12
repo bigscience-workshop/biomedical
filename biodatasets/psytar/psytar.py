@@ -149,13 +149,6 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "psytar_source"
 
-    _ENTITY_TYPES = {
-        "ADR",  # Adverse Drug Reaction
-        "WD",  # Withdrawal Symptoms
-        "SSI",  # Sign/Symptoms/Illness
-        "DI",  # Drug Indications
-    }
-
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
@@ -476,7 +469,6 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
                             "equivalences": [],
                             "attributes": [],
                         },
-                        entity_types=self._ENTITY_TYPES,
                     )
                     example["id"] = i_doc
                     i_doc += 1

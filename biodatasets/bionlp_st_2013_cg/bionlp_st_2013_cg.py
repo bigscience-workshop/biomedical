@@ -60,9 +60,11 @@ _URLs = {
     "bionlp_st_2013_cg": "https://github.com/openbiocorpora/bionlp-st-2013-cg/archive/refs/heads/master.zip",
 }
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION,
-                    Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.COREFERENCE_RESOLUTION,]
+_SUPPORTED_TASKS = [
+    Tasks.EVENT_EXTRACTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.COREFERENCE_RESOLUTION,
+]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -93,28 +95,6 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_st_2013_cg_source"
 
-    _ENTITY_TYPES = {
-        "Anatomical_system",
-        "Cell",
-        "Cellular_component",
-        "DNA_domain_or_region",
-        "Developing_anatomical_structure",
-        "Gene_or_gene_product",
-        "Immaterial_anatomical_entity",
-        "Multi-tissue_structure",
-        "Organ",
-        "Organism",
-        "Organism_subdivision",
-        "Organism_substance",
-        "Pathological_formation",
-        "Protein_domain_or_region",
-        "Tissue",
-        "Immaterial_anatomical_entity",
-        "Cancer",
-        "Amino_acid",
-        "Simple_chemical",
-    }
-
     def _info(self):
         """
         - `features` defines the schema of the parsed data set. The schema depends on the
@@ -138,7 +118,9 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -182,8 +164,12 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -209,7 +195,9 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         my_urls = _URLs[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
@@ -244,7 +232,7 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file)
                 )
                 example["id"] = str(guid)
                 yield guid, example

@@ -94,24 +94,6 @@ _DATASET_TYPES = {
     "patents": "Patents",
 }
 
-_ENTITY_TYPES = [
-    "ACTI",
-    "ANAT",
-    "CHEM",
-    "CONC",
-    "DEVI",
-    "DISO",
-    "GENE",
-    "GEOG",
-    "LIVB",
-    "OBJC",
-    "OCCU",
-    "ORGA",
-    "PHEN",
-    "PHYS",
-    "PROC",
-]
-
 
 class MantraGSCDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
@@ -196,11 +178,17 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_dir": data_dir, "language": language, "dataset_type": dataset_type},
+                gen_kwargs={
+                    "data_dir": data_dir,
+                    "language": language,
+                    "dataset_type": dataset_type,
+                },
             ),
         ]
 
-    def _generate_examples(self, data_dir: Path, language: str, dataset_type: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, data_dir: Path, language: str, dataset_type: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         data_dir = data_dir / f"{_LANGUAGES[language]}"
 
@@ -209,10 +197,14 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         else:
             # It is Medline now
             if language != "en":
-                data_dir = data_dir / f"{_DATASET_TYPES[dataset_type]}_EN_{language.upper()}_ec22-cui-best_man"
+                data_dir = (
+                    data_dir
+                    / f"{_DATASET_TYPES[dataset_type]}_EN_{language.upper()}_ec22-cui-best_man"
+                )
             else:
                 data_dir = [
-                    data_dir / f"{_DATASET_TYPES[dataset_type]}_EN_{_lang.upper()}_ec22-cui-best_man"
+                    data_dir
+                    / f"{_DATASET_TYPES[dataset_type]}_EN_{_lang.upper()}_ec22-cui-best_man"
                     for _lang in _LANGUAGES
                     if _lang != "en"
                 ]
@@ -232,7 +224,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             for i, raw_file in enumerate(raw_files):
                 brat_example = parsing.parse_brat_file(raw_file, parse_notes=True)
                 brat_to_bigbio_example = self._brat_to_bigbio_example(brat_example)
-                kb_example = parsing.brat_parse_to_bigbio_kb(brat_to_bigbio_example, _ENTITY_TYPES)
+                kb_example = parsing.brat_parse_to_bigbio_kb(brat_to_bigbio_example)
                 kb_example["id"] = i
                 yield i, kb_example
 
@@ -243,7 +235,9 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         }
 
         source_example["entities"] = []
-        for entity_annotation, ann_notes in zip(brat_example["text_bound_annotations"], brat_example["notes"]):
+        for entity_annotation, ann_notes in zip(
+            brat_example["text_bound_annotations"], brat_example["notes"]
+        ):
             entity_ann = entity_annotation.copy()
 
             # Change id property name
@@ -277,7 +271,9 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         }
         kb_example["text_bound_annotations"] = []
         kb_example["normalizations"] = []
-        for entity_annotation, ann_notes in zip(brat_example["text_bound_annotations"], brat_example["notes"]):
+        for entity_annotation, ann_notes in zip(
+            brat_example["text_bound_annotations"], brat_example["notes"]
+        ):
             entity_ann = entity_annotation.copy()
             # Get values from annotator notes
             assert entity_ann["id"] == ann_notes["ref_id"]

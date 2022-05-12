@@ -1,5 +1,5 @@
-from collections import defaultdict
 import logging
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
@@ -7,7 +7,6 @@ import bioc
 import datasets
 
 logger = logging.getLogger(__name__)
-
 
 
 def get_texts_and_offsets_from_bioc_ann(ann: bioc.BioCAnnotation) -> Tuple:
@@ -37,8 +36,11 @@ def remove_prefix(a: str, prefix: str) -> str:
     return a
 
 
-def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
-                    parse_notes: bool = False) -> Dict:
+def parse_brat_file(
+    txt_file: Path,
+    annotation_file_suffixes: List[str] = None,
+    parse_notes: bool = False,
+) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
@@ -188,7 +190,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
                 i = 0
                 for start, end in ann["offsets"]:
                     chunk_len = end - start
-                    ann["text"].append(text[i:chunk_len+i])
+                    ann["text"].append(text[i : chunk_len + i])
                     i += chunk_len
                     while i < len(text) and text[i] == " ":
                         i += 1
@@ -294,14 +296,12 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
     return example
 
 
-def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Dict:
+def brat_parse_to_bigbio_kb(brat_parse: Dict) -> Dict:
     """
     Transform a brat parse (conforming to the standard brat schema) obtained with
     `parse_brat_file` into a dictionary conforming to the `bigbio-kb` schema (as defined in ../schemas/kb.py)
 
     :param brat_parse:
-    :param entity_types: Entity types of the dataset. This should include all types of `T` annotations that are not
-                         event triggers and will be different in different datasets.
     """
 
     unified_example = {}
@@ -337,7 +337,11 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
     for event in brat_parse["events"]:
         event = event.copy()
         event["id"] = id_prefix + event["id"]
-        trigger = next(tr for tr in brat_parse["text_bound_annotations"] if tr['id'] == event["trigger"])
+        trigger = next(
+            tr
+            for tr in brat_parse["text_bound_annotations"]
+            if tr["id"] == event["trigger"]
+        )
         if trigger in non_event_ann:
             non_event_ann.remove(trigger)
         event["trigger"] = {
@@ -348,20 +352,23 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
             argument["ref_id"] = id_prefix + argument["ref_id"]
 
         unified_example["events"].append(event)
-        
+
     unified_example["entities"] = []
-    anno_ids = [ref_id['id'] for ref_id in non_event_ann]
+    anno_ids = [ref_id["id"] for ref_id in non_event_ann]
     for ann in non_event_ann:
         entity_ann = ann.copy()
         entity_ann["id"] = id_prefix + entity_ann["id"]
         entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
         unified_example["entities"].append(entity_ann)
-        
+
     # massage relations
     unified_example["relations"] = []
     skipped_relations = set()
     for ann in brat_parse["relations"]:
-        if ann["head"]["ref_id"] not in anno_ids or ann["tail"]["ref_id"] not in anno_ids:
+        if (
+            ann["head"]["ref_id"] not in anno_ids
+            or ann["tail"]["ref_id"] not in anno_ids
+        ):
             skipped_relations.add(ann["id"])
             continue
         unified_example["relations"].append(
@@ -380,7 +387,6 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
             f" Skip (for now): "
             f"{list(skipped_relations)}"
         )
-
 
     # get coreferences
     unified_example["coreferences"] = []

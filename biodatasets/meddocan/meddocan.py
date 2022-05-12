@@ -22,9 +22,11 @@ challenge task specifically devoted to the anonymization of medical documents in
 """
 
 import os
-import datasets
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
+import datasets
+
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
@@ -76,6 +78,7 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 class MeddocanDataset(datasets.GeneratorBasedBuilder):
     """Manually annotated collection of clinical case studies from Spanish medical publications."""
 
@@ -84,11 +87,11 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-                name="meddocan_source",
-                version=SOURCE_VERSION,
-                description="Meddocan source schema",
-                schema="source",
-                subset_id="meddocan",
+            name="meddocan_source",
+            version=SOURCE_VERSION,
+            description="Meddocan source schema",
+            schema="source",
+            subset_id="meddocan",
         ),
         BigBioConfig(
             name="meddocan_bigbio_kb",
@@ -100,31 +103,6 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "meddocan_source"
-
-    _ENTITY_TYPES = {
-        'TERRITORIO',
-        'FECHAS',
-        'EDAD_SUJETO_ASISTENCIA',
-        'NOMBRE_SUJETO_ASISTENCIA',
-        'NOMBRE_PERSONAL_SANITARIO',
-        'SEXO_SUJETO_ASISTENCIA',
-        'CALLE',
-        'PAIS',
-        'ID_SUJETO_ASISTENCIA',
-        'CORREO',
-        'ID_TITULACION_PERSONAL_SANITARIO',
-        'ID_ASEGURAMIENTO',
-        'HOSPITAL',
-        'FAMILIARES_SUJETO_ASISTENCIA',
-        'INSTITUCION',
-        'ID_CONTACTO ASISTENCIAL',
-        'NUMERO_TELEFONO',
-        'PROFESION',
-        'NUMERO_FAX',
-        'OTROS_SUJETO_ASISTENCIA',
-        'CENTRO_SALUD',
-        'ID_EMPLEO_PERSONAL_SANITARIO'
-    }
 
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
@@ -190,9 +168,7 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
                             "ref_id": datasets.Value("string"),
                             "resource_name": datasets.Value("string"),
                             "cuid": datasets.Value("string"),
-                            "text": datasets.Value(
-                                "string"
-                            ),
+                            "text": datasets.Value("string"),
                         }
                     ],
                 },
@@ -254,16 +230,17 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.parse_brat_file(txt_file)
-            
+
                 example["id"] = str(guid)
                 yield guid, example
 
         elif self.config.schema == "bigbio_kb":
             for guid, txt_file in enumerate(txt_files):
-                example = parsing.brat_parse_to_bigbio_kb(parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES)
+                example = parsing.brat_parse_to_bigbio_kb(
+                    parsing.parse_brat_file(txt_file)
+                )
                 example["id"] = str(guid)
                 yield guid, example
 
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-
