@@ -74,15 +74,6 @@ _SUPPORTED_TASKS = [
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
-_ENTITY_TYPES = [
-    "Anatomy",
-    "CellComponent",
-    "CellLine",
-    "CellType",
-    "GeneProtein",
-    "Species",
-]
-
 
 class CellFinderDataset(datasets.GeneratorBasedBuilder):
     """The CellFinder corpus."""
@@ -233,9 +224,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
 
                 # Read brat annotations for the given text file and convert example to the BigBio-KB format
                 brat_example = parsing.parse_brat_file(file)
-                kb_example = parsing.brat_parse_to_bigbio_kb(
-                    brat_example, _ENTITY_TYPES
-                )
+                kb_example = parsing.brat_parse_to_bigbio_kb(brat_example)
                 kb_example["id"] = kb_example["document_id"]
 
                 # Fix text type annotation for the converted example
