@@ -6,7 +6,7 @@
 
 .PHONY: quality
 
-datasets_dir := biodatasets
+datasets_dir := bigbio/biodatasets
 examples_dir := examples
 
 # Format source code automatically (one file)
