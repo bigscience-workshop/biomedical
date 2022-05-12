@@ -19,7 +19,7 @@ on angiogenesis. It contains annotations for entities, relations, events and cor
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import datasets
 
@@ -95,6 +95,14 @@ class MLEE(datasets.GeneratorBasedBuilder):
     ]
 
     DEFAULT_CONFIG_NAME = "mlee_source"
+
+    _ROLE_MAPPING = {
+        "Theme2": "Theme",
+        "Instrument2": "Instrument",
+        "Participant2": "Participant",
+        "Participant3": "Participant",
+        "Participant4": "Participant",
+    }
 
     def _info(self):
         """
@@ -236,6 +244,15 @@ class MLEE(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _standardize_arguments_roles(self, kb_example: Dict) -> Dict:
+
+        for event in kb_example["events"]:
+            for argument in event["arguments"]:
+                role = argument["role"]
+                argument["role"] = self._ROLE_MAPPING.get(role, role)
+
+        return kb_example
+
     def _generate_examples(self, data_files: Path):
         """
         Yield one `(guid, example)` pair per abstract in MLEE.
@@ -253,6 +270,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 example = parsing.brat_parse_to_bigbio_kb(
                     parsing.parse_brat_file(txt_file)
                 )
+                example = self._standardize_arguments_roles(example)
                 example["id"] = str(guid)
                 yield guid, example
         else:
