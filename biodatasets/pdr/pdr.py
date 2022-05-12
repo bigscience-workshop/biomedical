@@ -58,7 +58,7 @@ _URLS = {_DATASETNAME: "http://gcancer.org/pdr/Plant-Disease_Corpus.tar.gz"}
 
 _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
+    # Tasks.RELATION_EXTRACTION,
     Tasks.EVENT_EXTRACTION,
     Tasks.COREFERENCE_RESOLUTION,
 ]
@@ -229,10 +229,10 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 annotator1 = parsing.parse_brat_file(file, [".ann"])
-                annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1, _ENTITY_TYPES)
+                annotator1 = parsing.brat_parse_to_bigbio_kb(annotator1)
 
                 annotator2 = parsing.parse_brat_file(file, [".ann2"])
-                annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2, _ENTITY_TYPES)
+                annotator2 = parsing.brat_parse_to_bigbio_kb(annotator2)
 
                 merged_annotation = self._merge_annotations_by_intersection(
                     file, annotator1, annotator2
