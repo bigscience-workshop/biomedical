@@ -15,7 +15,7 @@
 
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import datasets
 
@@ -195,6 +195,13 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bionlp_shared_task_2009_source"
 
+    _ROLE_MAPPING = {
+        "Theme2": "Theme",
+        "Theme3": "Theme",
+        "Theme4": "Theme",
+        "Site2": "Site",
+    }
+
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
@@ -284,7 +291,16 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath, split) -> (int, dict):
+    def _standardize_arguments_roles(self, kb_example: Dict) -> Dict:
+
+        for event in kb_example["events"]:
+            for argument in event["arguments"]:
+                role = argument["role"]
+                argument["role"] = self._ROLE_MAPPING.get(role, role)
+
+        return kb_example
+
+    def _generate_examples(self, filepath, split):
 
         filepath = Path(filepath)
         txt_files: List[Path] = [
@@ -300,5 +316,6 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
             for i, file in enumerate(txt_files):
                 brat_content = parse_brat_file(file)
                 kb_example = brat_parse_to_bigbio_kb(brat_content)
+                kb_example = self._standardize_arguments_roles(kb_example)
                 kb_example["id"] = kb_example["document_id"]
                 yield i, kb_example
