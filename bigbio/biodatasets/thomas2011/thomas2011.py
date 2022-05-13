@@ -89,13 +89,13 @@ Also the additional rules are subject to these agreement.
 The annotations are published for academic use only and usage for development of commercial products is not permitted.
 """
 
-# 
+#
 
 # this is a backup url in case the official one will stop working
 # _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 _URLS = {
-    "source" : "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
-    "bigbio_kb" : "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz"
+    "source": "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
+    "bigbio_kb": "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
 }
 
 _SUPPORTED_TASKS = [
@@ -151,8 +151,6 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "thomas2011_source"
 
-    _ENTITY_TYPES = {"Nucleotide Sequence Mutation", "Protein Sequence Mutation"}
-
     def _info(self) -> datasets.DatasetInfo:
 
         # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
@@ -198,7 +196,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
         #        file.rename(data_dir / file.name)
 
         # Delete all unused files and directories from the original download
-        #for x in repo_dir.glob("[!data]*"):
+        # for x in repo_dir.glob("[!data]*"):
         #    if x.is_file():
         #        x.unlink()
         #    elif x.is_dir():
@@ -210,7 +208,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, 'annotations.txt'),
+                    "filepath": os.path.join(data_dir, "annotations.txt"),
                     "split": "test",
                 },
             )
@@ -226,7 +224,11 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             data_ann = []
             with open(filepath, encoding="utf-8") as ann_tsv_file:
                 csv_reader_code = csv.reader(
-                    ann_tsv_file, quotechar="'", delimiter="\t", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                    ann_tsv_file,
+                    quotechar="'",
+                    delimiter="\t",
+                    quoting=csv.QUOTE_ALL,
+                    skipinitialspace=True,
                 )
                 for id_, row in enumerate(csv_reader_code):
                     data_ann.append(row)
