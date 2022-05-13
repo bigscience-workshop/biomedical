@@ -216,12 +216,13 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
                 example = parsing.parse_brat_file(
                     filepath / "annotations" / f"{file_name}.ann"
                 )
-                events = [
-                    event
-                    for event in example["events"]
-                    if event["type"] not in self._ENTITY_TYPES
-                ]
-                example["events"] = events
+
+                # this example contains event lines
+                # but events have not arguments
+                # this is most likely an error on the annotation side
+                if example["document_id"] == "11058905":
+                    example["events"] = []
+
                 example["text"] = text
                 example = parsing.brat_parse_to_bigbio_kb(example)
                 example["id"] = str(guid)
