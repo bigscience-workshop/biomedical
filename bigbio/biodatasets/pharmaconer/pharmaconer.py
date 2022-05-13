@@ -89,7 +89,7 @@ The predictions are compared to the manually annotated concept ids corresponding
 pharmacological substances.
 """
 
-_DESCRIPTIONS = {
+_DESCRIPTION = {
     "subtrack_1": _GENERAL_DESCRIPTION + _DESCRIPTION_SUBTRACK_1,
     "subtrack_2": _GENERAL_DESCRIPTION + _DESCRIPTION_SUBTRACK_2,
     "full_task": _GENERAL_DESCRIPTION
@@ -222,7 +222,7 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
             features = schemas.text_features
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTIONS[self.config.subset_id],
+            description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
             license=_LICENSE,
