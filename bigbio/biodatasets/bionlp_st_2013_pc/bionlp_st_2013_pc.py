@@ -13,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
-"""
 from pathlib import Path
 from typing import Dict, List
 
@@ -27,91 +22,103 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_DATASETNAME = "mlee"
-_SOURCE_VIEW_NAME = "source"
+_DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
-  biburl    = {},
-  bibsource = {}
+@inproceedings{ohta-etal-2013-overview,
+    title = "Overview of the Pathway Curation ({PC}) task of {B}io{NLP} Shared Task 2013",
+    author = "Ohta, Tomoko  and
+      Pyysalo, Sampo  and
+      Rak, Rafal  and
+      Rowley, Andrew  and
+      Chun, Hong-Woo  and
+      Jung, Sung-Jae  and
+      Choi, Sung-Pil  and
+      Ananiadou, Sophia  and
+      Tsujii, Jun{'}ichi",
+    booktitle = "Proceedings of the {B}io{NLP} Shared Task 2013 Workshop",
+    month = aug,
+    year = "2013",
+    address = "Sofia, Bulgaria",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W13-2009",
+    pages = "67--75",
 }
 """
 
 _DESCRIPTION = """\
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
+the Pathway Curation (PC) task is a main event extraction task of the BioNLP shared task (ST) 2013.
+The PC task concerns the automatic extraction of biomolecular reactions from text.
+The task setting, representation and semantics are defined with respect to pathway
+model standards and ontologies (SBML, BioPAX, SBO) and documents selected by relevance
+to specific model reactions. Two BioNLP ST 2013 participants successfully completed
+the PC task. The highest achieved F-score, 52.8%, indicates that event extraction is
+a promising approach to supporting pathway curation efforts.
 """
 
-_HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
+_HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-pc"
 
-_LICENSE = "CC BY-NC-SA 3.0"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC BY-SA 3.0"
 
 _URLs = {
-    "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
-    "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+    "bionlp_st_2013_pc": "https://github.com/openbiocorpora/bionlp-st-2013-pc/archive/refs/heads/master.zip",
 }
 
 _SUPPORTED_TASKS = [
     Tasks.EVENT_EXTRACTION,
     Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
     Tasks.COREFERENCE_RESOLUTION,
 ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MLEE(datasets.GeneratorBasedBuilder):
-    """Write a short docstring documenting what this dataset is"""
+class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
+    """the Pathway Curation (PC) task is a main event extraction task of the BioNLP shared task (ST) 2013."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="mlee_source",
+            name="bionlp_st_2013_pc_source",
             version=SOURCE_VERSION,
-            description="MLEE source schema",
+            description="bionlp_st_2013 source schema",
             schema="source",
-            subset_id="mlee",
+            subset_id="bionlp_st_2013_pc",
         ),
         BigBioConfig(
-            name="mlee_bigbio_kb",
-            version=SOURCE_VERSION,
-            description="MLEE BigBio schema",
+            name="bionlp_st_2013_pc_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="bionlp_st_2013_pc BigBio schema",
             schema="bigbio_kb",
-            subset_id="mlee",
+            subset_id="bionlp_st_2013_pc",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "mlee_source"
+    DEFAULT_CONFIG_NAME = "bionlp_st_2013_pc_source"
 
     _ROLE_MAPPING = {
         "Theme2": "Theme",
-        "Instrument2": "Instrument",
+        "Theme3": "Theme",
+        "Theme4": "Theme",
         "Participant2": "Participant",
         "Participant3": "Participant",
         "Participant4": "Participant",
+        "Participant5": "Participant",
+        "Product2": "Product",
+        "Product3": "Product",
+        "Product4": "Product",
     }
 
     def _info(self):
         """
-        Provide information about MLEE:
         - `features` defines the schema of the parsed data set. The schema depends on the
         chosen `config`: If it is `_SOURCE_VIEW_NAME` the schema is the schema of the
         original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
         canonical KB-task schema defined in `biomedical/schemas/kb.py`.
-
         """
         if self.config.schema == "source":
             features = datasets.Features(
@@ -210,23 +217,12 @@ class MLEE(datasets.GeneratorBasedBuilder):
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
-        """
-        Create the three splits provided by MLEE: train, validation and test.
-
-        Each split is created by instantiating a `datasets.SplitGenerator`, which will
-        call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
-        """
-
-        my_urls = _URLs[self.config.schema]
+        my_urls = _URLs[_DATASETNAME]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir
-            / "MLEE-1.0.2-rev1"
-            / "standoff"
-            / "development"
-            / "train",
-            "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
-            "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
+            "train": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2013-pc-master" / "original-data" / "test",
         }
 
         return [
@@ -254,10 +250,6 @@ class MLEE(datasets.GeneratorBasedBuilder):
         return kb_example
 
     def _generate_examples(self, data_files: Path):
-        """
-        Yield one `(guid, example)` pair per abstract in MLEE.
-        The contents of `example` will depend on the chosen configuration.
-        """
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):

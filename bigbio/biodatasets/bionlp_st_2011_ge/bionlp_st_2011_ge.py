@@ -13,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
-"""
 from pathlib import Path
 from typing import Dict, List
 
@@ -27,91 +22,101 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_DATASETNAME = "mlee"
+_DATASETNAME = "bionlp_st_2011_ge"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
-  biburl    = {},
-  bibsource = {}
+@inproceedings{10.5555/2107691.2107693,
+author = {Kim, Jin-Dong and Wang, Yue and Takagi, Toshihisa and Yonezawa, Akinori},
+title = {Overview of Genia Event Task in BioNLP Shared Task 2011},
+year = {2011},
+isbn = {9781937284091},
+publisher = {Association for Computational Linguistics},
+address = {USA},
+abstract = {The Genia event task, a bio-molecular event extraction task,
+is arranged as one of the main tasks of BioNLP Shared Task 2011.
+As its second time to be arranged for community-wide focused
+efforts, it aimed to measure the advance of the community since 2009,
+and to evaluate generalization of the technology to full text papers.
+After a 3-month system development period, 15 teams submitted their
+performance results on test cases. The results show the community has
+made a significant advancement in terms of both performance improvement
+and generalization.},
+booktitle = {Proceedings of the BioNLP Shared Task 2011 Workshop},
+pages = {7–15},
+numpages = {9},
+location = {Portland, Oregon},
+series = {BioNLP Shared Task '11}
 }
 """
 
 _DESCRIPTION = """\
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
+The BioNLP-ST GE task has been promoting development of fine-grained information extraction (IE) from biomedical
+documents, since 2009. Particularly, it has focused on the domain of NFkB as a model domain of Biomedical IE.
+The GENIA task aims at extracting events occurring upon genes or gene products, which are typed as "Protein"
+without differentiating genes from gene products. Other types of physical entities, e.g. cells, cell components,
+are not differentiated from each other, and their type is given as "Entity".
 """
 
-_HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
+_HOMEPAGE = "https://sites.google.com/site/bionlpst/bionlp-shared-task-2011/genia-event-extraction-genia"
 
-_LICENSE = "CC BY-NC-SA 3.0"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
 
 _URLs = {
-    "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
-    "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
 }
 
 _SUPPORTED_TASKS = [
     Tasks.EVENT_EXTRACTION,
     Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
     Tasks.COREFERENCE_RESOLUTION,
 ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MLEE(datasets.GeneratorBasedBuilder):
-    """Write a short docstring documenting what this dataset is"""
+class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
+    """The BioNLP-ST GE task has been promoting development of fine-grained information extraction (IE) from biomedical
+    documents, since 2009. Particularly, it has focused on the domain of NFkB as a model domain of Biomedical IE"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="mlee_source",
+            name="bionlp_st_2011_ge_source",
             version=SOURCE_VERSION,
-            description="MLEE source schema",
+            description="bionlp_st_2011_ge source schema",
             schema="source",
-            subset_id="mlee",
+            subset_id="bionlp_st_2011_ge",
         ),
         BigBioConfig(
-            name="mlee_bigbio_kb",
-            version=SOURCE_VERSION,
-            description="MLEE BigBio schema",
+            name="bionlp_st_2011_ge_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="bionlp_st_2011_ge BigBio schema",
             schema="bigbio_kb",
-            subset_id="mlee",
+            subset_id="bionlp_st_2011_ge",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "mlee_source"
+    DEFAULT_CONFIG_NAME = "bionlp_st_2011_ge_source"
 
     _ROLE_MAPPING = {
         "Theme2": "Theme",
-        "Instrument2": "Instrument",
-        "Participant2": "Participant",
-        "Participant3": "Participant",
-        "Participant4": "Participant",
+        "Theme3": "Theme",
+        "Theme4": "Theme",
+        "Site2": "Site",
     }
 
     def _info(self):
         """
-        Provide information about MLEE:
         - `features` defines the schema of the parsed data set. The schema depends on the
         chosen `config`: If it is `_SOURCE_VIEW_NAME` the schema is the schema of the
         original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
         canonical KB-task schema defined in `biomedical/schemas/kb.py`.
-
         """
         if self.config.schema == "source":
             features = datasets.Features(
@@ -192,41 +197,23 @@ class MLEE(datasets.GeneratorBasedBuilder):
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
             features=features,
-            # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
-            # specify them. They'll be used if as_supervised=True in builder.as_dataset.
-            # This is not applicable for MLEE.
-            # supervised_keys=("sentence", "label"),
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
-        """
-        Create the three splits provided by MLEE: train, validation and test.
-
-        Each split is created by instantiating a `datasets.SplitGenerator`, which will
-        call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
-        """
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir
-            / "MLEE-1.0.2-rev1"
-            / "standoff"
-            / "development"
-            / "train",
-            "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
-            "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
+            "train": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "test",
         }
 
         return [
@@ -254,10 +241,6 @@ class MLEE(datasets.GeneratorBasedBuilder):
         return kb_example
 
     def _generate_examples(self, data_files: Path):
-        """
-        Yield one `(guid, example)` pair per abstract in MLEE.
-        The contents of `example` will depend on the chosen configuration.
-        """
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):

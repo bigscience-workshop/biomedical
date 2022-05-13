@@ -13,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
-"""
 from pathlib import Path
 from typing import Dict, List
 
@@ -27,91 +22,95 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_DATASETNAME = "mlee"
+_DATASETNAME = "bionlp_st_2011_id"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
-  biburl    = {},
-  bibsource = {}
+@inproceedings{pyysalo-etal-2011-overview,
+    title = "Overview of the Infectious Diseases ({ID}) task of {B}io{NLP} Shared Task 2011",
+    author = "Pyysalo, Sampo  and
+      Ohta, Tomoko  and
+      Rak, Rafal  and
+      Sullivan, Dan  and
+      Mao, Chunhong  and
+      Wang, Chunxia  and
+      Sobral, Bruno  and
+      Tsujii, Jun{'}ichi  and
+      Ananiadou, Sophia",
+    booktitle = "Proceedings of {B}io{NLP} Shared Task 2011 Workshop",
+    month = jun,
+    year = "2011",
+    address = "Portland, Oregon, USA",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/W11-1804",
+    pages = "26--35",
 }
 """
 
 _DESCRIPTION = """\
-MLEE is an event extraction corpus consisting of manually annotated abstracts of papers
-on angiogenesis. It contains annotations for entities, relations, events and coreferences
-The annotations span molecular, cellular, tissue, and organ-level processes.
+The dataset of the Infectious Diseases (ID) task of
+BioNLP Shared Task 2011.
 """
 
-_HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
+_HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-id"
 
-_LICENSE = "CC BY-NC-SA 3.0"
+_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
 
 _URLs = {
-    "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
-    "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
+    "source": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
+    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-id/archive/refs/heads/master.zip",
 }
 
 _SUPPORTED_TASKS = [
     Tasks.EVENT_EXTRACTION,
-    Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.RELATION_EXTRACTION,
     Tasks.COREFERENCE_RESOLUTION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
 ]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MLEE(datasets.GeneratorBasedBuilder):
-    """Write a short docstring documenting what this dataset is"""
+class bionlp_st_2011_id(datasets.GeneratorBasedBuilder):
+    """The dataset of the Infectious Diseases (ID) task of
+    BioNLP Shared Task 2011."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="mlee_source",
+            name="bionlp_st_2011_id_source",
             version=SOURCE_VERSION,
-            description="MLEE source schema",
+            description="bionlp_st_2011_id source schema",
             schema="source",
-            subset_id="mlee",
+            subset_id="bionlp_st_2011_id",
         ),
         BigBioConfig(
-            name="mlee_bigbio_kb",
-            version=SOURCE_VERSION,
-            description="MLEE BigBio schema",
+            name="bionlp_st_2011_id_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="bionlp_st_2011_id BigBio schema",
             schema="bigbio_kb",
-            subset_id="mlee",
+            subset_id="bionlp_st_2011_id",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "mlee_source"
+    DEFAULT_CONFIG_NAME = "bionlp_st_2011_id_source"
 
     _ROLE_MAPPING = {
+        "Theme1": "Theme",
         "Theme2": "Theme",
-        "Instrument2": "Instrument",
-        "Participant2": "Participant",
-        "Participant3": "Participant",
-        "Participant4": "Participant",
+        "Site1": "Site",
+        "Site2": "Site",
     }
 
     def _info(self):
         """
-        Provide information about MLEE:
         - `features` defines the schema of the parsed data set. The schema depends on the
         chosen `config`: If it is `_SOURCE_VIEW_NAME` the schema is the schema of the
         original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
         canonical KB-task schema defined in `biomedical/schemas/kb.py`.
-
         """
         if self.config.schema == "source":
             features = datasets.Features(
@@ -192,41 +191,23 @@ class MLEE(datasets.GeneratorBasedBuilder):
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
-            # This is the description that will appear on the datasets page.
             description=_DESCRIPTION,
             features=features,
-            # If there's a common (input, target) tuple from the features, uncomment supervised_keys line below and
-            # specify them. They'll be used if as_supervised=True in builder.as_dataset.
-            # This is not applicable for MLEE.
-            # supervised_keys=("sentence", "label"),
-            # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
-            # License for the dataset if available
             license=_LICENSE,
-            # Citation for the dataset
             citation=_CITATION,
         )
 
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
-        """
-        Create the three splits provided by MLEE: train, validation and test.
-
-        Each split is created by instantiating a `datasets.SplitGenerator`, which will
-        call `this._generate_examples` with the keyword arguments in `gen_kwargs`.
-        """
 
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir
-            / "MLEE-1.0.2-rev1"
-            / "standoff"
-            / "development"
-            / "train",
-            "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
-            "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
+            "train": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "train",
+            "dev": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "devel",
+            "test": data_dir / f"bionlp-st-2011-id-master" / "original-data" / "test",
         }
 
         return [
@@ -254,10 +235,6 @@ class MLEE(datasets.GeneratorBasedBuilder):
         return kb_example
 
     def _generate_examples(self, data_files: Path):
-        """
-        Yield one `(guid, example)` pair per abstract in MLEE.
-        The contents of `example` will depend on the chosen configuration.
-        """
         if self.config.schema == "source":
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
