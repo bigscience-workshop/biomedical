@@ -26,8 +26,6 @@ _CURRENTLY_BROKEN_NAMES = set(
         "pcr_source",  # download url
         "pcr_fixed_source",  # download url
         "pcr_bigbio_kb",  # download url
-        "seth_corpus_source",  # undefined variable
-        "seth_corpus_bigbio_kb",  # undefined variable
     ]
 )
 
