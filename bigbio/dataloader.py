@@ -187,7 +187,7 @@ class BigBioConfigHelpers:
     def available_dataset_names(self) -> List[str]:
         return sorted(list(set([helper.dataset_name for helper in self])))
 
-    def for_dataset(self, dataset_name: str) -> List[BigBioConfigHelper]:
+    def for_dataset(self, dataset_name: str) -> "BigBioConfigHelpers":
         helpers = [helper for helper in self if helper.dataset_name == dataset_name]
         return BigBioConfigHelpers(helpers=helpers)
 
