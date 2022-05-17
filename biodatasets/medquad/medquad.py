@@ -132,7 +132,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
                     "qid": datasets.Value("string"),
                     "qtype": datasets.Value("string"),
                     "Question": datasets.Value("string"),
-                    "Answer": datasets.Value("string"),
+                    "Answer": datasets.Sequence(datasets.Value("string")),
                 }
             )
 
@@ -149,7 +149,7 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _load_qa_from_xml(self, file_paths) -> List[dict[str, str | None]]:
+    def _load_train_qa_from_xml(self, file_paths) -> List[dict[str, str | None]]:
         """
         This method traverses the whole list of the downloaded XML files and extracts Q&A pairs.
         Returns the extracted Q&As and the base directory of the dumped json file that contains them all.
@@ -179,9 +179,78 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
 
         return qa_list
 
-    def _dump_xml_to_json(self, qa_file_paths, test=False):
+    def _load_test_qa_from_xml(self, file_paths) -> List[dict[str, str | None]]:
+        """
+        This method traverses the downloaded test XML file and extracts Q&A pairs.
+        Returns the extracted Q&As and the base directory of the dumped json file that contains them all.
+        """
+        assert len(file_paths)
 
-        qa_pairs_enriched_fname = f"MedQuADGoldenEnriched/{self.config.subset_id}.json"
+        qa_list = []
+        for file_path in file_paths:
+            doc_root = ET.parse(file_path).getroot()
+            for nlm_quetion in doc_root:
+                qid = nlm_quetion.attrib.get("qid")
+
+                original_question = nlm_quetion[0]
+                original_question_qfile = original_question.attrib.get("qfile")
+                original_question_subject = original_question[0]
+                original_question_message = original_question[1]
+                nist_paraphrase = nlm_quetion[1]
+                annotations = nlm_quetion[2]
+                annotation_focuses, annotation_types, annotation_keywords = [], [], []
+                for annotation in annotations:
+                    if annotation.tag == "FOCUS":
+                        annotation_focuses.append({
+                            "fid": annotation.attrib.get("fid"),
+                            "fcategory": annotation.attrib.get("fcategory"),
+                            "text": annotation.text,
+                        })
+                    elif annotation.tag == "TYPE":
+                        annotation_focuses.append({
+                            "tid": annotation.attrib.get("tid"),
+                            "hasFocus": annotation.attrib.get("hasFocus"),
+                            "hasKeyword": annotation.attrib.get("hasKeyword"),
+                            "text": annotation.text,
+                        })
+                    elif annotation.tag == "KEYWORD":
+                        annotation_focuses.append({
+                            "kid": annotation.attrib.get("kid"),
+                            "kcategory": annotation.attrib.get("kcategory"),
+                            "text": annotation.text,
+                        })
+
+                reference_answers = nlm_quetion[3]
+                ref_answers = []
+                for ref_answer in reference_answers:
+                    ref_answers.append({
+                        "aid": ref_answer.attrib.get("aid"),
+                        "ANSWER": ref_answer[0].text,
+                        "AnswerURL": ref_answer[1].text,
+                        "COMMENT": ref_answer[2].text,
+                    })
+
+                qa_list.append({
+                    "qid": qid,
+                    "Original-Question": {
+                        "qfile": original_question_qfile,
+                        "SUBJECT": original_question_subject.text,
+                        "MESSAGE": original_question_message.text,
+                    },
+                    "NIST-PARAPHRASE": nist_paraphrase.text,
+                    "ANNOTATIONS": {
+                        "FOCUS": annotation_focuses,
+                        "TYPE": annotation_types,
+                        "KEYWORD": annotation_keywords,
+                    },
+                    "ReferenceAnswers": ref_answers,
+                })
+
+        return qa_list
+
+    def _dump_xml_to_json(self, qa_file_paths, split):
+
+        qa_pairs_enriched_fname = f"MedQuADGoldenEnriched/{self.config.subset_id}_{split}.json"
 
         # Collect path info for all repo paths, and determine relevant XML files
         data_dir = os.path.dirname(qa_file_paths[0])
@@ -189,11 +258,14 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
         qa_pairs_enriched_full_path = os.path.join(data_dir, qa_pairs_enriched_fname)
 
         if not os.path.exists(qa_pairs_enriched_full_path):
-            qa_list = self._load_qa_from_xml(
-                file_paths=qa_file_paths
-            ) if test else self._load_qa_from_xml(
-                file_paths=qa_file_paths
-            )
+            if split == datasets.Split.TEST:
+                qa_list = self._load_test_qa_from_xml(
+                    file_paths=qa_file_paths
+                )
+            else:
+                qa_list = self._load_train_qa_from_xml(
+                    file_paths=qa_file_paths
+                )
 
             qa_pairs_enriched_dir = os.path.dirname(qa_pairs_enriched_full_path)
             if not os.path.exists(qa_pairs_enriched_dir):
@@ -201,15 +273,15 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
 
             # dump QA paris to json
             with open(qa_pairs_enriched_full_path, "wt", encoding="utf-8") as file:
-                json.dump(qa_list, file, indent=2)
+                json.dump(qa_list, file)
 
         return qa_pairs_enriched_full_path
 
     def _dump_test_xml_to_json(self, dl_manager):
-        file_base_url = _URLS[f"medquad_test_base_uris"]
+        file_base_url = _URLS["medquad_test_base_uris"]
         file_extracted = dl_manager.download_and_extract(file_base_url)
 
-        return self._dump_xml_to_json([file_extracted], test=True)
+        return self._dump_xml_to_json([file_extracted], split=datasets.Split.TEST)
 
     def _dump_train_xml_to_json(self, dl_manager) -> str:
         """
@@ -232,14 +304,12 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             for file_path in glob.glob(os.path.join(repo_dir, uri_, "*.xml")):
                 qa_file_paths.append(file_path)
 
-        return self._dump_xml_to_json(qa_file_paths)
-
-
+        return self._dump_xml_to_json(qa_file_paths, split=datasets.Split.TRAIN)
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        qa_pairs_enriched_fpath = self._dump_train_xml_to_json(dl_manager)
+        qa_pairs_enriched_train_fpath = self._dump_train_xml_to_json(dl_manager)
         qa_pairs_enriched_test_fpath = self._dump_test_xml_to_json(dl_manager)
 
         # There is no canonical train/valid/test set in this dataset. So, only TRAIN is added.
@@ -247,8 +317,15 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": qa_pairs_enriched_fpath,
-                    "split": "train",
+                    "filepath": qa_pairs_enriched_train_fpath,
+                    "split": datasets.Split.TRAIN,
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": qa_pairs_enriched_test_fpath,
+                    "split": datasets.Split.TEST,
                 },
             ),
         ]
@@ -260,14 +337,25 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
             with open(filepath, encoding="utf-8") as file:
                 data = json.load(file)
                 for key, record in enumerate(data):
-                    yield key, {
-                        "Document": record["Document"],
-                        "QAPair": record["QAPair"],
-                        "qid": record["qid"],
-                        "qtype": record["qtype"],
-                        "Question": record["Question"],
-                        "Answer": record["Answer"],
-                    }
+                    if split == datasets.Split.TEST:
+                        yield key, {
+                            "Document": None,
+                            "QAPair": None,
+                            "qid": record["qid"],
+                            "qtype": record["Original-Question"]["SUBJECT"],
+                            # A paraphrased verions of record["Original-Question"]["MESSAGE"]
+                            "Question": record["NIST-PARAPHRASE"],
+                            "Answer": [ref["ANSWER"] for ref in record["ReferenceAnswers"]],
+                        }
+                    else:
+                        yield key, {
+                            "Document": record["Document"],
+                            "QAPair": record["QAPair"],
+                            "qid": record["qid"],
+                            "qtype": record["qtype"],
+                            "Question": record["Question"],
+                            "Answer": [record["Answer"]],
+                        }
 
         elif self.config.schema == "bigbio_qa":
             with open(filepath, encoding="utf-8") as file:
