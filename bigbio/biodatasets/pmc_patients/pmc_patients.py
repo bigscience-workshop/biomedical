@@ -29,7 +29,6 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-# TODO: Add BibTeX citation
 _CITATION = """\
 @misc{zhao2022pmcpatients,
       title={PMC-Patients: A Large-scale Dataset of Patient Notes and Relations Extracted from Case
@@ -63,7 +62,11 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
-    """TODO: Short description of my dataset."""
+    """PPS dataset is a list of triplets. 
+    Each entry is in format (patient_uid_1, patient_uid_2, similarity) and their
+    respective texts.
+    where similarity has three values:0, 1, 2, indicating corresponding similarity.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -116,7 +119,6 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(data_dir, "datasets/task_2_patient2patient_similarity/PPS_train.json"),
                     "split": "train",
