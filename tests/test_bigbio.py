@@ -613,11 +613,15 @@ class TestDataLoader(unittest.TestCase):
 
                             connector = match.group(0)
 
-                            logger.warning(
-                                f"Split:{split} - Example:{example_id} - ",
-                                f"Entity:{entity_id} contains a normalization with a connector `{connector}`",
-                                "Please make sure you are that you are expanding the normalization list for each `db_id`",
+                            msg = "".join(
+                                [
+                                    f"Split:{split} - Example:{example_id} - ",
+                                    f"Entity:{entity_id} w/ `db_id` `{db_id}` has connector `{connector}`.",
+                                    " Please expand the normalization list for each `db_id`",
+                                ]
                             )
+
+                            logger.warning(msg)
 
                             warning_raised = True
 
@@ -671,12 +675,16 @@ class TestDataLoader(unittest.TestCase):
 
                             connector = match.group(0)
 
-                            logger.warning(
-                                f"Split{split} - Example{example_id} - ",
-                                f"Feature:{feature_name} contains a connector `{connector}` \n",
-                                "Having multiple types it is currently not supported.",
-                                "Please split this featuere into multiple ones with different `type`",
+                            msg = "".join(
+                                [
+                                    f"Split:{split} - Example:{example_id} - ",
+                                    f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`.",
+                                    "Having multiple types it is currently not supported.",
+                                    " Please split this featuere into multiple ones with different `type`",
+                                ]
                             )
+
+                            logger.warning(msg)
 
                             warning_raised[feature_name] = True
 
