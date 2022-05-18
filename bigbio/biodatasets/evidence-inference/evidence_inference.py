@@ -140,20 +140,48 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepaths": [
                         os.path.join(data_dir, "annotations_merged.csv"),
                         os.path.join(data_dir, "prompts_merged.csv"),
                     ],
                     "datapath": os.path.join(data_dir, "txt_files"),
+                    "split": 'train',
+                    'datadir': data_dir
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepaths": [
+                        os.path.join(data_dir, "annotations_merged.csv"),
+                        os.path.join(data_dir, "prompts_merged.csv"),
+                    ],
+                    "datapath": os.path.join(data_dir, "txt_files"),
+                    'split': 'validation',
+                    'datadir': data_dir
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepaths": [
+                        os.path.join(data_dir, "annotations_merged.csv"),
+                        os.path.join(data_dir, "prompts_merged.csv"),
+                    ],
+                    "datapath": os.path.join(data_dir, "txt_files"),
+                    'split': 'test',
+                    'datadir': data_dir
                 },
             ),
         ]
 
-    def _generate_examples(self, filepaths, datapath) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepaths, datapath, split, datadir) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
+        with open(f'{datadir}/splits/{split}_article_ids.txt', 'r') as f:
+            ids = [int(i.strip()) for i in f.readlines()]
         prompts = pd.read_csv(filepaths[-1], encoding="utf8")
+        prompts = prompts[prompts['PMCID'].isin(ids)]
         annotations = pd.read_csv(filepaths[0], encoding="utf8").set_index("PromptID")
         evidences = pd.read_csv(filepaths[0], encoding="utf8").set_index("PMCID")
         evidences = evidences[evidences["Evidence Start"] != -1]
@@ -177,7 +205,7 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             for key, sample in prompts.iterrows():
                 pid = sample["PromptID"]
-                pmcid = sample["PMCID"]
+                pmcid = sample['PMCID']
                 label = lookup(annotations, pid, "Label")
                 start = lookup(evidences, pmcid, "Evidence Start")
                 end = lookup(evidences, pmcid, "Evidence End")
