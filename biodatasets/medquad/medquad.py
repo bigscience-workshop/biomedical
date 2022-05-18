@@ -32,6 +32,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Tuple, Dict
 
 import datasets
+from pyarrow.dataset import dataset
 
 from utils import schemas
 from utils.configs import BigBioConfig
@@ -333,9 +334,9 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        if self.config.schema == "source":
-            with open(filepath, encoding="utf-8") as file:
-                data = json.load(file)
+        with open(filepath, encoding="utf-8") as file:
+            data = json.load(file)
+            if self.config.schema == "source":
                 for key, record in enumerate(data):
                     if split == datasets.Split.TEST:
                         yield key, {
@@ -357,19 +358,17 @@ class MedquadDataset(datasets.GeneratorBasedBuilder):
                             "Answer": [record["Answer"]],
                         }
 
-        elif self.config.schema == "bigbio_qa":
-            with open(filepath, encoding="utf-8") as file:
+            elif self.config.schema == "bigbio_qa":
                 uid = 0
-                data = json.load(file)
                 for key, record in enumerate(data):
                     uid += 1
                     yield key, {
                         "id": str(uid),
-                        "document_id": record["Document"],
+                        "document_id": record.get("Document"),
                         "question_id": record["qid"],
-                        "question": record["Question"],
-                        "type": record["qtype"],
+                        "question": record.get("Question"),
+                        "type": record.get("qtype"),
                         "choices": [],
                         "context": [],
-                        "answer": [record["Answer"]],
+                        "answer": [record.get("Answer")],
                     }
