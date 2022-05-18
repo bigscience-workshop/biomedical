@@ -680,10 +680,10 @@ class TestDataLoader(unittest.TestCase):
                             msg = "".join(
                                 [
                                     f"Split:{split} - Example:{example_id} - ",
-                                    f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`.",
-                                    "Having multiple types it is currently not supported.",
+                                    f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`. ",
+                                    "Having multiple types is currently not supported. ",
                                     "Please check for common connectors (e.g. `;`, `+`, `|`) "
-                                    " and split this featuere into multiple ones with different `type`",
+                                    "and split this feature into multiple ones with different `type`",
                                 ]
                             )
 
