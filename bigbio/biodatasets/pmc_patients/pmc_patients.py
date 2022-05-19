@@ -29,6 +29,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @misc{zhao2022pmcpatients,
       title={PMC-Patients: A Large-scale Dataset of Patient Notes and Relations Extracted from Case
