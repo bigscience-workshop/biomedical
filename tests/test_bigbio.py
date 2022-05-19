@@ -571,17 +571,12 @@ class TestDataLoader(unittest.TestCase):
 
         warning_raised = {}
 
-        # yeah it looks bad: the idea is to avoid to go through the entire dataset
-        # one warning is enough to prompt a cleaning pass
         for split in dataset_bigbio:
 
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping entities multilabel db on {split}")
                 continue
-
-            if sum(warning_raised.values()) > 2:
-                break
 
             if "entities" not in dataset_bigbio[split].features:
                 continue
@@ -592,15 +587,9 @@ class TestDataLoader(unittest.TestCase):
 
             for example in dataset_bigbio[split]:
 
-                if sum(warning_raised.values()) > 2:
-                    break
-
                 example_id = example["id"]
 
                 for entity in example["entities"]:
-
-                    if sum(warning_raised.values()) > 2:
-                        break
 
                     normalized = entity.get("normalized", [])
                     entity_id = entity["id"]
@@ -614,18 +603,20 @@ class TestDataLoader(unittest.TestCase):
 
                             connector = match.group(0)
 
-                            msg = "".join(
-                                [
-                                    f"Split:{split} - Example:{example_id} - ",
-                                    f"Entity:{entity_id} w/ `db_id` `{db_id}` has connector `{connector}`. ",
-                                    "Please check for common connectors (e.g. `;`, `+`, `|`) "
-                                    "and expand the normalization list for each `db_id`",
-                                ]
-                            )
+                            if connector not in warning_raised:
 
-                            logger.warning(msg)
+                                msg = "".join(
+                                    [
+                                        f"Split:{split} - Example:{example_id} - ",
+                                        f"Entity:{entity_id} w/ `db_id` `{db_id}` has connector `{connector}`. ",
+                                        "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                        "and expand the normalization list for each `db_id`",
+                                    ]
+                                )
 
-                            warning_raised[connector] = True
+                                logger.warning(msg)
+
+                                warning_raised[connector] = True
 
     def test_multilabel_type(self, dataset_bigbio: DatasetDict):
         """
