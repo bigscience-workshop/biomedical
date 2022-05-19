@@ -241,9 +241,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
                                             ]
                                         ],
                                         "type": "",
-                                        "normalized": [
-                                            {"db_name": None, "db_id": None}
-                                        ],
+                                        "normalized": [],
                                     }
                                 )
                                 key += 1
@@ -264,9 +262,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
                                             ]
                                         ],
                                         "type": "",
-                                        "normalized": [
-                                            {"db_name": None, "db_id": None}
-                                        ],
+                                        "normalized": [],
                                     }
                                 )
                                 key += 1
@@ -276,9 +272,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
                                         "type": line_processed[-1].split("\n")[0],
                                         "arg1_id": str(key - 2),
                                         "arg2_id": str(key - 1),
-                                        "normalized": [
-                                            {"db_name": None, "db_id": None}
-                                        ],
+                                        "normalized": [],
                                     }
                                 )
                                 key += 1
@@ -300,9 +294,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
                                             ]
                                         ],
                                         "type": line_processed[-1].split("\n")[0],
-                                        "normalized": [
-                                            {"db_name": None, "db_id": None}
-                                        ],
+                                        "normalized": [],
                                     }
                                 )
                                 key += 1
