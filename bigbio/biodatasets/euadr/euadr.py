@@ -5,6 +5,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = False
 _CITATION = """\
 @article{VANMULLIGEN2012879,
 title = {The EU-ADR corpus: Annotated drugs, diseases, targets, and their relationships},
