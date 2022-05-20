@@ -15,12 +15,14 @@
 """\This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
 In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
 It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+import itertools
+
 import datasets
+from bioc import pubtator
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
-import itertools
-from bioc import pubtator
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
@@ -41,6 +43,7 @@ _CITATION = """\
   copyright = {Creative Commons Attribution 4.0 International}
 }
 """
+_LOCAL = False
 _DATASETNAME = "tmvar_v3"
 _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
 In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
