@@ -13,17 +13,17 @@ class LicenseMixin:
     Base class from which all licenses inherit
     """
 
-    def __repr__(self):
+    def to_string(self) -> str:
         """
-        Override to get a formatted full description of the license
+        Get formatted name
         """
         text = f"{self.name}"
 
         if hasattr(self, "type") and getattr(self, "type", None) is not None:
-            text += f" - {self.type} -"
+            text += f" - {self.type}"
 
         if hasattr(self, "version") and getattr(self, "version", None) is not None:
-            text += f" v{self.version}"
+            text += f" - v{self.version}"
 
         if hasattr(self, "link") and getattr(self, "link", None) is not None:
             text += f" ({self.link})"
@@ -36,6 +36,18 @@ class LicenseMixin:
 
         return text
 
+    def __repr__(self):
+        """
+        Override to get a formatted full description of the license
+        """
+        return self.to_string()
+
+    def __str__(self):
+        """
+        Override to get a formatted full description of the license
+        """
+        return self.to_string()
+
 
 @dataclass
 class CreativeCommons(LicenseMixin):
@@ -44,7 +56,7 @@ class CreativeCommons(LicenseMixin):
     """
 
     type: str
-    version: int
+    version: Optional[float] = None
     name: str = "CC"
 
 
@@ -54,7 +66,7 @@ class Apache(LicenseMixin):
     All Apache.
     """
 
-    version: int
+    version: float
     name: str = "Apache"
 
 
@@ -64,7 +76,7 @@ class GPL(LicenseMixin):
     All GPL.
     """
 
-    version: int
+    version: float
     name: str = "GNU General Public License"
 
 
@@ -105,6 +117,6 @@ class Custom(LicenseMixin):
     It must contain the text describing the license and optionally a link as source
     """
 
-    text = "CUSTOM"
+    name = "CUSTOM"
     description: str
     link: Optional[str] = None
