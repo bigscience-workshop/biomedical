@@ -74,6 +74,9 @@ logger = datasets.utils.logging.get_logger(__name__)
 class BioREDDataset(datasets.GeneratorBasedBuilder):
     """Relation Extraction corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical), on a set of 600 PubMed articles"""
 
+    logger.warning(
+        "For bigbio_kb, this dataset uses a naming convention as uid_[title/abstract/relation/entity_id]_[entity/relation_uid]"
+    )
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
@@ -186,34 +189,47 @@ class BioREDDataset(datasets.GeneratorBasedBuilder):
             with open(filepath, "r", encoding="utf8") as fstream:
                 uid = itertools.count(0)
                 for raw_document in self.generate_raw_docs(fstream):
+                    entities_in_doc = dict()
                     document = self.parse_raw_doc(raw_document)
                     pmid = document.pop("pmid")
-                    document["id"] = next(uid)
+                    document["id"] = str(next(uid))
                     document["document_id"] = pmid
                     entities_ = []
                     relations_ = []
                     for entity in document["entities"]:
+                        temp_id = document["id"] + "_" + str(entity["concept_id"])
+                        curr_entity_count = entities_in_doc.get(temp_id, 0)
                         entities_.append(
                             {
-                                "id": next(uid),
+                                "id": temp_id + "_" + str(curr_entity_count),
                                 "type": entity["semantic_type_id"],
                                 "text": entity["text"],
                                 "normalized": [],
                                 "offsets": entity["offsets"],
                             }
                         )
+                        entities_in_doc[temp_id] = curr_entity_count + 1
+                    rel_uid = itertools.count(0)
                     for relation in document["relations"]:
                         relations_.append(
                             {
-                                "id": next(uid),
+                                "id": document["id"]
+                                + "_relation_"
+                                + str(next(rel_uid)),
                                 "type": relation["type"],
-                                "arg1_id": relation["concept_1"],
-                                "arg2_id": relation["concept_2"],
+                                "arg1_id": document["id"]
+                                + "_"
+                                + str(relation["concept_1"])
+                                + "_0",
+                                "arg2_id": document["id"]
+                                + "_"
+                                + str(relation["concept_2"])
+                                + "_0",
                                 "normalized": [],
                             }
                         )
                     for passage in document["passages"]:
-                        passage["id"] = next(uid)
+                        passage["id"] = document["id"] + "_" + passage["type"]
                     document["entities"] = entities_
                     document["relations"] = relations_
                     document["events"] = []
@@ -275,14 +291,17 @@ class BioREDDataset(datasets.GeneratorBasedBuilder):
             elif _type_ind.isnumeric():
                 # Entities handled here
                 start_idx = _type_ind
-                end_idx, mention, semantic_type_id, entity_id = rest
-                entity = {
-                    "offsets": [[int(start_idx), int(end_idx)]],
-                    "text": [mention],
-                    "semantic_type_id": semantic_type_id.split(","),
-                    "concept_id": entity_id,
-                }
-                entities.append(entity)
+                end_idx, mention, semantic_type_id, entity_ids = rest
+                entity = [
+                    {
+                        "offsets": [[int(start_idx), int(end_idx)]],
+                        "text": [mention],
+                        "semantic_type_id": semantic_type_id.split(","),
+                        "concept_id": entity_id,
+                    }
+                    for entity_id in entity_ids.split(",")
+                ]
+                entities.extend(entity)
             else:
                 logger.warn(
                     f"Skipping annotation in Document ID: {_pmid}. Unexpected format"
@@ -293,9 +312,3 @@ class BioREDDataset(datasets.GeneratorBasedBuilder):
             "entities": entities,
             "relations": relations,
         }
-
-
-# This allows you to run your dataloader with `python _DATASETNAME.py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
