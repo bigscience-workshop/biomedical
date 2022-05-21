@@ -85,16 +85,15 @@ class BigBioConfigHelper:
     _py_module: ModuleType = field(repr=False)
     _ds_cls: type = field(repr=False)
 
-    def get_load_dataset_kwargs(
+    def load_dataset(
         self,
-        data_dir: Optional[str] = None,
+        **load_dataset_kwargs,
     ):
-
-        return {
-            "path": self.script,
-            "name": self.config.name,
-            "data_dir": data_dir,
-        }
+        return load_dataset(
+            path=self.script,
+            name=self.config.name,
+            **load_dataset_kwargs,
+        )
 
 
 def default_is_keeper(helper: BigBioConfigHelper) -> bool:
