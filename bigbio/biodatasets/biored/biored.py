@@ -28,22 +28,23 @@ from bigbio.utils.constants import Tasks
 from bioc import pubtator
 
 # TODO: Add BibTeX citation
+_LOCAL = False
 _CITATION = """\
   @misc{https://doi.org/10.48550/arxiv.2204.04263,
   doi = {10.48550/ARXIV.2204.04263},
-  
+
   url = {https://arxiv.org/abs/2204.04263},
-  
+
   author = {Luo, Ling and Lai, Po-Ting and Wei, Chih-Hsuan and Arighi, Cecilia N and Lu, Zhiyong},
-  
+
   keywords = {Computation and Language (cs.CL), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  
+
   title = {BioRED: A Comprehensive Biomedical Relation Extraction Dataset},
-  
+
   publisher = {arXiv},
-  
+
   year = {2022},
-  
+
   copyright = {Creative Commons Attribution 4.0 International}
 }
 
@@ -74,9 +75,9 @@ logger = datasets.utils.logging.get_logger(__name__)
 class BioredDataset(datasets.GeneratorBasedBuilder):
     """Relation Extraction corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical), on a set of 600 PubMed articles"""
 
-    logger.warning(
-        "For bigbio_kb, this dataset uses a naming convention as uid_[title/abstract/relation/entity_id]_[entity/relation_uid]"
-    )
+    # For bigbio_kb, this dataset uses a naming convention as
+    # uid_[title/abstract/relation/entity_id]_[entity/relation_uid]
+
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
