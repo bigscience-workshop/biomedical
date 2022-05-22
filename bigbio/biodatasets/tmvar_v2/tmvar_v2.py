@@ -231,6 +231,9 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     semantic_type_id = "ProteinMutation"
                     logger.warning("Semantic type missing. ProteinMutation inserted")
                     logger.warning(f"Document ID: {pmid} Line: {line}")
+                    logger.warning(
+                        f"semantic_type_id is missing and would typically be between 'position 29' and 'p|SUB|P|29|S' in the line above"
+                    )
             elif len(mentions) == 7:
                 (
                     pmid_,
