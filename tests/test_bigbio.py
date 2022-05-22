@@ -653,7 +653,7 @@ class TestDataLoader(unittest.TestCase):
                 ):
                     continue
 
-                for example in dataset_bigbio[split]:
+                for example_index, example in enumerate(dataset_bigbio[split]):
 
                     if warning_raised[feature_name]:
                         break
@@ -672,7 +672,7 @@ class TestDataLoader(unittest.TestCase):
 
                             msg = "".join(
                                 [
-                                    f"Split:{split} - Example:{example_id} - ",
+                                    f"Split:{split} - Example:(id={example_id}, index={example_index}) - ",
                                     f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`. ",
                                     "Having multiple types is currently not supported. ",
                                     "Please check for common connectors (e.g. `;`, `+`, `|`) "
