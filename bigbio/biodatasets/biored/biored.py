@@ -71,7 +71,7 @@ _BIGBIO_VERSION = "1.0.0"
 logger = datasets.utils.logging.get_logger(__name__)
 
 
-class BioREDDataset(datasets.GeneratorBasedBuilder):
+class BioredDataset(datasets.GeneratorBasedBuilder):
     """Relation Extraction corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical), on a set of 600 PubMed articles"""
 
     logger.warning(
