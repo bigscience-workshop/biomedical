@@ -84,9 +84,13 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `biomedical/biodatasets` directory:
+Make a new directory within the `biomedical/bigbio/biodatasets` directory:
 
     mkdir bigbio/biodatasets/<dataset_name>
+
+Add an `__init__.py` file to this directory:
+
+    touch bigbio/biodatasets/<dataset_name>/__init__.py
 
 Please use lowercase letters and underscores when choosing a `<dataset_name>`.
 To implement your dataset, there are three key methods that are important:
