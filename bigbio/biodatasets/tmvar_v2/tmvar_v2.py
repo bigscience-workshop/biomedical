@@ -98,18 +98,16 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     "passages": [
                         {
                             "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Value("string"),
+                            "offsets": [datasets.Value("int32")],
                         }
                     ],
                     "entities": [
                         {
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Value("string"),
+                            "offsets": [datasets.Value("int32")],
                             "concept_id": datasets.Value("string"),
-                            "semantic_type_id": datasets.Sequence(
-                                datasets.Value("string")
-                            ),
+                            "semantic_type_id": datasets.Value("string"),
                             "rsid": datasets.Value("string"),
                         }
                     ],
@@ -153,9 +151,9 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                 uid = itertools.count(0)
                 for raw_document in self.generate_raw_docs(fstream):
                     document = self.parse_raw_doc(raw_document)
-                    pmid = document.pop("pmid")
                     document["id"] = next(uid)
-                    document["document_id"] = pmid
+                    document["document_id"] = document.pop("pmid")
+
                     entities_ = []
                     for entity in document["entities"]:
                         if entity.get("rsid", ""):
@@ -167,21 +165,24 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                             ]
                         else:
                             normalized = []
+
                         entities_.append(
                             {
                                 "id": next(uid),
                                 "type": entity["semantic_type_id"],
-                                "text": entity["text"],
+                                "text": [entity["text"]],
                                 "normalized": normalized,
-                                "offsets": entity["offsets"],
+                                "offsets": [entity["offsets"]],
                             }
                         )
                     for passage in document["passages"]:
                         passage["id"] = next(uid)
+
                     document["entities"] = entities_
                     document["relations"] = []
                     document["events"] = []
                     document["coreferences"] = []
+
                     yield document["document_id"], document
 
     def generate_raw_docs(self, fstream):
@@ -202,14 +203,26 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
         pmid, _, title = raw_doc[0].split("|")
         pmid = int(pmid)
         _, _, abstract = raw_doc[1].split("|")
-        passages = [
-            {"type": "title", "text": [title], "offsets": [[0, len(title)]]},
-            {
-                "type": "abstract",
-                "text": [abstract],
-                "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]],
-            },
-        ]
+
+        if self.config.schema == "source":
+            passages = [
+                {"type": "title", "text": title, "offsets": [0, len(title)]},
+                {
+                    "type": "abstract",
+                    "text": abstract,
+                    "offsets": [len(title) + 1, len(title) + len(abstract) + 1],
+                },
+            ]
+        elif self.config.schema == "bigbio_kb":
+            passages = [
+                {"type": "title", "text": [title], "offsets": [[0, len(title)]]},
+                {
+                    "type": "abstract",
+                    "text": [abstract],
+                    "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]],
+                },
+            ]
+
         entities = []
         for count, line in enumerate(raw_doc[2:]):
             line_pieces = line.split("\t")
@@ -217,8 +230,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                 if pmid == 18166824 and count == 0:
                     # this example has the following text
                     # 18166824    880    948    amino acid (proline) with a polar amino acid (serine) at position 29    p|SUB|P|29|S    RSID:2075789
-                    # it is missing the semantic_type_id between `... position 29` and `p|SUB|P|29|s` a
-                    # Setting rsid to entity_id, entity_id to semantic_type_id and semantic_type_id to "ProteinMutation"
+                    # it is missing the semantic_type_id between `... position 29` and `p|SUB|P|29|S`
                     pmid_ = str(pmid)
                     start_idx = "880"
                     end_idx = "948"
@@ -226,13 +238,13 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     semantic_type_id = "ProteinMutation"
                     entity_id = "p|SUB|P|29|S"
                     rsid = "RSID:2075789"
-                    assert(line_pieces[0]==pmid_)
-                    assert(line_pieces[1]==start_idx)
-                    assert(line_pieces[2]==end_idx)
-                    assert(line_pieces[3]==mention)
-                    assert(line_pieces[4]==entity_id)
-                    assert(line_pieces[5]==rsid)
-                    logger.warning("Fixing semantic_type_id in Document ID: {pmid} Line: {line}")
+                    assert line_pieces[0] == pmid_
+                    assert line_pieces[1] == start_idx
+                    assert line_pieces[2] == end_idx
+                    assert line_pieces[3] == mention
+                    assert line_pieces[4] == entity_id
+                    assert line_pieces[5] == rsid
+                    logger.warning(f"Adding ProteinMutation semantic_type_id in Document ID: {pmid} Line: {line}")
                 else:
                     (
                         pmid_,
@@ -254,16 +266,18 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     entity_id,
                     rsid,
                 ) = line_pieces
+
             else:
-                logger.warning("Inconsistent entity format found. Skipping")
-                logger.warning(f"Document ID: {pmid} Line: {line}")
+                logger.warning(f"Inconsistent entity format found. Skipping Document ID: {pmid} Line: {line}")
                 continue
+
             entity = {
-                "offsets": [[int(start_idx), int(end_idx)]],
-                "text": [mention],
-                "semantic_type_id": semantic_type_id.split(","),
+                "offsets": [int(start_idx), int(end_idx)],
+                "text": mention,
+                "semantic_type_id": semantic_type_id,
                 "concept_id": entity_id,
                 "rsid": rsid,
             }
             entities.append(entity)
+
         return {"pmid": pmid, "passages": passages, "entities": entities}
