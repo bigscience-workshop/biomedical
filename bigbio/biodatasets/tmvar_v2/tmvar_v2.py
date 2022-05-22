@@ -130,12 +130,12 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
 
         url = _URLS[_DATASETNAME]
-        test_filepath = dl_manager.download(url)
+        train_filepath = dl_manager.download(url)
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TEST,
+                name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": test_filepath,
+                    "filepath": train_filepath,
                 },
             )
         ]
@@ -211,7 +211,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
             },
         ]
         entities = []
-        for line in raw_doc[2:]:
+        for count, line in enumerate(raw_doc[2:]):
             mentions = line.split("\t")
             if len(mentions) == 6:
                 (
@@ -223,6 +223,14 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     entity_id,
                 ) = mentions
                 rsid = None
+                if pmid == 18166824 and count == 0:
+                    # Setting rsid to entity_id, entity_id to semantic_type_id and semantic_type_id to "ProteinMutation"
+                    entity_id_temp = semantic_type_id
+                    rsid = entity_id
+                    entity_id = entity_id_temp
+                    semantic_type_id = "ProteinMutation"
+                    logger.warning("Semantic type missing. ProteinMutation inserted")
+                    logger.warning(f"Document ID: {pmid} Line: {line}")
             elif len(mentions) == 7:
                 (
                     pmid_,
@@ -236,7 +244,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
             else:
                 logger.warning("Inconsistent entity format found. Skipping")
                 logger.warning(f"Document ID: {pmid} Line: {line}")
-
+                continue
             entity = {
                 "offsets": [[int(start_idx), int(end_idx)]],
                 "text": [mention],
