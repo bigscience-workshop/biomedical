@@ -123,7 +123,7 @@ class TestDataLoader(unittest.TestCase):
                 self.test_passages_offsets(self.dataset)
             with self.subTest("Check entity offsets"):
                 self.test_entities_offsets(self.dataset)
-                self.test_entities_multilabel_db_id(self.dataset)
+                self.test_entities_multilabel_db(self.dataset)
             with self.subTest("Check events offsets"):
                 self.test_events_offsets(self.dataset)
             with self.subTest("Check coref offsets"):
@@ -562,9 +562,9 @@ class TestDataLoader(unittest.TestCase):
                                     answer in example["choices"]
                                 ), f"answer is not present in 'choices' {example}"
 
-    def test_entities_multilabel_db_id(self, dataset_bigbio: DatasetDict):
+    def test_entities_multilabel_db(self, dataset_bigbio: DatasetDict):
         """
-        Check if `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        Check if `db_name` or `db_id` of `normalized` field in entities have multiple values joined with common connectors.
         Raises a warning ONLY ONCE per connector type.
         """
         logger.info("KB ONLY: multi-label `db_id`")
@@ -596,27 +596,29 @@ class TestDataLoader(unittest.TestCase):
 
                     for norm in normalized:
 
-                        db_id = norm["db_id"]
-                        match = re.search(_CONNECTORS, db_id)
+                        # db_name, db_id
+                        for db_field, db_value in norm.items():
 
-                        if match is not None:
+                            match = re.search(_CONNECTORS, db_value)
 
-                            connector = match.group(0)
+                            if match is not None:
 
-                            if connector not in warning_raised:
+                                connector = match.group(0)
 
-                                msg = "".join(
-                                    [
-                                        f"Split:{split} - Example:{example_id} - ",
-                                        f"Entity:{entity_id} w/ `db_id` `{db_id}` has connector `{connector}`. ",
-                                        "Please check for common connectors (e.g. `;`, `+`, `|`) "
-                                        "and expand the normalization list for each `db_id`",
-                                    ]
-                                )
+                                if connector not in warning_raised:
 
-                                logger.warning(msg)
+                                    msg = "".join(
+                                        [
+                                            f"Split:{split} - Example:{example_id} - ",
+                                            f"Entity:{entity_id} w/ `{db_field}` `{db_value}` has connector `{connector}`. ",
+                                            "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                            "and expand the normalization list for each `db_id`",
+                                        ]
+                                    )
 
-                                warning_raised[connector] = True
+                                    logger.warning(msg)
+
+                                    warning_raised[connector] = True
 
     def test_multilabel_type(self, dataset_bigbio: DatasetDict):
         """
