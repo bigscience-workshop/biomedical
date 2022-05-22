@@ -87,7 +87,7 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     "hash": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "drug_name": datasets.Value("string"),
-                    "sentiment": datasets.Value("uint32"),
+                    "sentiment": datasets.Value("string"),
                 }
             )
 
@@ -120,27 +120,54 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     "split": "train",
                 },
             ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "test_tOlRoBf.csv"),
+                    "split": "test",
+                },
+            ),
         ]
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            csv_reader = pd.read_csv(filepath)
-            for _cols, line in csv_reader.iterrows():
-                document = {}
-                document["hash"] = line["unique_hash"]
-                document["text"] = line["text"]
-                document["drug_name"] = line["drug"]
-                document["sentiment"] = int(line["sentiment"])
-                yield document["hash"], document
+            csv_reader = pd.read_csv(filepath, dtype="object")
+            # Train and test splits handled differently as test split is missing values
+            if split == "train":
+                for _cols, line in csv_reader.iterrows():
+                    document = {}
+                    document["hash"] = line["unique_hash"]
+                    document["text"] = line["text"]
+                    document["drug_name"] = line["drug"]
+                    document["sentiment"] = line["sentiment"]
+                    yield document["hash"], document
+            else:
+                for _cols, line in csv_reader.iterrows():
+                    document = {}
+                    document["hash"] = line["unique_hash"]
+                    document["text"] = line["text"]
+                    document["drug_name"] = line["drug"]
+                    document["sentiment"] = None
+                    yield document["hash"], document
 
         elif self.config.schema == "bigbio_te":
-            csv_reader = pd.read_csv(filepath)
-            for _cols, line in csv_reader.iterrows():
-                document = {}
-                document["id"] = line["unique_hash"]
-                document["premise"] = line["text"]
-                document["hypothesis"] = line["drug"]
-                document["label"] = line["sentiment"]
-                yield document["id"], document
+            csv_reader = pd.read_csv(filepath, dtype="object")
+            # Train and test splits handled differently as test split is missing values
+            if split == "train":
+                for _cols, line in csv_reader.iterrows():
+                    document = {}
+                    document["id"] = line["unique_hash"]
+                    document["premise"] = line["text"]
+                    document["hypothesis"] = line["drug"]
+                    document["label"] = line["sentiment"]
+                    yield document["id"], document
+            else:
+                for _cols, line in csv_reader.iterrows():
+                    document = {}
+                    document["id"] = line["unique_hash"]
+                    document["premise"] = line["text"]
+                    document["hypothesis"] = line["drug"]
+                    document["label"] = None
+                    yield document["id"], document
