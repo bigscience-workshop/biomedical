@@ -21,6 +21,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LOCAL = True
 _CITATION = """\
 @misc{ask9medicaldata,
   author    = {Khan, Arbaaz},
