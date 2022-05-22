@@ -41,7 +41,7 @@ publisher={Oxford University Press}
 _DATASETNAME = "tmvar_v2"
 
 _DESCRIPTION = """This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them.
-It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+It can be used for NER tasks and NED tasks, This dataset has a single split"""
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
 
@@ -212,29 +212,39 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
         ]
         entities = []
         for count, line in enumerate(raw_doc[2:]):
-            mentions = line.split("\t")
-            if len(mentions) == 6:
-                (
-                    pmid_,
-                    start_idx,
-                    end_idx,
-                    mention,
-                    semantic_type_id,
-                    entity_id,
-                ) = mentions
-                rsid = None
+            line_pieces = line.split("\t")
+            if len(line_pieces) == 6:
                 if pmid == 18166824 and count == 0:
+                    # this example has the following text
+                    # 18166824    880    948    amino acid (proline) with a polar amino acid (serine) at position 29    p|SUB|P|29|S    RSID:2075789
+                    # it is missing the semantic_type_id between `... position 29` and `p|SUB|P|29|s` a
                     # Setting rsid to entity_id, entity_id to semantic_type_id and semantic_type_id to "ProteinMutation"
-                    entity_id_temp = semantic_type_id
-                    rsid = entity_id
-                    entity_id = entity_id_temp
+                    pmid_ = str(pmid)
+                    start_idx = "880"
+                    end_idx = "948"
+                    mention = "amino acid (proline) with a polar amino acid (serine) at position 29"
                     semantic_type_id = "ProteinMutation"
-                    logger.warning("Semantic type missing. ProteinMutation inserted")
-                    logger.warning(f"Document ID: {pmid} Line: {line}")
-                    logger.warning(
-                        f"semantic_type_id is missing and would typically be between 'position 29' and 'p|SUB|P|29|S' in the line above"
-                    )
-            elif len(mentions) == 7:
+                    entity_id = "p|SUB|P|29|S"
+                    rsid = "RSID:2075789"
+                    assert(line_pieces[0]==pmid_)
+                    assert(line_pieces[1]==start_idx)
+                    assert(line_pieces[2]==end_idx)
+                    assert(line_pieces[3]==mention)
+                    assert(line_pieces[4]==entity_id)
+                    assert(line_pieces[5]==rsid)
+                    logger.warning("Fixing semantic_type_id in Document ID: {pmid} Line: {line}")
+                else:
+                    (
+                        pmid_,
+                        start_idx,
+                        end_idx,
+                        mention,
+                        semantic_type_id,
+                        entity_id,
+                    ) = line_pieces
+                    rsid = None
+
+            elif len(line_pieces) == 7:
                 (
                     pmid_,
                     start_idx,
@@ -243,7 +253,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     semantic_type_id,
                     entity_id,
                     rsid,
-                ) = mentions
+                ) = line_pieces
             else:
                 logger.warning("Inconsistent entity format found. Skipping")
                 logger.warning(f"Document ID: {pmid} Line: {line}")
