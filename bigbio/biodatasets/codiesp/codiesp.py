@@ -24,8 +24,8 @@ coding (CodiEsp-P) and Explainable AI (CodiEsp-X). The script can also load
 an additional dataset of abstracts with ICD10 codes.
 """
 
-import os
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -37,7 +37,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.ES]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{
@@ -88,12 +88,14 @@ _LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLS = {
     "codiesp": "https://zenodo.org/record/3837305/files/codiesp.zip?download=1",
-    "extra":   "https://zenodo.org/record/3606662/files/abstractsWithCIE10_v2.zip?download=1",
+    "extra": "https://zenodo.org/record/3606662/files/abstractsWithCIE10_v2.zip?download=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION,
-                    Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [
+    Tasks.TEXT_CLASSIFICATION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+]
 
 _SOURCE_VERSION = "1.4.0"
 
@@ -239,8 +241,12 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "filepath": Path(os.path.join(data_dir["extra"], "abstractsWithCIE10_v2.json")),
-                        "split":    "train",
+                        "filepath": Path(
+                            os.path.join(
+                                data_dir["extra"], "abstractsWithCIE10_v2.json"
+                            )
+                        ),
+                        "split": "train",
                     },
                 )
             ]
@@ -249,21 +255,33 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/train")),
+                        "filepath": Path(
+                            os.path.join(
+                                data_dir["codiesp"], "final_dataset_v4_to_publish/train"
+                            )
+                        ),
                         "split": "train",
                     },
                 ),
                 datasets.SplitGenerator(
                     name=datasets.Split.TEST,
                     gen_kwargs={
-                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/test")),
+                        "filepath": Path(
+                            os.path.join(
+                                data_dir["codiesp"], "final_dataset_v4_to_publish/test"
+                            )
+                        ),
                         "split": "test",
                     },
                 ),
                 datasets.SplitGenerator(
                     name=datasets.Split.VALIDATION,
                     gen_kwargs={
-                        "filepath":  Path(os.path.join(data_dir["codiesp"], "final_dataset_v4_to_publish/dev")),
+                        "filepath": Path(
+                            os.path.join(
+                                data_dir["codiesp"], "final_dataset_v4_to_publish/dev"
+                            )
+                        ),
                         "split": "dev",
                     },
                 ),
@@ -278,9 +296,14 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
         if "extra" not in self.config.name:
             paths = {"text_files": Path(os.path.join(filepath, "text_files"))}
             for task in ["codiesp_d", "codiesp_p", "codiesp_x"]:
-                paths[task] = Path(os.path.join(filepath, f"{split}{task[-1].upper()}.tsv"))
+                paths[task] = Path(
+                    os.path.join(filepath, f"{split}{task[-1].upper()}.tsv")
+                )
 
-        if self.config.name == "codiesp_D_bigbio_text" or self.config.name == "codiesp_P_bigbio_text":
+        if (
+            self.config.name == "codiesp_D_bigbio_text"
+            or self.config.name == "codiesp_P_bigbio_text"
+        ):
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
             file_codes_dict = defaultdict(list)
@@ -310,7 +333,9 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 for a in appearances:
                     spans.append((int(a.split()[0]), int(a.split()[1])))
 
-                task_x_dict[file].append({"label": label, "code": code, "text": text, "spans": spans})
+                task_x_dict[file].append(
+                    {"label": label, "code": code, "text": text, "spans": spans}
+                )
 
             for guid, (file, data) in enumerate(task_x_dict.items()):
                 example = {
@@ -320,24 +345,33 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                     "entities": [],
                     "events": [],
                     "coreferences": [],
-                    "relations": []
+                    "relations": [],
                 }
 
                 for idx, d in enumerate(data):
-                    example["entities"].append({
-                                            "id": str(guid)+str(idx),
-                                            "type": d["label"],
-                                            "text": [d["text"]],
-                                            "offsets": d["spans"],
-                                            "normalized": [{
-                                                "db_name": "ICD10-PCS" if d["label"]=="PROCEDIMIENTO" else "ICD10-CM",
-                                                "db_id": d["code"],
-                                            }]
-                                        })
+                    example["entities"].append(
+                        {
+                            "id": str(guid) + str(idx),
+                            "type": d["label"],
+                            "text": [d["text"]],
+                            "offsets": d["spans"],
+                            "normalized": [
+                                {
+                                    "db_name": "ICD10-PCS"
+                                    if d["label"] == "PROCEDIMIENTO"
+                                    else "ICD10-CM",
+                                    "db_id": d["code"],
+                                }
+                            ],
+                        }
+                    )
 
                 yield guid, example
 
-        elif self.config.name == "codiesp_D_source" or self.config.name == "codiesp_P_source":
+        elif (
+            self.config.name == "codiesp_D_source"
+            or self.config.name == "codiesp_P_source"
+        ):
             df = pd.read_csv(paths[self.config.subset_id], sep="\t", header=None)
 
             file_codes_dict = defaultdict(list)
@@ -349,7 +383,9 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 example = {
                     "id": guid,
                     "document_id": file,
-                    "text": Path(os.path.join(paths["text_files"], f"{file}.txt")).read_text(),
+                    "text": Path(
+                        os.path.join(paths["text_files"], f"{file}.txt")
+                    ).read_text(),
                     "labels": codes,
                 }
 
@@ -364,39 +400,52 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
                 spans = []
                 for a in appearances:
                     spans.append([int(a.split()[0]), int(a.split()[1])])
-                file_codes_dict[file].append({"label": label, "code": code, "text": text, "spans": spans[0]})
+                file_codes_dict[file].append(
+                    {"label": label, "code": code, "text": text, "spans": spans[0]}
+                )
 
             for guid, (file, codes) in enumerate(file_codes_dict.items()):
                 example = {
                     "id": guid,
                     "document_id": file,
-                    "text": Path(os.path.join(paths["text_files"], f"{file}.txt")).read_text(),
+                    "text": Path(
+                        os.path.join(paths["text_files"], f"{file}.txt")
+                    ).read_text(),
                     "task_x": file_codes_dict[file],
                 }
 
                 yield guid, example
 
         elif "extra" in self.config.name:
-            with open(filepath) as file: 
-                json_data=json.load(file)
+            with open(filepath) as file:
+                json_data = json.load(file)
 
             if "mesh" in self.config.name:
                 for guid, article in enumerate(json_data["articles"]):
                     example = {
                         "id": str(guid),
                         "document_id": article["pmid"],
-                        "text": str(article["title"]) + " <SEP> " + str(article["abstractText"]),
-                        "labels": [mesh['Code'] for mesh in article['Mesh']],
+                        "text": str(article["title"])
+                        + " <SEP> "
+                        + str(article["abstractText"]),
+                        "labels": [mesh["Code"] for mesh in article["Mesh"]],
                     }
                     yield guid, example
 
-            else: # CIE ID codes
+            else:  # CIE ID codes
                 for guid, article in enumerate(json_data["articles"]):
                     example = {
                         "id": str(guid),
                         "document_id": article["pmid"],
-                        "text": str(article["title"]) + " <SEP> " + str(article["abstractText"]),
-                        "labels": [code for mesh in article['Mesh'] if 'CIE' in mesh for code in mesh['CIE']],
+                        "text": str(article["title"])
+                        + " <SEP> "
+                        + str(article["abstractText"]),
+                        "labels": [
+                            code
+                            for mesh in article["Mesh"]
+                            if "CIE" in mesh
+                            for code in mesh["CIE"]
+                        ],
                     }
                     yield guid, example
 

@@ -42,7 +42,7 @@ from bigbio.utils.constants import Tasks
 
 _DATASETNAME = "swedish_medical_ner"
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.SV]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{almgren-etal-2016-named,
@@ -155,7 +155,9 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
         urls = _URLS
@@ -245,7 +247,12 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
         # Create passage
         passage = "".join(text)
         doc["passages"].append(
-            {"id": str(uid) + "-passage-0", "type": "sentence", "text": [passage], "offsets": [[0, len(passage)]]}
+            {
+                "id": str(uid) + "-passage-0",
+                "type": "sentence",
+                "text": [passage],
+                "offsets": [[0, len(passage)]],
+            }
         )
 
         # Create entities

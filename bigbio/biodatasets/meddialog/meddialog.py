@@ -15,15 +15,16 @@
 
 import json
 import re
+
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-
 _DATASETNAME = "meddialog"
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.EN, Lang.ZH]
 _LOCAL = False
 _CITATION = """
 @article{DBLP:journals/corr/abs-2004-03329,

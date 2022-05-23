@@ -65,7 +65,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.EN, Lang.ZH, Lang.JA]
 _LOCAL = True
 _CITATION = """\
 @article{,
@@ -155,7 +155,11 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             subset_id="ntcir_13_medweb_source",
         )
     ]
-    for language_name, language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
+    for language_name, language_code in (
+        ("Japanese", "ja"),
+        ("English", "en"),
+        ("Chinese", "zh"),
+    ):
         # NOTE: BigBio text classification configurations
         # Text classification data for each language
         BUILDER_CONFIGS.append(
@@ -168,7 +172,11 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             ),
         )
 
-        for target_language_name, target_language_code in (("Japanese", "ja"), ("English", "en"), ("Chinese", "zh")):
+        for target_language_name, target_language_code in (
+            ("Japanese", "ja"),
+            ("English", "en"),
+            ("Chinese", "zh"),
+        ):
             # NOTE: BigBio text to text (translation) configurations
             # Parallel text corpora for all pairs of languages
             if language_name != target_language_name:
@@ -227,7 +235,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             )
         else:
             data_dir = self.config.data_dir
-        
+
         raw_data_dir = dl_manager.download_and_extract(
             str(Path(data_dir) / _URLS[_DATASETNAME])
         )
@@ -254,13 +262,15 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             language_code = match.group("language_code")
 
             filepaths = {
-                datasets.Split.TRAIN: (Path(data_dir) / f"NTCIR-13_MedWeb_{language_code}_training.xlsx",),
-                datasets.Split.TEST: (Path(data_dir) / f"NTCIR-13_MedWeb_{language_code}_test.xlsx",),
+                datasets.Split.TRAIN: (
+                    Path(data_dir) / f"NTCIR-13_MedWeb_{language_code}_training.xlsx",
+                ),
+                datasets.Split.TEST: (
+                    Path(data_dir) / f"NTCIR-13_MedWeb_{language_code}_test.xlsx",
+                ),
             }
         elif self.config.schema == "bigbio_t2t":
-            pattern = (
-                r"ntcir_13_medweb_translation_(?P<source_language_code>ja|en|zh)_(?P<target_language_code>ja|en|zh)_bigbio_t2t"
-            )
+            pattern = r"ntcir_13_medweb_translation_(?P<source_language_code>ja|en|zh)_(?P<target_language_code>ja|en|zh)_bigbio_t2t"
             match = re.search(pattern=pattern, string=self.config.subset_id)
 
             if not match:
@@ -275,12 +285,16 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
 
             filepaths = {
                 datasets.Split.TRAIN: (
-                    Path(data_dir) / f"NTCIR-13_MedWeb_{source_language_code}_training.xlsx",
-                    Path(data_dir) / f"NTCIR-13_MedWeb_{target_language_code}_training.xlsx",
+                    Path(data_dir)
+                    / f"NTCIR-13_MedWeb_{source_language_code}_training.xlsx",
+                    Path(data_dir)
+                    / f"NTCIR-13_MedWeb_{target_language_code}_training.xlsx",
                 ),
                 datasets.Split.TEST: (
-                    Path(data_dir) / f"NTCIR-13_MedWeb_{source_language_code}_test.xlsx",
-                    Path(data_dir) / f"NTCIR-13_MedWeb_{target_language_code}_test.xlsx",
+                    Path(data_dir)
+                    / f"NTCIR-13_MedWeb_{source_language_code}_test.xlsx",
+                    Path(data_dir)
+                    / f"NTCIR-13_MedWeb_{target_language_code}_test.xlsx",
                 ),
             }
 
@@ -308,7 +322,9 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
 
         return match.group("language_code")
 
-    def _generate_examples(self, filepaths: Tuple[Path], split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepaths: Tuple[Path], split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
@@ -334,13 +350,23 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
                 sheet_name=f"{language_code}_{split}",
             )
 
-            label_column_names = [column_name for column_name in df.columns if column_name not in ("ID", "Tweet")]
-            labels = df[label_column_names].apply(lambda row: row[row == "p"].index.tolist(), axis=1).values
+            label_column_names = [
+                column_name
+                for column_name in df.columns
+                if column_name not in ("ID", "Tweet")
+            ]
+            labels = (
+                df[label_column_names]
+                .apply(lambda row: row[row == "p"].index.tolist(), axis=1)
+                .values
+            )
 
             ids = df["ID"]
             tweets = df["Tweet"]
 
-            for row_index, (record_labels, record_id, tweet) in enumerate(zip(labels, ids, tweets)):
+            for row_index, (record_labels, record_id, tweet) in enumerate(
+                zip(labels, ids, tweets)
+            ):
                 yield row_index, {
                     "id": record_id,
                     "text": tweets,
@@ -365,9 +391,9 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             )[["ID", "Tweet"]]
             target_df["id_int"] = target_df["ID"].str.extract(r"(\d+)").astype(int)
 
-            df_combined = source_df.merge(target_df, on="id_int", suffixes=("_source", "_target"))[
-                ["id_int", "Tweet_source", "Tweet_target"]
-            ]
+            df_combined = source_df.merge(
+                target_df, on="id_int", suffixes=("_source", "_target")
+            )[["id_int", "Tweet_source", "Tweet_target"]]
 
             for row_index, record in enumerate(df_combined.itertuples(index=False)):
                 row = record._asdict()

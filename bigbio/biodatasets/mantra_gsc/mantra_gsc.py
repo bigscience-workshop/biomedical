@@ -24,7 +24,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.EN, Lang.FR, Lang.DE, Lang.NL, Lang.ES]
 _LOCAL = False
 _CITATION = """\
 @article{10.1093/jamia/ocv037,

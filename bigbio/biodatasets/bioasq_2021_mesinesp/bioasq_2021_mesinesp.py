@@ -53,7 +53,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.ES]
 _LOCAL = False
 _CITATION = """\
 @conference {396,
