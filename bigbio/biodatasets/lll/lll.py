@@ -36,7 +36,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks, BigBioValues
+from bigbio.utils.constants import Lang, Tasks, BigBioValues
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = False

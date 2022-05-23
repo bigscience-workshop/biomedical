@@ -21,7 +21,7 @@ from typing import List, Tuple, Dict, Iterator
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 import itertools
 
 _LANGUAGES = [Lang.EN]

@@ -20,7 +20,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 _DATASETNAME = "bionlp_st_2011_id"
 _SOURCE_VIEW_NAME = "source"

@@ -38,7 +38,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 # TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
