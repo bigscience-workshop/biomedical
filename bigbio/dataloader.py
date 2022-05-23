@@ -59,6 +59,27 @@ _RESOURCE_CONFIG_NAMES = set(
 )
 
 
+# BLURB benchmark datasets
+# https://microsoft.github.io/BLURB/tasks.html
+# ==========================================================
+_BLURB_CONFIG_NAMES = set(
+    [
+        "bc5cdr_bigbio_kb",  # BC5-chem and BC5-disease
+        "biosses_bigbio_pairs",  # BIOSSES
+        "ebm_pico_bigbio_kb",  # EBM PICO
+        "gnormplus_bigbio_kb",  # BC2GM
+        "jnlpba_bigbio_kb",  # JNLPBA
+        "ncbi_disease_bigbio_kb",  # NCBI-disease
+        "bioasq_7b_bigbio_qa",  # BioASQ
+        "chemprot_bigbio_kb",  # ChemProt
+        "ddi_corpus_bigbio_kb",  # DDI
+        "hallmarks_of_cancer_bigbio_text",  # HOC
+        #    ''                                   #  Gene-Disease Associations (GAD)
+        "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
+    ]
+)
+
+
 @dataclass
 class BigBioConfigHelper:
     """Metadata for one config of a dataset."""
@@ -85,16 +106,15 @@ class BigBioConfigHelper:
     _py_module: ModuleType = field(repr=False)
     _ds_cls: type = field(repr=False)
 
-    def get_load_dataset_kwargs(
+    def load_dataset(
         self,
-        data_dir: Optional[str] = None,
+        **load_dataset_kwargs,
     ):
-
-        return {
-            "path": self.script,
-            "name": self.config.name,
-            "data_dir": data_dir,
-        }
+        return load_dataset(
+            path=self.script,
+            name=self.config.name,
+            **load_dataset_kwargs,
+        )
 
 
 def default_is_keeper(helper: BigBioConfigHelper) -> bool:

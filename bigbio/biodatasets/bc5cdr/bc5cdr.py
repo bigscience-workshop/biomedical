@@ -220,10 +220,17 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         # texts = [doc_text[i:j] for i, j in offsets]
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons[db_id_key] if db_id_key else "-1"
+
+        # some entities are not linked and
+        # some entities are linked to multiple normalized ids
+        if db_ids == "-1":
+            db_ids_list = []
+        else:
+            db_ids_list = db_ids.split("|")
+
         normalized = [
-            # some entities are linked to multiple normalized ids
             {"db_name": db_id_key, "db_id": db_id}
-            for db_id in db_ids.split("|")
+            for db_id in db_ids_list
         ]
 
         return {
