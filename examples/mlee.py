@@ -31,6 +31,7 @@ _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LANGUAGES=[Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @article{,

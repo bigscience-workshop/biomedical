@@ -31,6 +31,7 @@ from bigbio.utils.constants import Tasks
 logger = datasets.logging.get_logger(__name__)
 
 
+_LANGUAGES = [Lang.EN, Lang.ZH]
 _LOCAL = False
 _CITATION = """\
 @article{,
