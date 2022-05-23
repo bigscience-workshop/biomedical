@@ -81,17 +81,6 @@ class CustomLicense(License):
             super().__setattr__("name", "CUSTOM")
 
 
-@dataclass
-class UnknownLicense(License):
-    """
-    This class is for all datasets which can be freely downloaded but do not specifiy a licese.
-    """
-
-    def __post_init__(self):
-        super().__setattr__("name", "UNKNOWN")
-        super().__setattr__("text", "Publicly available but not license specified.")
-
-
 def _get_variable_name(k: str) -> str:
 
     return k.replace("-", "_").upper().replace(".", "p").replace("+", "plus")
