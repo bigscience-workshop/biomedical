@@ -2,16 +2,14 @@ from collections import defaultdict
 from enum import Enum
 from types import SimpleNamespace
 
-from bigbio.utils.schemas import (
-    entailment_features,
-    kb_features,
-    pairs_features,
-    qa_features,
-    text2text_features,
-    text_features,
-)
+from bigbio.utils.schemas import (entailment_features, kb_features,
+                                  pairs_features, qa_features,
+                                  text2text_features, text_features)
+
+METADATA = ["_LOCAL"]
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
+
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"

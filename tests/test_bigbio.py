@@ -11,13 +11,15 @@ import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
+from types import ModuleType
 from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 import datasets
 from datasets import DatasetDict, Features
 
-from bigbio.utils.constants import (SCHEMA_TO_FEATURES, TASK_TO_SCHEMA,
-                                    VALID_SCHEMAS, VALID_TASKS, Tasks)
+from bigbio.utils.constants import (METADATA, SCHEMA_TO_FEATURES,
+                                    TASK_TO_SCHEMA, VALID_SCHEMAS, VALID_TASKS,
+                                    Tasks)
 from bigbio.utils.schemas import (entailment_features, kb_features,
                                   pairs_features, qa_features,
                                   text2text_features, text_features)
@@ -111,6 +113,8 @@ class TestDataLoader(unittest.TestCase):
         if schema == "source":
             return
 
+        with self.subTest("Check metadata"):
+            self.test_metadata(module)
         with self.subTest("IDs globally unique"):
             self.test_are_ids_globally_unique(self.dataset)
         with self.subTest("Check schema validity"):
@@ -134,6 +138,15 @@ class TestDataLoader(unittest.TestCase):
         elif schema == "QA":
             with self.subTest("Check multiple choice"):
                 self.test_multiple_choice(self.dataset)
+
+    def test_metadata(self, module: ModuleType):
+        """
+        Check if all metadata for a dataloader are present
+        """
+
+        for m in METADATA:
+            if not hasattr(module, m):
+                raise AssertionError(f"Required module-level '{m}' is not defined!")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
