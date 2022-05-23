@@ -32,6 +32,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @article{,

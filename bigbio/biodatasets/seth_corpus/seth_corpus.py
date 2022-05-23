@@ -30,6 +30,7 @@ from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @Article{SETH2016,

@@ -31,6 +31,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 import xml.dom.minidom as xml
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{,

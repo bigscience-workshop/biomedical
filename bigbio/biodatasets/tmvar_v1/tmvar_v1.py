@@ -24,6 +24,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 import itertools
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @article{wei2013tmvar,

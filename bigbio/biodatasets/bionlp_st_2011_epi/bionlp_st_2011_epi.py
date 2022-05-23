@@ -27,6 +27,7 @@ _DATASETNAME = "bionlp_st_2011_epi"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2011-overview,

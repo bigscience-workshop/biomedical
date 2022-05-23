@@ -43,6 +43,7 @@ _CITATION = """\
   copyright = {Creative Commons Attribution 4.0 International}
 }
 """
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _DATASETNAME = "tmvar_v3"
 _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 

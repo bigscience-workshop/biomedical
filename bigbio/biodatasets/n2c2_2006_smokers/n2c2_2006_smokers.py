@@ -68,6 +68,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/15/1/14/779738
+_LANGUAGES = [Lang.EN]
 _LOCAL = True
 _CITATION = """\
 @article{,

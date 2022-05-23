@@ -25,6 +25,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "bionlp_st_2013_cg"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2013-overview,

@@ -25,6 +25,7 @@ from bigbio.utils.constants import Tasks
 
 import json
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2010.14235,

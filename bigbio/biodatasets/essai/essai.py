@@ -8,6 +8,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = True
 _CITATION = """\
  @misc{dalloux, title={Datasets – Clément Dalloux}, url={http://clementdalloux.fr/?page_id=28}, journal={Clément Dalloux}, author={Dalloux, Clément}} 

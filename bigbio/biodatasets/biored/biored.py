@@ -28,6 +28,7 @@ from bigbio.utils.constants import Tasks
 from bioc import pubtator
 
 # TODO: Add BibTeX citation
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
   @misc{https://doi.org/10.48550/arxiv.2204.04263,

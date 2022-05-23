@@ -26,6 +26,7 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/corr/abs-2003-12218,

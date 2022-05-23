@@ -25,6 +25,7 @@ from bigbio.utils.constants import Tasks
 _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2013-overview,
