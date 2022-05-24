@@ -26,7 +26,7 @@ from typing import Dict, Iterator, Tuple
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import BigBioValues, Tasks
+from bigbio.utils.constants import BigBioValues, Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = False
