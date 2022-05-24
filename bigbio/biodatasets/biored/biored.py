@@ -157,21 +157,21 @@ class BioredDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Train.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Train.PubTator"),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Test.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Test.PubTator"),
                     "split": "test",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Dev.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Dev.PubTator"),
                     "split": "dev",
                 },
             ),
