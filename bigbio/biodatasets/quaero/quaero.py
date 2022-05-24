@@ -1,12 +1,14 @@
+import os
+
 import bioc
 import datasets
-import os
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
+_LANGUAGES = [Lang.FR]
 _LOCAL = False
 _CITATION = """\
 @InProceedings{neveol14quaero, 
@@ -73,6 +75,7 @@ _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+
 class QUAERO(datasets.GeneratorBasedBuilder):
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -86,14 +89,13 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="quaero_emea",
         ),
-            BigBioConfig(
+        BigBioConfig(
             name="quaero_medline_source",
             version=SOURCE_VERSION,
             description="QUAERO source schema on the MEDLINE subset",
             schema="source",
             subset_id="quaero_medline",
         ),
-
         BigBioConfig(
             name="quaero_emea_bigbio_kb",
             version=BIGBIO_VERSION,
@@ -137,12 +139,12 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                             "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                         }
-        ],
-                      }
+                    ],
+                }
             )
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
-            
+
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -168,12 +170,12 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             entity information
         """
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
-        #db_ids = span.infons[db_id_key] if db_id_key else "-1"
-        #normalized = [
-            # some entities are linked to multiple normalized ids
-         #   {"db_name": db_id_key, "db_id": db_id}
-          #  for db_id in db_ids.split("|")
-        #]
+        # db_ids = span.infons[db_id_key] if db_id_key else "-1"
+        # normalized = [
+        # some entities are linked to multiple normalized ids
+        #   {"db_name": db_id_key, "db_id": db_id}
+        #  for db_id in db_ids.split("|")
+        # ]
 
         return {
             "id": span.id,
@@ -182,7 +184,6 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             "type": span.infons["type"],
             "normalized": [],
         }
-
 
     def _get_document_text(self, xdoc):
         """Build document text for unit testing entity span offsets."""
@@ -207,10 +208,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
-                gen_kwargs={
-                    "filepath": data_dir,
-                    "split": "test"
-                },
+                gen_kwargs={"filepath": data_dir, "split": "test"},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
@@ -225,37 +223,47 @@ class QUAERO(datasets.GeneratorBasedBuilder):
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     def _generate_examples(self, filepath, split):
 
-        if self.config.subset_id == "quaero_emea" :
+        if self.config.subset_id == "quaero_emea":
             subset = "EMEA"
         elif self.config.subset_id == "quaero_medline":
             subset = "MEDLINE"
 
-        key=0
+        key = 0
         if self.config.schema == "source":
             file = f"{subset}_{split}_bioc"
             f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
             reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
 
             for xdoc in reader:
-              doc_text = self._get_document_text(xdoc)
-              yield (key, {
-                  "id": xdoc.id,
-                  "document_id": xdoc.id,
-                  "entities": [self._get_bioc_entity(span, doc_text) for passage in xdoc.passages for span in passage.annotations],
-                  "passages": [
-                      {
-                          "id": xdoc.id,
-                          "type": passage.infons,
-                          "text": [passage.text],
-                          "offsets": [self._get_bioc_entity(span, doc_text)["offsets"][0] for span in passage.annotations],
-                      }
-                      for passage in xdoc.passages
-                  ]
-              })
-              key+=1
+                doc_text = self._get_document_text(xdoc)
+                yield (
+                    key,
+                    {
+                        "id": xdoc.id,
+                        "document_id": xdoc.id,
+                        "entities": [
+                            self._get_bioc_entity(span, doc_text)
+                            for passage in xdoc.passages
+                            for span in passage.annotations
+                        ],
+                        "passages": [
+                            {
+                                "id": xdoc.id,
+                                "type": passage.infons,
+                                "text": [passage.text],
+                                "offsets": [
+                                    self._get_bioc_entity(span, doc_text)["offsets"][0]
+                                    for span in passage.annotations
+                                ],
+                            }
+                            for passage in xdoc.passages
+                        ],
+                    },
+                )
+                key += 1
         elif self.config.schema == "bigbio_kb":
-            i = 0 #unique key for each data sample, needed for datasets
-            uid = 0 #unique identifier needed for the schema
+            i = 0  # unique key for each data sample, needed for datasets
+            uid = 0  # unique identifier needed for the schema
             file = f"{subset}_{split}_bioc"
             f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
             reader = bioc.biocxml.BioCXMLDocumentReader(str(f))

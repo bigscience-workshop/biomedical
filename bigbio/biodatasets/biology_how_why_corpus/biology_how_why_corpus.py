@@ -28,9 +28,10 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 import xml.dom.minidom as xml
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{,

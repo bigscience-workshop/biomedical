@@ -19,11 +19,12 @@ import datasets
 import glob
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 
 _DATASETNAME = "ask_a_patient"
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """
 @inproceedings{limsopatham-collier-2016-normalising,

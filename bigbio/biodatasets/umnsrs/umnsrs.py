@@ -29,8 +29,9 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pakhomov2010semantic,

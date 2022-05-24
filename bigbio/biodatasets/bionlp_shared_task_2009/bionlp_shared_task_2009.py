@@ -21,9 +21,10 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{kim-etal-2009-overview,

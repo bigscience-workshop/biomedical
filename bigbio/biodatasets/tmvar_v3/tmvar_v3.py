@@ -22,7 +22,7 @@ from bioc import pubtator
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
@@ -43,6 +43,7 @@ _CITATION = """\
   copyright = {Creative Commons Attribution 4.0 International}
 }
 """
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _DATASETNAME = "tmvar_v3"
 _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
