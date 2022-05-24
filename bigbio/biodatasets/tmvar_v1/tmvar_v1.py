@@ -101,18 +101,16 @@ class TmvarV1Dataset(datasets.GeneratorBasedBuilder):
                     "passages": [
                         {
                             "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Value("string"),
+                            "offsets": [datasets.Value("int32")],
                         }
                     ],
                     "entities": [
                         {
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "text": datasets.Value("string"),
+                            "offsets": [datasets.Value("int32")],
                             "concept_id": datasets.Value("string"),
-                            "semantic_type_id": datasets.Sequence(
-                                datasets.Value("string")
-                            ),
+                            "semantic_type_id": datasets.Value("string"),
                         }
                     ],
                 }
@@ -166,19 +164,21 @@ class TmvarV1Dataset(datasets.GeneratorBasedBuilder):
                     pmid = document.pop("pmid")
                     document["id"] = next(uid)
                     document["document_id"] = pmid
+
                     entities_ = []
                     for entity in document["entities"]:
                         entities_.append(
                             {
                                 "id": next(uid),
                                 "type": entity["semantic_type_id"],
-                                "text": entity["text"],
+                                "text": [entity["text"]],
                                 "normalized": [],
-                                "offsets": entity["offsets"],
+                                "offsets": [entity["offsets"]],
                             }
                         )
                     for passage in document["passages"]:
                         passage["id"] = next(uid)
+
                     document["entities"] = entities_
                     document["relations"] = []
                     document["events"] = []
@@ -203,14 +203,26 @@ class TmvarV1Dataset(datasets.GeneratorBasedBuilder):
         pmid, _, title = raw_doc[0].split("|")
         pmid = int(pmid)
         _, _, abstract = raw_doc[1].split("|")
-        passages = [
-            {"type": "title", "text": [title], "offsets": [[0, len(title)]]},
-            {
-                "type": "abstract",
-                "text": [abstract],
-                "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]],
-            },
-        ]
+
+        if self.config.schema == "source":
+            passages = [
+                {"type": "title", "text": title, "offsets": [0, len(title)]},
+                {
+                    "type": "abstract",
+                    "text": abstract,
+                    "offsets": [len(title) + 1, len(title) + len(abstract) + 1],
+                },
+            ]
+        elif self.config.schema == "bigbio_kb":
+            passages = [
+                {"type": "title", "text": [title], "offsets": [[0, len(title)]]},
+                {
+                    "type": "abstract",
+                    "text": [abstract],
+                    "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]],
+                },
+            ]
+
         entities = []
         for line in raw_doc[2:]:
             mentions = line.split("\t")
@@ -224,10 +236,11 @@ class TmvarV1Dataset(datasets.GeneratorBasedBuilder):
             ) = mentions
 
             entity = {
-                "offsets": [[int(start_idx), int(end_idx)]],
-                "text": [mention],
-                "semantic_type_id": semantic_type_id.split(","),
+                "offsets": [int(start_idx), int(end_idx)],
+                "text": mention,
+                "semantic_type_id": semantic_type_id,
                 "concept_id": entity_id,
             }
             entities.append(entity)
+
         return {"pmid": pmid, "passages": passages, "entities": entities}
