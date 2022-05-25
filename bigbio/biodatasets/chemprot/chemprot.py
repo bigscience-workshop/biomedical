@@ -59,6 +59,21 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
+# Chemprot specific variables
+_GROUP_LABELS = {
+    "CPR:1": "Part_of",
+    "CPR:2": "Regulator",
+    "CPR:3": "Upregulator",
+    "CPR:4": "Downregulator",
+    "CPR:5": "Agonist",
+    "CPR:6": "Antagonist",
+    "CPR:7": "Modulator",
+    "CPR:8": "Cofactor",
+    "CPR:9": "Substrate",
+    "CPR:10": "Not",
+}
+
+
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
     """BioCreative VI Chemical-Protein Interaction Task."""
 
@@ -320,9 +335,10 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         return entities, entity_id
 
     @staticmethod
-    def _get_relations(rel_filename: str) -> Dict[str, str]:
-        """
-        For each document in the ChemProt corpus, create an annotation for all relationships.
+    def _get_relations(rel_filename: str, is_mapped: bool = False) -> Dict[str, str]:
+        """For each document in the ChemProt corpus, create an annotation for all relationships.
+
+        :param is_mapped: Whether to convert into NL the relation tags. Default is OFF
         """
         with open(rel_filename, "r") as f:
             contents = [i.strip() for i in f.readlines()]
@@ -337,6 +353,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             if pmid not in relations:
                 relations[pmid] = []
 
+            if _is_mapped:
+                label = _GROUP_LABELS[label]
+
             ann = {
                 "type": label,
                 "arg1": arg1,
@@ -348,7 +367,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         return relations
 
     @staticmethod
-    def _get_relations_gs(rel_filename: str) -> Dict[str, str]:
+    def _get_relations_gs(rel_filename: str, is_mapped: bool = False) -> Dict[str, str]:
         """
         For each document in the ChemProt corpus, create an annotation for the gold-standard relationships.
 
