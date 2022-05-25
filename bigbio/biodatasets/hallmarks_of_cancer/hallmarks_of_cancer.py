@@ -165,20 +165,20 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
 
                 label = label.strip()
                 multi_labels = [m_label.strip() for m_label in label.split("AND")]
-                multi_labels = [m_label.split("--")[0] for m_label in multi_labels]
+                unique_multi_labels = {m_label.split("--")[0] for m_label in multi_labels}
 
                 arrow_file_unique_key = 100 * document_index + example_index
                 if self.config.schema == "source":
                     yield arrow_file_unique_key, {
                         "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
                         "text": sentence,
-                        "label": multi_labels,
+                        "label": list(unique_multi_labels),
                     }
                 elif self.config.schema == "bigbio_text":
                     yield arrow_file_unique_key, {
                         "id": uid,
                         "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
                         "text": sentence,
-                        "labels": multi_labels,
+                        "labels": list(unique_multi_labels),
                     }
                     uid += 1
