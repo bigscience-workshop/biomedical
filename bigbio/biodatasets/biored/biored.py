@@ -24,10 +24,11 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 from bioc import pubtator
 
 # TODO: Add BibTeX citation
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
   @misc{https://doi.org/10.48550/arxiv.2204.04263,
@@ -157,21 +158,21 @@ class BioredDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Train.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Train.PubTator"),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Test.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Test.PubTator"),
                     "split": "test",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "BIORED", "Dev.PubTator"),
+                    "filepath": os.path.join(data_dir, "BioRED", "Dev.PubTator"),
                     "split": "dev",
                 },
             ),

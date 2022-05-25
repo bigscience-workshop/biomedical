@@ -26,11 +26,12 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 logger = datasets.logging.get_logger(__name__)
 
 
+_LANGUAGES = [Lang.EN, Lang.ZH]
 _LOCAL = False
 _CITATION = """\
 @article{,
