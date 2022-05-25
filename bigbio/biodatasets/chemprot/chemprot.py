@@ -397,6 +397,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             if pmid not in relations:
                 relations[pmid] = []
 
+            if _is_mapped:
+                label = _GROUP_LABELS[label]
+
             ann = {
                 "type": label,
                 "arg1": arg1,
