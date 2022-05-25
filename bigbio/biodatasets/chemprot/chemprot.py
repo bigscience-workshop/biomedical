@@ -228,7 +228,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
             entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
-            relations = self._get_relations(os.path.join(filepath, relation_file))
+            relations = self._get_relations(os.path.join(filepath, relation_file), is_mapped=True)
 
             uid = 0
             for id_, pmid in enumerate(abstracts.keys()):
@@ -353,7 +353,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             if pmid not in relations:
                 relations[pmid] = []
 
-            if _is_mapped:
+            if is_mapped:
                 label = _GROUP_LABELS[label]
 
             ann = {
@@ -397,7 +397,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             if pmid not in relations:
                 relations[pmid] = []
 
-            if _is_mapped:
+            if is_mapped:
                 label = _GROUP_LABELS[label]
 
             ann = {
