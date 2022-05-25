@@ -1,16 +1,23 @@
+import importlib.resources as pkg_resources
+import json
+from collections import defaultdict
 from enum import Enum
 from types import SimpleNamespace
 
-from bigbio.utils.schemas import (
-    entailment_features,
-    kb_features,
-    pairs_features,
-    qa_features,
-    text2text_features,
-    text_features,
-)
+from bigbio.utils import resources
+from bigbio.utils.schemas import (entailment_features, kb_features,
+                                  pairs_features, qa_features,
+                                  text2text_features, text_features)
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
+
+
+# shamelessly compied from:
+# https://github.com/huggingface/datasets/blob/master/src/datasets/utils/metadata.py
+langs_json = pkg_resources.read_text(resources, "languages.json")
+langs_dict = {k.replace("-", "_").upper(): v for k, v in json.loads(langs_json).items()}
+Lang = Enum("Lang", langs_dict)
+
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"
@@ -46,6 +53,11 @@ TASK_TO_SCHEMA = {
     Tasks.SUMMARIZATION: "T2T",
     Tasks.TEXT_CLASSIFICATION: "TEXT",
 }
+
+SCHEMA_TO_TASKS = defaultdict(set)
+for task, schema in TASK_TO_SCHEMA.items():
+    SCHEMA_TO_TASKS[schema].add(task)
+SCHEMA_TO_TASKS = dict(SCHEMA_TO_TASKS)
 
 VALID_TASKS = set(TASK_TO_SCHEMA.keys())
 VALID_SCHEMAS = set(TASK_TO_SCHEMA.values())
