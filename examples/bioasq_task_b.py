@@ -29,10 +29,13 @@ import os
 import re
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN]
+_LOCAL = True
 _CITATION = """\
 @article{tsatsaronis2015overview,
 	title        = {
@@ -575,7 +578,7 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     }
 
         elif self.config.schema == "bigbio_qa":
-            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records 
+            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records
             cache = set()
             with open(filepath, encoding="utf-8") as file:
                 uid = 0
