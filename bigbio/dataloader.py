@@ -15,7 +15,7 @@ import datasets
 from datasets import load_dataset
 
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks, SCHEMA_TO_TASKS
+from bigbio.utils.constants import Tasks, SCHEMA_TO_TASKS, Lang
 
 
 # TODO: update this as fixes come in
@@ -87,6 +87,7 @@ class BigBioConfigHelper:
     script: pathlib.Path
     dataset_name: str
     tasks: List[Tasks]
+    languages: List[Lang]
     config: BigBioConfig
     is_local: bool
     is_bigbio_schema: bool
@@ -178,6 +179,7 @@ class BigBioConfigHelpers:
                         script=dataloader_script.as_posix(),
                         dataset_name=dataset_name,
                         tasks=tasks,
+                        languages=py_module._LANGUAGES,
                         config=config,
                         is_local=py_module._LOCAL,
                         is_bigbio_schema=is_bigbio_schema,
@@ -243,8 +245,7 @@ if __name__ == "__main__":
     # filter and load datasets
     # ====================================================================
     tmvar_datasets = [
-        load_dataset(**helper.get_load_dataset_kwargs())
-        for helper in conhelps.filtered(
+        helper.load_dataset() for helper in conhelps.filtered(
             lambda x: ("tmvar" in x.dataset_name and x.is_bigbio_schema)
         )
     ]

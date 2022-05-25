@@ -555,13 +555,13 @@ class TestDataLoader(unittest.TestCase):
                     if len(example["choices"]) > 0:
                         # can change "==" to "in" if we include ranking later
                         assert (
-                            example["type"] == "multiple_choice"
-                        ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
+                            example["type"] in ["multiple_choice", "yesno"]
+                        ), f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
 
-                    if example["type"] == "multiple_choice":
+                    if example["type"] in ["multiple_choice", "yesno"]:
                         assert (
                             len(example["choices"]) > 0
-                        ), f"type is 'multiple_choice' but no values in 'choices' {example}"
+                        ), f"type is 'multiple_choice' or 'yesno' but no values in 'choices' {example}"
 
                         if self._skipkey_or_keysplit("answer", split):
                             logger.warning(

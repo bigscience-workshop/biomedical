@@ -22,8 +22,9 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN, Lang.FR, Lang.DE, Lang.NL, Lang.ES]
 _LOCAL = False
 _CITATION = """\
 @article{10.1093/jamia/ocv037,
@@ -80,7 +81,7 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-_LANGUAGES = {
+_LANGUAGES_2 = {
     "es": "Spanish",
     "fr": "French",
     "de": "German",
@@ -103,7 +104,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = []
 
-    for language, dataset_type in product(_LANGUAGES, _DATASET_TYPES):
+    for language, dataset_type in product(_LANGUAGES_2, _DATASET_TYPES):
         if dataset_type == "patents" and language in ["nl", "es"]:
             continue
 
@@ -111,7 +112,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             BigBioConfig(
                 name=f"mantra_gsc_{language}_{dataset_type}_source",
                 version=SOURCE_VERSION,
-                description=f"Mantra GSC {_LANGUAGES[language]} {_DATASET_TYPES[dataset_type]} source schema",
+                description=f"Mantra GSC {_LANGUAGES_2[language]} {_DATASET_TYPES[dataset_type]} source schema",
                 schema="source",
                 subset_id=f"mantra_gsc_{language}_{_DATASET_TYPES[dataset_type]}",
             )
@@ -120,7 +121,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             BigBioConfig(
                 name=f"mantra_gsc_{language}_{dataset_type}_bigbio_kb",
                 version=SOURCE_VERSION,
-                description=f"Mantra GSC {_LANGUAGES[language]} {_DATASET_TYPES[dataset_type]} BigBio schema",
+                description=f"Mantra GSC {_LANGUAGES_2[language]} {_DATASET_TYPES[dataset_type]} BigBio schema",
                 schema="bigbio_kb",
                 subset_id=f"mantra_gsc_{language}_{_DATASET_TYPES[dataset_type]}",
             )
@@ -190,7 +191,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
         self, data_dir: Path, language: str, dataset_type: str
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        data_dir = data_dir / f"{_LANGUAGES[language]}"
+        data_dir = data_dir / f"{_LANGUAGES_2[language]}"
 
         if dataset_type in ["patents", "emea"]:
             data_dir = data_dir / f"{_DATASET_TYPES[dataset_type]}_ec22-cui-best_man"
@@ -205,7 +206,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
                 data_dir = [
                     data_dir
                     / f"{_DATASET_TYPES[dataset_type]}_EN_{_lang.upper()}_ec22-cui-best_man"
-                    for _lang in _LANGUAGES
+                    for _lang in _LANGUAGES_2
                     if _lang != "en"
                 ]
 

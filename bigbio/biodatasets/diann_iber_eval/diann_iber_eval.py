@@ -27,8 +27,9 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN, Lang.ES]
 _LOCAL = False
 _CITATION = """\
 @proceedings{DBLP:conf/sepln/2018ibereval,
