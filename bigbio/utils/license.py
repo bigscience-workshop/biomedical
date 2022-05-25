@@ -17,12 +17,20 @@ from bigbio.utils import resources
 class License:
     """
     Base class from which all licenses inherit
+    
+    Args:
+        name: License title
+        text: Accompanying information of the license
+        link: URL to License
+        version: Current version of license
+        provenance: Organization providing authorization, if possible
     """
 
     name: Optional[str] = None
     text: Optional[str] = None
     link: Optional[str] = None
     version: Optional[float] = None
+    provenance: Optional[str] = None
 
     @property
     def is_share_alike(self):
@@ -35,18 +43,18 @@ class License:
     @property
     def display(self) -> str:
         """
-        Get formatted name
+        Get formatted name to reflect version, link and text.
         """
 
         string = f"{self.name}"
-
-        if hasattr(self, "version") and getattr(self, "version", None) is not None:
+        
+        if self.version is not None:
             string += f" - v{self.version}"
-
-        if hasattr(self, "link") and getattr(self, "link", None) is not None:
+        
+        if self.link is not None:
             string += f" ({self.link})"
-
-        if hasattr(self, "text") and getattr(self, "text", None) is not None:
+        
+        if self.text is not None:
             string += f": {self.text}"
 
         return string
