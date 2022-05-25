@@ -13,20 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 from typing import List
 
 import datasets
 
 from bigbio.utils import schemas
-
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
-import json
-
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2010.14235,
@@ -197,8 +195,7 @@ class MultiXScience(datasets.GeneratorBasedBuilder):
                     "document_id": str(key),
                     "text_1": example["abstract"],
                     "text_2": " ".join(
-                        [e["abstract"]
-                            for e in example["ref_abstract"].values()]
+                        [e["abstract"] for e in example["ref_abstract"].values()]
                     ),
                     "text_1_name": "Abstract of query paper",
                     "text_2_name": "Cite abstracts",

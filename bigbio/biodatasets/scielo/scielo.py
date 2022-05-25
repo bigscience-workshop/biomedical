@@ -24,7 +24,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN, Lang.ES, Lang.PT]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{soares2018large,

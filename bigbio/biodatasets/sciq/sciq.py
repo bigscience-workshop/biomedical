@@ -13,18 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
+import os
+
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
-
 _DATASETNAME = "sciq"
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @inproceedings{welbl-etal-2017-crowdsourcing,

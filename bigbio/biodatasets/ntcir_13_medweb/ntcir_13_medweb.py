@@ -66,7 +66,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN, Lang.ZH, Lang.JA]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{,

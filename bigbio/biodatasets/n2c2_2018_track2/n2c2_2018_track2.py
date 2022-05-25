@@ -49,7 +49,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/HenryBFSU20,

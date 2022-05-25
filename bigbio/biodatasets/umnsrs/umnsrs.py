@@ -32,7 +32,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pakhomov2010semantic,
@@ -165,7 +165,10 @@ class UmnsrsDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         print(filepath)
         data = pd.read_csv(
-            filepath, sep=",", header=0, names=["mean_score", "std_score", "text_1", "text_2", "code_1", "code_2"]
+            filepath,
+            sep=",",
+            header=0,
+            names=["mean_score", "std_score", "text_1", "text_2", "code_1", "code_2"],
         )
 
         if self.config.schema == "source":

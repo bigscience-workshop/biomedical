@@ -33,7 +33,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @Inproceedings{,
@@ -143,7 +143,10 @@ class MeQSumDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_t2t":
             corpus["id"] = corpus.index
-            corpus.rename(columns={"File": "document_id", "CHQ": "text_1", "Summary": "text_2"}, inplace=True)
+            corpus.rename(
+                columns={"File": "document_id", "CHQ": "text_1", "Summary": "text_2"},
+                inplace=True,
+            )
             corpus["text_1_name"] = ""
             corpus["text_2_name"] = ""
             for idx, example in corpus.iterrows():

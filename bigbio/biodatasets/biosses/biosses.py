@@ -23,9 +23,9 @@ score.
 Note: The original files are Word documents, compressed using RAR. This data
 loader uses a version that privides the same data in text format.
 """
+import datasets
 import pandas as pd
 
-import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
@@ -33,7 +33,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "biosses"
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @article{souganciouglu2017biosses,

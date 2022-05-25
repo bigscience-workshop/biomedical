@@ -31,7 +31,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = "NA"
 
@@ -91,7 +91,9 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
-                    "label": datasets.features.ClassLabel(names={0: "control", 1: "perturbation"}),
+                    "label": datasets.features.ClassLabel(
+                        names={0: "control", 1: "perturbation"}
+                    ),
                     "text": datasets.Value("string"),
                 }
             )
@@ -115,14 +117,18 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "geokhoj_v1/data/train/geo_samples_train.csv"),
+                    "filepath": os.path.join(
+                        data_dir, "geokhoj_v1/data/train/geo_samples_train.csv"
+                    ),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "geokhoj_v1/data/test/geo_samples_test.csv"),
+                    "filepath": os.path.join(
+                        data_dir, "geokhoj_v1/data/test/geo_samples_test.csv"
+                    ),
                     "split": "test",
                 },
             ),
@@ -134,11 +140,7 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             for id_, row in df.iterrows():
-                yield id_, {
-                    "id": row[0], 
-                    "label": row[1], 
-                    "text": row[2]
-                }
+                yield id_, {"id": row[0], "label": row[1], "text": row[2]}
 
         elif self.config.schema == "bigbio_text":
             for id_, row in df.iterrows():

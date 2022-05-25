@@ -28,7 +28,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{pedersen2007measures,
@@ -54,7 +54,9 @@ _HOMEPAGE = "https://conservancy.umn.edu/handle/11299/196265"
 
 _LICENSE = "CC0 1.0 Universal"
 
-_URLS = {_DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"}
+_URLS = {
+    _DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"
+}
 
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
@@ -134,7 +136,12 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
 
         if split == "train":
 
-            data = pd.read_csv(filepath, sep=",", header=0, names=["label", "code_1", "code_2", "text_1", "text_2"])
+            data = pd.read_csv(
+                filepath,
+                sep=",",
+                header=0,
+                names=["label", "code_1", "code_2", "text_1", "text_2"],
+            )
 
             if self.config.schema == "source":
                 for id_, row in data.iterrows():

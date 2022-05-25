@@ -28,7 +28,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{pedersen2007measures,
@@ -138,7 +138,14 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
             filepath,
             sep=",",
             header=0,
-            names=["label_physicians", "label_coders", "code_1", "code_2", "text_1", "text_2"],
+            names=[
+                "label_physicians",
+                "label_coders",
+                "code_1",
+                "code_2",
+                "text_1",
+                "text_2",
+            ],
         )
 
         if self.config.schema == "source":

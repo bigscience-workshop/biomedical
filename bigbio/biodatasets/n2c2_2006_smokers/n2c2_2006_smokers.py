@@ -69,7 +69,7 @@ _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/15/1/14/779738
 _LANGUAGES = [Lang.EN]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{,
