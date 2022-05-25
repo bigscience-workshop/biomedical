@@ -32,6 +32,7 @@ from bigbio.utils.constants import Lang, Tasks
 import xml.dom.minidom as xml
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{,

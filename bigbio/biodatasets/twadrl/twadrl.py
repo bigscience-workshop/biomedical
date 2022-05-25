@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "twadrl"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """
 @inproceedings{limsopatham-collier-2016-normalising,

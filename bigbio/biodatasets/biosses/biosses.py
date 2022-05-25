@@ -33,6 +33,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "biosses"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """
 @article{souganciouglu2017biosses,

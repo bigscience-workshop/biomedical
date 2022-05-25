@@ -24,6 +24,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "sciq"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """
 @inproceedings{welbl-etal-2017-crowdsourcing,

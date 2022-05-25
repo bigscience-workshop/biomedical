@@ -9,6 +9,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.FR]
+_PUBMED = True
 _LOCAL = True
 _CITATION = """\
 @inproceedings{grabar-etal-2018-cas,
