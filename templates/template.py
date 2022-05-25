@@ -39,6 +39,9 @@ from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
 
+# TODO: add True or False boolean value indicating if this dataset is local or not
+_LOCAL = 
+
 # TODO: Add BibTeX citation
 _CITATION = """\
 @article{,
