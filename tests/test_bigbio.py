@@ -123,7 +123,7 @@ class TestDataLoader(unittest.TestCase):
                 self.test_passages_offsets(self.dataset)
             with self.subTest("Check entity offsets"):
                 self.test_entities_offsets(self.dataset)
-                self.test_entities_multilabel_db_id(self.dataset)
+                self.test_entities_multilabel_db(self.dataset)
             with self.subTest("Check events offsets"):
                 self.test_events_offsets(self.dataset)
             with self.subTest("Check coref offsets"):
@@ -542,13 +542,13 @@ class TestDataLoader(unittest.TestCase):
                     if len(example["choices"]) > 0:
                         # can change "==" to "in" if we include ranking later
                         assert (
-                            example["type"] == "multiple_choice"
-                        ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
+                            example["type"] in ["multiple_choice", "yesno"]
+                        ), f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
 
-                    if example["type"] == "multiple_choice":
+                    if example["type"] in ["multiple_choice", "yesno"]:
                         assert (
                             len(example["choices"]) > 0
-                        ), f"type is 'multiple_choice' but no values in 'choices' {example}"
+                        ), f"type is 'multiple_choice' or 'yesno' but no values in 'choices' {example}"
 
                         if self._skipkey_or_keysplit("answer", split):
                             logger.warning(
@@ -562,25 +562,21 @@ class TestDataLoader(unittest.TestCase):
                                     answer in example["choices"]
                                 ), f"answer is not present in 'choices' {example}"
 
-    def test_entities_multilabel_db_id(self, dataset_bigbio: DatasetDict):
+    def test_entities_multilabel_db(self, dataset_bigbio: DatasetDict):
         """
-        Check if `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        Check if `db_name` or `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        Raises a warning ONLY ONCE per connector type.
         """
         logger.info("KB ONLY: multi-label `db_id`")
 
-        warning_raised = False
+        warning_raised = {}
 
-        # yeah it looks bad: the idea is to avoid to go through the entire dataset
-        # one warning is enough to prompt a cleaning pass
         for split in dataset_bigbio:
 
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping entities multilabel db on {split}")
                 continue
-
-            if warning_raised:
-                break
 
             if "entities" not in dataset_bigbio[split].features:
                 continue
@@ -591,35 +587,38 @@ class TestDataLoader(unittest.TestCase):
 
             for example in dataset_bigbio[split]:
 
-                if warning_raised:
-                    break
-
                 example_id = example["id"]
 
                 for entity in example["entities"]:
-
-                    if warning_raised:
-                        break
 
                     normalized = entity.get("normalized", [])
                     entity_id = entity["id"]
 
                     for norm in normalized:
 
-                        db_id = norm["db_id"]
-                        match = re.search(_CONNECTORS, db_id)
+                        # db_name, db_id
+                        for db_field, db_value in norm.items():
 
-                        if match is not None:
+                            match = re.search(_CONNECTORS, db_value)
 
-                            connector = match.group(0)
+                            if match is not None:
 
-                            logger.warning(
-                                f"Split:{split} - Example:{example_id} - ",
-                                f"Entity:{entity_id} contains a normalization with a connector `{connector}`",
-                                "Please make sure you are that you are expanding the normalization list for each `db_id`",
-                            )
+                                connector = match.group(0)
 
-                            warning_raised = True
+                                if connector not in warning_raised:
+
+                                    msg = "".join(
+                                        [
+                                            f"Split:{split} - Example:{example_id} - ",
+                                            f"Entity:{entity_id} w/ `{db_field}` `{db_value}` has connector `{connector}`. ",
+                                            "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                            "and expand the normalization list for each `db_id`",
+                                        ]
+                                    )
+
+                                    logger.warning(msg)
+
+                                    warning_raised[connector] = True
 
     def test_multilabel_type(self, dataset_bigbio: DatasetDict):
         """
@@ -654,7 +653,7 @@ class TestDataLoader(unittest.TestCase):
                 ):
                     continue
 
-                for example in dataset_bigbio[split]:
+                for example_index, example in enumerate(dataset_bigbio[split]):
 
                     if warning_raised[feature_name]:
                         break
@@ -671,12 +670,17 @@ class TestDataLoader(unittest.TestCase):
 
                             connector = match.group(0)
 
-                            logger.warning(
-                                f"Split{split} - Example{example_id} - ",
-                                f"Feature:{feature_name} contains a connector `{connector}` \n",
-                                "Having multiple types it is currently not supported.",
-                                "Please split this featuere into multiple ones with different `type`",
+                            msg = "".join(
+                                [
+                                    f"Split:{split} - Example:(id={example_id}, index={example_index}) - ",
+                                    f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`. ",
+                                    "Having multiple types is currently not supported. ",
+                                    "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                    "and split this feature into multiple ones with different `type`",
+                                ]
                             )
+
+                            logger.warning(msg)
 
                             warning_raised[feature_name] = True
 
