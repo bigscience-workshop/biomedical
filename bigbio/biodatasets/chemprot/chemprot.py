@@ -60,7 +60,9 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 # Chemprot specific variables
+# NOTE: There are 3 examples (2 in dev, 1 in training) with CPR:0
 _GROUP_LABELS = {
+    "CPR:0": "Undefined",
     "CPR:1": "Part_of",
     "CPR:2": "Regulator",
     "CPR:3": "Upregulator",
@@ -354,7 +356,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 relations[pmid] = []
 
             if is_mapped:
-                label = _GROUP_LABELS.get(label, label)
+                label = _GROUP_LABELS[label]
 
             ann = {
                 "type": label,
@@ -398,7 +400,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 relations[pmid] = []
 
             if is_mapped:
-                label = _GROUP_LABELS.get(label, label)
+                label = _GROUP_LABELS[label]
 
             ann = {
                 "type": label,
