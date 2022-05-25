@@ -354,7 +354,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 relations[pmid] = []
 
             if is_mapped:
-                label = _GROUP_LABELS[label]
+                label = _GROUP_LABELS.get(label, label)
 
             ann = {
                 "type": label,
@@ -398,7 +398,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 relations[pmid] = []
 
             if is_mapped:
-                label = _GROUP_LABELS[label]
+                label = _GROUP_LABELS.get(label, label)
 
             ann = {
                 "type": label,
