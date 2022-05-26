@@ -15,40 +15,28 @@ _UNIFIED_VIEW_NAME = "bigbio"
 _LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
-@inproceedings{10.5555/2107691.2107703,
-author = {Pyysalo, Sampo and Ohta, Tomoko and Tsujii, Jun'ichi},
-title = {Overview of the Entity Relations (REL) Supporting Task of BioNLP Shared Task 2011},
-year = {2011},
-isbn = {9781937284091},
-publisher = {Association for Computational Linguistics},
-address = {USA},
-abstract = {This paper presents the Entity Relations (REL) task,
-a supporting task of the BioNLP Shared Task 2011. The task concerns
-the extraction of two types of part-of relations between a gene/protein
-and an associated entity. Four teams submitted final results for
-the REL task, with the highest-performing system achieving 57.7%
-F-score. While experiments suggest use of the data can help improve
-event extraction performance, the task data has so far received only
-limited use in support of event extraction. The REL task continues
-as an open challenge, with all resources available from the shared
-task website.},
-booktitle = {Proceedings of the BioNLP Shared Task 2011 Workshop},
-pages = {83–88},
-numpages = {6},
-location = {Portland, Oregon},
-series = {BioNLP Shared Task '11}
+@article{Bravo2015,
+  doi = {10.1186/s12859-015-0472-9},
+  url = {https://doi.org/10.1186/s12859-015-0472-9},
+  year = {2015},
+  month = feb,
+  publisher = {Springer Science and Business Media {LLC}},
+  volume = {16},
+  number = {1},
+  author = {{\`{A}}lex Bravo and Janet Pi{\~{n}}ero and N{\'{u}}ria Queralt-Rosinach and Michael Rautschka and Laura I Furlong},
+  title = {Extraction of relations between genes and diseases from text and large-scale data analysis: implications for translational research},
+  journal = {{BMC} Bioinformatics}
 }
 """
 
 _DESCRIPTION = """\
-The Entity Relations (REL) task is a supporting task of the BioNLP Shared Task 2011.
-The task concerns the extraction of two types of part-of relations between a
-gene/protein and an associated entity.
+A corpus identifying associations between genes and diseases by a semi-automatic 
+annotation procedure based on the Genetic Association Database
 """
 
-_HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-rel"
+_HOMEPAGE = "https://github.com/dmis-lab/biobert" # This data source is used by the BLURB benchmark
 
-_LICENSE = "License Terms for BioNLP Shared Task 2011 Data"
+_LICENSE = "Creative Common Attribution 4.0 International"
 
 _URLs = {
     "source": "https://drive.google.com/uc?export=download&id=1-jDKGcXREb2X9xTFnuiJ36PvsqoyHWcw",
@@ -88,12 +76,6 @@ class GAD(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "gad_fold0_source"
 
     def _info(self):
-        """
-        - `features` defines the schema of the parsed data set. The schema depends on the
-        chosen `config`: If it is `_SOURCE_VIEW_NAME` the schema is the schema of the
-        original data. If `config` is `_UNIFIED_VIEW_NAME`, then the schema is the
-        canonical KB-task schema defined in `biomedical/schemas/kb.py`.
-        """
         if self.config.schema == "source":
             features = datasets.Features(
                 {
