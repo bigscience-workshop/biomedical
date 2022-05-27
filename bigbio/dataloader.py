@@ -74,7 +74,7 @@ _BLURB_CONFIG_NAMES = set(
         "chemprot_bigbio_kb",  # ChemProt
         "ddi_corpus_bigbio_kb",  # DDI
         "hallmarks_of_cancer_bigbio_text",  # HOC
-        #    ''                                   #  Gene-Disease Associations (GAD)
+        "gad_fold0_bigbio_text", #  Gene-Disease Associations (GAD)
         "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
     ]
 )
