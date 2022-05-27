@@ -68,7 +68,7 @@ _URLS = {
     _DATASETNAME: "http://www.geniaproject.org/other-corpora/ptm-event-corpus/post-translational_modifications_training_data.tar.gz?attredirects=0&d=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.EVENT_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.COREFERENCE_RESOLUTION, Tasks.EVENT_EXTRACTION]
 
 _SOURCE_VERSION = "1.0.0"
 
