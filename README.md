@@ -56,7 +56,6 @@ ds_source = load_dataset('bc5cdr', name='bc5cdr_source')
 
 # load the harmonized biobio schema
 ds_bb = load_dataset('bc5cdr', name='bc5cdr_bigbio_kb')
-
 ```
 
 Load a specific private (local) dataset 
@@ -66,7 +65,6 @@ from datasets import load_dataset
 
 # local datasets require a path
 ds_source = load_dataset('bioasq_task_b', data_dir='', name='bc5cdr_source')
-
 ```
 
 Get all available dataset configuration names
@@ -75,9 +73,7 @@ Get all available dataset configuration names
 from bigbio.dataloader import BigBioConfigHelpers
 
 ds_names = [x.config.name for x in BigBioConfigHelpers()]
-
 ```
-
 
 
 Load a filtered subset of all public datasets. Warning, this will take some time to download!
@@ -92,14 +88,13 @@ bb_public_helpers = conhelps.filtered(
 )
 for helper in bb_public_helpers:
     dsd = helper.load_dataset()
-
 ```
 
 ## Benchmark Support
 
-BigBIO includes support for almost all datasets included in other popular biomedical benchmarks.
+BigBIO includes support for almost all datasets included in other popular English biomedical benchmarks.
 
-| Task Type |    Dataset    | Biomedical  Hackathon |  BLUE | BLURB | In-BoXBART | Require DUA? |
+| Task Type |    Dataset    | BigBIO (Ours)|  BLUE | BLURB | In-BoXBART | Requires DUA |
 |:---------:|:-------------:|:---------------------:|:-----:|:-----:|:----------:|:------------:|
 |    NER    | BC5-chem      |          ✓         |  ✓ |  ✓ |    ✓    |         |
 |    NER    | BC5-disease   |          ✓         |  ✓ |  ✓ |    ✓    |         |
@@ -121,7 +116,7 @@ BigBIO includes support for almost all datasets included in other popular biomed
 |     SR    | Accelerometer |        Private         |  |  |    ✓    |           |
 |     SR    | Acromegaly    | Private |  |  |    ✓    |           |
 |    NER    | AnatEM        |          ✓         |  |  |    ✓    |           |
-|     SR    | Cooking       |                  |  |  |    ✓    |           |
+|     SR    | Cooking       |      Private        |  |  |    ✓    |           |
 |    NER    | BC4CHEMD      |          ✓         |  |  |    ✓    |           |
 |    NER    | BioNLP09      |          ✓         |  |  |    ✓    |           |
 |    NER    | BioNLP11EPI   |          ✓         |  |  |    ✓    |           |
