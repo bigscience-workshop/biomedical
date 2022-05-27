@@ -23,9 +23,10 @@ multiple PTM types at once in a unified framework.
 
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
@@ -182,16 +183,12 @@ class GeniaPtmEventCorpusDataset(datasets.GeneratorBasedBuilder):
                 if filename.endswith(".txt"):
                     txt_file_path = Path(dirpath, filename)
                     if self.config.schema == "source":
-                        example = parsing.parse_brat_file(
-                            txt_file_path, annotation_file_suffixes=[".a1", ".a2"]
-                        )
+                        example = parsing.parse_brat_file(txt_file_path, annotation_file_suffixes=[".a1", ".a2"])
                         example["id"] = str(guid)
                         for key in ["attributes", "normalizations"]:
                             del example[key]
                         yield guid, example
                     elif self.config.schema == "bigbio_kb":
-                        example = parsing.brat_parse_to_bigbio_kb(
-                            parsing.parse_brat_file(txt_file_path)
-                        )
+                        example = parsing.brat_parse_to_bigbio_kb(parsing.parse_brat_file(txt_file_path))
                         example["id"] = str(guid)
                         yield guid, example
