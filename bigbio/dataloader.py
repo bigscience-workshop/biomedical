@@ -213,6 +213,14 @@ class BigBioConfigHelpers:
         helpers = [helper for helper in self if helper.dataset_name == dataset_name]
         return BigBioConfigHelpers(helpers=helpers)
 
+    def for_config_name(self, config_name: str) -> "BigBioConfigHelper":
+        helpers = [helper for helper in self if helper.config.name == config_name]
+        if len(helpers) == 0:
+            raise ValueError(f"no helper with helper.config.name = {config_name}")
+        if len(helpers) > 1:
+            raise ValueError(f"multiple helpers with helper.config.name = {config_name}")
+        return helpers[0]
+
     def default_for_dataset(self, dataset_name: str) -> BigBioConfigHelper:
         helpers = [
             helper
