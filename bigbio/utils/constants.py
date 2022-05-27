@@ -1,17 +1,23 @@
+import importlib.resources as pkg_resources
+import json
 from collections import defaultdict
 from enum import Enum
 from types import SimpleNamespace
 
-from bigbio.utils.schemas import (
-    entailment_features,
-    kb_features,
-    pairs_features,
-    qa_features,
-    text2text_features,
-    text_features,
-)
+from bigbio.utils import resources
+from bigbio.utils.schemas import (entailment_features, kb_features,
+                                  pairs_features, qa_features,
+                                  text2text_features, text_features)
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
+
+
+# shamelessly compied from:
+# https://github.com/huggingface/datasets/blob/master/src/datasets/utils/metadata.py
+langs_json = pkg_resources.read_text(resources, "languages.json")
+langs_dict = {k.replace("-", "_").upper(): v for k, v in json.loads(langs_json).items()}
+Lang = Enum("Lang", langs_dict)
+
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"

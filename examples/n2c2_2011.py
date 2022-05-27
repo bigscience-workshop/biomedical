@@ -72,11 +72,12 @@ from datasets import Features, Value
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
 _DATASETNAME = "n2c2_2011"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
+_LANGUAGES = [Lang.EN]
 _LOCAL = True
 _CITATION = """\
 @article{,

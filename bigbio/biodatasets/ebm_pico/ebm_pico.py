@@ -26,8 +26,9 @@ from typing import Dict, List, Tuple, Union
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN]
 _LOCAL = False
 _CITATION = """\
 @inproceedings{nye-etal-2018-corpus,
