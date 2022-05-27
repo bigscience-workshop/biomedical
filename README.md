@@ -1,15 +1,18 @@
 # BigBIO: Biomedical Datasets
 
-BigBIO (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric.
-Our goals are to **enable easy, scalable programatic access to biomedical datasets** and **promote reproducibility in data processing** 
+BigBIO (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric. Our goals include
+
+- Lightweight, programmatic access to biomedical datasets at scale
+- Promote reproducibility in data processing
+- Better documentation for dataset provenance, licensing, and other key attributes
+- Easier generation of meta-datasets (e.g., prompting, masssive MTL)
+
+Currently BigBIO provides support for
 
 - 127 biomedical datasets
 - X languages
 - Harmonized dataset schemas by task type
 - Metadata on *licensing*, *coarse/fine-grained task types*, *domain*, and more!   
-
-All datasets are provided in their source schema, to preserve the original dataset format, and a harmonized schema to enable 
-
 
 
 ### Documentation
@@ -92,7 +95,49 @@ for helper in bb_public_helpers:
 
 ```
 
+## Benchmark Support
 
+BigBIO includes support for almost all datasets included in other popular biomedical benchmarks.
+
+| Task Type |    Dataset    | Biomedical  Hackathon |  BLUE | BLURB | In-BoXBART | Require DUA? |
+|:---------:|:-------------:|:---------------------:|:-----:|:-----:|:----------:|:------------:|
+|    NER    | BC5-chem      |          ✓         |  ✓ |  ✓ |    ✓    |         |
+|    NER    | BC5-disease   |          ✓         |  ✓ |  ✓ |    ✓    |         |
+|    NER    | NCBI-disease  |          ✓         |  |  ✓ |    ✓    |         |
+|     RE    | ChemProt      |          ✓         |  ✓ |  ✓ |    ✓    |         |
+|     RE    | DDI           |          ✓         |  ✓ |  ✓ |    ✓    |         |
+|    STS   | BIOSSES       |          ✓         |  ✓ |  ✓ |       |         |
+|     DC    | HoC           |          ✓         |  ✓ |  ✓ |    ✓    |         |
+|     QA    | PubMedQA      |          ✓         |  |  ✓ |       |         |
+|     QA    | BioASQ        |          ✓         |  |  ✓ |    ✓    |     ✓     |
+|     TE    | MedSTS        |          TBD         |  ✓ |  |       |      ✓      |
+|    NER   | ShARe/CLEFE   |          TBD         |  ✓ |  |       |     ✓       |
+|    NER   | i2b2-2010     |          ✓         |  ✓ |  |       |     ✓     |
+|    NLI   | MedNLI        |          ✓         |  ✓ |  |       |     ✓       |
+|    NER    | BC2GM         |          ✓         |  |  ✓ |    ✓    |           |
+|    NER    | JNLPBA        |          ✓         |  |  ✓ |    ✓    |           |
+|    NER    | EBM PICO      |          ✓         |  |  ✓ |       |           |
+|     RE    | GAD           |          ✓         |  |  ✓ |       |           |
+|     SR    | Accelerometer |        Private         |  |  |    ✓    |           |
+|     SR    | Acromegaly    | Private |  |  |    ✓    |           |
+|    NER    | AnatEM        |          ✓         |  |  |    ✓    |           |
+|     SR    | Cooking       |                  |  |  |    ✓    |           |
+|    NER    | BC4CHEMD      |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP09      |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP11EPI   |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP11ID    |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP13CG    |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP13GE    |          ✓         |  |  |    ✓    |           |
+|    NER    | BioNLP13PC    |          ✓         |  |  |    ✓    |           |
+|     SR    | COVID         | Private |  |  |    ✓    |           |
+|    NER    | CRAFT         |        TBD        |  |  |    ✓    |           |
+|     DI    | DI-2006       |          ✓         |  |  |    ✓    |           |
+|    NER    | Ex-PTM        |          ✓         |  |  |    ✓    |           |
+|    POS    | Genia         |          ✓         |  |  |    ✓    |           |
+|     SR    | HRT           | Private |  |  |    ✓    |           |
+|    RFI    | RFHD-2014     |        TBD        |  |  |    ✓    |           |
+|    NER    | Linnaeus      |          ✓         |  |  |    ✓    |           |
+|     SA    | Medical Drugs |          ✓         |  |  |    ✓    |           |
 
 
 ## Citing
