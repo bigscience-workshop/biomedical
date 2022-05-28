@@ -131,7 +131,7 @@ This wrapper function will pass through any other kwargs you may need to use.
 For example `data_dir` for datasets that are not public, 
 
 ```python
-n2c2_2011_bigbio = conhelps.for_config_name("n2c2_2011_source").load_dataset(data_dir="/path/to/n2c2_2011/data")
+n2c2_2011_source = conhelps.for_config_name("n2c2_2011_source").load_dataset(data_dir="/path/to/n2c2_2011/data")
 ```
  
 ### Filtering by dataset properties 
