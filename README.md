@@ -167,7 +167,8 @@ n2c2_source_helpers = conhelps.filtered(
 
 ```
 
-You can load each dataset config in any instance of `BigBioConfigHelpers` by iterating over it, 
+You can iterate over any instance of `BigBioConfigHelpers` and store the loaded datasets 
+in a container (e.g. a dictionary), 
 
 ```python
 bb_public_datasets = {
