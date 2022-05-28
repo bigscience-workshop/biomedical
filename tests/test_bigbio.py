@@ -4,57 +4,28 @@ Unit-tests to ensure tasks adhere to big-bio schema.
 NOTE: If bypass keys/splits present, statistics are STILL printed.
 """
 import argparse
-from collections import defaultdict
 import importlib
 import logging
-from pathlib import Path
 import re
 import sys
-from typing import Iterable, Iterator, List, Optional, Union, Dict
 import unittest
+from collections import defaultdict
+from pathlib import Path
+from types import ModuleType
+from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 import datasets
 from datasets import DatasetDict, Features
-from bigbio.utils.constants import Tasks
-from bigbio.utils.schemas import (
-    entailment_features,
-    kb_features,
-    pairs_features,
-    qa_features,
-    text2text_features,
-    text_features,
-)
 
+from bigbio.utils.constants import (METADATA, SCHEMA_TO_FEATURES,
+                                    TASK_TO_SCHEMA, VALID_SCHEMAS, VALID_TASKS,
+                                    Tasks)
+from bigbio.utils.schemas import (entailment_features, kb_features,
+                                  pairs_features, qa_features,
+                                  text2text_features, text_features)
 
 logger = logging.getLogger(__name__)
 
-
-_TASK_TO_SCHEMA = {
-    Tasks.NAMED_ENTITY_RECOGNITION: "KB",
-    Tasks.NAMED_ENTITY_DISAMBIGUATION: "KB",
-    Tasks.EVENT_EXTRACTION: "KB",
-    Tasks.RELATION_EXTRACTION: "KB",
-    Tasks.COREFERENCE_RESOLUTION: "KB",
-    Tasks.QUESTION_ANSWERING: "QA",
-    Tasks.TEXTUAL_ENTAILMENT: "TE",
-    Tasks.SEMANTIC_SIMILARITY: "PAIRS",
-    Tasks.PARAPHRASING: "T2T",
-    Tasks.TRANSLATION: "T2T",
-    Tasks.SUMMARIZATION: "T2T",
-    Tasks.TEXT_CLASSIFICATION: "TEXT",
-}
-
-_VALID_TASKS = set(_TASK_TO_SCHEMA.keys())
-_VALID_SCHEMAS = set(_TASK_TO_SCHEMA.values())
-
-_SCHEMA_TO_FEATURES = {
-    "KB": kb_features,
-    "QA": qa_features,
-    "TE": entailment_features,
-    "T2T": text2text_features,
-    "TEXT": text_features,
-    "PAIRS": pairs_features,
-}
 
 _TASK_TO_FEATURES = {
     Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
@@ -95,7 +66,6 @@ class TestDataLoader(unittest.TestCase):
     BYPASS_KEYS: List[str]
     BYPASS_SPLIT_KEY_PAIRS: List[str]
 
-
     def runTest(self):
 
         logger.info(f"self.PATH: {self.PATH}")
@@ -112,22 +82,20 @@ class TestDataLoader(unittest.TestCase):
         module = importlib.import_module(module_name)
         logger.info(f"imported module {module}")
 
-
         logger.info("Checking for _SUPPORTED_TASKS ...")
         self._SUPPORTED_TASKS = module._SUPPORTED_TASKS
         logger.info(f"Found _SUPPORTED_TASKS={self._SUPPORTED_TASKS}")
 
-        invalid_tasks = set(self._SUPPORTED_TASKS) - _VALID_TASKS
+        invalid_tasks = set(self._SUPPORTED_TASKS) - VALID_TASKS
         if len(invalid_tasks) > 0:
             raise ValueError(
-                f"Found invalid supported tasks {invalid_tasks}. Must be one of {_VALID_TASKS}"
+                f"Found invalid supported tasks {invalid_tasks}. Must be one of {VALID_TASKS}"
             )
 
         self._MAPPED_SCHEMAS = set(
-            [_TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
+            [TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
         )
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
-
 
         logger.info(f"Checking load_dataset with config name {config_name}")
         self.dataset = datasets.load_dataset(
@@ -145,6 +113,8 @@ class TestDataLoader(unittest.TestCase):
         if schema == "source":
             return
 
+        with self.subTest("Check metadata"):
+            self.test_metadata(module)
         with self.subTest("IDs globally unique"):
             self.test_are_ids_globally_unique(self.dataset)
         with self.subTest("Check schema validity"):
@@ -157,7 +127,7 @@ class TestDataLoader(unittest.TestCase):
                 self.test_passages_offsets(self.dataset)
             with self.subTest("Check entity offsets"):
                 self.test_entities_offsets(self.dataset)
-                self.test_entities_multilabel_db_id(self.dataset)
+                self.test_entities_multilabel_db(self.dataset)
             with self.subTest("Check events offsets"):
                 self.test_events_offsets(self.dataset)
             with self.subTest("Check coref offsets"):
@@ -169,6 +139,14 @@ class TestDataLoader(unittest.TestCase):
             with self.subTest("Check multiple choice"):
                 self.test_multiple_choice(self.dataset)
 
+    def test_metadata(self, module: ModuleType):
+        """
+        Check if all metadata for a dataloader are present
+        """
+
+        for m in METADATA:
+            if not hasattr(module, m):
+                raise AssertionError(f"Required module-level '{m}' is not defined!")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
@@ -231,7 +209,6 @@ class TestDataLoader(unittest.TestCase):
             for elem in collection:
                 self._assert_ids_globally_unique(elem, ids_seen)
 
-
     def test_are_ids_globally_unique(self, dataset_bigbio: DatasetDict):
         """
         Tests each example in a split has a unique ID.
@@ -242,13 +219,12 @@ class TestDataLoader(unittest.TestCase):
             # Skip entire data split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping unique ID check on {split_name}")
-                continue  
+                continue
 
             ids_seen = set()
             for example in split:
                 self._assert_ids_globally_unique(example, ids_seen=ids_seen)
         logger.info("Found {} unique IDs".format(len(ids_seen)))
-
 
     def _get_referenced_ids(self, example):
         referenced_ids = []
@@ -269,7 +245,6 @@ class TestDataLoader(unittest.TestCase):
                 referenced_ids.append((relation["arg2_id"], "entity"))
 
         return referenced_ids
-
 
     def _get_existing_referable_ids(self, example):
         existing_ids = []
@@ -293,7 +268,7 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping referenced ids on {split_name}")
-                continue  
+                continue
 
             for example in split:
                 referenced_ids = set()
@@ -338,11 +313,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping passage offsets on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("passages", split):
                 logger.warning(f"Skipping passages offsets for split='{split}'")
-                continue  
+                continue
 
             if "passages" in dataset_bigbio[split].features:
 
@@ -453,7 +428,7 @@ class TestDataLoader(unittest.TestCase):
 
             if self._skipkey_or_keysplit("entities", split):
                 logger.warning(f"Skipping entities offsets for split='{split}'")
-                continue  
+                continue
 
             if "entities" in dataset_bigbio[split].features:
 
@@ -480,7 +455,6 @@ class TestDataLoader(unittest.TestCase):
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
 
-
     def test_events_offsets(self, dataset_bigbio: DatasetDict):
         """
         Verify that the events' trigger offsets are correct,
@@ -494,11 +468,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping events offsets on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("events", split):
                 logger.warning(f"Skipping events offsets for split='{split}'")
-                continue  
+                continue
 
             if "events" in dataset_bigbio[split].features:
 
@@ -537,11 +511,11 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping coref ids on {split}")
-                continue  
+                continue
 
             if self._skipkey_or_keysplit("coreferences", split):
                 logger.warning(f"Skipping coreferences ids for split='{split}'")
-                continue  
+                continue
 
             if "coreferences" in dataset_bigbio[split].features:
 
@@ -566,12 +540,14 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping multiple-choice on {split}")
-                continue  
+                continue
 
             for example in dataset_bigbio[split]:
 
                 if self._skipkey_or_keysplit("choices", split):
-                    logger.warning("Skipping multiple choice for key=choices, split='{split}'")
+                    logger.warning(
+                        "Skipping multiple choice for key=choices, split='{split}'"
+                    )
                     continue
 
                 else:
@@ -579,17 +555,18 @@ class TestDataLoader(unittest.TestCase):
                     if len(example["choices"]) > 0:
                         # can change "==" to "in" if we include ranking later
                         assert (
-                            example["type"] == "multiple_choice"
-                        ), f"`choices` is populated, but type is not 'multiple_choice' {example}"
+                            example["type"] in ["multiple_choice", "yesno"]
+                        ), f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
 
-                    if example["type"] == "multiple_choice":
+                    if example["type"] in ["multiple_choice", "yesno"]:
                         assert (
                             len(example["choices"]) > 0
-                        ), f"type is 'multiple_choice' but no values in 'choices' {example}"
-
+                        ), f"type is 'multiple_choice' or 'yesno' but no values in 'choices' {example}"
 
                         if self._skipkey_or_keysplit("answer", split):
-                            logger.warning("Skipping multiple choice for key=answer, split='{split}'")
+                            logger.warning(
+                                "Skipping multiple choice for key=answer, split='{split}'"
+                            )
                             continue
 
                         else:
@@ -598,17 +575,15 @@ class TestDataLoader(unittest.TestCase):
                                     answer in example["choices"]
                                 ), f"answer is not present in 'choices' {example}"
 
-
-    def test_entities_multilabel_db_id(self, dataset_bigbio: DatasetDict):
+    def test_entities_multilabel_db(self, dataset_bigbio: DatasetDict):
         """
-        Check if `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        Check if `db_name` or `db_id` of `normalized` field in entities have multiple values joined with common connectors.
+        Raises a warning ONLY ONCE per connector type.
         """
         logger.info("KB ONLY: multi-label `db_id`")
 
-        warning_raised = False
+        warning_raised = {}
 
-        # yeah it looks bad: the idea is to avoid to go through the entire dataset
-        # one warning is enough to prompt a cleaning pass
         for split in dataset_bigbio:
 
             # skip entire split
@@ -616,47 +591,47 @@ class TestDataLoader(unittest.TestCase):
                 logger.info(f"\tSkipping entities multilabel db on {split}")
                 continue
 
-            if warning_raised:
-                break
-
             if "entities" not in dataset_bigbio[split].features:
                 continue
 
             if self._skipkey_or_keysplit("entities", split):
                 logger.warning(f"Skipping multilabel entities for split='{split}'")
-                continue  
+                continue
 
             for example in dataset_bigbio[split]:
-
-                if warning_raised:
-                    break
 
                 example_id = example["id"]
 
                 for entity in example["entities"]:
-
-                    if warning_raised:
-                        break
 
                     normalized = entity.get("normalized", [])
                     entity_id = entity["id"]
 
                     for norm in normalized:
 
-                        db_id = norm["db_id"]
-                        match = re.search(_CONNECTORS, db_id)
+                        # db_name, db_id
+                        for db_field, db_value in norm.items():
 
-                        if match is not None:
+                            match = re.search(_CONNECTORS, db_value)
 
-                            connector = match.group(0)
+                            if match is not None:
 
-                            logger.warning(
-                                f"Split:{split} - Example:{example_id} - ",
-                                f"Entity:{entity_id} contains a normalization with a connector `{connector}`",
-                                "Please make sure you are that you are expanding the normalization list for each `db_id`",
-                            )
+                                connector = match.group(0)
 
-                            warning_raised = True
+                                if connector not in warning_raised:
+
+                                    msg = "".join(
+                                        [
+                                            f"Split:{split} - Example:{example_id} - ",
+                                            f"Entity:{entity_id} w/ `{db_field}` `{db_value}` has connector `{connector}`. ",
+                                            "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                            "and expand the normalization list for each `db_id`",
+                                        ]
+                                    )
+
+                                    logger.warning(msg)
+
+                                    warning_raised[connector] = True
 
     def test_multilabel_type(self, dataset_bigbio: DatasetDict):
         """
@@ -675,12 +650,14 @@ class TestDataLoader(unittest.TestCase):
             # skip entire split
             if split in self.BYPASS_SPLITS:
                 logger.info(f"\tSkipping multilabel type on {split}")
-                continue  
+                continue
 
             for feature_name in features_with_type:
 
                 if self._skipkey_or_keysplit(feature_name, split):
-                    logger.warning(f"Skipping multilabel type for splitkey = '{(split, feature_name)}'")
+                    logger.warning(
+                        f"Skipping multilabel type for splitkey = '{(split, feature_name)}'"
+                    )
                     continue
 
                 if (
@@ -689,7 +666,7 @@ class TestDataLoader(unittest.TestCase):
                 ):
                     continue
 
-                for example in dataset_bigbio[split]:
+                for example_index, example in enumerate(dataset_bigbio[split]):
 
                     if warning_raised[feature_name]:
                         break
@@ -706,17 +683,21 @@ class TestDataLoader(unittest.TestCase):
 
                             connector = match.group(0)
 
-                            logger.warning(
-                                f"Split{split} - Example{example_id} - ",
-                                f"Feature:{feature_name} contains a connector `{connector}` \n",
-                                "Having multiple types it is currently not supported.",
-                                "Please split this featuere into multiple ones with different `type`",
+                            msg = "".join(
+                                [
+                                    f"Split:{split} - Example:(id={example_id}, index={example_index}) - ",
+                                    f"Feature:{feature_name} w/ `type` `{feature_type}` has connector `{connector}`. ",
+                                    "Having multiple types is currently not supported. ",
+                                    "Please check for common connectors (e.g. `;`, `+`, `|`) "
+                                    "and split this feature into multiple ones with different `type`",
+                                ]
                             )
+
+                            logger.warning(msg)
 
                             warning_raised[feature_name] = True
 
                             break
-
 
     def test_schema(self, schema: str):
         """Search supported tasks within a dataset and verify big-bio schema"""
@@ -728,7 +709,7 @@ class TestDataLoader(unittest.TestCase):
                 if task in _TASK_TO_FEATURES:
                     non_empty_features.update(_TASK_TO_FEATURES[task])
         else:
-            features = _SCHEMA_TO_FEATURES[schema]
+            features = SCHEMA_TO_FEATURES[schema]
 
         split_to_feature_counts = self.get_feature_statistics(features=features)
 
@@ -744,7 +725,7 @@ class TestDataLoader(unittest.TestCase):
             # Skip entire data split
             if split_name in self.BYPASS_SPLITS:
                 logger.info(f"Skipping schema on {split_name}")
-                continue  
+                continue
 
             logger.info("Testing schema for: " + str(split_name))
             self.assertEqual(split.info.features, features)
@@ -752,10 +733,12 @@ class TestDataLoader(unittest.TestCase):
             for non_empty_feature in non_empty_features:
 
                 if self._skipkey_or_keysplit(non_empty_feature, split_name):
-                    logger.warning(f"Skipping schema for split, key = '{(split_name, non_empty_feature)}'")
+                    logger.warning(
+                        f"Skipping schema for split, key = '{(split_name, non_empty_feature)}'"
+                    )
                     continue
 
-                if (split_to_feature_counts[split_name][non_empty_feature] == 0):
+                if split_to_feature_counts[split_name][non_empty_feature] == 0:
                     raise AssertionError(
                         f"Required key '{non_empty_feature}' does not have any instances"
                     )
@@ -786,7 +769,7 @@ class TestDataLoader(unittest.TestCase):
             self.assertEqual(len(field), 1)
 
     def _warn_bypass(self):
-        """ Warn if keys, data splits, or schemas are skipped """
+        """Warn if keys, data splits, or schemas are skipped"""
 
         if len(self.BYPASS_SPLITS) > 0:
             logger.warning(f"Splits ignored = '{self.BYPASS_SPLITS}'")
@@ -798,7 +781,9 @@ class TestDataLoader(unittest.TestCase):
             logger.warning(
                 f"Split and key pairs ignored ='{self.BYPASS_SPLIT_KEY_PAIRS}'"
             )
-            self.BYPASS_SPLIT_KEY_PAIRS = [i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS]
+            self.BYPASS_SPLIT_KEY_PAIRS = [
+                i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS
+            ]
 
     def _skipkey_or_keysplit(self, key: str, split: str):
         """Check if key or (split, key) pair should be omitted"""
@@ -810,6 +795,7 @@ class TestDataLoader(unittest.TestCase):
             flag = True
 
         return flag
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -855,7 +841,6 @@ if __name__ == "__main__":
         nargs="*",
         help="Skip a key in a data split (e.g. skip 'entities' in 'test'). List all key-pairs comma separated. (ex: --bypass_split_key_pairs test,entities train, events)",
     )
-
 
     args = parser.parse_args()
     logger.info(f"args: {args}")

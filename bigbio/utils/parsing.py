@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
@@ -5,6 +6,7 @@ from typing import Dict, Iterable, List, Tuple
 import bioc
 import datasets
 
+logger = logging.getLogger(__name__)
 
 
 def get_texts_and_offsets_from_bioc_ann(ann: bioc.BioCAnnotation) -> Tuple:
@@ -34,8 +36,11 @@ def remove_prefix(a: str, prefix: str) -> str:
     return a
 
 
-def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
-                    parse_notes: bool = False) -> Dict:
+def parse_brat_file(
+    txt_file: Path,
+    annotation_file_suffixes: List[str] = None,
+    parse_notes: bool = False,
+) -> Dict:
     """
     Parse a brat file into the schema defined below.
     `txt_file` should be the path to the brat '.txt' file you want to parse, e.g. 'data/1234.txt'
@@ -185,7 +190,7 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
                 i = 0
                 for start, end in ann["offsets"]:
                     chunk_len = end - start
-                    ann["text"].append(text[i:chunk_len+i])
+                    ann["text"].append(text[i : chunk_len + i])
                     i += chunk_len
                     while i < len(text) and text[i] == " ":
                         i += 1
@@ -291,14 +296,12 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None,
     return example
 
 
-def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Dict:
+def brat_parse_to_bigbio_kb(brat_parse: Dict) -> Dict:
     """
     Transform a brat parse (conforming to the standard brat schema) obtained with
     `parse_brat_file` into a dictionary conforming to the `bigbio-kb` schema (as defined in ../schemas/kb.py)
 
     :param brat_parse:
-    :param entity_types: Entity types of the dataset. This should include all types of `T` annotations that are not
-                         event triggers and will be different in different datasets.
     """
 
     unified_example = {}
@@ -329,22 +332,18 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         )
 
     # separate entities and event triggers
-    unified_example["entities"] = []
-    id_to_event_trigger = {}
-    for ann in brat_parse["text_bound_annotations"]:
-        if ann["type"] in entity_types:
-            entity_ann = ann.copy()
-            entity_ann["id"] = id_prefix + entity_ann["id"]
-            entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
-            unified_example["entities"].append(entity_ann)
-        else:
-            id_to_event_trigger[ann["id"]] = ann
-
     unified_example["events"] = []
+    non_event_ann = brat_parse["text_bound_annotations"].copy()
     for event in brat_parse["events"]:
         event = event.copy()
         event["id"] = id_prefix + event["id"]
-        trigger = id_to_event_trigger[event["trigger"]]
+        trigger = next(
+            tr
+            for tr in brat_parse["text_bound_annotations"]
+            if tr["id"] == event["trigger"]
+        )
+        if trigger in non_event_ann:
+            non_event_ann.remove(trigger)
         event["trigger"] = {
             "text": trigger["text"].copy(),
             "offsets": trigger["offsets"].copy(),
@@ -354,9 +353,24 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
 
         unified_example["events"].append(event)
 
+    unified_example["entities"] = []
+    anno_ids = [ref_id["id"] for ref_id in non_event_ann]
+    for ann in non_event_ann:
+        entity_ann = ann.copy()
+        entity_ann["id"] = id_prefix + entity_ann["id"]
+        entity_ann["normalized"] = ref_id_to_normalizations[ann["id"]]
+        unified_example["entities"].append(entity_ann)
+
     # massage relations
     unified_example["relations"] = []
+    skipped_relations = set()
     for ann in brat_parse["relations"]:
+        if (
+            ann["head"]["ref_id"] not in anno_ids
+            or ann["tail"]["ref_id"] not in anno_ids
+        ):
+            skipped_relations.add(ann["id"])
+            continue
         unified_example["relations"].append(
             {
                 "arg1_id": id_prefix + ann["head"]["ref_id"],
@@ -366,6 +380,13 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
                 "normalized": [],
             }
         )
+    if len(skipped_relations) > 0:
+        example_id = brat_parse["document_id"]
+        logger.warning(
+            f"Example:{example_id}: The `bigbio_kb` schema allows `relations` only between entities."
+            f" Skip (for now): "
+            f"{list(skipped_relations)}"
+        )
 
     # get coreferences
     unified_example["coreferences"] = []
@@ -374,12 +395,11 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict, entity_types: Iterable[str]) -> Di
         for ref_id in ann["ref_ids"]:
             if not ref_id.startswith("T"):  # not textbound -> no entity
                 is_entity_cluster = False
-            elif ref_id in id_to_event_trigger:  # event trigger -> no entity
+            elif ref_id not in anno_ids:  # event trigger -> no entity
                 is_entity_cluster = False
         if is_entity_cluster:
             entity_ids = [id_prefix + i for i in ann["ref_ids"]]
             unified_example["coreferences"].append(
                 {"id": id_prefix + str(i), "entity_ids": entity_ids}
             )
-
     return unified_example

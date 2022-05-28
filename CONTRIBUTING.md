@@ -84,9 +84,13 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Implement your dataset
 
-Make a new directory within the `biomedical/biodatasets` directory:
+Make a new directory within the `biomedical/bigbio/biodatasets` directory:
 
-    mkdir biodatasets/<dataset_name>
+    mkdir bigbio/biodatasets/<dataset_name>
+
+Add an `__init__.py` file to this directory:
+
+    touch bigbio/biodatasets/<dataset_name>/__init__.py
 
 Please use lowercase letters and underscores when choosing a `<dataset_name>`.
 To implement your dataset, there are three key methods that are important:
@@ -95,9 +99,9 @@ To implement your dataset, there are three key methods that are important:
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
   * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
 
-To start, copy [templates/template.py](templates/template.py) to your `biomedical/biodatasets/<dataset_name>` directory with the name `<dataset_name>.py`. Within this file, fill out all the TODOs.
+To start, copy [templates/template.py](templates/template.py) to your `biomedical/bigbio/biodatasets/<dataset_name>` directory with the name `<dataset_name>.py`. Within this file, fill out all the TODOs.
 
-    cp templates/template.py biodatasets/<dataset_name>/<dataset_name>.py
+    cp templates/template.py bigbio/biodatasets/<dataset_name>/<dataset_name>.py
 
 For the `_info_` function, you will need to define `features` for your
 `DatasetInfo` object. For the `bigbio` config, choose the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](bigbio/utils/schemas/).
@@ -145,7 +149,7 @@ Make sure your dataset is implemented correctly by checking in python the follow
 ```python
 from datasets import load_dataset
 
-data = load_dataset("biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
+data = load_dataset("bigbio/biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
 ```
 
 Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).
@@ -153,7 +157,7 @@ Run these commands from the top level of the `biomedical` repo (i.e. the same di
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio bigbio/biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
 ```
 
 Your particular dataset may require use of some of the other command line args in the test script.
@@ -167,7 +171,7 @@ python -m tests.test_bigbio --help
 
 From the main directory, run the Makefile via the following command:
 
-    make check_file=biodatasets/<dataset_name>/<dataset_name>.py
+    make check_file=bigbio/biodatasets/<dataset_name>/<dataset_name>.py
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
@@ -175,7 +179,7 @@ This runs the black formatter, isort, and lints to ensure that the code is reada
 
 First, commit your changes to the branch to "add" the work:
 
-    git add biodatasets/<dataset_name>/<dataset_name>.py
+    git add bigbio/biodatasets/<dataset_name>/<dataset_name>.py
     git commit -m "A message describing your commits"
 
 Then, run the following commands to incorporate any new changes in the master branch of datasets as follows:
