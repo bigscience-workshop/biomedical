@@ -201,7 +201,7 @@ For example, if you cloned the repo
 
 ```python
 from datasets import load_dataset
-dsd = load_dataset("bigbio/biodatasets/anat_em/anat_em.py")
+dsd = load_dataset("bigbio/biodatasets/anat_em/anat_em.py", name="anat_em_bigbio_kb")
 ```
 
 
