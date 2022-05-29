@@ -235,12 +235,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "type": "genic_interaction",
                                 "arg1_id": f"{document_['id']}-agent-{relation['ref_id1']}",
                                 "arg2_id": f"{document_['id']}-target-{relation['ref_id2']}",
-                                "normalized": [
-                                    {
-                                        "db_name": None,
-                                        "db_id": None,
-                                    }
-                                ],
+                                "normalized": [],
                             }
                             for relation in document["genic_interactions"]
                         ]
