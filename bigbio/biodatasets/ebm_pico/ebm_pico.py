@@ -314,7 +314,7 @@ class EbmPico(datasets.GeneratorBasedBuilder):
                         "type": f'{ent["high_level_annotation_type"]}_{ent["fine_grained_annotation_type"]}',
                         "text": [ent["annotation_text"]],
                         "offsets": [[ent["char_start"], ent["char_end"]]],
-                        "normalized": [{"db_name": None, "db_id": None}],
+                        "normalized": [],
                     }
                     data["entities"].append(entity)
                     uid += 1
