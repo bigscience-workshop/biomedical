@@ -1,5 +1,5 @@
 """
- Gather dataset statistics
+Gather dataset statistics
 Help make plots
 """
 from collections import Counter
@@ -8,7 +8,6 @@ import json
 
 import bigbio
 from bigbio.dataloader import BigBioConfigHelpers
-from rich import print as rprint
 
 
 MAX_COMMON = 50
@@ -38,32 +37,32 @@ def get_kb_meta(helper, split, ds):
     relations_unique_db_ids = set()
 
     for sample in ds:
-        for passage in sample["passages"]:
+        for passage in sample['passages']:
             passages_count += 1
             passages_char_count += len(passage["text"][0])
             passages_type_counter[passage["type"]] += 1
 
-        for entity in sample["entities"]:
+        for entity in sample['entities']:
             entities_count += 1
-            entities_type_counter[entity["type"]] += 1
-            for norm in entity["normalized"]:
+            entities_type_counter[entity['type']] += 1
+            for norm in entity['normalized']:
                 entities_db_name_counter[norm["db_name"]] += 1
                 entities_unique_db_ids.add(norm["db_id"])
 
-        for event in sample["events"]:
+        for event in sample['events']:
             events_count += 1
-            events_type_counter[event["type"]] += 1
-            for argument in event["arguments"]:
+            events_type_counter[event['type']] += 1
+            for argument in event['arguments']:
                 events_arguments_count += 1
                 events_arguments_role_counter[argument["role"]] += 1
 
-        for coreference in sample["coreferences"]:
+        for coreference in sample['coreferences']:
             coreferences_count += 1
 
-        for relation in sample["relations"]:
+        for relation in sample['relations']:
             relations_count += 1
-            relations_type_counter[relation["type"]] += 1
-            for norm in relation["normalized"]:
+            relations_type_counter[relation['type']] += 1
+            for norm in relation['normalized']:
                 relations_db_name_counter[norm["db_name"]] += 1
                 relations_unique_db_ids.add(norm["db_id"])
 
@@ -75,21 +74,15 @@ def get_kb_meta(helper, split, ds):
         "passages_char_count": passages_char_count,
         "entities_count": entities_count,
         "entities_type_counts": dict(entities_type_counter.most_common(MAX_COMMON)),
-        "entities_db_name_counts": dict(
-            entities_db_name_counter.most_common(MAX_COMMON)
-        ),
+        "entities_db_name_counts": dict(entities_db_name_counter.most_common(MAX_COMMON)),
         "entities_unique_db_id_counts": len(entities_unique_db_ids),
         "events_count": events_count,
         "events_arguments_count": events_arguments_count,
-        "events_arguments_role_counts": dict(
-            events_arguments_role_counter.most_common(MAX_COMMON)
-        ),
+        "events_arguments_role_counts": dict(events_arguments_role_counter.most_common(MAX_COMMON)),
         "coreferences_count": coreferences_count,
         "relations_count": relations_count,
         "relations_type_counts": dict(relations_type_counter.most_common(MAX_COMMON)),
-        "relations_db_name_counts": dict(
-            relations_db_name_counter.most_common(MAX_COMMON)
-        ),
+        "relations_db_name_counts": dict(relations_db_name_counter.most_common(MAX_COMMON)),
         "relations_unique_db_id_counts": len(relations_unique_db_ids),
     }
 
@@ -104,7 +97,7 @@ def get_text_meta(helper, split, ds):
 
     for sample in ds:
         text_char_count += len(sample["text"]) if sample["text"] is not None else 0
-        for label in sample["labels"]:
+        for label in sample['labels']:
             labels_count += 1
             labels_counter[label] += 1
 
@@ -126,12 +119,8 @@ def get_pairs_meta(helper, split, ds):
     label_counter = Counter()
 
     for sample in ds:
-        text_1_char_count += (
-            len(sample["text_1"]) if sample["text_1"] is not None else 0
-        )
-        text_2_char_count += (
-            len(sample["text_2"]) if sample["text_2"] is not None else 0
-        )
+        text_1_char_count += len(sample["text_1"]) if sample["text_1"] is not None else 0
+        text_2_char_count += len(sample["text_2"]) if sample["text_2"] is not None else 0
         label_counter[sample["label"]] += 1
 
     meta = {
@@ -186,12 +175,8 @@ def get_t2t_meta(helper, split, ds):
     text_2_name_counter = Counter()
 
     for sample in ds:
-        text_1_char_count += (
-            len(sample["text_1"]) if sample["text_1"] is not None else 0
-        )
-        text_2_char_count += (
-            len(sample["text_2"]) if sample["text_2"] is not None else 0
-        )
+        text_1_char_count += len(sample["text_1"]) if sample["text_1"] is not None else 0
+        text_2_char_count += len(sample["text_2"]) if sample["text_2"] is not None else 0
         text_1_name_counter[sample["text_1_name"]] += 1
         text_2_name_counter[sample["text_2_name"]] += 1
 
@@ -214,12 +199,8 @@ def get_te_meta(helper, split, ds):
     label_counter = Counter()
 
     for sample in ds:
-        premise_char_count += (
-            len(sample["premise"]) if sample["premise"] is not None else 0
-        )
-        hypothesis_char_count += (
-            len(sample["hypothesis"]) if sample["hypothesis"] is not None else 0
-        )
+        premise_char_count += len(sample["premise"]) if sample["premise"] is not None else 0
+        hypothesis_char_count += len(sample["hypothesis"]) if sample["hypothesis"] is not None else 0
         label_counter[sample["label"]] += 1
 
     meta = {
@@ -233,26 +214,28 @@ def get_te_meta(helper, split, ds):
     return meta
 
 
+
+
+
 # creating an instance of BigBioDataloader loads
 # lots of metadata about the available datasets and configs
-# ==========================================================
+#==========================================================
 conhelps = BigBioConfigHelpers()
 
 conhelps = conhelps.filtered(lambda x: x.dataset_name != "pubtator_central")
 conhelps = conhelps.filtered(lambda x: x.is_bigbio_schema)
 
-print(
-    "loaded {} configs from {} datasets".format(
-        len(conhelps), len(set([helper.dataset_name for helper in conhelps])),
-    )
-)
+print("loaded {} configs from {} datasets".format(
+    len(conhelps),
+    len(set([helper.dataset_name for helper in conhelps])),
+))
 
 public_conhelps = conhelps.filtered(lambda x: not x.is_local)
 local_conhelps = conhelps.filtered(lambda x: x.is_local)
 
 
 # when we actually read the datasets, we can examine more data
-# ==========================================================
+#==========================================================
 
 conhelps_for_meta = public_conhelps
 # conhelps_for_meta = local_conhelps
@@ -260,77 +243,71 @@ conhelps_for_meta = public_conhelps
 
 # gather configs by dataset
 configs_by_ds = defaultdict(list)
-task_counter = Counter()
-
 for helper in conhelps_for_meta:
     configs_by_ds[helper.dataset_name].append(helper)
-    print()
-    task_counter[helper.bigbio_schema_caps] += 1
-
-# rprint(configs_by_ds)
-rprint(task_counter)
-# counter
-
-# # now gather metadata
-# dataset_metas = {}
-# for dataset_name, helpers in configs_by_ds.items():
-#     print("dataset_name: ", dataset_name)
-
-#     config_metas = {}
-#     for helper in helpers:
-#         print("config name: ", helper.config.name)
-#         dsd = helper.load_dataset()
-
-#         split_metas = {}
-#         for split, ds in dsd.items():
-
-#             if helper.config.schema == "bigbio_kb":
-#                 meta = get_kb_meta(helper, split, ds)
-
-#             elif helper.config.schema == "bigbio_text":
-#                 meta = get_text_meta(helper, split, ds)
-
-#             elif helper.config.schema == "bigbio_t2t":
-#                 meta = get_t2t_meta(helper, split, ds)
-
-#             elif helper.config.schema == "bigbio_pairs":
-#                 meta = get_pairs_meta(helper, split, ds)
-
-#             elif helper.config.schema == "bigbio_qa":
-#                 meta = get_qa_meta(helper, split, ds)
-
-#             elif helper.config.schema == "bigbio_te":
-#                 meta = get_te_meta(helper, split, ds)
-
-#             else:
-#                 raise ValueError()
-
-#             split_metas[split] = meta
-
-#         config_meta = {
-#             "config_name": helper.config.name,
-#             "bigbio_schema": helper.config.schema,
-#             "splits": split_metas,
-#             "splits_count": len(split_metas),
-#         }
-#         config_metas[helper.config.name] = config_meta
-
-#     dataset_meta = {
-#         "dataset_name": dataset_name,
-#         "is_local": False,
-#         "tasks": [el.name for el in helper.tasks],
-#         "languages": [el.name for el in helper.languages],
-#         "bigbio_version": helper.bigbio_version,
-#         "source_version": helper.source_version,
-#         "citation": helper.citation,
-#         "description": helper.description,
-#         "homepage": helper.homepage,
-#         "license": helper.license,
-#         "config_metas": config_metas,
-#         "configs_count": len(config_metas),
-#     }
-#     dataset_metas[dataset_name] = dataset_meta
 
 
-# with open("dataset_metadatas.json", "w") as fp:
-#     json.dump(dataset_metas, fp, indent=4)
+# now gather metadata
+dataset_metas = {}
+for dataset_name, helpers in configs_by_ds.items():
+    print("dataset_name: ", dataset_name)
+
+    config_metas = {}
+    for helper in helpers:
+        print("config name: ", helper.config.name)
+        dsd = helper.load_dataset()
+
+        split_metas = {}
+        for split, ds in dsd.items():
+
+            if helper.config.schema == "bigbio_kb":
+                meta = get_kb_meta(helper, split, ds)
+
+            elif helper.config.schema == "bigbio_text":
+                meta = get_text_meta(helper, split, ds)
+
+            elif helper.config.schema == "bigbio_t2t":
+                meta = get_t2t_meta(helper, split, ds)
+
+            elif helper.config.schema == "bigbio_pairs":
+                meta = get_pairs_meta(helper, split, ds)
+
+            elif helper.config.schema == "bigbio_qa":
+                meta = get_qa_meta(helper, split, ds)
+
+            elif helper.config.schema == "bigbio_te":
+                meta = get_te_meta(helper, split, ds)
+
+            else:
+                raise ValueError()
+
+            split_metas[split] = meta
+
+        config_meta = {
+            "config_name": helper.config.name,
+            "bigbio_schema": helper.config.schema,
+            "splits": split_metas,
+            "splits_count": len(split_metas),
+        }
+        config_metas[helper.config.name] = config_meta
+
+
+    dataset_meta = {
+        "dataset_name": dataset_name,
+        "is_local": False,
+        "tasks": [el.name for el in helper.tasks],
+        "languages": [el.name for el in helper.languages],
+        "bigbio_version": helper.bigbio_version,
+        "source_version": helper.source_version,
+        "citation": helper.citation,
+        "description": helper.description,
+        "homepage": helper.homepage,
+        "license": helper.license,
+        "config_metas": config_metas,
+        "configs_count": len(config_metas),
+    }
+    dataset_metas[dataset_name] = dataset_meta
+
+
+with open("dataset_metadatas.json", "w") as fp:
+    json.dump(dataset_metas, fp, indent=4)
