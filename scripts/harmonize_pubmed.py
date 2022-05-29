@@ -291,7 +291,7 @@ df = pd.DataFrame(
 # https://www.ncbi.nlm.nih.gov/pmc/tools/id-converter-api/
 # https://ftp.ncbi.nlm.nih.gov/pub/pmc/PMC-ids.csv.gz
 #=======================================================================
-df_pmc_ids = pd.read_csv("PMC-ids.csv")
+df_pmc_ids = pd.read_csv("PMC-ids.csv.gz")
 df_pmc_ids["PMID"] = df_pmc_ids["PMID"].astype("Int64")
 df["pmid"] = df["pmid"].astype("Int64")
 
