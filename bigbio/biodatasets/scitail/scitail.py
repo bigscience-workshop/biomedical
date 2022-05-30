@@ -70,6 +70,9 @@ _SOURCE_VERSION = "1.1.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
+LABEL_MAP = {"entails": "entailment", "neutral": "neutral"}
+
+
 class SciTailDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
@@ -155,5 +158,7 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
                 yield row["id"], row.to_dict()
 
         elif self.config.schema == "bigbio_te":
+            # normalize labels
+            data['label'] = data['label'].apply(lambda x: LABEL_MAP[x])
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
