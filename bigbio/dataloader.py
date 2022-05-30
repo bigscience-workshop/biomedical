@@ -107,14 +107,24 @@ class BigBioConfigHelper:
     _py_module: ModuleType = field(repr=False)
     _ds_cls: type = field(repr=False)
 
+    def get_load_dataset_kwargs(
+        self,
+        **extra_load_dataset_kwargs,
+    ):
+        return {
+            "path": self.script,
+            "name": self.config.name,
+            **extra_load_dataset_kwargs,
+        }
+
     def load_dataset(
         self,
-        **load_dataset_kwargs,
+        **extra_load_dataset_kwargs,
     ):
         return load_dataset(
             path=self.script,
             name=self.config.name,
-            **load_dataset_kwargs,
+            **extra_load_dataset_kwargs,
         )
 
 
@@ -211,6 +221,8 @@ class BigBioConfigHelpers:
 
     def for_dataset(self, dataset_name: str) -> "BigBioConfigHelpers":
         helpers = [helper for helper in self if helper.dataset_name == dataset_name]
+        if len(helpers) == 0:
+            raise ValueError(f"no helper with helper.dataset_name = {dataset_name}")
         return BigBioConfigHelpers(helpers=helpers)
 
     def for_config_name(self, config_name: str) -> "BigBioConfigHelper":
