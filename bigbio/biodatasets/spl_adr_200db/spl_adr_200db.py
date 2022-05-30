@@ -285,10 +285,12 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
         for reaction in source_features["reactions"]:
             entity_name = reaction["str"]
             for normalization in reaction["normalizations"]:
-                if normalization["meddra_pt_id"]:
-                    entity_normalizations[entity_name].append(
-                        {"db_name": None, "db_id": f"pt_{normalization['meddra_pt_id']}"}
-                    )
+                # commenting this out for now
+                # if there is no db_name then its not a useful normalization
+                #if normalization["meddra_pt_id"]:
+                #    entity_normalizations[entity_name].append(
+                #        {"db_name": None, "db_id": f"pt_{normalization['meddra_pt_id']}"}
+                #    )
                 if normalization["meddra_llt_id"]:
                     entity_normalizations[entity_name].append(
                         {"db_name": "MedDRA v18.1", "db_id": f"llt_{normalization['meddra_llt_id']}"}
