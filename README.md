@@ -213,7 +213,7 @@ print(load_dataset_kwargs)
 {
     'path': '/home/user/repos/biomedical/bigbio/biodatasets/n2c2_2011/n2c2_2011.py',
     'name': 'n2c2_2011_source',
-    'data_dir': '/path/to/data'
+    'data_dir': 'path/to/data'
 }
 dsd = load_dataset(**load_dataset_kwargs)
 ```
