@@ -1,4 +1,4 @@
-# coding=utf-8
+# coding=utf-8medd
 # Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "meddialog"
 
 _LANGUAGES = [Lang.EN, Lang.ZH]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @article{DBLP:journals/corr/abs-2004-03329,

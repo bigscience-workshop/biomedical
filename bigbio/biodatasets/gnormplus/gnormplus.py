@@ -27,6 +27,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @Article{Wei2015,

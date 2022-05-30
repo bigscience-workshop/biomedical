@@ -9,6 +9,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.FR]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @InProceedings{neveol14quaero, 

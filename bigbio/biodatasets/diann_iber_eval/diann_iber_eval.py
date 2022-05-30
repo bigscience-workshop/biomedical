@@ -30,6 +30,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN, Lang.ES]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @proceedings{DBLP:conf/sepln/2018ibereval,

@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import parse_brat_file
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @InProceedings{Shardlow2018,
