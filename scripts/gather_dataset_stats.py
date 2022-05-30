@@ -5,6 +5,8 @@ Help make plots
 from collections import Counter
 from collections import defaultdict, OrderedDict
 import json
+import os
+from typing import Optional
 
 import pandas as pd
 
@@ -245,7 +247,7 @@ def get_te_meta(helper, split, ds):
     return meta
 
 
-def gather_metadatas_json(conhelps):
+def gather_metadatas_json(conhelps, data_dir_base: Optional[str]=None):
 
     # gather configs by dataset
     configs_by_ds = defaultdict(list)
@@ -260,7 +262,20 @@ def gather_metadatas_json(conhelps):
         config_metas = {}
         for helper in helpers:
             print("config name: ", helper.config.name)
-            dsd = helper.load_dataset()
+            if helper.config.name in [
+                'bioasq_10b_bigbio_qa',
+            ]:
+                continue
+
+
+            if helper.is_local:
+                if dataset_name == "psytar":
+                    data_dir = os.path.join(data_dir_base, dataset_name, "PsyTAR_dataset.xlsx")
+                else:
+                    data_dir = os.path.join(data_dir_base, dataset_name)
+            else:
+                data_dir = None
+            dsd = helper.load_dataset(data_dir=data_dir)
 
             split_metas = {}
             for split, ds in dsd.items():
@@ -491,15 +506,26 @@ print(
     )
 )
 
-public_conhelps = conhelps.filtered(lambda x: not x.is_local)
+do_public = True
+do_private = True
 
-public_dataset_metas = gather_metadatas_json(public_conhelps)
-with open("bigbio-public-metadatas.json", "w") as fp:
-    json.dump(public_dataset_metas, fp, indent=4)
+if do_public:
+    public_conhelps = conhelps.filtered(lambda x: not x.is_local)
+    public_dataset_metas = gather_metadatas_json(public_conhelps)
+    with open("bigbio-public-metadatas.json", "w") as fp:
+        json.dump(public_dataset_metas, fp, indent=4)
+    public_dfs = flatten_metadatas(public_dataset_metas)
+    for key, df in public_dfs.items():
+        df.to_parquet(f"bigbio-public-metadatas-flat-{key}.parquet")
+        df.to_csv(f"bigbio-public-metadatas-flat-{key}.csv", index=False)
 
-public_dfs = flatten_metadatas(public_dataset_metas)
-for key, df in public_dfs.items():
-    df.to_parquet(f"bigbio-public-metadatas-flat-{key}.parquet")
-    df.to_csv(f"bigbio-public-metadatas-flat-{key}.csv", index=False)
-
-private_conhelps = conhelps.filtered(lambda x: x.is_local)
+if do_private:
+    data_dir_base = "/home/galtay/data/bigbio"
+    private_conhelps = conhelps.filtered(lambda x: x.is_local)
+    private_dataset_metas = gather_metadatas_json(private_conhelps, data_dir_base=data_dir_base)
+    with open("bigbio-private-metadatas.json", "w") as fp:
+        json.dump(private_dataset_metas, fp, indent=4)
+    private_dfs = flatten_metadatas(private_dataset_metas)
+    for key, df in private_dfs.items():
+        df.to_parquet(f"bigbio-private-metadatas-flat-{key}.parquet")
+        df.to_csv(f"bigbio-private-metadatas-flat-{key}.csv", index=False)
