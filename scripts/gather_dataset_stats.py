@@ -65,7 +65,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
 
         dataset_meta = {
             "dataset_name": dataset_name,
-            "is_local": False,
+            "is_local": helper.is_local,
             "languages": [el.name for el in helper.languages],
             "bigbio_version": helper.bigbio_version,
             "source_version": helper.source_version,
