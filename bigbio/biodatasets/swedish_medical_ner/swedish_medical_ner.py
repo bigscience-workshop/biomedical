@@ -43,6 +43,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "swedish_medical_ner"
 
 _LANGUAGES = [Lang.SV]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{almgren-etal-2016-named,

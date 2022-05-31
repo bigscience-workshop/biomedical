@@ -24,6 +24,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @dataset{luis_gasco_2022_6458455,
@@ -106,8 +107,12 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
                             "type": datasets.Value("string"),
                             "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "concept_codes": datasets.Sequence(datasets.Value("string")),
-                            "semantic_relations": datasets.Sequence(datasets.Value("string")),
+                            "concept_codes": datasets.Sequence(
+                                datasets.Value("string")
+                            ),
+                            "semantic_relations": datasets.Sequence(
+                                datasets.Value("string")
+                            ),
                         }
                     ],
                 }
@@ -141,7 +146,10 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(
-        self, entities_mapping_file_path: Path, linking_mapping_file_path: Path, text_files_dir: Path
+        self,
+        entities_mapping_file_path: Path,
+        linking_mapping_file_path: Path,
+        text_files_dir: Path,
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         entities_mapping = pd.read_csv(entities_mapping_file_path, sep="\t")
@@ -159,9 +167,13 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
             # doc_text = doc_text.replace("\n", "")
 
             if filename in linking_file_names:
-                entities_df: pd.DataFrame = linking_mapping[linking_mapping["filename"] == filename]
+                entities_df: pd.DataFrame = linking_mapping[
+                    linking_mapping["filename"] == filename
+                ]
             else:
-                entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]
+                entities_df: pd.DataFrame = entities_mapping[
+                    entities_mapping["filename"] == filename
+                ]
 
             example = {
                 "id": f"{uid}",

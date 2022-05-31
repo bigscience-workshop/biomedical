@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 _DATASETNAME = "meddialog"
 
 _LANGUAGES = [Lang.EN, Lang.ZH]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @article{DBLP:journals/corr/abs-2004-03329,

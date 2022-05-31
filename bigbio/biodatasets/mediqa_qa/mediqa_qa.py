@@ -12,14 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import json
 import glob
-import datasets
+import json
+import os
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
-import xml.etree.ElementTree as ET
+
+import datasets
 
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
@@ -27,6 +28,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{MEDIQA2019,
@@ -59,8 +61,10 @@ _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+
 class PubmedQADataset(datasets.GeneratorBasedBuilder):
     """PubmedQA Dataset"""
+
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
@@ -80,7 +84,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             description="MEDIQA QA BigBio schema",
             schema="bigbio_qa",
             subset_id="mediqa_qa_bigbio_qa",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "mediqa_qa_source"
@@ -100,10 +104,10 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                                     "ReferenceRank": datasets.Value("int32"),
                                     "ReferenceScore": datasets.Value("int32"),
                                     "AnswerURL": datasets.Value("string"),
-                                    "AnswerText": datasets.Value("string")
+                                    "AnswerText": datasets.Value("string"),
                                 }
                             }
-                        ]
+                        ],
                     }
                 }
             )
@@ -123,46 +127,57 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
 
         return [
             datasets.SplitGenerator(
-                name=f'train_live_qa_med',
+                name=f"train_live_qa_med",
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TrainingSet1-LiveQAMed.xml"
-                }
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TrainingSet1-LiveQAMed.xml"
+                },
             ),
             datasets.SplitGenerator(
-                name=f'train_alexa',
+                name=f"train_alexa",
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TrainingSet2-Alexa.xml"
-                }
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TrainingSet2-Alexa.xml"
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-ValidationSet.xml"
-                }
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-ValidationSet.xml"
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TestSet-wLabels.xml"
-                }
-            )
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task3_QA/MEDIQA2019-Task3-QA-TestSet-wLabels.xml"
+                },
+            ),
         ]
 
     def _generate_examples(self, filepath: Path) -> Iterator[Tuple[str, Dict]]:
         dom = ET.parse(filepath).getroot()
-        for row in dom.iterfind('Question'):
-            qid = row.attrib['QID']
-            question_text = row.find('QuestionText').text
+        for row in dom.iterfind("Question"):
+            qid = row.attrib["QID"]
+            question_text = row.find("QuestionText").text
 
-            answer_list = row.find('AnswerList')
-            aids, sys_ranks, ref_ranks, ref_scores, answer_urls, answer_texts = [], [], [], [], [], []
-            for answer in answer_list.findall('Answer'):
-                aids.append(answer.attrib['AID'])
-                sys_ranks.append(int(answer.attrib['SystemRank']))
-                ref_ranks.append(int(answer.attrib['ReferenceRank']))
-                ref_scores.append(int(answer.attrib['ReferenceScore']))
-                answer_urls.append(answer.find('AnswerURL').text)
-                answer_texts.append(answer.find('AnswerText').text)
+            answer_list = row.find("AnswerList")
+            aids, sys_ranks, ref_ranks, ref_scores, answer_urls, answer_texts = (
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+            )
+            for answer in answer_list.findall("Answer"):
+                aids.append(answer.attrib["AID"])
+                sys_ranks.append(int(answer.attrib["SystemRank"]))
+                ref_ranks.append(int(answer.attrib["ReferenceRank"]))
+                ref_scores.append(int(answer.attrib["ReferenceScore"]))
+                answer_urls.append(answer.find("AnswerURL").text)
+                answer_texts.append(answer.find("AnswerText").text)
 
             if self.config.schema == "source":
                 yield qid, {
@@ -177,11 +192,25 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                                     "ReferenceRank": ref_rank,
                                     "ReferenceScore": ref_score,
                                     "AnswerURL": ans_url,
-                                    "AnswerText": ans_text
+                                    "AnswerText": ans_text,
                                 }
-                            } for (aid, sys_rank, ref_rank, ref_score, ans_url, ans_text) in
-                            zip(aids, sys_ranks, ref_ranks, ref_scores, answer_urls, answer_texts)
-                        ]
+                            }
+                            for (
+                                aid,
+                                sys_rank,
+                                ref_rank,
+                                ref_score,
+                                ans_url,
+                                ans_text,
+                            ) in zip(
+                                aids,
+                                sys_ranks,
+                                ref_ranks,
+                                ref_scores,
+                                answer_urls,
+                                answer_texts,
+                            )
+                        ],
                     }
                 }
             elif self.config.schema == "bigbio_qa":
@@ -190,8 +219,8 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
                     "question_id": qid,
                     "document_id": qid,
                     "question": question_text,
-                    "type": 'factoid',
+                    "type": "factoid",
                     "choices": [],
-                    "context": '',
+                    "context": "",
                     "answer": answer_texts,
                 }

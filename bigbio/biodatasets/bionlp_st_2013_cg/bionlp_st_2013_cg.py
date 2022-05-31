@@ -26,6 +26,7 @@ _DATASETNAME = "bionlp_st_2013_cg"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2013-overview,

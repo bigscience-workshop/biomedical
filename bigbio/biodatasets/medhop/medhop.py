@@ -23,6 +23,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.configs import BigBioConfig
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{welbl-etal-2018-constructing,
