@@ -32,7 +32,7 @@ logger = datasets.logging.get_logger(__name__)
 
 
 _LANGUAGES = [Lang.EN, Lang.ZH]
-_PUBMED = True
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{,
