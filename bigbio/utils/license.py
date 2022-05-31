@@ -17,7 +17,7 @@ from bigbio.utils import resources
 class License:
     """
     Base class from which all licenses inherit
-    
+
     Args:
         name: License title
         text: Accompanying information of the license
@@ -37,39 +37,8 @@ class License:
         """
         Is Share-alike?
         """
-
-        return False
-
-    @property
-    def display(self) -> str:
-        """
-        Get formatted name to reflect version, link and text.
-        """
-
-        string = f"{self.name}"
-        
-        if self.version is not None:
-            string += f" - v{self.version}"
-        
-        if self.link is not None:
-            string += f" ({self.link})"
-        
-        if self.text is not None:
-            string += f": {self.text}"
-
-        return string
-
-    def __repr__(self):
-        """
-        Override to get a formatted full description of the license
-        """
-        return self.display
-
-    def __str__(self):
-        """
-        Override to get a formatted full description of the license
-        """
-        return self.display
+        # NOTE: leave here has an example of license properties
+        raise NotImplementedError()
 
 
 @dataclass
@@ -81,12 +50,13 @@ class CustomLicense(License):
     """
 
     def __post_init__(self):
-        if self.text is None:
-            raise ValueError(
-                "A `CustomLicense` must provide at least the license text!"
-            )
         if self.name is None:
-            super().__setattr__("name", "CUSTOM")
+            self.name = "Custom license"
+
+        if self.text is None or self.link is None:
+            raise ValueError(
+                "A `CustomLicense` must provide (a) the license text or (b) the license link!"
+            )
 
 
 def _get_variable_name(k: str) -> str:
@@ -119,6 +89,4 @@ def load_licenses():
 
 
 _LICENSES = load_licenses()
-Licenses = Enum(
-    "Licenses", {k: License(name=v) for k, v in _LICENSES.items()}, type=License
-)
+Licenses = Enum("Licenses", {k: License(name=v) for k, v in _LICENSES.items()})
