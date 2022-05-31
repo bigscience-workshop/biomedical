@@ -74,6 +74,7 @@ from datasets import Features, Value
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -110,7 +111,7 @@ _HOMEPAGE = "https://muchmore.dfki.de/resources1.htm"
 # multilingual information on the basis of a domain ontology and classification.
 # For the main task of multilingual domain modelling, the project will focus
 # on German and English. "
-_LICENSE = "other"
+_LICENSE = Licenses.UNKNOWN
 
 _URLs = {
     "muchmore_source": [
@@ -288,7 +289,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

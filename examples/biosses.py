@@ -29,6 +29,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "biosses"
 
@@ -57,7 +58,7 @@ score.
 
 _HOMEPAGE = "https://tabilab.cmpe.boun.edu.tr/BIOSSES/DataSet.html"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
 _URLs = {
     "source": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
@@ -117,7 +118,7 @@ class BiossesDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
