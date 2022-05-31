@@ -52,7 +52,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
             split_metas = {}
             for split, meta_dc in split_metas_dataclasses.items():
                 split_metas[split] = dataclasses.asdict(meta_dc)
-                split_metas["split"] = split
+                split_metas[split]["split"] = split
 
             config_meta = {
                 "config_name": helper.config.name,
@@ -93,154 +93,50 @@ def flatten_metadatas(dataset_metas):
         "te": [],
     }
 
-    dataset_row_names = [
-        "dataset_name",
-        "is_local",
-        "languages",
-        "bigbio_version",
-        "source_version",
-        "citation",
-        "description",
-        "homepage",
-        "license",
-        "configs_count",
-    ]
-
-    config_row_names = [
-        "config_name",
-        "biogbio_schema",
-        "tasks",
-        "splits_count",
-    ]
-
-    split_row_names = {}
-
     for dataset_name, dataset_meta in dataset_metas.items():
 
-        dataset_row = [
-            dataset_name,
-            dataset_meta["is_local"],
-            dataset_meta["languages"],
-            dataset_meta["bigbio_version"],
-            dataset_meta["source_version"],
-            dataset_meta["citation"],
-            dataset_meta["description"],
-            dataset_meta["homepage"],
-            dataset_meta["license"],
-            dataset_meta["configs_count"],
-        ]
+        dataset_row = {
+            "dataset_name": dataset_name,
+            "is_local": dataset_meta["is_local"],
+            "languages": dataset_meta["languages"],
+            "bigbio_version": dataset_meta["bigbio_version"],
+            "source_version": dataset_meta["source_version"],
+            "citation": dataset_meta["citation"],
+            "description": dataset_meta["description"],
+            "homepage": dataset_meta["homepage"],
+            "license": dataset_meta["license"],
+            "configs_count": dataset_meta["configs_count"],
+        }
 
         for config_name, config_meta in dataset_meta["config_metas"].items():
 
-            config_row = [
-                config_name,
-                config_meta["bigbio_schema"],
-                config_meta["tasks"],
-                config_meta["splits_count"],
-            ]
+            config_row = {
+                "config_name": config_name,
+                "bigbio_schema": config_meta["bigbio_schema"],
+                "tasks": config_meta["tasks"],
+                "splits_count": config_meta["splits_count"],
+            }
 
             print(config_name, config_meta["bigbio_schema"])
 
             for split, split_meta in config_meta["splits"].items():
 
-                if config_meta["bigbio_schema"] == "bigbio_kb":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["passages_count"],
-                        json.dumps(split_meta["passages_type_counts"]),
-                        split_meta["passages_char_count"],
-                        split_meta["entities_count"],
-                        json.dumps(split_meta["entities_type_counts"]),
-                        json.dumps(split_meta["entities_db_name_counts"]),
-                        split_meta["entities_unique_db_id_counts"],
-                        split_meta["events_count"],
-                        split_meta["events_arguments_count"],
-                        json.dumps(split_meta["events_arguments_role_counts"]),
-                        split_meta["coreferences_count"],
-                        split_meta["relations_count"],
-                        json.dumps(split_meta["relations_type_counts"]),
-                        json.dumps(split_meta["relations_db_name_counts"]),
-                        split_meta["relations_unique_db_id_counts"],
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["kb"].append(row)
-                    split_row_names["kb"] = list(split_meta.keys())
+                split_row = {}
+                for key, val in split_meta.items():
+                    if isinstance(val, dict):
+                        split_row[key] = json.dumps(val)
+                    else:
+                        split_row[key] = val
+                row = {**dataset_row, **config_row, **split_row}
 
-                elif config_meta["bigbio_schema"] == "bigbio_text":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["text_char_count"],
-                        split_meta["labels_count"],
-                        json.dumps(split_meta["labels_counts"]),
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["text"].append(row)
-                    split_row_names["text"] = list(split_meta.keys())
+                # e.g. kb
+                schema_code = config_meta["bigbio_schema"].split("_")[1]
+                flat_rows[schema_code].append(row)
 
-                elif config_meta["bigbio_schema"] == "bigbio_t2t":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["text_1_char_count"],
-                        split_meta["text_2_char_count"],
-                        json.dumps(split_meta["text_1_name_counts"]),
-                        json.dumps(split_meta["text_2_name_counts"]),
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["t2t"].append(row)
-                    split_row_names["t2t"] = list(split_meta.keys())
-
-                elif config_meta["bigbio_schema"] == "bigbio_pairs":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["text_1_char_count"],
-                        split_meta["text_2_char_count"],
-                        json.dumps(split_meta["label_counts"]),
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["pairs"].append(row)
-                    split_row_names["pairs"] = list(split_meta.keys())
-
-                elif config_meta["bigbio_schema"] == "bigbio_qa":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["question_char_count"],
-                        split_meta["context_char_count"],
-                        split_meta["answer_count"],
-                        split_meta["answer_char_count"],
-                        json.dumps(split_meta["type_counts"]),
-                        json.dumps(split_meta["choices_counts"]),
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["qa"].append(row)
-                    split_row_names["qa"] = list(split_meta.keys())
-
-                elif config_meta["bigbio_schema"] == "bigbio_te":
-                    split_row = [
-                        split,
-                        split_meta["samples_count"],
-                        split_meta["premise_char_count"],
-                        split_meta["hypothesis_char_count"],
-                        json.dumps(split_meta["label_counts"]),
-                    ]
-                    row = dataset_row + config_row + split_row
-                    flat_rows["te"].append(row)
-                    split_row_names["te"] = list(split_meta.keys())
-
-                else:
-                    raise ValueError()
-
-    dfs = {
-        key: pd.DataFrame(
-            flat_rows[key],
-            columns=dataset_row_names + config_row_names + split_row_names[key],
-        )
-        for key in split_row_names.keys()
-    }
+    dfs = {}
+    for key, rows in flat_rows.items():
+        if len(rows) > 0:
+            dfs[key] = pd.DataFrame(rows)
     return dfs
 
 
