@@ -30,6 +30,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN, Lang.ES]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @proceedings{DBLP:conf/sepln/2018ibereval,
@@ -186,7 +187,7 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
                     "XML_annotation": datasets.Value("string"),
                     "metadata": {
                         "title": datasets.Value("string"),
-                        "keywords": datasets.Sequence([datasets.Value("string")]),
+                        "keywords": datasets.Sequence(datasets.Value("string")),
                     },
                 }
             )
@@ -334,9 +335,9 @@ class DIANNIberEvalDataset(datasets.GeneratorBasedBuilder):
         keyword_indicators = ["key words", "keywords"]
 
         keyword_list = [
-            line
+            line.strip()
             for line in keyword_str.split("\n")
-            if line.strip() != "" and line.lower() not in keyword_indicators
+            if line.strip() != "" and line.strip().lower() not in keyword_indicators
         ]
 
         return {"title": title_str, "keywords": keyword_list}

@@ -74,7 +74,7 @@ _BLURB_CONFIG_NAMES = set(
         "chemprot_bigbio_kb",  # ChemProt
         "ddi_corpus_bigbio_kb",  # DDI
         "hallmarks_of_cancer_bigbio_text",  # HOC
-        #    ''                                   #  Gene-Disease Associations (GAD)
+        "gad_fold0_bigbio_text", #  Gene-Disease Associations (GAD)
         "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
     ]
 )
@@ -107,14 +107,24 @@ class BigBioConfigHelper:
     _py_module: ModuleType = field(repr=False)
     _ds_cls: type = field(repr=False)
 
+    def get_load_dataset_kwargs(
+        self,
+        **extra_load_dataset_kwargs,
+    ):
+        return {
+            "path": self.script,
+            "name": self.config.name,
+            **extra_load_dataset_kwargs,
+        }
+
     def load_dataset(
         self,
-        **load_dataset_kwargs,
+        **extra_load_dataset_kwargs,
     ):
         return load_dataset(
             path=self.script,
             name=self.config.name,
-            **load_dataset_kwargs,
+            **extra_load_dataset_kwargs,
         )
 
 
@@ -211,7 +221,17 @@ class BigBioConfigHelpers:
 
     def for_dataset(self, dataset_name: str) -> "BigBioConfigHelpers":
         helpers = [helper for helper in self if helper.dataset_name == dataset_name]
+        if len(helpers) == 0:
+            raise ValueError(f"no helper with helper.dataset_name = {dataset_name}")
         return BigBioConfigHelpers(helpers=helpers)
+
+    def for_config_name(self, config_name: str) -> "BigBioConfigHelper":
+        helpers = [helper for helper in self if helper.config.name == config_name]
+        if len(helpers) == 0:
+            raise ValueError(f"no helper with helper.config.name = {config_name}")
+        if len(helpers) > 1:
+            raise ValueError(f"multiple helpers with helper.config.name = {config_name}")
+        return helpers[0]
 
     def default_for_dataset(self, dataset_name: str) -> BigBioConfigHelper:
         helpers = [
@@ -230,12 +250,33 @@ class BigBioConfigHelpers:
             helpers=[helper for helper in self if is_keeper(helper)]
         )
 
+    def __repr__(self):
+        return "\n\n".join([helper.__repr__() for helper in self])
+
+    def __str__(self):
+        return self.__repr__()
+
     def __iter__(self):
         for helper in self._helpers:
             yield helper
 
     def __len__(self):
         return len(self._helpers)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            start, stop, step = key.indices(len(self))
+            return BigBioConfigHelpers(
+                helpers=[self._helpers[ii] for ii in range(start, stop, step)]
+            )
+        elif isinstance(key, int):
+            if key < 0: #Handle negative indices
+                key += len(self)
+            if key < 0 or key >= len( self ) :
+                raise IndexError(f"The index ({key}) is out of range.")
+            return self._helpers[key]
+        else:
+            raise TypeError("Invalid argument type.")
 
 
 if __name__ == "__main__":

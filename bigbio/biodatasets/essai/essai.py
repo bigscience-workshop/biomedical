@@ -9,6 +9,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.FR]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
  @misc{dalloux, title={Datasets – Clément Dalloux}, url={http://clementdalloux.fr/?page_id=28}, journal={Clément Dalloux}, author={Dalloux, Clément}} 
@@ -196,7 +197,7 @@ class ESSAI(datasets.GeneratorBasedBuilder):
                             "type": "POS_tag",
                             "text": [POS_tags_[i]],
                             "offsets": [[i, i + 1]],
-                            "normalized": [{"db_name": None, "db_id": None}],
+                            "normalized": [],
                         }
                         data["entities"].append(entity)
                         key += 1
