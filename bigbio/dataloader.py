@@ -105,8 +105,8 @@ class BigBioKbMetadata:
     coreferences_count: 0
 
     relations_count: 0
-    relations_type_counter: Counter()
-    relations_db_name_counter: Counter()
+    relations_type_counter: Dict[str, int]
+    relations_db_name_counter: Dict[str, int]
     relations_unique_db_ids_count: int
 
     @classmethod
