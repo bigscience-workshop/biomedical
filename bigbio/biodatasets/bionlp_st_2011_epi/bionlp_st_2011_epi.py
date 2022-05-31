@@ -21,7 +21,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2011_epi"
