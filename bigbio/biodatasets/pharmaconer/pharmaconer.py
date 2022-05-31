@@ -31,6 +31,7 @@ import pandas as pd
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -99,7 +100,7 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "https://temu.bsc.es/pharmaconer/index.php/datasets/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
 
 _URLS = {
     "pharmaconer": "https://zenodo.org/record/4270158/files/pharmaconer.zip?download=1",
@@ -225,7 +226,7 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

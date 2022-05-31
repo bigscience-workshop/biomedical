@@ -26,6 +26,7 @@ from typing import Dict, Iterator, Tuple
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import BigBioValues, Tasks
 
 _LOCAL = False
@@ -62,7 +63,7 @@ PubMedQA datasets comprise of 3 different subsets:
 """
 
 _HOMEPAGE = "https://github.com/pubmedqa/pubmedqa"
-_LICENSE = "MIT License"
+_LICENSE_OLD = "MIT License"
 
 _URLS = {
     "pubmed_qa_artificial": "https://drive.google.com/uc?export=download&id=1kaU0ECRbVkrfjBAKtVsPCRF6qXSouoq9",
@@ -162,7 +163,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

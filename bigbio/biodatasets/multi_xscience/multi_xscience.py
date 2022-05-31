@@ -21,6 +21,7 @@ import datasets
 from bigbio.utils import schemas
 
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 import json
@@ -60,7 +61,7 @@ hat Multi-XScience is well suited for abstractive models.
 
 _HOMEPAGE = "https://github.com/yaolu/Multi-XScience"
 
-_LICENSE = "MIT License"
+_LICENSE_OLD = "MIT License"
 
 _URLS = {
     _DATASETNAME: [
@@ -129,7 +130,7 @@ class MultiXScience(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

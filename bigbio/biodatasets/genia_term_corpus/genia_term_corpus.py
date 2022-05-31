@@ -28,6 +28,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -82,7 +83,7 @@ identification of  physical biological entities as well as other important terms
 
 _HOMEPAGE = "http://www.geniaproject.org/genia-corpus/term-corpus"
 
-_LICENSE = """GENIA Project License for Annotated Corpora"""
+_LICENSE_OLD = """GENIA Project License for Annotated Corpora"""
 
 _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/GENIA/current/GENIA-corpus/Term/GENIAcorpus3.02.tgz",
@@ -159,7 +160,7 @@ class GeniaTermCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

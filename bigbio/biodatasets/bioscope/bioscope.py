@@ -35,6 +35,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -62,7 +63,7 @@ linguist expert before the annotation of the corpus was initiated.
 
 _HOMEPAGE = "https://rgai.inf.u-szeged.hu/node/105"
 
-_LICENSE = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
+_LICENSE_OLD = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
 
 _URLS = {
     _DATASETNAME: "https://rgai.sed.hu/sites/rgai.sed.hu/files/bioscope.zip",
@@ -174,7 +175,7 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

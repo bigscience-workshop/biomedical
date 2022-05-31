@@ -18,6 +18,7 @@ import json
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 
@@ -49,7 +50,7 @@ For most questions, an additional paragraph with supporting evidence for the cor
 
 _HOMEPAGE = "https://allenai.org/data/sciq"
 
-_LICENSE = "CC BY-NC 3.0"
+_LICENSE_OLD = "CC BY-NC 3.0"
 
 _URLs = "https://ai2-public-datasets.s3.amazonaws.com/sciq/SciQ.zip"
 
@@ -103,7 +104,7 @@ class SciQ(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

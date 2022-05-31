@@ -21,6 +21,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.constants import Tasks
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -70,7 +71,7 @@ _DATASETNAME = "MedHop"
 
 _HOMEPAGE = "http://qangaroo.cs.ucl.ac.uk/"
 
-_LICENSE = "CC BY-SA 3.0"
+_LICENSE_OLD = "CC BY-SA 3.0"
 
 _BASE_GDRIVE = "https://drive.google.com/uc?export=download&confirm=yTib&id="
 
@@ -132,7 +133,7 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

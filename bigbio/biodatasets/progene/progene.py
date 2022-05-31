@@ -22,6 +22,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -56,7 +57,7 @@ The corpus was developed in the context of the StemNet project (http://www.stemn
 
 _HOMEPAGE = "https://zenodo.org/record/3698568#.YlVHqdNBxeg"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
 
 # using custom url: original distribution includes trained models (>25GB) and original dataset license allow for redistribution
 _URLS = "https://huggingface.co/datasets/bigscience-biomedical/progene/resolve/main/crossvalidation_data.zip"
@@ -114,7 +115,7 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

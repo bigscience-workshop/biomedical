@@ -28,6 +28,7 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 import xml.dom.minidom as xml
 
@@ -53,7 +54,7 @@ Answer Reranking” (ACL 2014).
 
 _HOMEPAGE = "https://allenai.org/data/biology-how-why-corpus"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/biology-how-why-corpus/BiologyHowWhyCorpus.tar",
@@ -114,7 +115,7 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

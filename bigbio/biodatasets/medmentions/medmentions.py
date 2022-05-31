@@ -43,6 +43,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -82,7 +83,7 @@ Reviewers and Annotators, an estimate of the Precision of the annotations, was 9
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/MedMentions"
 
-_LICENSE = "CC0"
+_LICENSE_OLD = "CC0"
 
 _URLS = {
     "medmentions_full": [
@@ -176,7 +177,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

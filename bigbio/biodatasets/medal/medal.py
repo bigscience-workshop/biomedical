@@ -26,6 +26,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 logger = datasets.logging.get_logger(__name__)
@@ -55,7 +56,7 @@ pre-training in the medical domain.
 
 _HOMEPAGE = "https://github.com/BruceWen120/medal"
 
-_LICENSE = """\
+_LICENSE_OLD = """\
 The original dataset was retrieved and modified from the NLM website. By using this dataset, you are bound by the terms and conditions specified by NLM:
 INTRODUCTION
 Downloading data from the National Library of Medicine FTP servers indicates your acceptance of the following Terms and Conditions: No charges, usage fees or royalties are paid to NLM for this data.
@@ -132,7 +133,7 @@ pre-training in the medical domain."""
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

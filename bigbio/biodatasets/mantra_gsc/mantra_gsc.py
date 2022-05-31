@@ -22,6 +22,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -68,7 +69,7 @@ concepts, based on a subset of the Unified Medical Language System and covering 
 
 _HOMEPAGE = "https://biosemantics.erasmusmc.nl/index.php/resources/mantra-gsc"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE_OLD = "CC BY 4.0"
 
 _URLS = {
     _DATASETNAME: "http://biosemantics.org/MantraGSC/Mantra-GSC.zip",
@@ -162,7 +163,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

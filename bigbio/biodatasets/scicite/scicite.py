@@ -37,6 +37,7 @@ import numpy as np
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -60,7 +61,7 @@ citation context in the computer science and biomedical domains.
 
 _HOMEPAGE = "https://allenai.org/data/scicite"
 
-_LICENSE = ""
+_LICENSE_OLD = ""
 
 _URLS = {
     _DATASETNAME: "https://s3-us-west-2.amazonaws.com/ai2-s2-research/scicite/scicite.tar.gz",
@@ -132,7 +133,7 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
             raise ValueError("Unrecognized schema: %s" % self.config.schema)
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=_LICENSE, citation=_CITATION,
+            description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=str(_LICENSE), citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:

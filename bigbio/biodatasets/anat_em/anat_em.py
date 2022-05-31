@@ -27,6 +27,7 @@ import datasets
 import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -53,7 +54,7 @@ Common Anatomy Reference Ontology.
 """
 
 _HOMEPAGE = "http://nactem.ac.uk/anatomytagger/#AnatEM"
-_LICENSE = "Creative Commons BY-SA 3.0 license"
+_LICENSE_OLD = "Creative Commons BY-SA 3.0 license"
 
 _URLS = {_DATASETNAME: "http://nactem.ac.uk/anatomytagger/AnatEM-1.0.2.tar.gz"}
 
@@ -116,7 +117,7 @@ class AnatEMDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

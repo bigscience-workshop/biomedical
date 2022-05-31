@@ -19,6 +19,7 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -42,7 +43,7 @@ can be used in the context of not only the COVID-19 pandemic but also in other f
 
 _HOMEPAGE = "https://github.com/VinAIResearch/PhoNER_COVID19"
 
-_LICENSE = "\
+_LICENSE_OLD = "\
 By downloading the PhoNER_COVID19 dataset, USER agrees: \
 - to use PhoNER_COVID19 for research or educational purposes only.\
 - to not distribute PhoNER_COVID19 or part of PhoNER_COVID19 in any original or modified form.\
@@ -129,7 +130,7 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

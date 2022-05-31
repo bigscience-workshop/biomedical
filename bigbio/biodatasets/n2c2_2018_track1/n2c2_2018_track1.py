@@ -43,6 +43,7 @@ from lxml import etree
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = True
@@ -125,7 +126,7 @@ in any of the training set and they do not, which confirms that atleast train an
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE_OLD = "External Data User Agreement"
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
@@ -226,7 +227,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

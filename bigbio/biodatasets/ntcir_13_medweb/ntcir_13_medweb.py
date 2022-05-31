@@ -63,6 +63,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = True
@@ -102,7 +103,7 @@ these three languages.
 
 _HOMEPAGE = "http://research.nii.ac.jp/ntcir/permission/ntcir-13/perm-en-MedWeb.html"
 
-_LICENSE = "Creative Commons Attribution 4.0 International License"
+_LICENSE_OLD = "Creative Commons Attribution 4.0 International License"
 
 # NOTE: Data can only be obtained (locally) by first filling out form to provide
 # information about usage context under this link: http://www.nii.ac.jp/dsc/idr/en/ntcir/ntcir.html
@@ -213,7 +214,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

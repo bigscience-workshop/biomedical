@@ -27,6 +27,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
@@ -57,7 +58,7 @@ for particular word classes (e.g. verbs).
 _HOMEPAGE = "https://github.com/cambridgeltl/bio-simverb"
 
 
-_LICENSE = """Open Access This article is distributed under the terms of the
+_LICENSE_OLD = """Open Access This article is distributed under the terms of the
 Creative Commons Attribution 4.0 International License
 (http://creativecommons.org/licenses/by/4.0/), which permits
 unrestricted use, distribution, and reproduction in any medium,
@@ -124,7 +125,7 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

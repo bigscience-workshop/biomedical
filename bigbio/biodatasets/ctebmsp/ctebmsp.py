@@ -31,6 +31,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -85,7 +86,7 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
 
-_LICENSE = (
+_LICENSE_OLD = (
     "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
 )
 
@@ -219,7 +220,7 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

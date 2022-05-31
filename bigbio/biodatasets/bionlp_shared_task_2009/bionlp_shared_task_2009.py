@@ -21,6 +21,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
@@ -53,7 +54,7 @@ of the GENIA Event corpus annotations, used for evaluation.
 
 _HOMEPAGE = "http://www.geniaproject.org/shared-tasks/bionlp-shared-task-2009"
 
-_LICENSE = """
+_LICENSE_OLD = """
 GENIA Project License for Annotated Corpora
 
 1. Copyright of abstracts
@@ -257,7 +258,7 @@ class BioNLPSharedTask2009(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

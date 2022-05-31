@@ -28,6 +28,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -54,7 +55,7 @@ _DESCRIPTION = (
 
 _HOMEPAGE = "https://github.com/rockt/SETH"
 
-_LICENSE = "Apache License 2.0"
+_LICENSE_OLD = "Apache License 2.0"
 
 _URLS = {
     "source": "https://github.com/rockt/SETH/archive/refs/heads/master.zip",
@@ -170,7 +171,7 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

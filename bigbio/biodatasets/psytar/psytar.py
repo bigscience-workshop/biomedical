@@ -51,6 +51,7 @@ import pandas as pd
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = True
@@ -97,7 +98,7 @@ SSIs and DIs)
 
 _HOMEPAGE = "https://www.askapatient.com/research/pharmacovigilance/corpus-ades-psychiatric-medications.asp"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE_OLD = "CC BY 4.0"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.TEXT_CLASSIFICATION]
 
@@ -207,7 +208,7 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

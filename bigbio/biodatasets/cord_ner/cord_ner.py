@@ -24,6 +24,7 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -59,7 +60,7 @@ CORD-NER dataset covers 75 fine-grained entity types: In addition to the common 
 _HOMEPAGE = "https://xuanwang91.github.io/2020-03-20-cord19-ner/"
 
 
-_LICENSE = """
+_LICENSE_OLD = """
     This dataset is made from multiple datasets by Allen Institute 
     for AI in partnership with the Chan Zuckerberg Initiative, Georgetown 
     University’s Center for Security and Emerging Technology, Microsoft Research, 
@@ -204,7 +205,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

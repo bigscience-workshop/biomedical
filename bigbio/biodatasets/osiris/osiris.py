@@ -24,6 +24,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -58,7 +59,7 @@ provided the original work is properly cited (Furlong et al, BMC Bioinformatics 
 _HOMEPAGE = "https://sites.google.com/site/laurafurlongweb/databases-and-tools/corpora/"
 
 
-_LICENSE = "Creative Commons Attribution 3.0 Unported License"
+_LICENSE_OLD = "Creative Commons Attribution 3.0 Unported License"
 
 _URLS = {
     _DATASETNAME: ["https://github.com/rockt/SETH/blob/master/resources/OSIRIS/corpus.xml?raw=true "
@@ -144,7 +145,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

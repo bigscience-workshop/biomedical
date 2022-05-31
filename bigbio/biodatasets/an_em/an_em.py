@@ -29,6 +29,7 @@ import datasets
 import bigbio.utils.parsing as parse
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -61,7 +62,7 @@ entities and contains over 3,000 annotated mentions.
 
 _HOMEPAGE = "http://www.nactem.ac.uk/anatomy/"
 
-_LICENSE = "Creative Commons BY-SA 3.0 license"
+_LICENSE_OLD = "Creative Commons BY-SA 3.0 license"
 
 _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/anatomy/data/AnEM-1.0.4.tar.gz",
@@ -148,7 +149,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

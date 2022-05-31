@@ -30,6 +30,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -56,7 +57,7 @@ summarized consumer health questions.
 
 _HOMEPAGE = "https://github.com/abachaa/MeQSum"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MeQSum/raw/master/MeQSum_ACL2019_BenAbacha_Demner-Fushman.xlsx",
@@ -111,7 +112,7 @@ class MeQSumDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

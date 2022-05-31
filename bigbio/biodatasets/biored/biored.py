@@ -24,6 +24,7 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 from bioc import pubtator
 
@@ -57,7 +58,7 @@ _DESCRIPTION = """Relation Extraction corpus with multiple entity types (e.g., g
 
 _HOMEPAGE = "https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/"
 
-_LICENSE = "NA"
+_LICENSE_OLD = "NA"
 
 _URLS = {
     _DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip",
@@ -142,7 +143,7 @@ class BioredDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

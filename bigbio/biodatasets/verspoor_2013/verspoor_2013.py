@@ -32,6 +32,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -62,7 +63,7 @@ application to genetic variation information in a range of diseases."""
 
 _HOMEPAGE = "NA"
 
-_LICENSE = "NA"
+_LICENSE_OLD = "NA"
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
@@ -193,7 +194,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

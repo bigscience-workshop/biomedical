@@ -29,6 +29,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -66,7 +67,7 @@ For further information, please visit https://temu.bsc.es/meddocan/ or send an e
 
 _HOMEPAGE = "https://temu.bsc.es/meddocan/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
 
 _URLS = {
     "meddocan": "https://zenodo.org/record/4279323/files/meddocan.zip?download=1",
@@ -181,7 +182,7 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

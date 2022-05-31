@@ -27,6 +27,7 @@ import numpy as np
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -58,7 +59,7 @@ To get the final annotations, we perform the majority voting.
 
 _HOMEPAGE = "https://github.com/Markus-Zlabinger/pico-annotation"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _DATA_PATH = "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
 _URLS = {
@@ -192,7 +193,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

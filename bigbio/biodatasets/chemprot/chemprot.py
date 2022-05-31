@@ -22,9 +22,11 @@ import os
 from typing import Dict, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense
 
 _LOCAL = False
 _CITATION = """\
@@ -46,7 +48,13 @@ The BioCreative VI Chemical-Protein interaction dataset identifies entities of c
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
 
-_LICENSE = "Public Domain Mark 1.0"
+_LICENSE = CustomLicense(
+    name="Public Domain Mark 1.0",
+    text="""This work has been identified as being free of known restrictions under copyright law,
+    including all related and neighboring rights.
+    """,
+    link="https://creativecommons.org/publicdomain/mark/1.0/",
+)
 
 _URLs = {
     "source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
@@ -122,7 +130,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -133,10 +141,18 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
         # Extract each of the individual folders
         # NOTE: omitting "extract" call cause it uses a new folder
-        train_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_training.zip"))
-        test_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_test_gs.zip"))
-        dev_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_development.zip"))
-        sample_path = dl_manager.extract(os.path.join(data_dir, "ChemProt_Corpus/chemprot_sample.zip"))
+        train_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_training.zip")
+        )
+        test_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_test_gs.zip")
+        )
+        dev_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_development.zip")
+        )
+        sample_path = dl_manager.extract(
+            os.path.join(data_dir, "ChemProt_Corpus/chemprot_sample.zip")
+        )
 
         return [
             datasets.SplitGenerator(
@@ -185,18 +201,29 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath, abstract_file, entity_file, relation_file,
-                           gold_standard_file, split):
+    def _generate_examples(
+        self,
+        filepath,
+        abstract_file,
+        entity_file,
+        relation_file,
+        gold_standard_file,
+        split,
+    ):
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
-            entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
+            entities, entity_id = self._get_entities(
+                os.path.join(filepath, entity_file)
+            )
 
             if self.config.subset_id == "chemprot_full":
                 relations = self._get_relations(os.path.join(filepath, relation_file))
             elif self.config.subset_id == "chemprot_shared_task_eval":
-                relations = self._get_relations_gs(os.path.join(filepath, gold_standard_file))
+                relations = self._get_relations_gs(
+                    os.path.join(filepath, gold_standard_file)
+                )
             else:
                 raise ValueError(self.config)
 
@@ -211,7 +238,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
-            entities, entity_id = self._get_entities(os.path.join(filepath, entity_file))
+            entities, entity_id = self._get_entities(
+                os.path.join(filepath, entity_file)
+            )
             relations = self._get_relations(os.path.join(filepath, relation_file))
 
             uid = 0
@@ -272,7 +301,9 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             contents = [i.strip() for i in f.readlines()]
 
         # PMID is the first column, Abstract is last
-        return {doc.split("\t")[0]: "\n".join(doc.split("\t")[1:]) for doc in contents}  # Includes title as line 1
+        return {
+            doc.split("\t")[0]: "\n".join(doc.split("\t")[1:]) for doc in contents
+        }  # Includes title as line 1
 
     @staticmethod
     def _get_entities(ents_filename: str) -> Tuple[Dict[str, str]]:
@@ -386,4 +417,3 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             relations[pmid].append(ann)
 
         return relations
-

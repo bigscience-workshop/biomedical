@@ -32,6 +32,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -56,7 +57,7 @@ Linnaeus is a novel corpus of full-text documents manually annotated for species
 
 _HOMEPAGE = "http://linnaeus.sourceforge.net/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+_LICENSE_OLD = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
 
 _URLS = {
     _DATASETNAME: "https://sourceforge.net/projects/linnaeus/files/Corpora/manual-corpus-species-1.0.tar.gz/download",
@@ -140,7 +141,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

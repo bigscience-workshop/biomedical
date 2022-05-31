@@ -26,6 +26,7 @@ from bioc import pubtator
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -48,7 +49,7 @@ resource for the biomedical natural language processing community.
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/CBBresearch/Dogan/DISEASE/"
-_LICENSE = "Public Domain (CC0)"
+_LICENSE_OLD = "Public Domain (CC0)"
 
 
 _URLS = {
@@ -116,7 +117,7 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

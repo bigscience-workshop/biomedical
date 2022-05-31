@@ -22,6 +22,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -72,7 +73,7 @@ _DESCRIPTION = {
 _HOMEPAGE = "https://scifact.apps.allenai.org/"
 
 
-_LICENSE = "CC BY-NC 2.0"
+_LICENSE_OLD = "CC BY-NC 2.0"
 
 _URLS = {
     _DATASETNAME: "https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz",
@@ -170,7 +171,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.name],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

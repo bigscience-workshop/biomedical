@@ -29,6 +29,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -58,7 +59,7 @@ sentences for gene/protein NER. 15K GENETAG sentences were used for the BioCreAt
 
 _HOMEPAGE = "https://github.com/openbiocorpora/genetag"
 
-_LICENSE = "Public Domain"
+_LICENSE_OLD = "Public Domain"
 
 _BASE_URL = "https://raw.githubusercontent.com/openbiocorpora/genetag/master/original-data/"
 
@@ -147,7 +148,7 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -27,6 +27,7 @@ import datasets
 import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -54,7 +55,7 @@ interactions. It contains 1025 documents from two different sources: DrugBank da
 """
 
 _HOMEPAGE = "https://github.com/isegura/DDICorpus"
-_LICENSE = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) "
+_LICENSE_OLD = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) "
 
 
 _URLS = {
@@ -131,7 +132,7 @@ class DDICorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

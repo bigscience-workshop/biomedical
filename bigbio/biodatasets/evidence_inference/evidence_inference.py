@@ -32,6 +32,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -68,7 +69,7 @@ or had significant effect on the outcome, relative to the comparator.
 
 _HOMEPAGE = "https://github.com/jayded/evidence-inference"
 
-_LICENSE = "MIT"
+_LICENSE_OLD = "MIT"
 
 _URLS = {
     _DATASETNAME: "http://evidence-inference.ebm-nlp.com/v2.0.tar.gz",
@@ -128,7 +129,7 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

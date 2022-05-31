@@ -20,6 +20,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -51,7 +52,7 @@ judged on fifty abstracts, was 94%.
 
 _HOMEPAGE = "http://mutationfinder.sourceforge.net/"
 
-_LICENSE = """\
+_LICENSE_OLD = """\
 Copyright (c) 2007 Regents of the University of Colorado
 
 Permission is hereby granted, free of charge, to any person
@@ -135,7 +136,7 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

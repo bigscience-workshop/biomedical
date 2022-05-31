@@ -24,6 +24,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -45,7 +46,7 @@ A set of 100 abstracts annotated by Kevin Nagel with protein, residue, organism 
 
 _HOMEPAGE = "https://sourceforge.net/projects/bionlp-corpora/files/ProteinResidue/"
 
-_LICENSE = """
+_LICENSE_OLD = """
 Copyright (c) 2011 Kevin Nagel
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -133,7 +134,7 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

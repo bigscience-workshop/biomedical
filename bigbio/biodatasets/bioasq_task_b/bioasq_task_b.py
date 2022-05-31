@@ -33,6 +33,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense, Licenses
 
 _LOCAL = True
 _CITATION = """\
@@ -362,7 +363,10 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 
 # Data access reqires registering with BioASQ.
 # See http://participants-area.bioasq.org/accounts/register/
-_LICENSE = "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html"
+_LICENSE = CustomLicense(
+    name="National Library of Medicine Terms and Conditions",
+    link="https://www.nlm.nih.gov/databases/download/terms_and_conditions.html",
+)
 
 _URLs = {
     "bioasq_10b": ["BioASQ-training10b.zip", None],
@@ -455,7 +459,7 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -577,7 +581,7 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     }
 
         elif self.config.schema == "bigbio_qa":
-            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records 
+            # NOTE: Years 2014-2016 (BioASQ2-BioASQ4) have duplicate records
             cache = set()
             with open(filepath, encoding="utf-8") as file:
                 uid = 0

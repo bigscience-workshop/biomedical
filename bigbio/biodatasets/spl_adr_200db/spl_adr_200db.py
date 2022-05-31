@@ -63,6 +63,7 @@ from typing import Dict, List, Tuple
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -99,7 +100,7 @@ Dictionary for Regulatory Activities (MedDRA).
 _HOMEPAGE = "https://bionlp.nlm.nih.gov/tac2017adversereactions/"
 
 # NOTE: Source: https://osf.io/6h9q4/
-_LICENSE = "CC0 1.0 Universal "
+_LICENSE_OLD = "CC0 1.0 Universal "
 
 _URLS = {
     _DATASETNAME: {
@@ -215,7 +216,7 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

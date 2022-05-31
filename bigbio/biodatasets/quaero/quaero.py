@@ -4,6 +4,7 @@ import os
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
@@ -63,7 +64,7 @@ All questions regarding the task or data should be addressed to aurelie.neveol@l
 
 _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
-_LICENSE = "GFDL"
+_LICENSE_OLD = "GFDL"
 
 _URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip"
 
@@ -148,7 +149,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

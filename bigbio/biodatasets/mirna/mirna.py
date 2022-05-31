@@ -19,6 +19,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -87,7 +88,7 @@ from 201 and 100 documents respectively.
 """
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/download-mirna-test-corpus.html"
-_LICENSE = "Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)"
+_LICENSE_OLD = "Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)"
 
 _BASE = "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/miRNA/miRNA-"
 
@@ -171,7 +172,7 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

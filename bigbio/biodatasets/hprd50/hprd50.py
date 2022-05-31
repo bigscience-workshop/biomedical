@@ -38,6 +38,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 # TODO: Add BibTeX citation
@@ -74,7 +75,7 @@ Recognition and Relation Extraction.
 
 _HOMEPAGE = ""
 
-_LICENSE = ""
+_LICENSE_OLD = ""
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/zipball/master",
@@ -274,7 +275,7 @@ class HPRD50Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

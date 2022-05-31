@@ -46,6 +46,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = True
@@ -115,7 +116,7 @@ of the art in a particular task, learn from it, and build on it.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE_OLD = "External Data User Agreement"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
@@ -362,7 +363,7 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -26,6 +26,7 @@ from typing import Dict, List, Tuple, Union
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -60,7 +61,7 @@ aggregated to reduce noise. Test labels are collected from medical professionals
 
 _HOMEPAGE = "https://github.com/bepnye/EBM-NLP"
 
-_LICENSE = "UNKNOWN"
+_LICENSE_OLD = "UNKNOWN"
 
 _URLS = {_DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"}
 
@@ -207,7 +208,7 @@ class EbmPico(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

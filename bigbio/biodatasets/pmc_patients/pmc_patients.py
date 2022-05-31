@@ -27,6 +27,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -49,7 +50,7 @@ This dataset is used for calculating the similarity between two patient descript
 
 _HOMEPAGE = "https://github.com/zhao-zy15/PMC-Patients"
 
-_LICENSE = "CC BY-NC-SA"
+_LICENSE_OLD = "CC BY-NC-SA"
 
 _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?id=1vFCLy_CF8fxPDZvDtHPR6Dl6x9l0TyvW&export=download",
@@ -109,7 +110,7 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

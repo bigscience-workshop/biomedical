@@ -18,6 +18,7 @@ import re
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 
@@ -60,7 +61,7 @@ All copyrights of the data belong to healthcaremagic.com and icliniq.com.
 
 _HOMEPAGE = "https://github.com/UCSD-AI4H/Medical-Dialogue-System"
 
-_LICENSE = "Public for Research"
+_LICENSE_OLD = "Public for Research"
 
 _URLs = {
     "en": {
@@ -161,7 +162,7 @@ class MedDialog(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

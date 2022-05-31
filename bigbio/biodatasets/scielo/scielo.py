@@ -20,6 +20,7 @@ from typing import IO, Any, Generator, List, Optional, Tuple
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -42,7 +43,7 @@ as well as trilingual aligned for a small subset of sentences. Alignment was car
 
 _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWSRB"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE_OLD = "CC BY 4.0"
 
 _URLS = {
     "en_es": "https://ndownloader.figstatic.com/files/14019287",
@@ -118,7 +119,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

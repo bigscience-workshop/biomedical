@@ -22,6 +22,7 @@ from bioc import biocxml
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
@@ -61,7 +62,7 @@ text-mining techniques for gene identification tasks in biomedical text.
 
 _HOMEPAGE = "https://zenodo.org/record/5089049"
 
-_LICENSE = "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication license"
+_LICENSE_OLD = "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication license"
 
 _URLS = {
     "source": "https://zenodo.org/record/5089049/files/NLM-Gene-Corpus.zip",
@@ -138,7 +139,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

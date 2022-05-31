@@ -25,6 +25,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -52,7 +53,7 @@ as well as syntactic dependencies.
 
 _HOMEPAGE = "https://github.com/metalrt/ppi-dataset"
 
-_LICENSE = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
+_LICENSE_OLD = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/archive/refs/heads/master.zip",
@@ -134,7 +135,7 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

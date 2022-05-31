@@ -36,6 +36,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks, BigBioValues
 
 _LOCAL = False
@@ -67,7 +68,7 @@ sentences.
 
 _HOMEPAGE = "http://genome.jouy.inra.fr/texte/LLLchallenge"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _URLS = {
     _DATASETNAME: [
@@ -157,7 +158,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

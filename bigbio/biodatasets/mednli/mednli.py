@@ -42,6 +42,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = True
@@ -74,7 +75,7 @@ drawn about the patient.
 
 
 _HOMEPAGE = "https://physionet.org/content/mednli/1.0.0/"
-_LICENSE = "PhysioNet Credentialed Health Data License 1.5.0"
+_LICENSE_OLD = "PhysioNet Credentialed Health Data License 1.5.0"
 
 _URLS = {}
 
@@ -132,7 +133,7 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

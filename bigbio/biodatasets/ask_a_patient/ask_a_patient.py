@@ -19,6 +19,7 @@ import datasets
 import glob
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 
@@ -48,7 +49,7 @@ mapped to how they are formally written in medical ontologies (SNOMED-CT and AMT
 
 _HOMEPAGE = "https://zenodo.org/record/55013"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE_OLD = "CC BY 4.0"
 
 _URLs = "https://zenodo.org/record/55013/files/datasets.zip"
 
@@ -97,7 +98,7 @@ class AskAPatient(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

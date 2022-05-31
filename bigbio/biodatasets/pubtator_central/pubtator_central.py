@@ -48,6 +48,7 @@ from bioc import pubtator
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -81,7 +82,7 @@ disambiguation module based on cutting-edge deep learning techniques provide inc
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/pubtator/"
-_LICENSE = """\
+_LICENSE_OLD = """\
 PUBLIC DOMAIN NOTICE
 National Center for Biotechnology Information
 
@@ -194,7 +195,7 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

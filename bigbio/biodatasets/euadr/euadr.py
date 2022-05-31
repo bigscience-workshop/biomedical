@@ -3,6 +3,7 @@ import os
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -33,7 +34,7 @@ Corpora with specific entities and relationships annotated are essential to trai
 
 _HOMEPAGE = "https://www.sciencedirect.com/science/article/pii/S1532046412000573"
 
-_LICENSE = "Elsevier user license"
+_LICENSE_OLD = "Elsevier user license"
 
 _URL = "https://biosemantics.erasmusmc.nl/downloads/euadr.tgz"
 
@@ -84,7 +85,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

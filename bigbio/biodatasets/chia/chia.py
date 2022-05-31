@@ -25,6 +25,7 @@ import datasets
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -51,7 +52,7 @@ by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12
 """
 
 _HOMEPAGE = "https://github.com/WengLab-InformaticsResearch/CHIA"
-_LICENSE = "CC-BY-4.0"
+_LICENSE_OLD = "CC-BY-4.0"
 
 _URLS = {
     _DATASETNAME: "https://figshare.com/ndownloader/files/21728850",
@@ -206,7 +207,7 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

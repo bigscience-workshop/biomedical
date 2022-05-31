@@ -24,6 +24,7 @@ import html
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -52,7 +53,7 @@ They are selected because both have a focus on human genes.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _URLS = {
     _DATASETNAME: [
@@ -134,7 +135,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

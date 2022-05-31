@@ -28,6 +28,7 @@ import datasets
 import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -57,7 +58,7 @@ The CellFinder project aims to create a stem cell data repository by linking inf
 _HOMEPAGE = (
     "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
 )
-_LICENSE = "CC BY-SA 3.0"
+_LICENSE_OLD = "CC BY-SA 3.0"
 
 _SOURCE_URL = (
     "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
@@ -143,7 +144,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

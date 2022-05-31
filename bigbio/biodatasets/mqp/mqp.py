@@ -23,9 +23,11 @@ from typing import Dict, Tuple
 
 import datasets
 from datasets import load_dataset
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -52,7 +54,7 @@ but contextually similar ) or dissimilar (syntactically may look similar but con
 
 _HOMEPAGE = "https://github.com/curai/medical-question-pair-dataset"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLs = {
     _DATASETNAME: "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
@@ -108,7 +110,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -133,7 +135,11 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
         if split == "train":  # There's only training dataset available atm
             with open(filepath, encoding="utf-8") as csv_file:
                 csv_reader = csv.reader(
-                    csv_file, quotechar='"', delimiter=",", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                    csv_file,
+                    quotechar='"',
+                    delimiter=",",
+                    quoting=csv.QUOTE_ALL,
+                    skipinitialspace=True,
                 )
 
                 if self.config.schema == "source":

@@ -23,6 +23,7 @@ from bioc import biocxml
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
@@ -58,7 +59,7 @@ PubTator was used as our annotation tool along with BioC formats.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = ""
+_LICENSE_OLD = ""
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
@@ -136,7 +137,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

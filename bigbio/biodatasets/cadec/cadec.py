@@ -35,6 +35,7 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -67,7 +68,7 @@ normalized with meddra codes), sct (entities normalized with SNOMED CT codes).
 
 _HOMEPAGE = "https://data.gov.au/dataset/ds-dap-csiro%3A10948/details?q="
 
-_LICENSE = "https://confluence.csiro.au/display/dap/CSIRO+Data+Licence"
+_LICENSE_OLD = "https://confluence.csiro.au/display/dap/CSIRO+Data+Licence"
 
 _URLS = {
     _DATASETNAME: "https://data.csiro.au/dap/ws/v2/collections/17190/data/1904643",
@@ -140,7 +141,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

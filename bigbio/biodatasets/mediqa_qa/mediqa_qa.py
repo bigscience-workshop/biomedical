@@ -24,6 +24,7 @@ import xml.etree.ElementTree as ET
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -48,7 +49,7 @@ In the QA task, participants are tasked to:
 """
 
 _HOMEPAGE = "https://sites.google.com/view/mediqa2019"
-_LICENSE = "-"
+_LICENSE_OLD = "-"
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip"
@@ -113,7 +114,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

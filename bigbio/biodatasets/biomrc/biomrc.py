@@ -31,6 +31,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
 
 _LOCAL = False
@@ -66,7 +67,7 @@ sizes, also releasing our code, and providing a leaderboard.
 
 _HOMEPAGE = "https://github.com/PetrosStav/BioMRC_code"
 
-_LICENSE = "Unknown"
+_LICENSE_OLD = "Unknown"
 
 _URLS = {
     "large": {
@@ -167,7 +168,7 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
