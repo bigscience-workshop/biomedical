@@ -44,8 +44,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import PhysioNetLicense1p5
 
 _LOCAL = True
 _CITATION = """\
@@ -78,7 +78,7 @@ unseen dataset for scoring each participant submission.
 
 
 _HOMEPAGE = "https://physionet.org/content/mednli-bionlp19/1.0.1/"
-_LICENSE_OLD = "PhysioNet Credentialed Health Data License 1.5.0"
+_LICENSE = PhysioNetLicense1p5
 
 _URLS = {}
 

@@ -48,8 +48,8 @@ from bioc import pubtator
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import NCBILicense
 
 _LOCAL = False
 _CITATION = """\
@@ -82,20 +82,7 @@ disambiguation module based on cutting-edge deep learning techniques provide inc
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/pubtator/"
-_LICENSE_OLD = """\
-PUBLIC DOMAIN NOTICE
-National Center for Biotechnology Information
-
-This software/database is a "United States Government Work" under the terms of the United States Copyright Act.
-It was written as part of the authors' official duties as a United States Government employee and thus cannot be
-copyrighted. This software/database is freely available to the public for use. The National Library of Medicine
-and the U.S. Government have not placed any restriction on its use or reproduction.
-
-Although all reasonable efforts have been taken to ensure the accuracy and reliability of the software and data,
-the NLM and the U.S. Government do not and cannot warrant the performance or results that may be obtained by
-using this software or data. The NLM and the U.S. Government disclaim all warranties, express or implied,
-including warranties of performance, merchantability or fitness for any particular purpose.
-"""
+_LICENSE = NCBILicense
 
 _URLS = {
     "sample": "https://ftp.ncbi.nlm.nih.gov/pub/lu/PubTatorCentral/bioconcepts2pubtatorcentral.offset.sample",
@@ -201,7 +188,11 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        urls = _URLS["sample"] if self.config.subset_id.endswith("sample") else _URLS["full"]
+        urls = (
+            _URLS["sample"]
+            if self.config.subset_id.endswith("sample")
+            else _URLS["full"]
+        )
         data_dir = dl_manager.download_and_extract(urls)
 
         return [
@@ -214,7 +205,9 @@ class PubtatorCentralDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
+    def _generate_examples(
+        self, filepath: str, split: str
+    ) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
             for source_example in self._pubtator_to_source(filepath):
                 yield source_example["pmid"], source_example

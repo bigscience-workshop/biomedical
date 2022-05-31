@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2019_bb"
 _SOURCE_VIEW_NAME = "source"
@@ -70,7 +70,7 @@ and applications in microbiology.
 
 _HOMEPAGE = "https://sites.google.com/view/bb-2019/dataset"
 
-_LICENSE_OLD = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
+_LICENSE = Licenses.UNKNOWN
 
 _URLs = {
     "source": {

@@ -40,8 +40,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import UMLSLicense
 
 _LOCAL = True
 _CITATION = """\
@@ -79,7 +79,7 @@ MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 
-_LICENSE_OLD = "DUA (UMLS)"
+_LICENSE = UMLSLicense
 
 _URLS = {_DATASETNAME: ""}
 

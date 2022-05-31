@@ -84,7 +84,7 @@ For further information, please visit https://temu.bsc.es/codiesp or send an ema
 
 _HOMEPAGE = "https://temu.bsc.es/codiesp/"
 
-_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "codiesp": "https://zenodo.org/record/3837305/files/codiesp.zip?download=1",

@@ -52,8 +52,8 @@ from datasets import Version
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = True
 _CITATION = """\
@@ -100,7 +100,7 @@ Using this reference standard, 22 systems were developed for concept extraction,
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE_OLD = "External Data User Agreement"
+_LICENSE = Licenses.EXTERNAL_DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 

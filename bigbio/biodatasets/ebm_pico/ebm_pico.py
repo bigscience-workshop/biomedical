@@ -24,10 +24,11 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -61,9 +62,11 @@ aggregated to reduce noise. Test labels are collected from medical professionals
 
 _HOMEPAGE = "https://github.com/bepnye/EBM-NLP"
 
-_LICENSE_OLD = "UNKNOWN"
+_LICENSE = Licenses.UNKNOWN
 
-_URLS = {_DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"}
+_URLS = {
+    _DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"
+}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -136,7 +139,9 @@ def _get_entities_pico(
 
             for _indices in multiple_indices:
                 high_level_type = LABEL_DECODERS["starting_spans"][annotation_type][1]
-                fine_grained_type = LABEL_DECODERS["hierarchical_labels"][annotation_type][annotations[_indices[0]]]
+                fine_grained_type = LABEL_DECODERS["hierarchical_labels"][
+                    annotation_type
+                ][annotations[_indices[0]]]
                 annotation_text = " ".join([tokenized[ind] for ind in _indices])
 
                 char_start = document_content.find(annotation_text)
@@ -219,7 +224,9 @@ class EbmPico(datasets.GeneratorBasedBuilder):
         data_dir = dl_manager.download_and_extract(urls)
 
         documents_folder = Path(data_dir) / "ebm_nlp_2_00" / "documents"
-        annotations_folder = Path(data_dir) / "ebm_nlp_2_00" / "annotations" / "aggregated"
+        annotations_folder = (
+            Path(data_dir) / "ebm_nlp_2_00" / "annotations" / "aggregated"
+        )
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
@@ -239,7 +246,9 @@ class EbmPico(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, documents_folder, annotations_folder, split_folder: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, documents_folder, annotations_folder, split_folder: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         annotation_types = ["interventions", "outcomes", "participants"]
 
@@ -262,11 +271,15 @@ class EbmPico(datasets.GeneratorBasedBuilder):
                     with open(
                         f"{annotations_folder}/hierarchical_labels/{annotation_type}/{split_folder}/{document}"
                     ) as fp:
-                        annotation_dict[annotation_type] = [int(x) for x in fp.read().splitlines()]
+                        annotation_dict[annotation_type] = [
+                            int(x) for x in fp.read().splitlines()
+                        ]
                 except OSError:
                     annotation_dict[annotation_type] = []
 
-            ents = _get_entities_pico(annotation_dict, tokenized=tokenized, document_content=document_content)
+            ents = _get_entities_pico(
+                annotation_dict, tokenized=tokenized, document_content=document_content
+            )
 
             if self.config.schema == "source":
 
@@ -277,7 +290,9 @@ class EbmPico(datasets.GeneratorBasedBuilder):
                         {
                             "text": ent["annotation_text"],
                             "annotation_type": ent["high_level_annotation_type"],
-                            "fine_grained_annotation_type": ent["fine_grained_annotation_type"],
+                            "fine_grained_annotation_type": ent[
+                                "fine_grained_annotation_type"
+                            ],
                             "start": ent["char_start"],
                             "end": ent["char_end"],
                         }

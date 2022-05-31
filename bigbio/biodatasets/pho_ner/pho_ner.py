@@ -14,13 +14,14 @@
 # limitations under the License.
 
 import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense
 
 _LOCAL = False
 _CITATION = """@inproceedings{PhoNER_COVID19,
@@ -43,11 +44,13 @@ can be used in the context of not only the COVID-19 pandemic but also in other f
 
 _HOMEPAGE = "https://github.com/VinAIResearch/PhoNER_COVID19"
 
-_LICENSE_OLD = "\
+_LICENSE = CustomLicense(
+    text="\
 By downloading the PhoNER_COVID19 dataset, USER agrees: \
 - to use PhoNER_COVID19 for research or educational purposes only.\
 - to not distribute PhoNER_COVID19 or part of PhoNER_COVID19 in any original or modified form.\
 - and to cite our NAACL paper above whenever PhoNER_COVID19 is employed to help produce published results."
+)
 
 _URLS = {
     "source": "https://github.com/VinAIResearch/PhoNER_COVID19/archive/refs/heads/master.zip",
@@ -113,7 +116,9 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
                             "entities": [
                                 {
                                     "id": datasets.Value("int32"),
-                                    "offsets": datasets.Sequence([datasets.Value("int32")]),
+                                    "offsets": datasets.Sequence(
+                                        [datasets.Value("int32")]
+                                    ),
                                     "text": datasets.Sequence(datasets.Value("string")),
                                     "type": datasets.Value("string"),
                                 }
@@ -171,7 +176,9 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
         return entity_list, []
 
     @staticmethod
-    def extract_entity(entity_list: List, text: str, current_id: int, schema: str) -> List:
+    def extract_entity(
+        entity_list: List, text: str, current_id: int, schema: str
+    ) -> List:
         entities = []
         ignore_index = 0
         for index, (entity_type, entity) in enumerate(entity_list):
@@ -180,20 +187,28 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
                 continue
             else:
                 if schema == "source":
-                    entities.append({
-                        "id": index + current_id - ignore_index,
-                        "offsets": [(text.index(entity), text.index(entity) + len(entity))],
-                        "text": [entity],
-                        "type": entity_type,
-                    })
+                    entities.append(
+                        {
+                            "id": index + current_id - ignore_index,
+                            "offsets": [
+                                (text.index(entity), text.index(entity) + len(entity))
+                            ],
+                            "text": [entity],
+                            "type": entity_type,
+                        }
+                    )
                 elif schema == "bigbio_kb":
-                    entities.append({
-                        "id": str(index + current_id - ignore_index),
-                        "offsets": [(text.index(entity), text.index(entity) + len(entity))],
-                        "text": [entity],
-                        "type": entity_type,
-                        "normalized": [],
-                    })
+                    entities.append(
+                        {
+                            "id": str(index + current_id - ignore_index),
+                            "offsets": [
+                                (text.index(entity), text.index(entity) + len(entity))
+                            ],
+                            "text": [entity],
+                            "type": entity_type,
+                            "normalized": [],
+                        }
+                    )
         return entities
 
     def _generate_original_examples(self, contents, schema):
@@ -213,43 +228,58 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
                 passages_word.append(word)
                 # Get first value of entity
                 if type_ner is None:
-                    type_ner = entity.split('-')[-1]
+                    type_ner = entity.split("-")[-1]
                 # check whether current entity is changed
-                elif type_ner != entity.split('-')[-1]:
-                    entity_list, current_entity_list = self.join_entity(type_ner, current_entity_list, entity_list)
-                    type_ner = entity.split('-')[-1]
+                elif type_ner != entity.split("-")[-1]:
+                    entity_list, current_entity_list = self.join_entity(
+                        type_ner, current_entity_list, entity_list
+                    )
+                    type_ner = entity.split("-")[-1]
                 current_entity_list.append(word)
 
             else:
                 # join passage word
                 text = " ".join(passages_word)
-                entity_list, current_entity_list = self.join_entity(type_ner, current_entity_list, entity_list)
+                entity_list, current_entity_list = self.join_entity(
+                    type_ner, current_entity_list, entity_list
+                )
                 type_ner = None
                 if schema == "source":
-                    entities = self.extract_entity(entity_list, text, id, schema="source")
+                    entities = self.extract_entity(
+                        entity_list, text, id, schema="source"
+                    )
                     data = {
-                        "passages": [{
-                            "id": uid,
-                            "text": [text],
-                            "offsets": [(start_sentence, idx)],
-                            "entities": entities,
-                        }],
+                        "passages": [
+                            {
+                                "id": uid,
+                                "text": [text],
+                                "offsets": [(start_sentence, idx)],
+                                "entities": entities,
+                            }
+                        ],
                     }
                     id += len(entities)
                     start_sentence = idx + 2
 
                 elif schema == "bigbio_kb":
-                    passages_id = id+1
-                    entities = self.extract_entity(entity_list, text, current_id=passages_id+1, schema="bigbio_kb")
+                    passages_id = id + 1
+                    entities = self.extract_entity(
+                        entity_list,
+                        text,
+                        current_id=passages_id + 1,
+                        schema="bigbio_kb",
+                    )
                     data = {
                         "id": str(id),
                         "document_id": [],
-                        "passages": [{
-                            "id": str(passages_id),
-                            "type": "",
-                            "text": [text],
-                            "offsets": [(0, len(text))],
-                        }],
+                        "passages": [
+                            {
+                                "id": str(passages_id),
+                                "type": "",
+                                "text": [text],
+                                "offsets": [(0, len(text))],
+                            }
+                        ],
                         "entities": entities,
                         "relations": [],
                         "events": [],
@@ -268,21 +298,35 @@ class PhoNerDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             if self.config.subset_id == "pho_ner_word":
-                with open(os.path.join(filepath, f"word/{split}_word.conll"), encoding='utf-8') as f:
+                with open(
+                    os.path.join(filepath, f"word/{split}_word.conll"), encoding="utf-8"
+                ) as f:
                     contents = f.readlines()
             elif self.config.subset_id == "pho_ner_syllable":
-                with open(os.path.join(filepath, f"syllable/{split}_syllable.conll"), encoding='utf-8') as f:
+                with open(
+                    os.path.join(filepath, f"syllable/{split}_syllable.conll"),
+                    encoding="utf-8",
+                ) as f:
                     contents = f.readlines()
-            genny = self._generate_original_examples(contents=contents, schema=self.config.schema)
+            genny = self._generate_original_examples(
+                contents=contents, schema=self.config.schema
+            )
             for _id, sample in genny:
                 yield _id, sample
         elif self.config.schema == "bigbio_kb":
             if self.config.subset_id == "pho_ner_word":
-                with open(os.path.join(filepath, f"word/{split}_word.conll"), encoding='utf-8') as f:
+                with open(
+                    os.path.join(filepath, f"word/{split}_word.conll"), encoding="utf-8"
+                ) as f:
                     contents = f.readlines()
             elif self.config.subset_id == "pho_ner_syllable":
-                with open(os.path.join(filepath, f"syllable/{split}_syllable.conll"), encoding='utf-8') as f:
+                with open(
+                    os.path.join(filepath, f"syllable/{split}_syllable.conll"),
+                    encoding="utf-8",
+                ) as f:
                     contents = f.readlines()
-            genny = self._generate_original_examples(contents=contents, schema=self.config.schema)
+            genny = self._generate_original_examples(
+                contents=contents, schema=self.config.schema
+            )
             for _id, sample in genny:
                 yield _id, sample

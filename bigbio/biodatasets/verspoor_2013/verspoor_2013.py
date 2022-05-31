@@ -32,8 +32,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -63,7 +63,7 @@ application to genetic variation information in a range of diseases."""
 
 _HOMEPAGE = "NA"
 
-_LICENSE_OLD = "NA"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 

@@ -13,15 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import os
 import re
+
 import datasets
-import glob
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
-
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "ask_a_patient"
 
@@ -49,7 +50,7 @@ mapped to how they are formally written in medical ontologies (SNOMED-CT and AMT
 
 _HOMEPAGE = "https://zenodo.org/record/55013"
 
-_LICENSE_OLD = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLs = "https://zenodo.org/record/55013/files/datasets.zip"
 

@@ -14,16 +14,17 @@
 # limitations under the License.
 
 
+import itertools
 import os
 from pydoc import doc
-from typing import List, Tuple, Dict, Iterator
+from typing import Dict, Iterator, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
-import itertools
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -46,7 +47,7 @@ It can be used for NER tasks and NED tasks, This dataset has a single split"""
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
 
-_LICENSE_OLD = "freely available"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/tmVar/tmVar.Normalization.txt",
@@ -245,7 +246,9 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     assert line_pieces[3] == mention
                     assert line_pieces[4] == entity_id
                     assert line_pieces[5] == rsid
-                    logger.warning(f"Adding ProteinMutation semantic_type_id in Document ID: {pmid} Line: {line}")
+                    logger.warning(
+                        f"Adding ProteinMutation semantic_type_id in Document ID: {pmid} Line: {line}"
+                    )
                 else:
                     (
                         pmid_,
@@ -269,7 +272,9 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                 ) = line_pieces
 
             else:
-                logger.warning(f"Inconsistent entity format found. Skipping Document ID: {pmid} Line: {line}")
+                logger.warning(
+                    f"Inconsistent entity format found. Skipping Document ID: {pmid} Line: {line}"
+                )
                 continue
 
             entity = {

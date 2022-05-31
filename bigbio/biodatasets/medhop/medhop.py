@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
+import os
 
 import datasets
 
 from bigbio.utils import schemas
-from bigbio.utils.constants import Tasks
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Tasks
 from bigbio.utils.license import Licenses
 
 _LOCAL = False
@@ -71,7 +71,7 @@ _DATASETNAME = "MedHop"
 
 _HOMEPAGE = "http://qangaroo.cs.ucl.ac.uk/"
 
-_LICENSE_OLD = "CC BY-SA 3.0"
+_LICENSE = Licenses.CC_BY_SA_3p0
 
 _BASE_GDRIVE = "https://drive.google.com/uc?export=download&confirm=yTib&id="
 

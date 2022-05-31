@@ -28,8 +28,8 @@ import datasets
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -53,7 +53,7 @@ The corpus consists of about 2400 plant and disease entities and 300 annotated r
 """
 
 _HOMEPAGE = "http://gcancer.org/pdr/"
-_LICENSE_OLD = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {_DATASETNAME: "http://gcancer.org/pdr/Plant-Disease_Corpus.tar.gz"}
 

@@ -57,8 +57,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = True
 _CITATION = """\
@@ -129,7 +129,7 @@ i.e. `anticoagulation` != `anticoagulation.` from doc_id: 818404
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE_OLD = "External Data User Agreement"
+_LICENSE = Licenses.EXTERNAL_DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 

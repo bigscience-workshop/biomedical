@@ -71,6 +71,7 @@ human annotations of all chemicals, diseases and their interactions in 1,500 Pub
 
 _HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
 
+_LICENSE = Licenses.
 _LICENSE_OLD = CustomLicense(
     name="Public Domain Mark 1.0",
     text="""This work has been identified as being free of known restrictions under copyright law,

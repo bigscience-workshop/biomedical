@@ -17,15 +17,16 @@
 CORD-NER dataset covers 75 fine-grained entity types: In addition to the common biomedical entity types (e.g., genes, chemicals and diseases), it covers many new entity types related explicitly to the COVID-19 studies (e.g., coronaviruses, viral proteins, evolution, materials, substrates and immune responses), which may benefit research on COVID-19 related virus, spreading mechanisms, and potential vaccines. CORD-NER annotation is a combination of four sources with different NER methods.
 """
 
-import os
 import json
-from typing import List, Tuple, Dict
+import os
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense
 
 _LOCAL = False
 _CITATION = """\
@@ -60,7 +61,9 @@ CORD-NER dataset covers 75 fine-grained entity types: In addition to the common 
 _HOMEPAGE = "https://xuanwang91.github.io/2020-03-20-cord19-ner/"
 
 
-_LICENSE_OLD = """
+_LICENSE = CustomLicense(
+    link="https://www.kaggle.com/datasets/allen-institute-for-ai/CORD-19-research-challenge?select=metadata.csv",
+    text="""
     This dataset is made from multiple datasets by Allen Institute 
     for AI in partnership with the Chan Zuckerberg Initiative, Georgetown 
     University’s Center for Security and Emerging Technology, Microsoft Research, 
@@ -68,7 +71,8 @@ _LICENSE_OLD = """
     of Health, in coordination with The White House Office of Science 
     and Technology Policy . The licenses are different depending on the source.
     The full license details can be found here: https://www.kaggle.com/datasets/allen-institute-for-ai/CORD-19-research-challenge?select=metadata.csv
-    """
+    """,
+)
 
 _URLS = {
     _DATASETNAME: {

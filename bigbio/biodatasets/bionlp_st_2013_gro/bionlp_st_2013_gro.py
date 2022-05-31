@@ -21,8 +21,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2013_gro"
 _SOURCE_VIEW_NAME = "source"
@@ -53,7 +53,7 @@ relations. A data set from the bio NLP shared tasks competition from 2013
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-gro"
 
-_LICENSE_OLD = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
+_LICENSE = GeniaProjectLicense
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2013-gro/archive/refs/heads/master.zip",

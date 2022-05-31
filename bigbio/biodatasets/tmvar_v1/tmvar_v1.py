@@ -14,16 +14,17 @@
 # limitations under the License.
 
 
+import itertools
 import os
 from pydoc import doc
-from typing import List, Tuple, Dict, Iterator
+from typing import Dict, Iterator, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
-import itertools
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -46,7 +47,7 @@ The dataset is split into train(334) and test(166) splits"""
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
 
-_LICENSE_OLD = "freely available"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/tmVar/tmVarCorpus.zip",

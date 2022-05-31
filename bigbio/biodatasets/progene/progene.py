@@ -22,8 +22,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -57,7 +57,7 @@ The corpus was developed in the context of the StemNet project (http://www.stemn
 
 _HOMEPAGE = "https://zenodo.org/record/3698568#.YlVHqdNBxeg"
 
-_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 # using custom url: original distribution includes trained models (>25GB) and original dataset license allow for redistribution
 _URLS = "https://huggingface.co/datasets/bigscience-biomedical/progene/resolve/main/crossvalidation_data.zip"
@@ -109,7 +109,9 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
         else:
-            raise ValueError("config schema is one of source or bigbio_kb for Progene Dataset")
+            raise ValueError(
+                "config schema is one of source or bigbio_kb for Progene Dataset"
+            )
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -136,7 +138,10 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
                     split_id = f"split_{split_num}_{datasets.Split.TEST}"
 
                 splits.append(
-                    datasets.SplitGenerator(name=split_id, gen_kwargs={"filepath": file, "split_id": split_id})
+                    datasets.SplitGenerator(
+                        name=split_id,
+                        gen_kwargs={"filepath": file, "split_id": split_id},
+                    )
                 )
 
         return splits
@@ -218,7 +223,11 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
                 entity_dicts.append(entity_dict)
 
             if self.config.schema == "source":
-                yield f"{split_id}_{guid}", {"id": f"{split_id}_{guid}", "tokens": tokens, "tags": ner_tags}
+                yield f"{split_id}_{guid}", {
+                    "id": f"{split_id}_{guid}",
+                    "tokens": tokens,
+                    "tags": ner_tags,
+                }
             elif self.config.schema == "bigbio_kb":
                 yield f"{split_id}_{guid}", {
                     "id": f"{split_id}_{guid}",
@@ -317,7 +326,9 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
         text_string = " ".join(text)
         for entity, start_word, end_word in entity_offsets:
             start_char = spans[start_word][0]
-            end_char = spans[end_word][1] - 1  # The offsets include the space in the text
+            end_char = (
+                spans[end_word][1] - 1
+            )  # The offsets include the space in the text
             entity_text = text_string[start_char:end_char]
             entity_offsets = [start_char, end_char]
             entities.append((entity_text, entity_offsets))

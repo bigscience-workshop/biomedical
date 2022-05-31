@@ -31,8 +31,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -67,7 +67,7 @@ sizes, also releasing our code, and providing a leaderboard.
 
 _HOMEPAGE = "https://github.com/PetrosStav/BioMRC_code"
 
-_LICENSE_OLD = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     "large": {
@@ -95,8 +95,12 @@ _URLS = {
         },
     },
     "tiny": {
-        "A": {"test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny.json.gz"},
-        "B": {"test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny_B.json.gz"},
+        "A": {
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny.json.gz"
+        },
+        "B": {
+            "test": "https://archive.org/download/biomrc_dataset/biomrc_tiny/dataset_tiny_B.json.gz"
+        },
     },
 }
 
@@ -180,15 +184,25 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
 
         if version == "tiny":
             return [
-                datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": downloaded_files["test"]}),
+                datasets.SplitGenerator(
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={"filepath": downloaded_files["test"]},
+                ),
             ]
         else:
             return [
-                datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": downloaded_files["train"]}),
                 datasets.SplitGenerator(
-                    name=datasets.Split.VALIDATION, gen_kwargs={"filepath": downloaded_files["val"]}
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={"filepath": downloaded_files["train"]},
                 ),
-                datasets.SplitGenerator(name=datasets.Split.TEST, gen_kwargs={"filepath": downloaded_files["test"]}),
+                datasets.SplitGenerator(
+                    name=datasets.Split.VALIDATION,
+                    gen_kwargs={"filepath": downloaded_files["val"]},
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.TEST,
+                    gen_kwargs={"filepath": downloaded_files["test"]},
+                ),
             ]
 
     def _generate_examples(self, filepath):
@@ -198,17 +212,32 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
             with open(filepath, encoding="utf-8") as fp:
                 biomrc = json.load(fp)
                 for _id, (ab, ti, el, an) in enumerate(
-                    zip(biomrc["abstracts"], biomrc["titles"], biomrc["entities_list"], biomrc["answers"])
+                    zip(
+                        biomrc["abstracts"],
+                        biomrc["titles"],
+                        biomrc["entities_list"],
+                        biomrc["answers"],
+                    )
                 ):
                     el = [self._parse_dict_from_entity(entity) for entity in el]
                     an = self._parse_dict_from_entity(an)
-                    yield _id, {"abstract": ab, "title": ti, "entities_list": el, "answer": an}
+                    yield _id, {
+                        "abstract": ab,
+                        "title": ti,
+                        "entities_list": el,
+                        "answer": an,
+                    }
         elif self.config.schema == "bigbio_qa":
             with open(filepath, encoding="utf-8") as fp:
                 uid = it.count(0)
                 biomrc = json.load(fp)
                 for _id, (ab, ti, el, an) in enumerate(
-                    zip(biomrc["abstracts"], biomrc["titles"], biomrc["entities_list"], biomrc["answers"])
+                    zip(
+                        biomrc["abstracts"],
+                        biomrc["titles"],
+                        biomrc["entities_list"],
+                        biomrc["answers"],
+                    )
                 ):
                     # remove info such as code, label, synonyms from answer and choices
                     # f.e. @entity1 :: ('9606', 'Species') :: ['patients', 'patient']"
@@ -227,6 +256,10 @@ class BiomrcDataset(datasets.GeneratorBasedBuilder):
     def _parse_dict_from_entity(self, entity):
         if "::" in entity:
             pseudoidentifier, identifier, synonyms = entity.split(" :: ")
-            return {"pseudoidentifier": pseudoidentifier, "identifier": identifier, "synonyms": synonyms}
+            return {
+                "pseudoidentifier": pseudoidentifier,
+                "identifier": identifier,
+                "synonyms": synonyms,
+            }
         else:
             return {"pseudoidentifier": entity, "identifier": "", "synonyms": ""}

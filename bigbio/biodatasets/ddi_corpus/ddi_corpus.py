@@ -27,8 +27,8 @@ import datasets
 import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -55,7 +55,7 @@ interactions. It contains 1025 documents from two different sources: DrugBank da
 """
 
 _HOMEPAGE = "https://github.com/isegura/DDICorpus"
-_LICENSE_OLD = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) "
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 
 _URLS = {

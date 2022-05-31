@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2013_ge"
 _SOURCE_VIEW_NAME = "source"
@@ -53,7 +53,7 @@ NFkB as a model domain of Biomedical IE
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-ge"
 
-_LICENSE_OLD = "https://creativecommons.org/licenses/by/3.0/ CC BY 3.0"
+_LICENSE = GeniaProjectLicense
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",

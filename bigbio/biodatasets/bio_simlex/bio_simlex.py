@@ -27,8 +27,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LOCAL = False
@@ -58,16 +58,7 @@ for particular word classes (e.g. verbs).
 _HOMEPAGE = "https://github.com/cambridgeltl/bio-simverb"
 
 
-_LICENSE_OLD = """Open Access This article is distributed under the terms of the
-Creative Commons Attribution 4.0 International License
-(http://creativecommons.org/licenses/by/4.0/), which permits
-unrestricted use, distribution, and reproduction in any medium,
-provided you give appropriate credit to the original author(s) and
-the source, provide a link to the Creative Commons license, and
-indicate if changes were made. The Creative Commons Public Domain
-Dedication waiver (http://creativecommons.org/publicdomain/zero/1.0/)
-applies to the data made available in this article, unless otherwise stated."""
-
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/cambridgeltl/bio-simverb/blob/master/wvlib/word-similarities/\

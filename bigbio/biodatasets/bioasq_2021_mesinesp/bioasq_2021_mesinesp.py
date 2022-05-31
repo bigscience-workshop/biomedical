@@ -51,8 +51,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -108,7 +108,7 @@ procedures extracted from the BSC NERs documents.
 _HOMEPAGE = "https://zenodo.org/record/5602914#.YhSXJ5PMKWt"
 
 
-_LICENSE_OLD = "CC-BY-4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: {

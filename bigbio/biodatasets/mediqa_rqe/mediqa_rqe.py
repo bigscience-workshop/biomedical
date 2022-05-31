@@ -12,20 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import json
 import glob
-import datasets
+import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
 from xml.etree import ElementTree as ET
 
+import datasets
+
 import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -48,7 +49,7 @@ The objective of the RQE task is to identify entailment between two questions in
 """
 
 _HOMEPAGE = "https://sites.google.com/view/mediqa2019"
-_LICENSE_OLD = "-"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip"
@@ -58,8 +59,10 @@ _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
+
 class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
     """MediqaRQE Dataset"""
+
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
@@ -79,7 +82,7 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
             description="MEDIQA RQE BigBio schema",
             schema="bigbio_te",
             subset_id="mediqa_rqe_bigbio_te",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "mediqa_rqe_source"
@@ -91,7 +94,7 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
                     "pid": datasets.Value("string"),
                     "value": datasets.Value("string"),
                     "chq": datasets.Value("string"),
-                    "faq": datasets.Value("string")
+                    "faq": datasets.Value("string"),
                 }
             )
         elif self.config.schema == "bigbio_te":
@@ -112,38 +115,36 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TrainingSet-AMIA2016.xml"
-                }
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TrainingSet-AMIA2016.xml"
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-ValidationSet-AMIA2016.xml"
-                }
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-ValidationSet-AMIA2016.xml"
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": data_dir / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml"
-                }
-            )
+                    "filepath": data_dir
+                    / "MEDIQA2019-master/MEDIQA_Task2_RQE/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml"
+                },
+            ),
         ]
 
     def _generate_examples(self, filepath: Path) -> Iterator[Tuple[str, Dict]]:
         dom = ET.parse(filepath).getroot()
-        for row in dom.iterfind('pair'):
-            pid = row.attrib['pid']
-            value = row.attrib['value']
-            chq = row.find('chq').text
-            faq = row.find('faq').text
+        for row in dom.iterfind("pair"):
+            pid = row.attrib["pid"]
+            value = row.attrib["value"]
+            chq = row.find("chq").text
+            faq = row.find("faq").text
 
             if self.config.schema == "source":
-                yield pid, {
-                    "pid": pid,
-                    "value": value,
-                    "chq": chq,
-                    "faq": faq
-                }
+                yield pid, {"pid": pid, "value": value, "chq": chq, "faq": faq}
             elif self.config.schema == "bigbio_te":
                 yield pid, {
                     "id": pid,

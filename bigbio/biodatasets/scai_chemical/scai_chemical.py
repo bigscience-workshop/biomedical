@@ -22,13 +22,14 @@ found in MEDLINE text.
 """
 
 import gzip
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -50,7 +51,7 @@ found in MEDLINE text.
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/corpora-for-chemical-entity-recognition.html"
 
-_LICENSE_OLD = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/Corpora-for-Chemical-Entity-Recognition/chemicals-test-corpus-27-04-2009-v3_iob.gz",
@@ -68,7 +69,6 @@ class ScaiChemicalDataset(datasets.GeneratorBasedBuilder):
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -235,7 +235,7 @@ class ScaiChemicalDataset(datasets.GeneratorBasedBuilder):
                 {
                     "offsets": [token_start, token_end],
                     "text": token_text,
-                    "tag": token_tag
+                    "tag": token_tag,
                 }
             )
             if entity_text != "":

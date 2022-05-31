@@ -28,8 +28,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -55,7 +55,7 @@ _DESCRIPTION = (
 
 _HOMEPAGE = "https://github.com/rockt/SETH"
 
-_LICENSE_OLD = "Apache License 2.0"
+_LICENSE = Licenses.APACHE_2p0
 
 _URLS = {
     "source": "https://github.com/rockt/SETH/archive/refs/heads/master.zip",

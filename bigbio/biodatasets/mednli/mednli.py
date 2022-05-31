@@ -75,6 +75,7 @@ drawn about the patient.
 
 
 _HOMEPAGE = "https://physionet.org/content/mednli/1.0.0/"
+_LICENSE = Licenses.
 _LICENSE_OLD = "PhysioNet Credentialed Health Data License 1.5.0"
 
 _URLS = {}

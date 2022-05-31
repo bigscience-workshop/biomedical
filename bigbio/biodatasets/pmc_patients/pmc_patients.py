@@ -27,8 +27,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -50,7 +50,7 @@ This dataset is used for calculating the similarity between two patient descript
 
 _HOMEPAGE = "https://github.com/zhao-zy15/PMC-Patients"
 
-_LICENSE_OLD = "CC BY-NC-SA"
+_LICENSE = Licenses.CC_BY_NC_SA_4p0
 
 _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?id=1vFCLy_CF8fxPDZvDtHPR6Dl6x9l0TyvW&export=download",
@@ -64,7 +64,7 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
-    """PPS dataset is a list of triplets. 
+    """PPS dataset is a list of triplets.
     Each entry is in format (patient_uid_1, patient_uid_2, similarity) and their
     respective texts.
     where similarity has three values:0, 1, 2, indicating corresponding similarity.
@@ -122,7 +122,10 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "datasets/task_2_patient2patient_similarity/PPS_train.json"),
+                    "filepath": os.path.join(
+                        data_dir,
+                        "datasets/task_2_patient2patient_similarity/PPS_train.json",
+                    ),
                     "split": "train",
                     "data_dir": data_dir,
                 },
@@ -130,7 +133,10 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "datasets/task_2_patient2patient_similarity/PPS_test.json"),
+                    "filepath": os.path.join(
+                        data_dir,
+                        "datasets/task_2_patient2patient_similarity/PPS_test.json",
+                    ),
                     "split": "test",
                     "data_dir": data_dir,
                 },
@@ -138,14 +144,19 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "datasets/task_2_patient2patient_similarity/PPS_dev.json"),
+                    "filepath": os.path.join(
+                        data_dir,
+                        "datasets/task_2_patient2patient_similarity/PPS_dev.json",
+                    ),
                     "split": "dev",
                     "data_dir": data_dir,
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, split: str, data_dir: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepath, split: str, data_dir: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         uid = 0
@@ -173,7 +184,9 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_pairs":
             source_files = os.path.join(data_dir, f"datasets/PMC-Patients_{split}.json")
-            src_frame = pd.read_json(source_files, encoding="utf8").set_index("patient_uid")
+            src_frame = pd.read_json(source_files, encoding="utf8").set_index(
+                "patient_uid"
+            )
             for key, (id1, id2, label) in enumerate(ret_file):
                 text_1 = lookup_text(id1, src_frame)
                 text_2 = lookup_text(id2, src_frame)
@@ -181,6 +194,12 @@ class PMCPatientsDataset(datasets.GeneratorBasedBuilder):
                 # if any of the lookup texts are empty skip the sample
                 if text_1 == "" or text_2 == "":
                     continue
-                feature_dict = {"id": uid, "document_id": "NULL", "text_1": text_1, "text_2": text_2, "label": label}
+                feature_dict = {
+                    "id": uid,
+                    "document_id": "NULL",
+                    "text_1": text_1,
+                    "text_2": text_2,
+                    "label": label,
+                }
                 uid += 1
                 yield key, feature_dict

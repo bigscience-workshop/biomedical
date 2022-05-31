@@ -29,8 +29,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LOCAL = False
@@ -62,7 +62,7 @@ comprehension models can obtain necessary knowledge for answering the questions.
 
 _HOMEPAGE = "https://github.com/jind11/MedQA"
 
-_LICENSE_OLD = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?export=download&confirm=t&id=1ImYUSLk9JbgHXOemfvyiDiirluZHPeQw",
@@ -157,15 +157,27 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
             }
         elif self.config.subset_id == "med_qa_tw_en":
             paths = {
-                "train": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "en", "train-2en.jsonl"),
-                "test": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "en", "test-2en.jsonl"),
-                "valid": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "en", "dev-2en.jsonl"),
+                "train": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "en", "train-2en.jsonl"
+                ),
+                "test": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "en", "test-2en.jsonl"
+                ),
+                "valid": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "en", "dev-2en.jsonl"
+                ),
             }
         elif self.config.subset_id == "med_qa_tw_zh":
             paths = {
-                "train": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "zh", "train-2zh.jsonl"),
-                "test": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "zh", "test-2zh.jsonl"),
-                "valid": os.path.join(base_dir, "Taiwan", "tw_translated_jsonl", "zh", "dev-2zh.jsonl"),
+                "train": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "zh", "train-2zh.jsonl"
+                ),
+                "test": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "zh", "test-2zh.jsonl"
+                ),
+                "valid": os.path.join(
+                    base_dir, "Taiwan", "tw_translated_jsonl", "zh", "dev-2zh.jsonl"
+                ),
             }
 
         return [
@@ -197,7 +209,10 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
         if self.config.schema == "source":
             for key, example in data.iterrows():
                 example = example.to_dict()
-                example["options"] = [{"key": key, "value": value} for key, value in example["options"].items()]
+                example["options"] = [
+                    {"key": key, "value": value}
+                    for key, value in example["options"].items()
+                ]
                 yield key, example
 
         elif self.config.schema == "bigbio_qa":

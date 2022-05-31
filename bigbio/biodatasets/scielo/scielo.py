@@ -18,10 +18,11 @@ Parallel corpus of full-text articles in Portuguese, English and Spanish from Sc
 from typing import IO, Any, Generator, List, Optional, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -43,7 +44,7 @@ as well as trilingual aligned for a small subset of sentences. Alignment was car
 
 _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWSRB"
 
-_LICENSE_OLD = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "en_es": "https://ndownloader.figstatic.com/files/14019287",
@@ -110,7 +111,9 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             lang_list: List[str] = self.config.subset_id.split("_")[1:]
-            features = datasets.Features({"translation": datasets.features.Translation(languages=lang_list)})
+            features = datasets.Features(
+                {"translation": datasets.features.Translation(languages=lang_list)}
+            )
 
         elif self.config.schema == "bigbio_t2t":
             features = schemas.text2text_features
@@ -180,7 +183,9 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
 
             if languages == "en_pt_es":
                 source, target, target_2 = tuple(languages.split("_"))
-                for idx, (l1, l2, l3) in enumerate(zip(source_sentences, target_sentences, target_sentences_2)):
+                for idx, (l1, l2, l3) in enumerate(
+                    zip(source_sentences, target_sentences, target_sentences_2)
+                ):
                     result = {"translation": {source: l1, target: l2, target_2: l3}}
                     yield idx, result
             else:

@@ -50,6 +50,7 @@ and chemical entities and 600 plant-chemical relationships which are drawn from 
 """
 
 _HOMEPAGE = "http://210.107.182.73/plantchemcorpus.htm"
+_LICENSE = Licenses.
 _LICENSE_OLD = ""
 
 _URLS = {_DATASETNAME: "http://210.107.182.73/1109_corpus_units_STformat.tar"}

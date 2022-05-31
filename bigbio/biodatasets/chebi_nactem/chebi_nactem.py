@@ -21,8 +21,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import parse_brat_file
 
 _LOCAL = False
@@ -51,7 +51,7 @@ In total, our corpus provides over 15000 named entity annotations and over 6,000
 
 _HOMEPAGE = "http://www.nactem.ac.uk/chebi"
 
-_LICENSE_OLD = "Creative Commons Attribution 4.0 International License. (https://creativecommons.org/licenses/by/4.0/)"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/chebi/ChEBI.zip",

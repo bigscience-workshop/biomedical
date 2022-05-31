@@ -31,8 +31,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _LOCAL = False
 _CITATION = """\
@@ -84,7 +84,7 @@ static relations, relations such as part-of that hold between entities without (
 
 _HOMEPAGE = "http://www.geniaproject.org/genia-corpus/relation-corpus"
 
-_LICENSE_OLD = """GENIA Project License for Annotated Corpora"""
+_LICENSE = GeniaProjectLicense
 
 _URLS = {
     _DATASETNAME: {

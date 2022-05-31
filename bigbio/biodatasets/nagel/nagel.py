@@ -46,6 +46,7 @@ A set of 100 abstracts annotated by Kevin Nagel with protein, residue, organism 
 
 _HOMEPAGE = "https://sourceforge.net/projects/bionlp-corpora/files/ProteinResidue/"
 
+_LICENSE = Licenses.
 _LICENSE_OLD = """
 Copyright (c) 2011 Kevin Nagel
 Permission is hereby granted, free of charge, to any person obtaining a copy of this

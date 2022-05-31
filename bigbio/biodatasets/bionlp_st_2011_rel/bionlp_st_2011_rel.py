@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2011_rel"
 _SOURCE_VIEW_NAME = "source"
@@ -62,7 +62,7 @@ gene/protein and an associated entity.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-rel"
 
-_LICENSE_OLD = "License Terms for BioNLP Shared Task 2011 Data"
+_LICENSE = GeniaProjectLicense
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",

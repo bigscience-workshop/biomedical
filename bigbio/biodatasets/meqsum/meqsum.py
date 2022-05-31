@@ -30,8 +30,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -57,7 +57,7 @@ summarized consumer health questions.
 
 _HOMEPAGE = "https://github.com/abachaa/MeQSum"
 
-_LICENSE_OLD = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MeQSum/raw/master/MeQSum_ACL2019_BenAbacha_Demner-Fushman.xlsx",
@@ -142,7 +142,10 @@ class MeQSumDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_t2t":
             corpus["id"] = corpus.index
-            corpus.rename(columns={"File": "document_id", "CHQ": "text_1", "Summary": "text_2"}, inplace=True)
+            corpus.rename(
+                columns={"File": "document_id", "CHQ": "text_1", "Summary": "text_2"},
+                inplace=True,
+            )
             corpus["text_1_name"] = ""
             corpus["text_2_name"] = ""
             for idx, example in corpus.iterrows():

@@ -53,8 +53,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import UMLSLicense
 
 _LOCAL = True
 _CITATION = """\
@@ -84,7 +84,7 @@ of the instances. Evaluations were only used when the evaluators completed all 1
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html"
 
-_LICENSE_OLD = "DUA (UMLS)"
+_LICENSE = UMLSLicense
 
 _URLS = {
     "UMLS": "UMLS1999.tar.gz",

@@ -38,8 +38,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LOCAL = False
@@ -75,7 +75,7 @@ Recognition and Relation Extraction.
 
 _HOMEPAGE = ""
 
-_LICENSE_OLD = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/zipball/master",

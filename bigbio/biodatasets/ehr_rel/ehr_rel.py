@@ -28,8 +28,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -62,7 +62,7 @@ A detailed analysis of the concepts in the dataset reveals a far larger coverage
 
 _HOMEPAGE = "https://github.com/babylonhealth/EHR-Rel"
 
-_LICENSE_OLD = "Apache License 2.0"
+_LICENSE = Licenses.APACHE_2p0
 
 _URLS = {
     _DATASETNAME: "https://github.com/babylonhealth/EHR-Rel/archive/refs/heads/master.zip",

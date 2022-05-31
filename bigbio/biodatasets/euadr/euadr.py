@@ -1,10 +1,11 @@
-import datasets
 import os
+
+import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -34,7 +35,7 @@ Corpora with specific entities and relationships annotated are essential to trai
 
 _HOMEPAGE = "https://www.sciencedirect.com/science/article/pii/S1532046412000573"
 
-_LICENSE_OLD = "Elsevier user license"
+_LICENSE = Licenses.UNKNOWN
 
 _URL = "https://biosemantics.erasmusmc.nl/downloads/euadr.tgz"
 

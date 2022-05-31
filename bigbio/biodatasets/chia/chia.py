@@ -52,7 +52,7 @@ by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12
 """
 
 _HOMEPAGE = "https://github.com/WengLab-InformaticsResearch/CHIA"
-_LICENSE_OLD = "CC-BY-4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: "https://figshare.com/ndownloader/files/21728850",

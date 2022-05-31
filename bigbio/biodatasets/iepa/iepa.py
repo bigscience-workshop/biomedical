@@ -30,8 +30,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -55,7 +55,7 @@ each of which contains a specific pair of co-occurring chemicals.
 
 _HOMEPAGE = "http://psb.stanford.edu/psb-online/proceedings/psb02/abstracts/p326.html"
 
-_LICENSE_OLD = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: {
@@ -183,7 +183,9 @@ class IepaDataset(datasets.GeneratorBasedBuilder):
             origID_doc = self._strict_get_attribute(document, "origID")
             sentences = []
             for sentence in document.getElementsByTagName("sentence"):
-                offsets_sent = self._strict_get_attribute(sentence, "charOffset").split("-")
+                offsets_sent = self._strict_get_attribute(sentence, "charOffset").split(
+                    "-"
+                )
                 id_sent = self._strict_get_attribute(sentence, "id")
                 origID_sent = self._strict_get_attribute(sentence, "origID")
                 text_sent = self._strict_get_attribute(sentence, "text")
@@ -193,8 +195,17 @@ class IepaDataset(datasets.GeneratorBasedBuilder):
                     id_ent = self._strict_get_attribute(entity, "id")
                     origID_ent = self._strict_get_attribute(entity, "origID")
                     text_ent = self._strict_get_attribute(entity, "text")
-                    offsets_ent = self._strict_get_attribute(entity, "charOffset").split("-")
-                    entities.append({"id": id_ent, "origID": origID_ent, "text": text_ent, "offsets": offsets_ent})
+                    offsets_ent = self._strict_get_attribute(
+                        entity, "charOffset"
+                    ).split("-")
+                    entities.append(
+                        {
+                            "id": id_ent,
+                            "origID": origID_ent,
+                            "text": text_ent,
+                            "offsets": offsets_ent,
+                        }
+                    )
 
                 interactions = []
                 for interaction in sentence.getElementsByTagName("interaction"):
@@ -202,7 +213,9 @@ class IepaDataset(datasets.GeneratorBasedBuilder):
                     e1_int = self._strict_get_attribute(interaction, "e1")
                     e2_int = self._strict_get_attribute(interaction, "e2")
                     type_int = self._strict_get_attribute(interaction, "type")
-                    interactions.append({"id": id_int, "e1": e1_int, "e2": e2_int, "type": type_int})
+                    interactions.append(
+                        {"id": id_int, "e1": e1_int, "e2": e2_int, "type": type_int}
+                    )
 
                 sentences.append(
                     {
@@ -214,7 +227,12 @@ class IepaDataset(datasets.GeneratorBasedBuilder):
                         "interactions": interactions,
                     }
                 )
-            yield id_doc, {"id": id_doc, "PMID": pmid_doc, "origID": origID_doc, "sentences": sentences}
+            yield id_doc, {
+                "id": id_doc,
+                "PMID": pmid_doc,
+                "origID": origID_doc,
+                "sentences": sentences,
+            }
 
     def _strict_get_attribute(self, element, key):
         if element.hasAttribute(key):

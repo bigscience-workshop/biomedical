@@ -61,6 +61,7 @@ hat Multi-XScience is well suited for abstractive models.
 
 _HOMEPAGE = "https://github.com/yaolu/Multi-XScience"
 
+_LICENSE = Licenses.
 _LICENSE_OLD = "MIT License"
 
 _URLS = {

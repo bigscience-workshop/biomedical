@@ -19,14 +19,15 @@ Relation Extraction corpus with multiple entity types (e.g., gene/protein, disea
 
 import itertools
 import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+from bioc import pubtator
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
-from bioc import pubtator
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LOCAL = False
@@ -58,7 +59,7 @@ _DESCRIPTION = """Relation Extraction corpus with multiple entity types (e.g., g
 
 _HOMEPAGE = "https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/"
 
-_LICENSE_OLD = "NA"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip",

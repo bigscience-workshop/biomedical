@@ -37,8 +37,8 @@ import numpy as np
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -61,7 +61,7 @@ citation context in the computer science and biomedical domains.
 
 _HOMEPAGE = "https://allenai.org/data/scicite"
 
-_LICENSE_OLD = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://s3-us-west-2.amazonaws.com/ai2-s2-research/scicite/scicite.tar.gz",
@@ -113,7 +113,9 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
                     "sectionName": datasets.Value("string"),
                     "string": datasets.Value("string"),
                     "citeEnd": datasets.Value("int64"),
-                    "label": datasets.features.ClassLabel(names=["method", "background", "result"]),
+                    "label": datasets.features.ClassLabel(
+                        names=["method", "background", "result"]
+                    ),
                     "label_confidence": datasets.Value("float"),
                     "label2": datasets.features.ClassLabel(
                         names=["supportive", "not_supportive", "cant_determine", "none"]
@@ -133,7 +135,11 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
             raise ValueError("Unrecognized schema: %s" % self.config.schema)
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=str(_LICENSE), citation=_CITATION,
+            description=_DESCRIPTION,
+            features=features,
+            homepage=_HOMEPAGE,
+            license=str(_LICENSE),
+            citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
@@ -144,15 +150,24 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "train.jsonl"), "split": "train", },
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "scicite", "train.jsonl"),
+                    "split": "train",
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "test.jsonl"), "split": "test", },
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "scicite", "test.jsonl"),
+                    "split": "test",
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={"filepath": os.path.join(data_dir, "scicite", "dev.jsonl"), "split": "dev", },
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "scicite", "dev.jsonl"),
+                    "split": "dev",
+                },
             ),
         ]
 
@@ -185,8 +200,12 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
                         "citeEnd": _safe_int(example["citeEnd"]),
                         "citeStart": _safe_int(example["citeStart"]),
                         "source": str(example["source"]),
-                        "label_confidence": float(example.get("label_confidence", np.nan)),
-                        "label2_confidence": float(example.get("label2_confidence", np.nan)),
+                        "label_confidence": float(
+                            example.get("label_confidence", np.nan)
+                        ),
+                        "label2_confidence": float(
+                            example.get("label2_confidence", np.nan)
+                        ),
                         "id": str(example["id"]),
                         "unique_id": str(example["unique_id"]),
                     }

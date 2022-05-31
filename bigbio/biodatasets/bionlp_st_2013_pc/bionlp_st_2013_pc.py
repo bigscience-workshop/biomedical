@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
@@ -61,7 +61,7 @@ a promising approach to supporting pathway curation efforts.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-pc"
 
-_LICENSE_OLD = "https://creativecommons.org/licenses/by/3.0/ CC BY-SA 3.0"
+_LICENSE = GeniaProjectLicense
 
 _URLs = {
     "bionlp_st_2013_pc": "https://github.com/openbiocorpora/bionlp-st-2013-pc/archive/refs/heads/master.zip",

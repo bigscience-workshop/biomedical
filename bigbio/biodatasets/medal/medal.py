@@ -26,7 +26,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
+from bigbio.utils.license import NLMLicense
 from bigbio.utils.constants import Tasks
 
 logger = datasets.logging.get_logger(__name__)
@@ -56,23 +56,7 @@ pre-training in the medical domain.
 
 _HOMEPAGE = "https://github.com/BruceWen120/medal"
 
-_LICENSE_OLD = """\
-The original dataset was retrieved and modified from the NLM website. By using this dataset, you are bound by the terms and conditions specified by NLM:
-INTRODUCTION
-Downloading data from the National Library of Medicine FTP servers indicates your acceptance of the following Terms and Conditions: No charges, usage fees or royalties are paid to NLM for this data.
-MEDLINE/PUBMED SPECIFIC TERMS
-NLM freely provides PubMed/MEDLINE data. Please note some PubMed/MEDLINE abstracts may be protected by copyright.
-GENERAL TERMS AND CONDITIONS
-Users of the data agree to:
-- acknowledge NLM as the source of the data by including the phrase "Courtesy of the U.S. National Library of Medicine" in a clear and conspicuous manner,
-properly use registration and/or trademark symbols when referring to NLM products, and
-- not indicate or imply that NLM has endorsed its products/services/applications.
-Users who republish or redistribute the data (services, products or raw data) agree to:
-- maintain the most current version of all distributed data, or
-- make known in a clear and conspicuous manner that the products/services/applications do not reflect the most current/accurate data available from NLM.
-These data are produced with a reasonable standard of care, but NLM makes no warranties express or implied, including no warranty of merchantability or fitness for particular purpose, regarding the accuracy or completeness of the data. Users agree to hold NLM and the U.S. Government harmless from any liability resulting from errors in the data. NLM disclaims any liability for any consequences due to use, misuse, or interpretation of information contained or not contained in the data.
-NLM does not provide legal advice regarding copyright, fair use, or other aspects of intellectual property rights. See the NLM Copyright page.
-NLM reserves the right to change the type and format of its machine-readable data. NLM will take reasonable steps to inform users of any changes to the format of the data before the data are distributed via the announcement section or subscription to email and RSS updates."""
+_LICENSE = NLMLicense
 
 _URL = "https://zenodo.org/record/4482922/files/"
 _URLS = {

@@ -31,8 +31,8 @@ import pandas as pd
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -74,7 +74,7 @@ For further information, please visit https://temu.bsc.es/cantemist or send an e
 
 _HOMEPAGE = "https://temu.bsc.es/cantemist/?p=4338"
 
-_LICENSE_OLD = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "cantemist": "https://zenodo.org/record/3978041/files/cantemist.zip?download=1",

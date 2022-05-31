@@ -32,8 +32,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -57,7 +57,7 @@ Linnaeus is a novel corpus of full-text documents manually annotated for species
 
 _HOMEPAGE = "http://linnaeus.sourceforge.net/"
 
-_LICENSE_OLD = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: "https://sourceforge.net/projects/linnaeus/files/Corpora/manual-corpus-species-1.0.tar.gz/download",
@@ -152,7 +152,9 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_files": os.path.join(data_dir, "manual-corpus-species-1.0")},
+                gen_kwargs={
+                    "data_files": os.path.join(data_dir, "manual-corpus-species-1.0")
+                },
             ),
         ]
 
@@ -236,7 +238,12 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             text = file.read()
         # Passages
         example["passages"] = [
-            {"id": f"{txt_file.stem}__text", "text": [text], "type": "Article", "offsets": [(0, len(text))]}
+            {
+                "id": f"{txt_file.stem}__text",
+                "text": [text],
+                "type": "Article",
+                "offsets": [(0, len(text))],
+            }
         ]
         # Entities
         example["entities"] = []

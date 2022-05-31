@@ -26,8 +26,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 logger = datasets.utils.logging.get_logger(__name__)
 
@@ -51,9 +51,11 @@ including biomedical subjects (e.g., infectious diseases, stem cell research), g
 
 _HOMEPAGE = "https://github.com/neemakot/Health-Fact-Checking/tree/master/data"
 
-_LICENSE_OLD = "MIT License"
+_LICENSE = Licenses.MIT
 
-_URLs = {_DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"}
+_URLs = {
+    _DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"
+}
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
@@ -124,15 +126,24 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": os.path.join(data_dir, "PUBHEALTH/train.tsv"), "split": "train"},
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "PUBHEALTH/train.tsv"),
+                    "split": "train",
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"filepath": os.path.join(data_dir, "PUBHEALTH/test.tsv"), "split": "test"},
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "PUBHEALTH/test.tsv"),
+                    "split": "test",
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={"filepath": os.path.join(data_dir, "PUBHEALTH/dev.tsv"), "split": "validation"},
+                gen_kwargs={
+                    "filepath": os.path.join(data_dir, "PUBHEALTH/dev.tsv"),
+                    "split": "validation",
+                },
             ),
         ]
 
@@ -141,7 +152,11 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
 
         with open(filepath, encoding="utf-8") as csv_file:
             csv_reader = csv.reader(
-                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_NONE, skipinitialspace=True
+                csv_file,
+                quotechar='"',
+                delimiter="\t",
+                quoting=csv.QUOTE_NONE,
+                skipinitialspace=True,
             )
             next(csv_reader, None)  # remove column headers
             for id_, row in enumerate(csv_reader):

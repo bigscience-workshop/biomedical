@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import GeniaProjectLicense
 
 _DATASETNAME = "bionlp_st_2013_cg"
 _UNIFIED_VIEW_NAME = "bigbio"
@@ -55,7 +55,7 @@ levels up to whole organisms. Final test set submissions were accepted from six 
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-cg"
 
-_LICENSE_OLD = "https://creativecommons.org/licenses/by/3.0/ CC BY-SA 3.0"
+_LICENSE = GeniaProjectLicense
 
 _URLs = {
     "bionlp_st_2013_cg": "https://github.com/openbiocorpora/bionlp-st-2013-cg/archive/refs/heads/master.zip",

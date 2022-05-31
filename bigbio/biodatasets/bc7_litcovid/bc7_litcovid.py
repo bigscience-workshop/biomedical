@@ -20,8 +20,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import Licenses
 
 _LOCAL = False
 _CITATION = """\
@@ -43,7 +43,7 @@ manually reviewed and articles annotated by in-house models.
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-5/"
 
-_LICENSE_OLD = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _BASE = "https://ftp.ncbi.nlm.nih.gov/pub/lu/LitCovid/biocreative/BC7-LitCovid-"
 

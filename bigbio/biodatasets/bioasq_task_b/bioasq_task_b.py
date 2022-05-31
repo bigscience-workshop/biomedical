@@ -33,7 +33,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks
-from bigbio.utils.license import CustomLicense, Licenses
+from bigbio.utils.license import NLMLicense
 
 _LOCAL = True
 _CITATION = """\
@@ -363,10 +363,7 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 
 # Data access reqires registering with BioASQ.
 # See http://participants-area.bioasq.org/accounts/register/
-_LICENSE = CustomLicense(
-    name="National Library of Medicine Terms and Conditions",
-    link="https://www.nlm.nih.gov/databases/download/terms_and_conditions.html",
-)
+_LICENSE = NLMLicense
 
 _URLs = {
     "bioasq_10b": ["BioASQ-training10b.zip", None],

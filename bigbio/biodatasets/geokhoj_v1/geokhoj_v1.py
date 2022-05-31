@@ -44,6 +44,7 @@ the GEO (Gene Expression Omnibus) database
 
 _HOMEPAGE = "https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1"
 
+_LICENSE = Licenses.
 _LICENSE_OLD = "CC BY-NC 4.0"
 
 _URLS = {

@@ -49,8 +49,8 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense
 
 # TODO: Add BibTeX citation
 _LOCAL = False
@@ -75,7 +75,7 @@ SNPs are associated with unambiguous dbSNP identifiers.
 
 _HOMEPAGE = "http://www.scai.fraunhofer.de/snp-normalization-corpus.html"
 
-_LICENSE_OLD = """
+_LICENSE_TEXT = """
 LICENSE
 1. Copyright of abstracts - Due to license restriction of PubMed(R) this corpus contains only annotations. 
 To facilitate a reproduction of the original corpus, we include the exact position in the text, 
@@ -89,6 +89,7 @@ Also the additional rules are subject to these agreement.
 3. Copyright of annotations
 The annotations are published for academic use only and usage for development of commercial products is not permitted.
 """
+_LICENSE = CustomLicense(text=_LICENSE_TEXT)
 
 #
 

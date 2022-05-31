@@ -20,8 +20,8 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Tasks
+from bigbio.utils.license import CustomLicense
 
 _LOCAL = False
 _CITATION = """\
@@ -52,7 +52,9 @@ judged on fifty abstracts, was 94%.
 
 _HOMEPAGE = "http://mutationfinder.sourceforge.net/"
 
-_LICENSE_OLD = """\
+_LICENSE = CustomLicense(
+    link="http://mutationfinder.sourceforge.net/license.txt",
+    text="""\
 Copyright (c) 2007 Regents of the University of Colorado
 
 Permission is hereby granted, free of charge, to any person
@@ -75,7 +77,8 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
-"""
+""",
+)
 
 _URLS = {
     _DATASETNAME: "https://sourceforge.net/projects/mutationfinder/files/MutationFinder/MutationFinder-1.1/"
@@ -149,23 +152,35 @@ class MutationFinderDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "doc_collection_path": os.path.join(data_dir, "MutationFinder/corpora/devo_set.txt"),
-                    "gold_std_path": os.path.join(data_dir, "MutationFinder/corpora/devo_gold_std.txt"),
+                    "doc_collection_path": os.path.join(
+                        data_dir, "MutationFinder/corpora/devo_set.txt"
+                    ),
+                    "gold_std_path": os.path.join(
+                        data_dir, "MutationFinder/corpora/devo_gold_std.txt"
+                    ),
                     "split": "dev",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "doc_collection_path": os.path.join(data_dir, "MutationFinder/corpora/test_set.txt"),
-                    "gold_std_path": os.path.join(data_dir, "MutationFinder/corpora/test_gold_std.txt"),
+                    "doc_collection_path": os.path.join(
+                        data_dir, "MutationFinder/corpora/test_set.txt"
+                    ),
+                    "gold_std_path": os.path.join(
+                        data_dir, "MutationFinder/corpora/test_gold_std.txt"
+                    ),
                     "split": "test",
                 },
             ),
         ]
 
-    def _generate_examples(self, doc_collection_path, gold_std_path, split: str) -> Tuple[int, Dict]:
-        with open(doc_collection_path) as doc_collection, open(gold_std_path) as gold_std:
+    def _generate_examples(
+        self, doc_collection_path, gold_std_path, split: str
+    ) -> Tuple[int, Dict]:
+        with open(doc_collection_path) as doc_collection, open(
+            gold_std_path
+        ) as gold_std:
             # First, parse doc_id -> mutations from the gold standard
             # Required, because lines in the gold standard and doc collection file are out of order.
             mutations = {}
