@@ -26,6 +26,7 @@ _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2013-overview,

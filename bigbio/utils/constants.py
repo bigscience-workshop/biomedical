@@ -9,7 +9,7 @@ from bigbio.utils.schemas import (entailment_features, kb_features,
                                   pairs_features, qa_features,
                                   text2text_features, text_features)
 
-METADATA = ["_LOCAL", "_LANGUAGES"]
+METADATA = ["_LOCAL", "_LANGUAGES", "_PUBMED"]
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 

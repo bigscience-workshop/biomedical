@@ -30,6 +30,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{zlabinger-etal-2020-effective,
@@ -276,7 +277,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
                         "type": ent["annotation_type"],
                         "text": [ent["annotation_text"]],
                         "offsets": [[ent["char_start"], ent["char_end"]]],
-                        "normalized": [{"db_name": None, "db_id": None}],
+                        "normalized": [],
                     }
                     data["entities"].append(entity)
                     uid += 1

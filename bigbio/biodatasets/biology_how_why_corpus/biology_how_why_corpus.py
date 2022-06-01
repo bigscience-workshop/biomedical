@@ -21,17 +21,19 @@ used for the question-answering system described in the paper “Discourse Compl
 Answer Reranking” (ACL 2014).
 """
 
-from itertools import count, chain
 import os
-from typing import List, Tuple, Dict
+import xml.dom.minidom as xml
+from itertools import chain, count
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
-import xml.dom.minidom as xml
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{,
@@ -65,6 +67,7 @@ _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
 
 class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
     """This dataset consists of 185 "how" and 193 "why" biology questions."""
@@ -102,7 +105,7 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
                         {
                             "justification": datasets.Value("string"),
                             "docid": datasets.Value("string"),
-                            "sentences": datasets.Sequence(datasets.Value("int32"))
+                            "sentences": datasets.Sequence(datasets.Value("int32")),
                         }
                     ],
                 }
@@ -127,23 +130,32 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "how_path": os.path.join(data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanHOW.all.xml"),
-                    "why_path": os.path.join(data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanWHY.all.xml"),
+                    "how_path": os.path.join(
+                        data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanHOW.all.xml"
+                    ),
+                    "why_path": os.path.join(
+                        data_dir, "BiologyHowWhyCorpus", "GoldStandardVulcanWHY.all.xml"
+                    ),
                 },
             ),
         ]
 
-
     def _generate_examples(self, how_path: str, why_path: str) -> Tuple[int, Dict]:
-        
+
         uid = count(0)
 
         if self.config.schema == "source":
-            for question in chain(self._parse_questions(how_path, "how"), self._parse_questions(why_path, "why")):
+            for question in chain(
+                self._parse_questions(how_path, "how"),
+                self._parse_questions(why_path, "why"),
+            ):
                 yield next(uid), question
 
         elif self.config.schema == "bigbio_qa":
-            for question in chain(self._parse_questions(how_path, "how"), self._parse_questions(why_path, "why")):
+            for question in chain(
+                self._parse_questions(how_path, "how"),
+                self._parse_questions(why_path, "why"),
+            ):
                 for answer in question["answers"]:
                     id = next(uid)
                     yield id, {
@@ -156,8 +168,6 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
                         "context": "",
                         "answer": [answer["justification"]],
                     }
-                    
-                
 
     def _parse_questions(self, path: str, type: str):
         collection = xml.parse(path).documentElement
@@ -167,8 +177,20 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
             answers = question.getElementsByTagName("answer")
             answers_ = []
             for answer in answers:
-                justification = answer.getElementsByTagName("justification")[0].childNodes[0].data
+                justification = (
+                    answer.getElementsByTagName("justification")[0].childNodes[0].data
+                )
                 docid = answer.getElementsByTagName("docid")[0].childNodes[0].data
-                sentences = answer.getElementsByTagName("sentences")[0].childNodes[0].data.split(", ")
-                answers_.append({'justification': justification, 'docid': docid, 'sentences': sentences})
+                sentences = (
+                    answer.getElementsByTagName("sentences")[0]
+                    .childNodes[0]
+                    .data.split(", ")
+                )
+                answers_.append(
+                    {
+                        "justification": justification,
+                        "docid": docid,
+                        "sentences": sentences,
+                    }
+                )
             yield {"text": text, "type": type, "answers": answers_}

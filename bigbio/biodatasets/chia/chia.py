@@ -28,6 +28,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{kury2020chia,
@@ -166,9 +167,13 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
-                    "document_id": datasets.Value("string"),  # NCT-ID from clinicialtrials.gov
+                    "document_id": datasets.Value(
+                        "string"
+                    ),  # NCT-ID from clinicialtrials.gov
                     "text": datasets.Value("string"),
-                    "text_type": datasets.Value("string"),  # inclusion or exclusion (criteria)
+                    "text_type": datasets.Value(
+                        "string"
+                    ),  # inclusion or exclusion (criteria)
                     "entities": [
                         {
                             "id": datasets.Value("string"),
@@ -236,7 +241,9 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 brat_example = parse_brat_file(file, [".ann"])
-                source_example = self._to_source_example(file, brat_example, fix_offsets)
+                source_example = self._to_source_example(
+                    file, brat_example, fix_offsets
+                )
                 yield source_example["id"], source_example
 
         elif self.config.schema == "bigbio_kb":
@@ -266,7 +273,9 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
                 yield bigbio_example["id"], bigbio_example
 
-    def _to_source_example(self, input_file: Path, brat_example: Dict, fix_offsets: bool) -> Dict:
+    def _to_source_example(
+        self, input_file: Path, brat_example: Dict, fix_offsets: bool
+    ) -> Dict:
         """
         Converts the generic brat example to the source schema format.
         """
@@ -298,11 +307,15 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
             if fix_offsets:
                 if len(entity_ann["offsets"]) > 1:
-                    entity_ann["text"] = self._get_texts_for_multiple_offsets(text, entity_ann["offsets"])
+                    entity_ann["text"] = self._get_texts_for_multiple_offsets(
+                        text, entity_ann["offsets"]
+                    )
 
                 fixed_offsets = []
                 fixed_texts = []
-                for entity_text, offsets in zip(entity_ann["text"], entity_ann["offsets"]):
+                for entity_text, offsets in zip(
+                    entity_ann["text"], entity_ann["offsets"]
+                ):
                     fixed_offset = self._fix_entity_offsets(text, entity_text, offsets)
                     fixed_offsets.append(fixed_offset)
                     fixed_texts.append(text[fixed_offset[0] : fixed_offset[1]])
@@ -354,7 +367,9 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
 
         return source_example
 
-    def _fix_entity_offsets(self, doc_text: str, entity_text: str, given_offsets: List[int]) -> List[int]:
+    def _fix_entity_offsets(
+        self, doc_text: str, entity_text: str, given_offsets: List[int]
+    ) -> List[int]:
         """
         Fixes incorrect mention offsets by checking whether the given entity mention text can be
         found to the left or right of the given offsets by considering incrementally larger shifts.
@@ -380,7 +395,9 @@ class ChiaDataset(datasets.GeneratorBasedBuilder):
         # We can't find any better offsets
         return given_offsets
 
-    def _get_texts_for_multiple_offsets(self, document_text: str, offsets: List[List[int]]) -> List[str]:
+    def _get_texts_for_multiple_offsets(
+        self, document_text: str, offsets: List[List[int]]
+    ) -> List[str]:
         """
         Extracts the single text span for a given list of offsets.
         """
@@ -485,7 +502,9 @@ def parse_brat_file(txt_file: Path, annotation_file_suffixes: List[str] = None) 
         annotation_file_suffixes = [".a1", ".a2", ".ann"]
 
     if len(annotation_file_suffixes) == 0:
-        raise AssertionError("At least one suffix for the to-be-read annotation files should be given!")
+        raise AssertionError(
+            "At least one suffix for the to-be-read annotation files should be given!"
+        )
 
     ann_lines = []
     for suffix in annotation_file_suffixes:

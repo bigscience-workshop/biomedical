@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{kim-etal-2009-overview,

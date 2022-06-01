@@ -44,6 +44,7 @@ _CITATION = """\
 }
 """
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _DATASETNAME = "tmvar_v3"
 _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 

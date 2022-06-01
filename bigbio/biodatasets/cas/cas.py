@@ -9,6 +9,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.FR]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @inproceedings{grabar-etal-2018-cas,
@@ -209,7 +210,7 @@ class CAS(datasets.GeneratorBasedBuilder):
                             "type": "POS_tag",
                             "text": [POS_tags_[i]],
                             "offsets": [[i, i + 1]],
-                            "normalized": [{"db_name": None, "db_id": None}],
+                            "normalized": [],
                         }
                         data["entities"].append(entity)
                         key += 1

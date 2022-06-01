@@ -12,15 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
-import os
+from pathlib import Path
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -46,6 +47,8 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "hallmarks_of_cancer"
+
 _DESCRIPTION = """\
 The Hallmarks of Cancer (HOC) Corpus consists of 1852 PubMed publication
 abstracts manually annotated by experts according to a taxonomy. The taxonomy
@@ -59,10 +62,7 @@ _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 
 _LICENSE = "GNU General Public License v3.0"
 
-_URLs = {
-    "source": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
-    "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
-}
+_URLs = {_DATASETNAME: "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"}
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
@@ -114,7 +114,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
                 {
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
+                    "label": [datasets.ClassLabel(names=_CLASS_NAMES)],
                 }
             )
 
@@ -132,52 +132,54 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        data_dir = dl_manager.download_and_extract(_URLs)
+        data_dir = dl_manager.download_and_extract(_URLs[_DATASETNAME])
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": data_dir,
-                    "split": "train",
-                },
+                gen_kwargs={"filepath": Path(data_dir)},
             )
         ]
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, filepath: Path):
 
-        path_name = list(filepath.values())[0] + "/*"
-        texts = glob.glob(path_name + "/text/*")
-        labels = glob.glob(path_name + "/labels/")
+        dataset_dir = filepath / "Hallmarks-of-Cancer-master"
+        texts_dir = dataset_dir / "text"
+        labels_dir = dataset_dir / "labels"
+
+        text_files = texts_dir.glob("*.txt")
+        label_files = labels_dir.glob("*.txt")
         uid = 1
 
-        for idx, tf_name in enumerate(texts):
-            filenname = os.path.basename(tf_name)
-            with open(tf_name, encoding="utf-8") as f:
-                lines = f.readlines()
-                text_body = "".join([j.strip() for j in lines])
+        for document_index, file_pair in enumerate(zip(text_files, label_files)):
+            text_file, label_file = file_pair
+            text = text_file.read_text().strip("\n")
+            labels = label_file.read_text().strip("\n")
 
-            label_file_name = labels[0] + "/" + filenname
-            with open(label_file_name, encoding="utf-8") as f:
-                lines = f.readlines()
-                label_body = "".join([j.strip() for j in lines])
-                label_body = [i.strip() for i in label_body.split("<")]
-                label_body = sum([k.split("AND") for k in label_body if len(k) > 1], [])
-                label_body = [i.split("--")[0].strip() for i in label_body]
+            sentences = text.split("\n")
+            labels = labels.split("<")[1:]
 
-            if self.config.schema == "source":
-                yield idx, {
-                    "document_id": filenname.split(".")[0],
-                    "text": text_body,
-                    "label": label_body,
-                }
-            elif self.config.schema == "bigbio_text":
+            for example_index, example_pair in enumerate(zip(sentences, labels)):
+                sentence, label = example_pair
+                if label == " ":
+                    continue
 
-                yield idx, {
-                    "id": uid,
-                    "document_id": filenname.split(".")[0],
-                    "text": text_body,
-                    "labels": [label_body],
-                }
+                label = label.strip()
+                multi_labels = [m_label.strip() for m_label in label.split("AND")]
+                unique_multi_labels = {m_label.split("--")[0] for m_label in multi_labels}
 
-                uid += 1
+                arrow_file_unique_key = 100 * document_index + example_index
+                if self.config.schema == "source":
+                    yield arrow_file_unique_key, {
+                        "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
+                        "text": sentence,
+                        "label": list(unique_multi_labels),
+                    }
+                elif self.config.schema == "bigbio_text":
+                    yield arrow_file_unique_key, {
+                        "id": uid,
+                        "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
+                        "text": sentence,
+                        "labels": list(unique_multi_labels),
+                    }
+                    uid += 1
