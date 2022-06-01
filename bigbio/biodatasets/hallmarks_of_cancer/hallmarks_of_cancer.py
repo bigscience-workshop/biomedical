@@ -79,7 +79,7 @@ _CLASS_NAMES = [
     'resisting cell death',
     'activating invasion and metastasis',
     'genomic instability and mutation',
-    'null',
+    'none',
     'inducing angiogenesis',
     'sustaining proliferative signaling',
     'avoiding immune destruction'
@@ -180,12 +180,16 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
 
             for example_index, example_pair in enumerate(zip(sentences, labels)):
                 sentence, label = example_pair
-                if label == " ":
-                    continue
 
                 label = label.strip()
+                
+                if label == "":
+                    label = "none"
+
                 multi_labels = [m_label.strip() for m_label in label.split("AND")]
-                unique_multi_labels = {m_label.split("--")[0].lower().lstrip() for m_label in multi_labels}
+                unique_multi_labels = {
+                    m_label.split("--")[0].lower().lstrip() for m_label in multi_labels if m_label != "NULL"
+                }
 
                 arrow_file_unique_key = 100 * document_index + example_index
                 if self.config.schema == "source":
