@@ -158,14 +158,22 @@ bb_public_helpers = conhelps.filtered(
 	and not x.is_local
 	and not x.is_large
 )
+```
 
+```python
 # source versions of all n2c2 datasets
 n2c2_source_helpers = conhelps.filtered(
     lambda x:
         x.dataset_name.startswith("n2c2")
 	and not x.is_bigbio_schema
 )
+```
 
+```python
+from bigbio.utils.constants import Tasks
+nli_helpers = conhelps.filtered(
+    lambda x: Tasks.TEXTUAL_ENTAILMENT in x.tasks
+)
 ```
 
 You can iterate over any instance of `BigBioConfigHelpers` and store the loaded datasets
@@ -178,8 +186,18 @@ bb_public_datasets = {
 }
 ```
 
+### Dataset metadata
 
+The `BigBioConfigHelper` provides a `get_metadata` method that will calculate 
+schema specific metadata for configs implementing a BigBIO schema. 
+For example, 
 
+```python
+helper = conhelps.for_config_name('scitail_bigbio_te')
+metadata = helper.get_metadata()
+print(metadata)
+{'train': BigBioTeMetadata(samples_count=23596, premise_char_count=2492695, hypothesis_char_count=1669028, label_counter={'neutral': 14994, 'entailment': 8602}), 'test': BigBioTeMetadata(samples_count=2126, premise_char_count=216196, hypothesis_char_count=153547, label_counter={'neutral': 1284, 'entailment': 842}), 'validation': BigBioTeMetadata(samples_count=1304, premise_char_count=138239, hypothesis_char_count=97320, label_counter={'entailment': 657, 'neutral': 647})}
+```
 
 ## More Usage
 
