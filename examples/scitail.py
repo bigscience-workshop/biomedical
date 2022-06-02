@@ -25,13 +25,16 @@ entails label and 16,925 examples with neutral label.
 
 import os
 
+import datasets
 import pandas as pd
 
-import datasets
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Lang, Tasks
 
+_LANGUAGES = [Lang.EN]
+_PUBMED = False
+_LOCAL = False
 _CITATION = """\
 @inproceedings{scitail,
     author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
@@ -125,19 +128,25 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_train.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_train.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_test.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_test.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_dev.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_dev.tsv"
+                    ),
                 },
             ),
         ]
@@ -145,7 +154,9 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, filepath):
         # since examples can contain quotes mid text set quoting to QUOTE_NONE (3) when reading tsv
         # e.g.: ... and apply specific "tools" to examples and ...
-        data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3)
+        data = pd.read_csv(
+            filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3
+        )
         data["id"] = data.index
 
         if self.config.schema == "source":

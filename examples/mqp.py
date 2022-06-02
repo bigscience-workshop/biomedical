@@ -23,10 +23,14 @@ from typing import Dict, Tuple
 
 import datasets
 from datasets import load_dataset
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
 
+from bigbio.utils import schemas
+from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Lang, Tasks
+
+_LANGUAGES = [Lang.EN]
+_PUBMED = False
+_LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
@@ -133,7 +137,11 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
         if split == "train":  # There's only training dataset available atm
             with open(filepath, encoding="utf-8") as csv_file:
                 csv_reader = csv.reader(
-                    csv_file, quotechar='"', delimiter=",", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                    csv_file,
+                    quotechar='"',
+                    delimiter=",",
+                    quoting=csv.QUOTE_ALL,
+                    skipinitialspace=True,
                 )
 
                 if self.config.schema == "source":
