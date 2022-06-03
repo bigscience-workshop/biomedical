@@ -81,7 +81,7 @@ MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 
-_LICENSE = Licenses.UMLSLicense
+_LICENSE = Licenses.UMLS_LICENSE
 
 _URLS = {_DATASETNAME: ""}
 
