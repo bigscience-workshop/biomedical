@@ -19,6 +19,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -60,9 +61,11 @@ The filenames are the corresponding PubMed IDs (PMID).
 
 _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
-_URLs = {_DATASETNAME: "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"}
+_URLs = {
+    _DATASETNAME: "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"
+}
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
@@ -126,7 +129,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -166,7 +169,9 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
 
                 label = label.strip()
                 multi_labels = [m_label.strip() for m_label in label.split("AND")]
-                unique_multi_labels = {m_label.split("--")[0] for m_label in multi_labels}
+                unique_multi_labels = {
+                    m_label.split("--")[0] for m_label in multi_labels
+                }
 
                 arrow_file_unique_key = 100 * document_index + example_index
                 if self.config.schema == "source":

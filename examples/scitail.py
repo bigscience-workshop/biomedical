@@ -31,6 +31,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -58,7 +59,7 @@ entails label and 16,925 examples with neutral label.
 
 _HOMEPAGE = "https://allenai.org/data/scitail"
 
-_LICENSE = "Apache License 2.0"
+_LICENSE = Licenses.APACHE_2p0
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
@@ -115,7 +116,7 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

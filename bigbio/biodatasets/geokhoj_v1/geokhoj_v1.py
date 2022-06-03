@@ -29,6 +29,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -45,7 +46,8 @@ the GEO (Gene Expression Omnibus) database
 
 _HOMEPAGE = "https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1"
 
-_LICENSE = "CC BY-NC 4.0"
+
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 _URLS = {
     "source": "https://github.com/ElucidataInc/GEOKhoj-datasets/blob/main/geokhoj_v1/geokhoj_V1.zip?raw=True",
@@ -105,7 +107,7 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

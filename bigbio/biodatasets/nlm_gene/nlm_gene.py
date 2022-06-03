@@ -15,14 +15,15 @@
 import collections
 import itertools
 from pathlib import Path
-
-from typing import List, Tuple, Dict
-from bioc import biocxml
+from typing import Dict, List, Tuple
 
 import datasets
+from bioc import biocxml
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.EN]
@@ -63,7 +64,7 @@ text-mining techniques for gene identification tasks in biomedical text.
 
 _HOMEPAGE = "https://zenodo.org/record/5089049"
 
-_LICENSE = "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication license"
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     "source": "https://zenodo.org/record/5089049/files/NLM-Gene-Corpus.zip",
@@ -140,7 +141,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -153,7 +154,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": data_dir/"Corpus",
+                    "filepath": data_dir / "Corpus",
                     "file_name": "Pmidlist.Train.txt",
                     "split": "train",
                 },
@@ -161,7 +162,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": data_dir/"Corpus",
+                    "filepath": data_dir / "Corpus",
                     "file_name": "Pmidlist.Test.txt",
                     "split": "test",
                 },
@@ -169,7 +170,9 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
         ]
 
     @staticmethod
-    def _get_bioc_entity(span, db_id_key="NCBI Gene identifier", splitters=",;|-") -> dict:
+    def _get_bioc_entity(
+        span, db_id_key="NCBI Gene identifier", splitters=",;|-"
+    ) -> dict:
         """Parse BioC entity annotation."""
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons.get(db_id_key, "-1")
@@ -179,8 +182,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             if splitter in db_ids:
                 connector = splitter
         normalized = [
-            {"db_name": db_id_key, "db_id": db_id}
-            for db_id in db_ids.split(connector)
+            {"db_name": db_id_key, "db_id": db_id} for db_id in db_ids.split(connector)
         ]
 
         return {
@@ -191,30 +193,35 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             "normalized": normalized,
         }
 
-    def _generate_examples(self, filepath: Path, file_name: str, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepath: Path, file_name: str, split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            with open(filepath/file_name, encoding='utf-8') as f:
+            with open(filepath / file_name, encoding="utf-8") as f:
                 contents = f.readlines()
             for uid, content in enumerate(contents):
                 file_id = content.replace("\n", "")
-                file_path = filepath/"FINAL"/f"{file_id}.BioC.XML"
+                file_path = filepath / "FINAL" / f"{file_id}.BioC.XML"
                 reader = biocxml.BioCXMLDocumentReader(file_path.as_posix())
                 for xdoc in reader:
                     yield uid, {
-                            "passages": [
-                                {
-                                    "document_id": xdoc.id,
-                                    "type": passage.infons["type"],
-                                    "text": passage.text,
-                                    "entities": [self._get_bioc_entity(span) for span in passage.annotations],
-                                }
-                                for passage in xdoc.passages
-                            ]
-                          }
+                        "passages": [
+                            {
+                                "document_id": xdoc.id,
+                                "type": passage.infons["type"],
+                                "text": passage.text,
+                                "entities": [
+                                    self._get_bioc_entity(span)
+                                    for span in passage.annotations
+                                ],
+                            }
+                            for passage in xdoc.passages
+                        ]
+                    }
         elif self.config.schema == "bigbio_kb":
-            with open(filepath/file_name, encoding='utf-8') as f:
+            with open(filepath / file_name, encoding="utf-8") as f:
                 contents = f.readlines()
             uid = 0  # global unique id
             for i, content in enumerate(contents):
@@ -250,7 +257,9 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                     # entities
                     for passage in xdoc.passages:
                         for span in passage.annotations:
-                            ent = self._get_bioc_entity(span, db_id_key="NCBI Gene identifier")
+                            ent = self._get_bioc_entity(
+                                span, db_id_key="NCBI Gene identifier"
+                            )
                             ent["id"] = uid  # override BioC default id
                             data["entities"].append(ent)
                             uid += 1

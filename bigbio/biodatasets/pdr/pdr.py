@@ -29,6 +29,7 @@ import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -54,8 +55,7 @@ The corpus consists of about 2400 plant and disease entities and 300 annotated r
 """
 
 _HOMEPAGE = "http://gcancer.org/pdr/"
-_LICENSE = ""
-
+_LICENSE = Licenses.UNKNOWN
 _URLS = {_DATASETNAME: "http://gcancer.org/pdr/Plant-Disease_Corpus.tar.gz"}
 
 _SUPPORTED_TASKS = [
@@ -175,7 +175,7 @@ class PDRDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

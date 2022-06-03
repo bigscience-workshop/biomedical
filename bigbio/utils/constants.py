@@ -5,11 +5,10 @@ from enum import Enum
 from types import SimpleNamespace
 
 from bigbio.utils import resources
+from bigbio.utils.license import Licenses
 from bigbio.utils.schemas import (entailment_features, kb_features,
                                   pairs_features, qa_features,
                                   text2text_features, text_features)
-
-METADATA = ["_LOCAL", "_LANGUAGES", "_PUBMED"]
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 
@@ -18,6 +17,15 @@ BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 langs_json = pkg_resources.read_text(resources, "languages.json")
 langs_dict = {k.replace("-", "_").upper(): v for k, v in json.loads(langs_json).items()}
 Lang = Enum("Lang", langs_dict)
+
+
+METADATA: dict = {
+    "_LOCAL": bool,
+    "_LANGUAGES": Lang,
+    "_PUBMED": bool,
+    "_LICENSE": Licenses,
+}
+
 
 class Tasks(Enum):
     NAMED_ENTITY_RECOGNITION = "NER"

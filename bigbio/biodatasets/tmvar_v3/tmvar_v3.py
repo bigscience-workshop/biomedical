@@ -23,6 +23,7 @@ from bioc import pubtator
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
@@ -51,7 +52,9 @@ _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated w
 In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
 It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
-_LICENSE = "freely available"
+
+_LICENSE = Licenses.UNKNOWN
+
 _URLS = {_DATASETNAME: "ftp://ftp.ncbi.nlm.nih.gov/pub/lu/tmVar3/tmVar3Corpus.txt"}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "3.0.0"
@@ -127,7 +130,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
