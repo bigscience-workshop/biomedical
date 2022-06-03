@@ -77,16 +77,16 @@ SNPs are associated with unambiguous dbSNP identifiers.
 
 _HOMEPAGE = "http://www.scai.fraunhofer.de/snp-normalization-corpus.html"
 
-_LICENSE_TEXT = CustomLicense(
+_LICENSE = CustomLicense(
     text="""
 LICENSE
-1. Copyright of abstracts - Due to license restriction of PubMed(R) this corpus contains only annotations. 
-To facilitate a reproduction of the original corpus, we include the exact position in the text, 
-as well as the matching string. The articles are composed of <Title><Whitespace><Whitespace><Abstract> 
-For detailed description of the corpus and its annotations see README.txt. 
+1. Copyright of abstracts - Due to license restriction of PubMed(R) this corpus contains only annotations.
+To facilitate a reproduction of the original corpus, we include the exact position in the text,
+as well as the matching string. The articles are composed of <Title><Whitespace><Whitespace><Abstract>
+For detailed description of the corpus and its annotations see README.txt.
 
 2. Copyright of regular expression
-License of the original regular expressions is subject to the license agreement at http://mutationfinder.sourceforge.net/license.txt 
+License of the original regular expressions is subject to the license agreement at http://mutationfinder.sourceforge.net/license.txt
 Also the additional rules are subject to these agreement.
 
 3. Copyright of annotations
