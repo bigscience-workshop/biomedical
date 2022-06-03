@@ -36,6 +36,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
@@ -80,7 +81,7 @@ B)
 
 _HOMEPAGE = "https://github.com/YerevaNN/BioRelEx"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: {
@@ -150,7 +151,9 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
                                 {
                                     "text": datasets.Value("string"),
                                     "is_mentioned": datasets.Value("bool"),
-                                    "mentions": datasets.Sequence([datasets.Value("int32")]),
+                                    "mentions": datasets.Sequence(
+                                        [datasets.Value("int32")]
+                                    ),
                                 }
                             ],
                             "grounding": [
@@ -240,8 +243,12 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
 
     def _source_to_kb(self, example):
         example_id = example["id"]
-        entities_, corefs_, ref_id_map = self._get_entities(example_id, example["entities"])
-        relations_ = self._get_relations(example_id, ref_id_map, example["interactions"])
+        entities_, corefs_, ref_id_map = self._get_entities(
+            example_id, example["entities"]
+        )
+        relations_ = self._get_relations(
+            example_id, ref_id_map, example["interactions"]
+        )
 
         document_ = {
             "id": example_id,
@@ -307,17 +314,27 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
         if entity["grounding"]:
             assert len(entity["grounding"]) == 1
             if entity["grounding"][0]["entrez_gene"] != "NA":
-                normalized_.append({"db_name": "NCBI gene", "db_id": entity["grounding"][0]["entrez_gene"]})
+                normalized_.append(
+                    {
+                        "db_name": "NCBI gene",
+                        "db_id": entity["grounding"][0]["entrez_gene"],
+                    }
+                )
             if entity["grounding"][0]["hgnc_symbol"] != "NA":
-                normalized_.append({"db_name": "hgnc", "db_id": entity["grounding"][0]["hgnc_symbol"]})
+                normalized_.append(
+                    {"db_name": "hgnc", "db_id": entity["grounding"][0]["hgnc_symbol"]}
+                )
 
             # maybe parse some other ids?
             source = entity["grounding"][0]["source"]
             if (
-                source != "NCBI gene" and source != "https://www.genenames.org/data/genegroup/"
+                source != "NCBI gene"
+                and source != "https://www.genenames.org/data/genegroup/"
             ):  # NCBI gene is same as entrez
                 normalized_.append(
-                    self._parse_id_from_link(entity["grounding"][0]["link"], entity["grounding"][0]["source"])
+                    self._parse_id_from_link(
+                        entity["grounding"][0]["link"], entity["grounding"][0]["source"]
+                    )
                 )
         return normalized_
 
@@ -350,18 +367,30 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
             "pubchem:compound": ["https://pubchem.ncbi.nlm.nih.gov/compound/"],
             "pubchem:substance": ["https://pubchem.ncbi.nlm.nih.gov/substance/"],
             "pfam": ["https://pfam.xfam.org/family/", "http://pfam.xfam.org/family/"],
-            "interpro": ["http://www.ebi.ac.uk/interpro/entry/", "https://www.ebi.ac.uk/interpro/entry/"],
+            "interpro": [
+                "http://www.ebi.ac.uk/interpro/entry/",
+                "https://www.ebi.ac.uk/interpro/entry/",
+            ],
             "DrugBank": ["https://www.drugbank.ca/drugs/"],
         }
 
         # fix exceptions manually
         if source == "https://enzyme.expasy.org/EC/2.5.1.18" and link == source:
             return {"db_name": "intenz", "db_id": "2.5.1.18"}
-        elif source == "https://www.genome.jp/kegg-bin/show_pathway?map=ko04120" and link == source:
+        elif (
+            source == "https://www.genome.jp/kegg-bin/show_pathway?map=ko04120"
+            and link == source
+        ):
             return {"db_name": "kegg", "db_id": "ko04120"}
-        elif source == "https://www.genome.jp/dbget-bin/www_bget?enzyme+2.7.11.1" and link == source:
+        elif (
+            source == "https://www.genome.jp/dbget-bin/www_bget?enzyme+2.7.11.1"
+            and link == source
+        ):
             return {"db_name": "intenz", "db_id": "2.7.11.1"}
-        elif source == "http://www.chemspider.com/Chemical-Structure.7995676.html" and link == source:
+        elif (
+            source == "http://www.chemspider.com/Chemical-Structure.7995676.html"
+            and link == source
+        ):
             return {"db_name": "chemspider", "db_id": "7995676"}
         elif source == "intenz":
             id = link.split("=")[0]
@@ -375,4 +404,6 @@ class BioRelExDataset(datasets.GeneratorBasedBuilder):
                     assert "/" not in id
                     return {"db_name": source, "db_id": id}
 
-            assert False, f"No template found for {link}, choices: {repr(link_templates)}"
+            assert (
+                False
+            ), f"No template found for {link}, choices: {repr(link_templates)}"

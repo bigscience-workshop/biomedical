@@ -26,6 +26,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -54,7 +55,7 @@ as well as syntactic dependencies.
 
 _HOMEPAGE = "https://github.com/metalrt/ppi-dataset"
 
-_LICENSE = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
+_LICENSE = Licenses.CC_BY_2p0
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/archive/refs/heads/master.zip",
@@ -148,14 +149,18 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "ppi-dataset-master/csv_output/BioInfer-train.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "ppi-dataset-master/csv_output/BioInfer-train.xml"
+                    ),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "ppi-dataset-master/csv_output/BioInfer-test.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "ppi-dataset-master/csv_output/BioInfer-test.xml"
+                    ),
                     "split": "test",
                 },
             ),
@@ -204,7 +209,10 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _add_entity(entity):
-        offsets = [[int(o) for o in offset.split("-")] for offset in entity.attrib["charOffset"].split(",")]
+        offsets = [
+            [int(o) for o in offset.split("-")]
+            for offset in entity.attrib["charOffset"].split(",")
+        ]
         # For multiple offsets, split entity text accordingly
         if len(offsets) > 1:
             text = []
@@ -213,7 +221,9 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
                 chunk_len = end - start
                 text.append(entity.attrib["text"][i : chunk_len + i])
                 i += chunk_len
-                while i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " ":
+                while (
+                    i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " "
+                ):
                     i += 1
         else:
             text = [entity.attrib["text"]]

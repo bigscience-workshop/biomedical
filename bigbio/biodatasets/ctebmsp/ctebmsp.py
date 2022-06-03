@@ -32,6 +32,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
 _PUBMED = True
@@ -87,9 +88,7 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
 
-_LICENSE = (
-    "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
-)
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 _URLS = {
     _DATASETNAME: "http://www.lllf.uam.es/ESP/nlpdata/wp2/CT-EBM-SP.zip",

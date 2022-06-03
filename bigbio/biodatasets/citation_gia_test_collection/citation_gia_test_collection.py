@@ -25,6 +25,7 @@ import html
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -54,7 +55,7 @@ They are selected because both have a focus on human genes.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: [

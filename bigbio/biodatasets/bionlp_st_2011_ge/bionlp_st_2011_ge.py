@@ -21,6 +21,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2011_ge"
 _SOURCE_VIEW_NAME = "source"
@@ -64,7 +65,7 @@ are not differentiated from each other, and their type is given as "Entity".
 
 _HOMEPAGE = "https://sites.google.com/site/bionlpst/bionlp-shared-task-2011/genia-event-extraction-genia"
 
-_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
+_LICENSE = Licenses.CC_BY_3p0
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",

@@ -64,6 +64,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.ZH, Lang.JA]
 _PUBMED = False
@@ -104,7 +105,7 @@ these three languages.
 
 _HOMEPAGE = "http://research.nii.ac.jp/ntcir/permission/ntcir-13/perm-en-MedWeb.html"
 
-_LICENSE = "Creative Commons Attribution 4.0 International License"
+_LICENSE = Licenses.CC_BY_4p0
 
 # NOTE: Data can only be obtained (locally) by first filling out form to provide
 # information about usage context under this link: http://www.nii.ac.jp/dsc/idr/en/ntcir/ntcir.html

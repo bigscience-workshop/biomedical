@@ -22,6 +22,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -60,7 +61,7 @@ hat Multi-XScience is well suited for abstractive models.
 
 _HOMEPAGE = "https://github.com/yaolu/Multi-XScience"
 
-_LICENSE = "MIT License"
+_LICENSE = Licenses.MIT
 
 _URLS = {
     _DATASETNAME: [

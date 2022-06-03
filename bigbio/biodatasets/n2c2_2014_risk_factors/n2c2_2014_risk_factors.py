@@ -60,6 +60,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = True
@@ -97,7 +98,8 @@ the patient's medical history.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "DUA-C/NC"
+_LICENSE =  Licenses.DUA
+# _LICENSE = "DUA-C/NC"
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 

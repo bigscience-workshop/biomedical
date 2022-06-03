@@ -27,6 +27,7 @@ from datasets import load_dataset
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -55,8 +56,7 @@ but contextually similar ) or dissimilar (syntactically may look similar but con
 
 _HOMEPAGE = "https://github.com/curai/medical-question-pair-dataset"
 
-_LICENSE = "Unknown"
-
+_LICENSE = Licenses.UNKNOWN
 _URLs = {
     _DATASETNAME: "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
 }

@@ -64,6 +64,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
 
@@ -107,7 +108,7 @@ a past smoker, a current smoker, a smoker, a non-smoker and an unknown. A total 
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 

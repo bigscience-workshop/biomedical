@@ -22,6 +22,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.ES, Lang.PT]
 _PUBMED = False
@@ -45,7 +46,7 @@ as well as trilingual aligned for a small subset of sentences. Alignment was car
 
 _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWSRB"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "en_es": "https://ndownloader.figstatic.com/files/14019287",

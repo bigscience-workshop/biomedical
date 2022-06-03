@@ -21,6 +21,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.VI]
 _PUBMED = False
@@ -45,11 +46,13 @@ can be used in the context of not only the COVID-19 pandemic but also in other f
 
 _HOMEPAGE = "https://github.com/VinAIResearch/PhoNER_COVID19"
 
-_LICENSE = "\
+_LICENSE = CustomLicense(
+    text="\
 By downloading the PhoNER_COVID19 dataset, USER agrees: \
 - to use PhoNER_COVID19 for research or educational purposes only.\
 - to not distribute PhoNER_COVID19 or part of PhoNER_COVID19 in any original or modified form.\
 - and to cite our NAACL paper above whenever PhoNER_COVID19 is employed to help produce published results."
+)
 
 _URLS = {
     "source": "https://github.com/VinAIResearch/PhoNER_COVID19/archive/refs/heads/master.zip",

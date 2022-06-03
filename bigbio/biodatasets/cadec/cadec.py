@@ -36,6 +36,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -69,7 +70,10 @@ normalized with meddra codes), sct (entities normalized with SNOMED CT codes).
 
 _HOMEPAGE = "https://data.gov.au/dataset/ds-dap-csiro%3A10948/details?q="
 
-_LICENSE = "https://confluence.csiro.au/display/dap/CSIRO+Data+Licence"
+_LICENSE = CustomLicense(
+    name="CSIRO Data License",
+    link="https://confluence.csiro.au/display/dap/CSIRO+Data+Licence",
+)
 
 _URLS = {
     _DATASETNAME: "https://data.csiro.au/dap/ws/v2/collections/17190/data/1904643",

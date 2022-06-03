@@ -27,6 +27,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 logger = datasets.utils.logging.get_logger(__name__)
 
@@ -52,7 +53,7 @@ including biomedical subjects (e.g., infectious diseases, stem cell research), g
 
 _HOMEPAGE = "https://github.com/neemakot/Health-Fact-Checking/tree/master/data"
 
-_LICENSE = "MIT License"
+_LICENSE = Licenses.MIT
 
 _URLs = {
     _DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"

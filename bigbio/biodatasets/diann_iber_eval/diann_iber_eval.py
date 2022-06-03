@@ -28,6 +28,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.ES]
 _PUBMED = False
@@ -74,7 +75,7 @@ una función, como "falta de visión".
 
 _HOMEPAGE = "http://nlp.uned.es/diann/"
 
-_LICENSE = "UNKNOWN"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     "diann_iber_eval_en": {

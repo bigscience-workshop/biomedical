@@ -44,6 +44,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -84,7 +85,7 @@ Reviewers and Annotators, an estimate of the Precision of the annotations, was 9
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/MedMentions"
 
-_LICENSE = "CC0"
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     "medmentions_full": [
@@ -165,7 +166,9 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                             "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
                             "concept_id": datasets.Value("string"),
-                            "semantic_type_id": datasets.Sequence(datasets.Value("string")),
+                            "semantic_type_id": datasets.Sequence(
+                                datasets.Value("string")
+                            ),
                         }
                     ],
                 }
@@ -185,7 +188,12 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
 
         urls = _URLS[self.config.subset_id]
-        corpus_path, pmids_train, pmids_dev, pmids_test = dl_manager.download_and_extract(urls)
+        (
+            corpus_path,
+            pmids_train,
+            pmids_dev,
+            pmids_test,
+        ) = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
@@ -228,7 +236,12 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                                     "type": type,
                                     "text": entity["text"],
                                     "offsets": entity["offsets"],
-                                    "normalized": [{"db_name": "UMLS", "db_id": entity["concept_id"]}],
+                                    "normalized": [
+                                        {
+                                            "db_name": "UMLS",
+                                            "db_id": entity["concept_id"],
+                                        }
+                                    ],
                                 }
                             )
                     document["entities"] = entities_
@@ -266,12 +279,23 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
         pmid_, type, abstract = raw_document[1].split("|", 2)
         passages = [
             {"type": "title", "text": [title], "offsets": [[0, len(title)]]},
-            {"type": "abstract", "text": [abstract], "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]]},
+            {
+                "type": "abstract",
+                "text": [abstract],
+                "offsets": [[len(title) + 1, len(title) + len(abstract) + 1]],
+            },
         ]
 
         entities = []
         for line in raw_document[2:]:
-            pmid_, start_idx, end_idx, mention, semantic_type_id, entity_id = line.split("\t")
+            (
+                pmid_,
+                start_idx,
+                end_idx,
+                mention,
+                semantic_type_id,
+                entity_id,
+            ) = line.split("\t")
             entity = {
                 "offsets": [[int(start_idx), int(end_idx)]],
                 "text": [mention],

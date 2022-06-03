@@ -32,6 +32,7 @@ import pandas as pd
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
@@ -101,7 +102,7 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "https://temu.bsc.es/pharmaconer/index.php/datasets/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "pharmaconer": "https://zenodo.org/record/4270158/files/pharmaconer.zip?download=1",

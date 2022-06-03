@@ -31,6 +31,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -58,7 +59,7 @@ summarized consumer health questions.
 
 _HOMEPAGE = "https://github.com/abachaa/MeQSum"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MeQSum/raw/master/MeQSum_ACL2019_BenAbacha_Demner-Fushman.xlsx",

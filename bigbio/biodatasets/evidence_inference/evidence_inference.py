@@ -33,6 +33,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -70,7 +71,7 @@ or had significant effect on the outcome, relative to the comparator.
 
 _HOMEPAGE = "https://github.com/jayded/evidence-inference"
 
-_LICENSE = "MIT"
+_LICENSE = Licenses.MIT
 
 _URLS = {
     _DATASETNAME: "http://evidence-inference.ebm-nlp.com/v2.0.tar.gz",
@@ -179,7 +180,9 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepaths, datapath, split, datadir) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepaths, datapath, split, datadir
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         with open(f"{datadir}/splits/{split}_article_ids.txt", "r") as f:
             ids = [int(i.strip()) for i in f.readlines()]
@@ -248,7 +251,13 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
 
                 feature_dict = {
                     "id": uid,
-                    "premise": "\t".join([sample["Intervention"], sample["Comparator"], sample["Outcome"]]),
+                    "premise": "\t".join(
+                        [
+                            sample["Intervention"],
+                            sample["Comparator"],
+                            sample["Outcome"],
+                        ]
+                    ),
                     "hypothesis": evidence,
                     "label": label,
                 }

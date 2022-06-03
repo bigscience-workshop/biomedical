@@ -24,6 +24,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -53,7 +54,7 @@ Grant Agencies have been identified in the full text of articles.
 
 _HOMEPAGE = "http://participants-area.bioasq.org/general_information/Task5c/"
 
-_LICENSE = "NLM License Code: 8283NLM123"
+_LICENSE = Licenses.NLM_LICENSE
 
 # Website contains all data, but login required
 _URLS = {_DATASETNAME: "http://participants-area.bioasq.org/datasets/"}

@@ -28,6 +28,7 @@ import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -55,7 +56,8 @@ Common Anatomy Reference Ontology.
 """
 
 _HOMEPAGE = "http://nactem.ac.uk/anatomytagger/#AnatEM"
-_LICENSE = "Creative Commons BY-SA 3.0 license"
+
+_LICENSE = Licenses.CC_BY_SA_3p0
 
 _URLS = {_DATASETNAME: "http://nactem.ac.uk/anatomytagger/AnatEM-1.0.2.tar.gz"}
 

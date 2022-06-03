@@ -30,6 +30,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -60,9 +61,11 @@ sentences for gene/protein NER. 15K GENETAG sentences were used for the BioCreAt
 
 _HOMEPAGE = "https://github.com/openbiocorpora/genetag"
 
-_LICENSE = "Public Domain"
+_LICENSE = Licenses.NCBI_LICENSE
 
-_BASE_URL = "https://raw.githubusercontent.com/openbiocorpora/genetag/master/original-data/"
+_BASE_URL = (
+    "https://raw.githubusercontent.com/openbiocorpora/genetag/master/original-data/"
+)
 
 _URLS = {
     "test": {
@@ -133,7 +136,9 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                     "pos_tags": datasets.Sequence(datasets.Value("string")),
                     "entities": [
                         {
-                            "token_offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "token_offsets": datasets.Sequence(
+                                [datasets.Value("int32")]
+                            ),
                             "text": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "entity_id": datasets.Value("string"),
@@ -157,7 +162,9 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS
         data_dir = dl_manager.download_and_extract(urls)
-        annotation_type = self.config.subset_id.split("genetag")[-1]  # correct or gold annotations
+        annotation_type = self.config.subset_id.split("genetag")[
+            -1
+        ]  # correct or gold annotations
 
         return [
             datasets.SplitGenerator(
@@ -190,7 +197,9 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath, annotationpath, postagspath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(
+        self, filepath, annotationpath, postagspath, split: str
+    ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         corpus, annotations = self._read_files(filepath, annotationpath, postagspath)
 
@@ -239,9 +248,13 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                     start = int(row[1].split()[0])
                     end = int(row[1].split()[1])
                     if sentence_id in annotations:
-                        annotations[sentence_id].append({"text": annot, "token_start": start, "token_end": end})
+                        annotations[sentence_id].append(
+                            {"text": annot, "token_start": start, "token_end": end}
+                        )
                     else:
-                        annotations[sentence_id] = [{"text": annot, "token_start": start, "token_end": end}]
+                        annotations[sentence_id] = [
+                            {"text": annot, "token_start": start, "token_end": end}
+                        ]
 
         return corpus, annotations
 
@@ -268,7 +281,9 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                         {
                             "text": entity["text"],
                             "type": "NEWGENE",
-                            "token_offsets": [[entity["token_start"], entity["token_end"]]],
+                            "token_offsets": [
+                                [entity["token_start"], entity["token_end"]]
+                            ],
                             "entity_id": f"{sent_id}_{uid+1}",
                         }
                     )
@@ -287,7 +302,12 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                 "id": sent_id,
                 "document_id": sent_id,
                 "passages": [
-                    {"id": f"{sent_id}_text", "type": "sentence", "text": [text], "offsets": [[0, len(text)]]}
+                    {
+                        "id": f"{sent_id}_text",
+                        "type": "sentence",
+                        "text": [text],
+                        "offsets": [[0, len(text)]],
+                    }
                 ],
                 "entities": self._add_entities_bb(sent_id, annotations[sent_id], text)
                 if annotations.get(sent_id)
@@ -344,7 +364,10 @@ class GenetagDataset(datasets.GeneratorBasedBuilder):
                     # match substring using character and word index
                     token_end = end + 1
                     token_end_char = i + len(entity["text"])
-                    if " ".join(text.split()[start:token_end]) == text[i:token_end_char]:
+                    if (
+                        " ".join(text.split()[start:token_end])
+                        == text[i:token_end_char]
+                    ):
                         annot = {
                             "offsets": [[i, i + len(entity["text"])]],
                             "text": [entity["text"]],

@@ -31,6 +31,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -56,7 +57,7 @@ Answer Reranking” (ACL 2014).
 
 _HOMEPAGE = "https://allenai.org/data/biology-how-why-corpus"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/biology-how-why-corpus/BiologyHowWhyCorpus.tar",

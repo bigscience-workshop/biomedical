@@ -27,6 +27,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -62,7 +63,7 @@ aggregated to reduce noise. Test labels are collected from medical professionals
 
 _HOMEPAGE = "https://github.com/bepnye/EBM-NLP"
 
-_LICENSE = "UNKNOWN"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {_DATASETNAME: "https://github.com/bepnye/EBM-NLP/raw/master/ebm_nlp_2_00.tar.gz"}
 

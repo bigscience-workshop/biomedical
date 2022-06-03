@@ -18,13 +18,13 @@ import os
 from pathlib import Path
 from typing import List
 
-
 import datasets
 import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -47,7 +47,8 @@ A set of 100 abstracts annotated by Kevin Nagel with protein, residue, organism 
 
 _HOMEPAGE = "https://sourceforge.net/projects/bionlp-corpora/files/ProteinResidue/"
 
-_LICENSE = """
+_LICENSE = CustomLicense(
+    text="""
 Copyright (c) 2011 Kevin Nagel
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -65,6 +66,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 """
+)
 
 _URLS = {
     _DATASETNAME: "https://sourceforge.net/projects/bionlp-corpora/files/ProteinResidue/NagelCorpus.tar.gz/download",

@@ -20,6 +20,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -89,7 +90,8 @@ from 201 and 100 documents respectively.
 """
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/download-mirna-test-corpus.html"
-_LICENSE = "Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)"
+
+_LICENSE = Licenses.CC_BY_NC_3p0
 
 _BASE = "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/miRNA/miRNA-"
 

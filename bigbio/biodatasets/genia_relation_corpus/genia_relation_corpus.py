@@ -32,6 +32,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -85,7 +86,7 @@ static relations, relations such as part-of that hold between entities without (
 
 _HOMEPAGE = "http://www.geniaproject.org/genia-corpus/relation-corpus"
 
-_LICENSE = """GENIA Project License for Annotated Corpora"""
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLS = {
     _DATASETNAME: {
