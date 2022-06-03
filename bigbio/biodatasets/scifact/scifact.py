@@ -179,7 +179,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.name],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

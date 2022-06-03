@@ -212,7 +212,7 @@ class bionlp_st_2013_pc(datasets.GeneratorBasedBuilder):
             # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
             # License for the dataset if available
-            license=_LICENSE,
+            license=str(_LICENSE),
             # Citation for the dataset
             citation=_CITATION,
         )

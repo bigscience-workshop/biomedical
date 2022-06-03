@@ -220,7 +220,7 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
