@@ -213,10 +213,8 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             doc_id = filename.split(".")[0]
             entities = []
             article_text = self._read_text(os.path.join(text_dir, filename))
-            print(doc_id, article_text[:20], end="\n")
             for ann_type, ann_dir in ner_dirs.items():
                 ann_file = os.path.join(data_dir, ann_dir, filename + ".knowtator.xml")
-                print(ann_file)
                 entities.extend(self._read_ann(ann_file, ann_type))
             if self.config.schema == "source":
                 source_example = {
