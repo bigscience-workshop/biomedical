@@ -17,12 +17,13 @@ import re
 from typing import Dict, Iterator, List, Tuple
 
 import bioc
-from bioc import biocxml
 import datasets
+from bioc import biocxml
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.EN]
@@ -130,7 +131,8 @@ entity mention (SACEM) class: abbreviation, family, formula, identifier, multipl
 _DATASETNAME = "CHEMDNER"
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/resources/biocreative-iv/chemdner-corpus/"
-_LICENSE = "Unknown"
+
+_LICENSE = Licenses.UNKNOWN
 
 _URLs = {
     "source": "https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/BC7T2-CHEMDNER-corpus_v2.BioC.xml.gz",
@@ -220,7 +222,7 @@ class CHEMDNERDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

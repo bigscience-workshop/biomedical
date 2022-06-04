@@ -36,6 +36,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -64,7 +65,7 @@ linguist expert before the annotation of the corpus was initiated.
 
 _HOMEPAGE = "https://rgai.inf.u-szeged.hu/node/105"
 
-_LICENSE = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
+_LICENSE = Licenses.CC_BY_2p0
 
 _URLS = {
     _DATASETNAME: "https://rgai.sed.hu/sites/rgai.sed.hu/files/bioscope.zip",
@@ -176,7 +177,7 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -229,31 +230,59 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
         """
         if self.config.subset_id.__contains__("abstracts"):
             sentences = self._concat_iterators(
-                ("Abstract", ET.parse(os.path.join(data_files, "abstracts.xml")).getroot().iter("sentence"))
+                (
+                    "Abstract",
+                    ET.parse(os.path.join(data_files, "abstracts.xml"))
+                    .getroot()
+                    .iter("sentence"),
+                )
             )
         elif self.config.subset_id.__contains__("papers"):
             sentences = self._concat_iterators(
-                ("Paper", ET.parse(os.path.join(data_files, "full_papers.xml")).getroot().iter("sentence"))
+                (
+                    "Paper",
+                    ET.parse(os.path.join(data_files, "full_papers.xml"))
+                    .getroot()
+                    .iter("sentence"),
+                )
             )
         elif self.config.subset_id.__contains__("medical_texts"):
             sentences = self._concat_iterators(
                 (
                     "Medical text",
-                    ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml"))
+                    ET.parse(
+                        os.path.join(
+                            data_files, "clinical_merger/clinical_records_anon.xml"
+                        )
+                    )
                     .getroot()
                     .iter("sentence"),
                 )
             )
         else:
-            abstracts = ET.parse(os.path.join(data_files, "abstracts.xml")).getroot().iter("sentence")
-            papers = ET.parse(os.path.join(data_files, "full_papers.xml")).getroot().iter("sentence")
+            abstracts = (
+                ET.parse(os.path.join(data_files, "abstracts.xml"))
+                .getroot()
+                .iter("sentence")
+            )
+            papers = (
+                ET.parse(os.path.join(data_files, "full_papers.xml"))
+                .getroot()
+                .iter("sentence")
+            )
             medical_texts = (
-                ET.parse(os.path.join(data_files, "clinical_merger/clinical_records_anon.xml"))
+                ET.parse(
+                    os.path.join(
+                        data_files, "clinical_merger/clinical_records_anon.xml"
+                    )
+                )
                 .getroot()
                 .iter("sentence")
             )
             sentences = self._concat_iterators(
-                ("Abstract", abstracts), ("Paper", papers), ("Medical text", medical_texts)
+                ("Abstract", abstracts),
+                ("Paper", papers),
+                ("Medical text", medical_texts),
             )
         return sentences
 
@@ -286,7 +315,9 @@ class BioscopeDataset(datasets.GeneratorBasedBuilder):
                     "id": f"{document_type_prefix}_{idx}",
                     "type": cues.get(idx).attrib["type"],
                     "text": ["".join(xcope.itertext())],
-                    "offsets": self._extract_offsets(text=text, entity_text="".join(xcope.itertext())),
+                    "offsets": self._extract_offsets(
+                        text=text, entity_text="".join(xcope.itertext())
+                    ),
                     "normalized": [],
                 }
             )

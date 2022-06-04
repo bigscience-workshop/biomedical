@@ -52,6 +52,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
@@ -109,7 +110,7 @@ procedures extracted from the BSC NERs documents.
 _HOMEPAGE = "https://zenodo.org/record/5602914#.YhSXJ5PMKWt"
 
 
-_LICENSE = "CC-BY-4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: {
@@ -216,7 +217,7 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

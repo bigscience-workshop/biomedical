@@ -144,9 +144,25 @@ class TestDataLoader(unittest.TestCase):
         Check if all metadata for a dataloader are present
         """
 
-        for m in METADATA:
-            if not hasattr(module, m):
-                raise AssertionError(f"Required module-level '{m}' is not defined!")
+        for metadata_name, metadata_type in METADATA.items():
+            if not hasattr(module, metadata_name):
+                raise AssertionError(
+                    f"Required dataloader attribute '{metadata_name}' is not defined!"
+                )
+
+            metadata_attr = getattr(module, metadata_name)
+
+            if metadata_name == "_LANGUAGES":
+                for lang in metadata_attr:
+                    if not isinstance(lang, metadata_type):
+                        raise AssertionError(
+                            f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(lang)}`!"
+                        )
+            else:
+                if not isinstance(metadata_attr, metadata_type):
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be of type `{metadata_type}`! Found `{type(metadata_attr)}`!"
+                    )
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
@@ -554,9 +570,10 @@ class TestDataLoader(unittest.TestCase):
 
                     if len(example["choices"]) > 0:
                         # can change "==" to "in" if we include ranking later
-                        assert (
-                            example["type"] in ["multiple_choice", "yesno"]
-                        ), f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
+                        assert example["type"] in [
+                            "multiple_choice",
+                            "yesno",
+                        ], f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
 
                     if example["type"] in ["multiple_choice", "yesno"]:
                         assert (
