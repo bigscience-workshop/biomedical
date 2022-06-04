@@ -26,6 +26,7 @@ import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -51,7 +52,7 @@ and chemical entities and 600 plant-chemical relationships which are drawn from 
 """
 
 _HOMEPAGE = "http://210.107.182.73/plantchemcorpus.htm"
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {_DATASETNAME: "http://210.107.182.73/1109_corpus_units_STformat.tar"}
 
@@ -143,7 +144,7 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

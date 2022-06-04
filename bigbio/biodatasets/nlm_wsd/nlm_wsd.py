@@ -54,6 +54,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -85,7 +86,7 @@ of the instances. Evaluations were only used when the evaluators completed all 1
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html"
 
-_LICENSE = "DUA (UMLS)"
+_LICENSE = Licenses.UMLS_LICENSE
 
 _URLS = {
     "UMLS": "UMLS1999.tar.gz",
@@ -190,7 +191,7 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
