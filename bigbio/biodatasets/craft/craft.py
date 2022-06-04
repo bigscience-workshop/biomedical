@@ -31,8 +31,9 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks, Lang
 import zipfile
 
-_LOCAL = False
+_LOCAL = True
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _CITATION = """\
 @article{bada2012concept,
   title={Concept annotation in the CRAFT corpus},
@@ -83,15 +84,15 @@ _CLASS_LABELS = {
     "UBERON": "Uberon ",
 }
 
-
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
+logger = datasets.utils.logging.get_logger(__name__)
 class CraftDataset(datasets.GeneratorBasedBuilder):
-    """This dataset presents the concept annotations of the Colorado Richly Annotated Full-Text (CRAFT) Corpus, a collection of 97 full-length,
+    """
+    This dataset presents the concept annotations of the Colorado Richly Annotated Full-Text (CRAFT) Corpus, a collection of 97 full-length,
     open-access biomedical journal articles that have been annotated both semantically and syntactically to serve as a research resource for the
-     biomedical natural-language-processing (NLP) community. CRAFT identifies all mentions of nearly all concepts from nine prominent biomedical
-     ontologies and terminologies: the Cell Type Ontology, the Chemical Entities of Biological Interest ontology, the NCBI Taxonomy, the Protein
-      Ontology, the Sequence Ontology, the entries of the Entrez Gene database, and the three subontologies of the Gene Ontology."""
+    biomedical natural-language-processing (NLP) community. CRAFT identifies all mentions of nearly all concepts from nine prominent biomedical
+    ontologies and terminologies: the Cell Type Ontology, the Chemical Entities of Biological Interest ontology, the NCBI Taxonomy, the Protein
+    Ontology, the Sequence Ontology, the entries of the Entrez Gene database, and the three subontologies of the Gene Ontology.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -118,7 +119,6 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
-
             features = datasets.Features(
                 {
                     "doc_id": datasets.Value("string"),
@@ -133,7 +133,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
                     ],
                 }
             )
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
 
         return datasets.DatasetInfo(
@@ -148,7 +148,13 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         text_subdir = r"CRAFT-5.0.0\articles\txt"
         urls = _URL[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
+        # TODO: KEEP if your dataset is LOCAL; remove if NOT
+        if self.config.data_dir is None:
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
+        else:
+            data_dir = self.config.data_dir
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
@@ -163,7 +169,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
         """
         Read text from the article and return it
         """
-        with open(file, "r") as f:
+        with open(file, "r", encoding="UTF-8") as f:
             text = f.read()
         return text
 
@@ -173,21 +179,28 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
         entities = []
         for ann in root.findall("annotation"):
             id = ann.find("mention").attrib["id"]
-            span = ann.find("span")
-            start, end = span.attrib["start"], span.attrib["end"]
-            text = ann.find("spannedText").text
-            entity = {
-                "entity_id": id,
-                "offsets": [start, end],
-                "type": ann_type,
-                "text": text,
-            }
-            entities.append(entity)
+            span_count = ann.findall("span")
+            if len(span_count) > 1:
+                logger.warn(
+                    f"Multiple annotations found for {id} in {file}. Skipping..."
+                )
+                continue
+            else:
+                span = ann.find("span")
+                start, end = span.attrib["start"], span.attrib["end"]
+                text = ann.find("spannedText").text
+                entity = {
+                    "entity_id": id,
+                    "offsets": [start, end],
+                    "type": ann_type,
+                    "text": text,
+                }
+                entities.append(entity)
         return entities
 
     def entity_to_bigbio_schema(self, entity):
         bigbio_entity = {
-            "id": entity["doc_id"],
+            "id": str(entity["entity_id"]),
             "offsets": [entity["offsets"]],
             "text": [entity["text"]],
             "type": entity["type"],
@@ -206,6 +219,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             )
             for key in _CLASS_LABELS.keys()
         }
+        ner_dirs["MONDO"]=os.path.join(r"CRAFT-5.0.0\concept-annotation","MONDO",)
         text_file_list = [
             file for file in os.listdir(text_dir) if file.split(".")[-1] == "txt"
         ]
@@ -214,7 +228,10 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             entities = []
             article_text = self._read_text(os.path.join(text_dir, filename))
             for ann_type, ann_dir in ner_dirs.items():
-                ann_file = os.path.join(data_dir, ann_dir, filename + ".knowtator.xml")
+                if ann_type=="MONDO":
+                    ann_file = os.path.join(data_dir, ann_dir, filename.replace("txt","xml"))
+                else:
+                    ann_file = os.path.join(data_dir, ann_dir, filename + ".knowtator.xml")
                 entities.extend(self._read_ann(ann_file, ann_type))
             if self.config.schema == "source":
                 source_example = {
@@ -224,7 +241,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
                 }
                 yield doc_id, source_example
 
-            elif self.config.schema == "bigbio_[bigbio_schema_name]":
+            elif self.config.schema == "bigbio_kb":
                 bigbio_example = {
                     "id": doc_id,
                     "document_id": doc_id,
@@ -233,7 +250,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
                             "id": doc_id + "_text",
                             "type": "text",
                             "text": [article_text],
-                            "offsets": [0, len(article_text)],
+                            "offsets": [[0, len(article_text)]],
                         }
                     ],
                     "entities": [
