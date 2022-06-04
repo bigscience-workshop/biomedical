@@ -117,10 +117,6 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
         if self.config.schema == "source":
 
             features = datasets.Features(
@@ -205,7 +201,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             key: os.path.join(
                 r"CRAFT-5.0.0\concept-annotation",
                 key,
-                key + "+extensions",
+                key,
                 "knowtator",
             )
             for key in _CLASS_LABELS.keys()
@@ -250,7 +246,3 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
                     "relations": [],
                 }
                 yield doc_id, bigbio_example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
