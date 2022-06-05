@@ -196,10 +196,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
                     entities.append(entity)
             else:
                 for ann in root.findall("annotation"):
-                    if ann_type == "MONDO":
-                        id = ann.attrib["id"]
-                    else:
-                        id = ann.find("mention").attrib["id"]
+                    id = ann.find("mention").attrib["id"]
                     span_count = ann.findall("span")
                     if len(span_count) > 1:
                         logger.warn(
