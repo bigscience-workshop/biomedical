@@ -20,16 +20,12 @@ Due to current limitations of the current schema, corefs are not included in thi
 """
 
 import os
-from pydoc import doc
 from typing import List, Tuple, Dict
 import xml.etree.ElementTree as ET
 import datasets
-from numpy import source
-from yaml import parse
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Tasks, Lang
-import zipfile
 
 _LOCAL = True
 _LANGUAGES = [Lang.EN]
@@ -85,6 +81,8 @@ _CLASS_LABELS = {
 }
 
 logger = datasets.utils.logging.get_logger(__name__)
+
+
 class CraftDataset(datasets.GeneratorBasedBuilder):
     """
     This dataset presents the concept annotations of the Colorado Richly Annotated Full-Text (CRAFT) Corpus, a collection of 97 full-length,
@@ -146,9 +144,7 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        text_subdir = r"CRAFT-5.0.0\articles\txt"
-        urls = _URL[_DATASETNAME]
-        # TODO: KEEP if your dataset is LOCAL; remove if NOT
+        text_subdir = os.path.join("CRAFT-5.0.0", "articles", "txt")
         if self.config.data_dir is None:
             raise ValueError(
                 "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
@@ -173,30 +169,55 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             text = f.read()
         return text
 
-    def _read_ann(self, file, ann_type) -> dict:
-        tree = ET.parse(file)
-        root = tree.getroot()
-        entities = []
-        for ann in root.findall("annotation"):
-            id = ann.find("mention").attrib["id"]
-            span_count = ann.findall("span")
-            if len(span_count) > 1:
-                logger.warn(
-                    f"Multiple annotations found for {id} in {file}. Skipping..."
-                )
-                continue
+    def _read_ann(self, file, ann_type) -> list:
+        if not os.path.exists(file):
+            logger.warn(f"The file {file} does not exist")
+            return []
+        else:
+            tree = ET.parse(file)
+            root = tree.getroot()
+            entities = []
+            if ann_type == "MONDO":
+                doc = tree.getroot().find("document")
+                for ann in doc.findall("annotation"):
+                    for span in ann.findall("span"):
+                        start, end, id = (
+                            span.attrib["start"],
+                            span.attrib["end"],
+                            span.attrib["id"],
+                        )
+                        text = span.text
+                        entity = {
+                            "entity_id": id,
+                            "offsets": [start, end],
+                            "type": ann_type,
+                            "text": text,
+                        }
+                    entities.append(entity)
             else:
-                span = ann.find("span")
-                start, end = span.attrib["start"], span.attrib["end"]
-                text = ann.find("spannedText").text
-                entity = {
-                    "entity_id": id,
-                    "offsets": [start, end],
-                    "type": ann_type,
-                    "text": text,
-                }
-                entities.append(entity)
-        return entities
+                for ann in root.findall("annotation"):
+                    if ann_type == "MONDO":
+                        id = ann.attrib["id"]
+                    else:
+                        id = ann.find("mention").attrib["id"]
+                    span_count = ann.findall("span")
+                    if len(span_count) > 1:
+                        logger.warn(
+                            f"Multiple annotations found for {id} in {file}. Skipping..."
+                        )
+                        continue
+                    else:
+                        span = ann.find("span")
+                        start, end = span.attrib["start"], span.attrib["end"]
+                        text = ann.find("spannedText").text
+                    entity = {
+                        "entity_id": id,
+                        "offsets": [start, end],
+                        "type": ann_type,
+                        "text": text,
+                    }
+                    entities.append(entity)
+            return entities
 
     def entity_to_bigbio_schema(self, entity):
         bigbio_entity = {
@@ -212,14 +233,21 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         ner_dirs = {
             key: os.path.join(
-                r"CRAFT-5.0.0\concept-annotation",
+                "CRAFT-5.0.0",
+                "concept-annotation",
                 key,
                 key,
                 "knowtator",
             )
             for key in _CLASS_LABELS.keys()
         }
-        ner_dirs["MONDO"]=os.path.join(r"CRAFT-5.0.0\concept-annotation","MONDO",)
+        ner_dirs["MONDO"] = os.path.join(
+            "CRAFT-5.0.0",
+            "concept-annotation",
+            "MONDO",
+            "MONDO_without_genotype_annotations",
+            "knowtator-2",
+        )
         text_file_list = [
             file for file in os.listdir(text_dir) if file.split(".")[-1] == "txt"
         ]
@@ -228,10 +256,14 @@ class CraftDataset(datasets.GeneratorBasedBuilder):
             entities = []
             article_text = self._read_text(os.path.join(text_dir, filename))
             for ann_type, ann_dir in ner_dirs.items():
-                if ann_type=="MONDO":
-                    ann_file = os.path.join(data_dir, ann_dir, filename.replace("txt","xml"))
+                if ann_type == "MONDO":
+                    ann_file = os.path.join(
+                        data_dir, ann_dir, filename.replace("txt", "xml")
+                    )
                 else:
-                    ann_file = os.path.join(data_dir, ann_dir, filename + ".knowtator.xml")
+                    ann_file = os.path.join(
+                        data_dir, ann_dir, filename + ".knowtator.xml"
+                    )
                 entities.extend(self._read_ann(ann_file, ann_type))
             if self.config.schema == "source":
                 source_example = {
