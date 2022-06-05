@@ -111,6 +111,10 @@ class GAD(datasets.GeneratorBasedBuilder):
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
+
+        if "blurb" in self.config.name:
+            return self._blurb_split_generator(dl_manager)
+
         fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
 
         my_urls = _URLs[self.config.schema]
