@@ -110,8 +110,8 @@ class GAD(datasets.GeneratorBasedBuilder):
 
     def _blurb_split_generator(
         self,
-        data_files: Dict[str, Path],
-    ):
+        dl_manager: datasets.DownloadManager
+        ):
         """Creates train/dev/test for BLURB split"""
 
         my_urls = _URLs[self.config.schema]
@@ -144,17 +144,11 @@ class GAD(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": train_fpath,
-                    "split": "train",
-                },
+                gen_kwargs={"filepath": train_fpath},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={
-                    "filepath": dev_fpath,
-                    "split": "validation",
-                },
+                gen_kwargs={"filepath": dev_fpath},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
@@ -168,7 +162,7 @@ class GAD(datasets.GeneratorBasedBuilder):
 
         # BLURB Custom split for GAD requires different generator
         if "blurb" in self.config.name:
-            return self._blurb_split_generator(data_files)
+            return self._blurb_split_generator(dl_manager)
         else:
             fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
 
