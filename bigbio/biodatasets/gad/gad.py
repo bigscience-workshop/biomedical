@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import datasets
 import pandas as pd
@@ -74,7 +74,7 @@ class GAD(datasets.GeneratorBasedBuilder):
         )
         for i in range(10)
     ]
-
+    
     # BLURB Benchmark config https://microsoft.github.io/BLURB/
     BUILDER_CONFIGS.append(
         BigBioConfig(
@@ -107,6 +107,56 @@ class GAD(datasets.GeneratorBasedBuilder):
             license=str(_LICENSE),
             citation=_CITATION,
         )
+
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
+        fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
+
+        my_urls = _URLs[self.config.schema]
+        data_dir = Path(dl_manager.download_and_extract(my_urls))
+        data_files = {
+            "train": data_dir / "GAD" / str(fold_id) / "train.tsv",
+            "test": data_dir / "GAD" / str(fold_id) / "test.tsv",
+        }
+
+        return [
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={"filepath": data_files["train"]},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={"filepath": data_files["test"]},
+            ),
+        ]
+
+    def _generate_examples(self, filepath: Path):
+        if "train.tsv" in str(filepath):
+            df = pd.read_csv(filepath, sep="\t", header=None).reset_index()
+        else:
+            df = pd.read_csv(filepath, sep="\t")
+        df.columns = ["id", "sentence", "label"]
+
+        if self.config.schema == "source":
+            for id, row in enumerate(df.itertuples()):
+                ex = {
+                    "index": row.id,
+                    "sentence": row.sentence,
+                    "label": int(row.label),
+                }
+                yield id, ex
+        elif self.config.schema == "bigbio_text":
+            for id, row in enumerate(df.itertuples()):
+                ex = {
+                    "id": id,
+                    "document_id": row.id,
+                    "text": row.sentence,
+                    "labels": [str(row.label)],
+                }
+                yield id, ex
+        else:
+            raise ValueError(f"Invalid config: {self.config.name}")
 
     def _blurb_split_generator(
         self,
@@ -155,58 +205,3 @@ class GAD(datasets.GeneratorBasedBuilder):
                 gen_kwargs={"filepath": data_files["test"]},
             ),
         ]
-    
-    def _split_generators(
-        self, dl_manager: datasets.DownloadManager
-    ) -> List[datasets.SplitGenerator]:
-
-        # BLURB Custom split for GAD requires different generator
-        if "blurb" in self.config.name:
-            return self._blurb_split_generator(dl_manager)
-        else:
-            fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
-
-            my_urls = _URLs[self.config.schema]
-            data_dir = Path(dl_manager.download_and_extract(my_urls))
-            data_files = {
-                "train": data_dir / "GAD" / str(fold_id) / "train.tsv",
-                "test": data_dir / "GAD" / str(fold_id) / "test.tsv",
-            }
-
-            return [
-                datasets.SplitGenerator(
-                    name=datasets.Split.TRAIN,
-                    gen_kwargs={"filepath": data_files["train"]},
-                ),
-                datasets.SplitGenerator(
-                    name=datasets.Split.TEST,
-                    gen_kwargs={"filepath": data_files["test"]},
-                ),
-            ]
-
-    def _generate_examples(self, filepath: Path):
-        if "train.tsv" in str(filepath):
-            df = pd.read_csv(filepath, sep="\t", header=None).reset_index()
-        else:
-            df = pd.read_csv(filepath, sep="\t")
-        df.columns = ["id", "sentence", "label"]
-
-        if self.config.schema == "source":
-            for id, row in enumerate(df.itertuples()):
-                ex = {
-                    "index": row.id,
-                    "sentence": row.sentence,
-                    "label": int(row.label),
-                }
-                yield id, ex
-        elif self.config.schema == "bigbio_text":
-            for id, row in enumerate(df.itertuples()):
-                ex = {
-                    "id": id,
-                    "document_id": row.id,
-                    "text": row.sentence,
-                    "labels": [str(row.label)],
-                }
-                yield id, ex
-        else:
-            raise ValueError(f"Invalid config: {self.config.name}")
