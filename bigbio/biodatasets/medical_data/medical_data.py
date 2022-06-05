@@ -26,6 +26,7 @@ from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = True
+_PUBMED = False
 _CITATION = """\
 @misc{ask9medicaldata,
   author    = {Khan, Arbaaz},
@@ -47,11 +48,9 @@ _LICENSE = Licenses.UNKNOWN
 
 _URLS = {}
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
-
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -73,10 +72,10 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
             subset_id=f"{_DATASETNAME}",
         ),
         BigBioConfig(
-            name=f"{_DATASETNAME}_bigbio_te",
+            name=f"{_DATASETNAME}_bigbio_pairs",
             version=BIGBIO_VERSION,
             description=f"{_DATASETNAME} BigBio schema",
-            schema="bigbio_te",
+            schema="bigbio_pairs",
             subset_id=f"{_DATASETNAME}",
         ),
     ]
@@ -92,12 +91,12 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     "hash": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "drug_name": datasets.Value("string"),
-                    "sentiment": datasets.Value("string"),
+                    "label": datasets.Value("string"),
                 }
             )
 
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+        elif self.config.schema == "bigbio_pairs":
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -146,7 +145,7 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     document["hash"] = line["unique_hash"]
                     document["text"] = line["text"]
                     document["drug_name"] = line["drug"]
-                    document["sentiment"] = line["sentiment"]
+                    document["label"] = line["sentiment"]
                     yield document["hash"], document
             else:
                 for _cols, line in csv_reader.iterrows():
@@ -154,25 +153,27 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     document["hash"] = line["unique_hash"]
                     document["text"] = line["text"]
                     document["drug_name"] = line["drug"]
-                    document["sentiment"] = None
+                    document["label"] = None
                     yield document["hash"], document
 
-        elif self.config.schema == "bigbio_te":
+        elif self.config.schema == "bigbio_pairs":
             csv_reader = pd.read_csv(filepath, dtype="object")
             # Train and test splits handled differently as test split is missing values
             if split == "train":
                 for _cols, line in csv_reader.iterrows():
                     document = {}
                     document["id"] = line["unique_hash"]
-                    document["premise"] = line["text"]
-                    document["hypothesis"] = line["drug"]
+                    document["document_id"] = "NULL"
+                    document["text_1"] = line["text"]
+                    document["text_2"] = line["drug"]
                     document["label"] = line["sentiment"]
                     yield document["id"], document
             else:
                 for _cols, line in csv_reader.iterrows():
                     document = {}
                     document["id"] = line["unique_hash"]
-                    document["premise"] = line["text"]
-                    document["hypothesis"] = line["drug"]
+                    document["document_id"] = "NULL"
+                    document["text_1"] = line["text"]
+                    document["text_2"] = line["drug"]
                     document["label"] = None
                     yield document["id"], document
