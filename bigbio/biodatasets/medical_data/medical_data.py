@@ -14,12 +14,15 @@
 # limitations under the License.
 
 import os
-from typing import List, Tuple, Dict
-import pandas as pd
+from typing import Dict, List, Tuple
+
 import datasets
+import pandas as pd
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = True
@@ -40,7 +43,7 @@ _DESCRIPTION = """\
 
 _HOMEPAGE = ""
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {}
 
@@ -100,7 +103,7 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

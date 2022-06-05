@@ -38,6 +38,7 @@ import numpy as np
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -62,7 +63,7 @@ citation context in the computer science and biomedical domains.
 
 _HOMEPAGE = "https://allenai.org/data/scicite"
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://s3-us-west-2.amazonaws.com/ai2-s2-research/scicite/scicite.tar.gz",
@@ -139,7 +140,7 @@ class SciciteDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

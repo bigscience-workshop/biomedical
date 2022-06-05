@@ -21,6 +21,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2011_rel"
 _SOURCE_VIEW_NAME = "source"
@@ -63,7 +64,7 @@ gene/protein and an associated entity.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-rel"
 
-_LICENSE = "License Terms for BioNLP Shared Task 2011 Data"
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2011-rel/archive/refs/heads/master.zip",
@@ -195,7 +196,7 @@ class bionlp_st_2011_rel(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

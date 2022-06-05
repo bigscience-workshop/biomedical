@@ -36,6 +36,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
@@ -85,7 +86,7 @@ For further information, please visit https://temu.bsc.es/codiesp or send an ema
 
 _HOMEPAGE = "https://temu.bsc.es/codiesp/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "codiesp": "https://zenodo.org/record/3837305/files/codiesp.zip?download=1",
@@ -223,7 +224,7 @@ class CodiespDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
