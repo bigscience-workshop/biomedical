@@ -34,21 +34,22 @@ A corpus identifying associations between genes and diseases by a semi-automatic
 annotation procedure based on the Genetic Association Database
 """
 
-_HOMEPAGE = "https://github.com/dmis-lab/biobert" # This data source is used by the BLURB benchmark
+_PUBMED = True
+
+_HOMEPAGE = "https://github.com/dmis-lab/biobert"  # This data source is used by the BLURB benchmark
 
 _LICENSE = "Creative Common Attribution 4.0 International"
 
 _URLs = {
     "source": "https://drive.google.com/uc?export=download&id=1-jDKGcXREb2X9xTFnuiJ36PvsqoyHWcw",
-    "bigbio_text": "https://drive.google.com/uc?export=download&id=1-jDKGcXREb2X9xTFnuiJ36PvsqoyHWcw"
+    "bigbio_text": "https://drive.google.com/uc?export=download&id=1-jDKGcXREb2X9xTFnuiJ36PvsqoyHWcw",
 }
 
-_SUPPORTED_TASKS = [
-    Tasks.TEXT_CLASSIFICATION
-]
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
 
 class GAD(datasets.GeneratorBasedBuilder):
     """GAD is a weakly labeled dataset for Entity Relations (REL) task which is treated as a sentence classification task."""
@@ -61,7 +62,8 @@ class GAD(datasets.GeneratorBasedBuilder):
             description="GAD source schema",
             schema="source",
             subset_id=f"gad_fold{i}",
-        ) for i in range(10)
+        )
+        for i in range(10)
     ] + [
         # 10-fold bigbio schema
         BigBioConfig(
@@ -70,7 +72,8 @@ class GAD(datasets.GeneratorBasedBuilder):
             description="GAD BigBio schema",
             schema="bigbio_text",
             subset_id=f"gad_fold{i}",
-        ) for i in range(10)
+        )
+        for i in range(10)
     ]
 
     DEFAULT_CONFIG_NAME = "gad_fold0_source"
@@ -81,7 +84,7 @@ class GAD(datasets.GeneratorBasedBuilder):
                 {
                     "index": datasets.Value("string"),
                     "sentence": datasets.Value("string"),
-                    "label": datasets.Value("int32")
+                    "label": datasets.Value("int32"),
                 }
             )
         elif self.config.schema == "bigbio_text":
@@ -99,12 +102,12 @@ class GAD(datasets.GeneratorBasedBuilder):
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
         fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
-        
+
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
             "train": data_dir / "GAD" / str(fold_id) / "train.tsv",
-            "test": data_dir / "GAD" / str(fold_id) / "test.tsv"
+            "test": data_dir / "GAD" / str(fold_id) / "test.tsv",
         }
 
         return [
@@ -119,19 +122,19 @@ class GAD(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, filepath: Path):
-        if 'train.tsv' in str(filepath):
-            df = pd.read_csv(filepath, sep='\t', header=None).reset_index()
+        if "train.tsv" in str(filepath):
+            df = pd.read_csv(filepath, sep="\t", header=None).reset_index()
         else:
-            df = pd.read_csv(filepath, sep='\t')
-        df.columns = ['id', 'sentence', 'label']
+            df = pd.read_csv(filepath, sep="\t")
+        df.columns = ["id", "sentence", "label"]
 
         if self.config.schema == "source":
             for id, row in enumerate(df.itertuples()):
                 ex = {
                     "index": row.id,
                     "sentence": row.sentence,
-                    "label": int(row.label)
-                }                
+                    "label": int(row.label),
+                }
                 yield id, ex
         elif self.config.schema == "bigbio_text":
             for id, row in enumerate(df.itertuples()):
@@ -139,8 +142,8 @@ class GAD(datasets.GeneratorBasedBuilder):
                     "id": id,
                     "document_id": row.id,
                     "text": row.sentence,
-                    "labels": [str(row.label)]
+                    "labels": [str(row.label)],
                 }
-                yield id, ex            
+                yield id, ex
         else:
             raise ValueError(f"Invalid config: {self.config.name}")

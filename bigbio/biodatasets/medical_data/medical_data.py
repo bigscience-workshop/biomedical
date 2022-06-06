@@ -42,6 +42,8 @@ _HOMEPAGE = ""
 
 _LICENSE = ""
 
+_PUBMED = False
+
 _URLS = {}
 
 _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]

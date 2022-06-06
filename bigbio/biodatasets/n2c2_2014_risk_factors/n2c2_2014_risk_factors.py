@@ -78,6 +78,8 @@ author = {Amber Stubbs and Christopher Kotfila and Özlem Uzuner}
 }
 """
 
+_PUBMED = False
+
 _DATASETNAME = "n2c2_2014_risk_factors"
 
 _DESCRIPTION = """\
