@@ -74,6 +74,17 @@ class GAD(datasets.GeneratorBasedBuilder):
         )
         for i in range(10)
     ]
+    
+    # BLURB Benchmark config https://microsoft.github.io/BLURB/
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
+            name=f"gad_blurb_bigbio_text",
+            version=datasets.Version(_BIGBIO_VERSION),
+            description=f"GAD BLURB benchmark in simplified BigBio schema",
+            schema="bigbio_text",
+            subset_id=f"gad_blurb",
+        )
+    )
 
     DEFAULT_CONFIG_NAME = "gad_fold0_source"
 
@@ -100,6 +111,10 @@ class GAD(datasets.GeneratorBasedBuilder):
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
+
+        if "blurb" in self.config.name:
+            return self._blurb_split_generator(dl_manager)
+
         fold_id = int(self.config.subset_id.split("_fold")[1][0]) + 1
 
         my_urls = _URLs[self.config.schema]
@@ -146,3 +161,51 @@ class GAD(datasets.GeneratorBasedBuilder):
                 yield id, ex
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
+
+    def _blurb_split_generator(
+        self,
+        dl_manager: datasets.DownloadManager
+        ):
+        """Creates train/dev/test for BLURB split"""
+
+        my_urls = _URLs[self.config.schema]
+        data_dir = Path(dl_manager.download_and_extract(my_urls))
+        data_files = {
+            "train": data_dir / "GAD" / str(1) / "train.tsv",
+            "test": data_dir / "GAD" / str(1) / "test.tsv",
+        }
+
+        root_path = data_files["train"].parents[1]
+        # Save the train + validation sets accordingly
+        with open(data_files["train"], 'r') as f:
+            train_data = f.readlines()
+
+        data = {}
+        data['train'], data['dev'] = train_data[:4261], train_data[4261:]
+
+        for batch in ['train', 'dev']:
+            fname = batch + "_blurb.tsv"
+            fname = root_path / fname
+
+            with open(fname, "w") as f:
+                f.write("index\tsentence\tlabel\n")
+                for idx, line in enumerate(data[batch]):
+                    f.write(f"{idx}\t{line}")
+
+        train_fpath = root_path / "train_blurb.tsv"
+        dev_fpath = root_path / "dev_blurb.tsv"
+
+        return [
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={"filepath": train_fpath},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={"filepath": dev_fpath},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={"filepath": data_files["test"]},
+            ),
+        ]
