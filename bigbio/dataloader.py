@@ -70,11 +70,11 @@ _BLURB_CONFIG_NAMES = set(
         "gnormplus_bigbio_kb",  # BC2GM
         "jnlpba_bigbio_kb",  # JNLPBA
         "ncbi_disease_bigbio_kb",  # NCBI-disease
-        "bioasq_7b_bigbio_qa",  # BioASQ
+        "bioasq_blurb_bigbio_qa",  # BioASQ
         "chemprot_bigbio_kb",  # ChemProt
         "ddi_corpus_bigbio_kb",  # DDI
         "hallmarks_of_cancer_bigbio_text",  # HOC
-        "gad_fold0_bigbio_text",  #  Gene-Disease Associations (GAD)
+        "gad_blurb_bigbio_text",  #  Gene-Disease Associations (GAD)
         "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
     ]
 )

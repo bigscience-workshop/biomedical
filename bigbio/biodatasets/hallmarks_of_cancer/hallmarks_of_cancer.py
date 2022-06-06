@@ -19,6 +19,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -60,26 +61,29 @@ The filenames are the corresponding PubMed IDs (PMID).
 
 _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
-_URLs = {_DATASETNAME: "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip"}
+_URLs = {
+    "corpus": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
+    "split_indices": "https://microsoft.github.io/BLURB/sample_code/data_generation.tar.gz"    
+}
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _CLASS_NAMES = [
-    "Activating invasion and metastasis",
-    "Avoiding immune destruction",
-    "Cellular energetics",
-    "Enabling replicative immortality",
-    "Evading growth suppressors",
-    "Genomic instability and mutation",
-    "Inducing angiogenesis",
-    "Resisting cell death",
-    "NULL",
-    "Sustaining proliferative signaling",
-    "Tumor promoting inflammation",
+    'evading growth suppressors',
+    'tumor promoting inflammation',
+    'enabling replicative immortality',
+    'cellular energetics',
+    'resisting cell death',
+    'activating invasion and metastasis',
+    'genomic instability and mutation',
+    'none',
+    'inducing angiogenesis',
+    'sustaining proliferative signaling',
+    'avoiding immune destruction'
 ]
 
 
@@ -126,47 +130,67 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        data_dir = dl_manager.download_and_extract(_URLs[_DATASETNAME])
+        data_dir = dl_manager.download_and_extract(_URLs)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"filepath": Path(data_dir)},
-            )
+                gen_kwargs={
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/train_pmid.tsv"                
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/test_pmid.tsv"
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/dev_pmid.tsv"              
+                },
+            ),
         ]
 
-    def _generate_examples(self, filepath: Path):
+    def _generate_examples(self, corpuspath: Path, indicespath: Path):
 
-        dataset_dir = filepath / "Hallmarks-of-Cancer-master"
+        indices = indicespath.read_text(encoding="utf8").strip("\n").split(",")
+        dataset_dir = corpuspath / "Hallmarks-of-Cancer-master"
         texts_dir = dataset_dir / "text"
         labels_dir = dataset_dir / "labels"
 
-        text_files = texts_dir.glob("*.txt")
-        label_files = labels_dir.glob("*.txt")
         uid = 1
-
-        for document_index, file_pair in enumerate(zip(text_files, label_files)):
-            text_file, label_file = file_pair
-            text = text_file.read_text().strip("\n")
-            labels = label_file.read_text().strip("\n")
+        for document_index, document in enumerate(indices):
+            text_file = texts_dir / document
+            label_file = labels_dir / document
+            text = text_file.read_text(encoding="utf8").strip("\n")
+            labels = label_file.read_text(encoding="utf8").strip("\n")
 
             sentences = text.split("\n")
             labels = labels.split("<")[1:]
 
             for example_index, example_pair in enumerate(zip(sentences, labels)):
                 sentence, label = example_pair
-                if label == " ":
-                    continue
 
                 label = label.strip()
+                
+                if label == "":
+                    label = "none"
+
                 multi_labels = [m_label.strip() for m_label in label.split("AND")]
-                unique_multi_labels = {m_label.split("--")[0] for m_label in multi_labels}
+                unique_multi_labels = {
+                    m_label.split("--")[0].lower().lstrip() for m_label in multi_labels if m_label != "NULL"
+                }
 
                 arrow_file_unique_key = 100 * document_index + example_index
                 if self.config.schema == "source":

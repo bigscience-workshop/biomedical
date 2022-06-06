@@ -41,6 +41,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -80,7 +81,7 @@ MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 
-_LICENSE = "DUA (UMLS)"
+_LICENSE = Licenses.UMLS_LICENSE
 
 _URLS = {_DATASETNAME: ""}
 
@@ -154,7 +155,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

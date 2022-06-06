@@ -30,6 +30,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = False
@@ -63,13 +64,18 @@ multiple PTM types at once in a unified framework.
 
 _HOMEPAGE = "http://www.geniaproject.org/other-corpora/ptm-event-corpus"
 
-_LICENSE = "GENIA Project License for Annotated Corpora"
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
+
 
 _URLS = {
     _DATASETNAME: "http://www.geniaproject.org/other-corpora/ptm-event-corpus/post-translational_modifications_training_data.tar.gz?attredirects=0&d=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.COREFERENCE_RESOLUTION, Tasks.EVENT_EXTRACTION]
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.COREFERENCE_RESOLUTION,
+    Tasks.EVENT_EXTRACTION,
+]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -119,7 +125,9 @@ class GeniaPtmEventCorpusDataset(datasets.GeneratorBasedBuilder):
                     "events": [  # E line in brat
                         {
                             "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger
+                            "type": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger
                             "trigger": datasets.Value("string"),
                             "arguments": [
                                 {
@@ -159,7 +167,7 @@ class GeniaPtmEventCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -183,12 +191,16 @@ class GeniaPtmEventCorpusDataset(datasets.GeneratorBasedBuilder):
                 if filename.endswith(".txt"):
                     txt_file_path = Path(dirpath, filename)
                     if self.config.schema == "source":
-                        example = parsing.parse_brat_file(txt_file_path, annotation_file_suffixes=[".a1", ".a2"])
+                        example = parsing.parse_brat_file(
+                            txt_file_path, annotation_file_suffixes=[".a1", ".a2"]
+                        )
                         example["id"] = str(guid)
                         for key in ["attributes", "normalizations"]:
                             del example[key]
                         yield guid, example
                     elif self.config.schema == "bigbio_kb":
-                        example = parsing.brat_parse_to_bigbio_kb(parsing.parse_brat_file(txt_file_path))
+                        example = parsing.brat_parse_to_bigbio_kb(
+                            parsing.parse_brat_file(txt_file_path)
+                        )
                         example["id"] = str(guid)
                         yield guid, example

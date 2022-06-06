@@ -26,6 +26,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -52,7 +53,7 @@ nine medical coders and three physicians from the Mayo Clinic.
 
 _HOMEPAGE = "https://conservancy.umn.edu/handle/11299/196265"
 
-_LICENSE = "CC0 1.0 Universal"
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     _DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"
@@ -111,7 +112,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

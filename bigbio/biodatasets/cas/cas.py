@@ -7,6 +7,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.FR]
 _PUBMED = False
@@ -38,7 +39,7 @@ This version only contain the annotated CAS corpus
 
 _HOMEPAGE = "https://clementdalloux.fr/?page_id=28"
 
-_LICENSE = "DUA"
+_LICENSE = Licenses.DUA
 
 _URLS = {
     "cas_source": "",
@@ -104,7 +105,7 @@ class CAS(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

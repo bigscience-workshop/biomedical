@@ -39,6 +39,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "swedish_medical_ner"
 
@@ -80,7 +81,7 @@ annotated.
 
 _HOMEPAGE = "https://github.com/olofmogren/biomedical-ner-data-swedish/"
 
-_LICENSE = "Creative Commons Attribution-ShareAlike 4.0 International Public License (CC BY-SA 4.0)"
+_LICENSE = Licenses.CC_BY_SA_4p0
 
 _URLS = {
     "swedish_medical_ner_wiki": "https://raw.githubusercontent.com/olofmogren/biomedical-ner-data-swedish/master/Wiki_annotated_60.txt",
@@ -152,7 +153,7 @@ class SwedishMedicalNerDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
