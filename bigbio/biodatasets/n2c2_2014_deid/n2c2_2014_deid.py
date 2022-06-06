@@ -60,6 +60,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _LOCAL = True
@@ -97,7 +98,7 @@ the 18 HIPAA categories have been grouped into 6 main categories and 25 sub cate
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "DUA-C/NC"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -158,7 +159,7 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
