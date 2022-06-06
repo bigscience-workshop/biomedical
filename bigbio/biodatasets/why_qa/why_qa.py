@@ -117,7 +117,7 @@ class WhyQaDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="why_qa_bigbio_qa",
             version=BIGBIO_VERSION,
-            description="why_wa BigBio schema",
+            description="why_qa BigBio schema",
             schema="bigbio_qa",
             subset_id="why_qa",
         ),
