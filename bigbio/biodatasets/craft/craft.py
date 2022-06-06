@@ -29,7 +29,7 @@ from bigbio.utils.constants import Tasks, Lang
 
 _LOCAL = True
 _LANGUAGES = [Lang.EN]
-_PUBMED = False
+_PUBMED = True
 _CITATION = """\
 @article{bada2012concept,
   title={Concept annotation in the CRAFT corpus},
