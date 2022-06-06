@@ -16,6 +16,8 @@ from collections import defaultdict, OrderedDict, Counter
 
 # vanilla tokenizer
 def tokenizer(text):
+    if not text:
+        return text, []
     text = text.strip()
     text = text.replace("\t", "")
     text = text.replace("\n", "")
@@ -50,15 +52,16 @@ _TEXT_MAPS = {
     "bigbio_qa": ["question", "context"],
     "bigbio_te": ["premise", "hypothesis"],
     "bigbio_tp": ["text_1", "text_2"],
+    "bigbio_pairs": ["text_1", "text_2"],
     "bigbio_t2t": ["text_1", "text_2"],
 }
 
 IBM_COLORS = [
     "#648fff",
-    "#785ef0",
     "#dc267f",
-    "#fe6100",
     "#ffb000",
+    "#fe6100",
+    "#785ef0",
     "#000000",
     "#ffffff",
 ]
@@ -82,28 +85,6 @@ def token_length_per_entry(entry, schema):
     return result
 
 
-def count_label(entry, schema, counter):
-    if schema == "bigbio_kb":
-        for e in entry["entities"]:
-            label = e['text'][0].lower()
-            counter[label] += 1
-        for ev in entry['events']:
-            label = ev['trigger']['text'][0].lower()
-            counter[label] += 1
-        for re in entry["relations"]:
-            label = re['type'].lower()
-            counter[label] += 1
-    elif schema == "bigbio_qa":
-        label = entry["answer"][0].lower()
-        counter[label] += 1
-    elif schema == "bigbio_te" or schema == "bigbio_tp":
-        counter[entry["label"].lower()] += 1
-    elif schema == "bigbio_text":
-        for label in entry["labels"]:
-            counter[label.lower()] += 1
-    return counter
-
-
 def parse_token_length(dataset, data_config, st=None):
     hist_data = []
     rprint(data_config)
@@ -121,62 +102,64 @@ def parse_token_length(dataset, data_config, st=None):
     return pd.DataFrame(hist_data)
 
 
-def parse_labels(dataset, data_config, st=None):
-    split_counter = {}
-    for split, data in dataset.items():
-        my_bar = st.progress(0)
-        counter = Counter()
-        total = len(data)
-        for i, entry in enumerate(data):
-            my_bar.progress(int(i / total * 100))
-            counter = count_label(entry, data_config.schema, counter)
-        split_counter[split] = counter
-        my_bar.empty()
-    st.write('labels complete!')
-    return split_counter
-
-
-def draw_token_dist(dataset, config, st=None):
-    hist_data = parse_token_length(dataset, config, st.sidebar)
-
+def draw_histogram(hist_data, col_name, st=None):
     fig = px.histogram(
         hist_data,
-        x="total_token_length",
+        x=col_name,
         color="split",
         color_discrete_sequence=IBM_COLORS,
         marginal="box",  # or violin, rug
         barmode="group",
         hover_data=hist_data.columns,
+        histnorm='probability',
+        nbins=20,
     )
     st.plotly_chart(fig, use_container_width=True)
 
 
-def draw_label_pie(dataset, config, st):
-    label_counter = parse_labels(dataset, config, st.sidebar)
-
-    cols = st.columns(len(label_counter))
-
-    for (s, lc), col in zip(label_counter.items(), cols):
-        most_x = 7
-        most_popular = lc.most_common()[:most_x]
-        # rest = lc.most_common()[most_x:]
-        # rest_sum = sum([v for k, v in rest])
-        # most_popular.append(('rest', rest_sum))
-        pie_data = dict(most_popular)
-        col.subheader(f'Top {most_x} popular labels in {s}')
-
-        pie_fig = go.Figure(data=[go.Pie(labels=list(pie_data.keys()), values=list(pie_data.values()), hole=.3, marker_colors=IBM_COLORS)])
-        col.plotly_chart(pie_fig, use_container_width=True)
+def draw_bar(bar_data, x, y, st=None):
+    fig = px.bar(
+        bar_data,
+        x=x,
+        y=y,
+        color="split",
+        color_discrete_sequence=IBM_COLORS,
+        # marginal="box",  # or violin, rug
+        barmode="group",
+        hover_data=bar_data.columns,
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
-def parse_metrics(metadata_helper, st=None):
-    metadata = helper.get_metadata()
-    print(metadata['train'].__dict__)
+def parse_metrics(metadata, st=None):
     for k, m in metadata.items():
         mattrs = m.__dict__
         for m, attr in mattrs.items():
             if type(attr) == int and attr > 0:
-                st.metric(label=f'{k}-{m}', value=attr)  #, delta=-0.5, delta_color="inverse")
+                st.metric(label=f'{k}-{m}', value=attr)
+
+
+def parse_counters(metadata):
+    metadata = metadata['train']  # using the training counter to fetch the names
+    counters = []
+    for k, v in metadata.__dict__.items():
+        if 'counter' in k and len(v) > 0:
+            counters.append(k)
+    return counters
+
+
+# generate the df for histogram
+def parse_label_counter(metadata, counter_type):
+    hist_data = []
+    for split, m in metadata.items():
+        metadata_counter = getattr(m, counter_type)
+        for k, v in metadata_counter.items():
+            row = {}
+            row["labels"] = k
+            row[counter_type] = v
+            row['split'] = split
+            hist_data.append(row)
+    return pd.DataFrame(hist_data)
 
 
 if __name__ == "__main__":
@@ -189,44 +172,49 @@ if __name__ == "__main__":
 
     # setup page, sidebar, columns
     st.set_page_config(layout="wide")
+    s = st.session_state
+    if not s:
+        s.pressed_first_button = False
     data_name = st.sidebar.selectbox("dataset", configs_set)
     st.sidebar.write("you selected:", data_name)
     st.header(f"Dataset stats for {data_name}")
-    # data_name = "chemdner"
 
     # setup data configs
     data_helpers = conhelps.for_dataset(data_name)
     data_configs = [d.config for d in data_helpers]
     data_config_names = [d.config.name for d in data_helpers]
-    data_config_name = st.sidebar.selectbox("dataset", set(data_config_names))
-    # data_config_name = "chemdner_bigbio_kb"
+    data_config_name = st.sidebar.selectbox("config", set(data_config_names))
 
-    # test without streamlit
-    # helper = conhelps.for_config_name(data_config_name)
-    # helper.get_metadata()
-    # rprint(helper.get_metadata())
-
-    # data_idx = data_config_names.index(data_config_name)
-    # dataset = load_dataset(
-    #     f"bigbio/biodatasets/{data_name}/{data_name}.py", name=data_config_name)
-    # hist_data = parse_token_length(dataset, data_configs[data_idx])
-    # rprint(hist_data.head())
-    # label_counter = parse_labels(dataset, data_configs[data_idx])
-    # print(label_counter)
-
-    if st.sidebar.button("fetch"):
+    if st.sidebar.button("fetch") or s.pressed_first_button:
+        s.pressed_first_button = True
         helper = conhelps.for_config_name(data_config_name)
-        parse_metrics(helper, st.sidebar)
+        metadata_helper = helper.get_metadata()
+
+        parse_metrics(metadata_helper, st.sidebar)
 
         # load HF dataset
         data_idx = data_config_names.index(data_config_name)
         data_config = data_configs[data_idx]
         dataset = load_dataset(
             f"bigbio/biodatasets/{data_name}/{data_name}.py", name=data_config_name)
+        # general token length
+        tok_hist_data = parse_token_length(dataset, data_config, st.sidebar)
 
         # draw token distribution
-        draw_token_dist(dataset, data_config, st)
-        # draw label distribution
-        draw_label_pie(dataset, data_config, st)
+        draw_histogram(tok_hist_data, "total_token_length", st)
+        # general counter(s)
+        col1, col2 = st.columns([1, 6])
+        counters = parse_counters(metadata_helper)
+        counter_type = col1.selectbox("counter_type", counters)
+        label_df = parse_label_counter(metadata_helper, counter_type)
+        label_max = int(label_df[counter_type].max())
+        label_min = int(label_df[counter_type].min())
+        filter_value = col1.slider('counter_filter (min, max)', label_min, label_max)
+        label_df = label_df[label_df[counter_type] >= filter_value]
+        # draw bar chart for counter
+        draw_bar(label_df, "labels", counter_type, col2)
+        # emb_df = main()
+        # emb_fig = px.scatter_3d(emb_df, x='x', y='y', z='z', color='sent')
+        # st.plotly_chart(emb_fig, use_container_width=True)
 
     st.sidebar.button("Re-run")
