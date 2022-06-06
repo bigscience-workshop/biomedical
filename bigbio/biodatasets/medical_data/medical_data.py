@@ -172,7 +172,7 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                 for _cols, line in csv_reader.iterrows():
                     document = {}
                     document["id"] = line["unique_hash"]
-                    document["document_id"] = "NULL"
+                    document["document_id"] = document["id"]
                     document["text_1"] = line["text"]
                     document["text_2"] = line["drug"]
                     document["label"] = None
