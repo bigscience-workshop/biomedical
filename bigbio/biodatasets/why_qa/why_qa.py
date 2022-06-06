@@ -71,8 +71,6 @@ _CITATION = """\
 
 _DATASETNAME = "[why_qa]"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
 
 This dataset is a collection of why-questions and their answers generated
@@ -101,8 +99,6 @@ def _get_samples(dataset):
     samples = dataset['data'][0]['paragraphs']
     return samples
 
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
 class WhyQaDataset(datasets.GeneratorBasedBuilder):
     """n2c2 community-annotated Why Questions dataset."""
 
