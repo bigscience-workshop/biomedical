@@ -49,7 +49,9 @@ from utils import schemas
 from utils.configs import BigBioConfig
 from utils.constants import Tasks
 
-# TODO: Add BibTeX citation
+
+_LOCAL = True
+
 _CITATION = """\
 @inproceedings{,
   author    = {Annotating and Characterizing Clinical Sentences with Explicit Why-{QA} Cues},
