@@ -26,10 +26,11 @@ from bioc import pubtator
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
+_TAGS = [Tags.GENE, Tags.DISEASE, Tags.CHEMICAL, Tags.VARIANT, Tags.PPI]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

@@ -52,9 +52,10 @@ from datasets import Version
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
+_TAGS = []
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True

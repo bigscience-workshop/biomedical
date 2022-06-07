@@ -71,12 +71,13 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2008"
 
 # https://academic.oup.com/jamia/article/16/4/561/766997
+_TAGS = []
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
