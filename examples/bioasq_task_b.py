@@ -32,9 +32,15 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 
+_TAGS = [
+    Tags.QA_YESNO
+    Tags.QA_FACTOID,
+    Tags.QA_LIST,
+    Tags.QA_SUMMARY,
+]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
