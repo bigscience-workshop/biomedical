@@ -17,12 +17,22 @@ from typing import Dict, Iterable, Iterator, List, Optional, Union
 import datasets
 from datasets import DatasetDict, Features
 
-from bigbio.utils.constants import (METADATA, SCHEMA_TO_FEATURES,
-                                    TASK_TO_SCHEMA, VALID_SCHEMAS, VALID_TASKS,
-                                    Tasks)
-from bigbio.utils.schemas import (entailment_features, kb_features,
-                                  pairs_features, qa_features,
-                                  text2text_features, text_features)
+from bigbio.utils.constants import (
+    METADATA,
+    SCHEMA_TO_FEATURES,
+    TASK_TO_SCHEMA,
+    VALID_SCHEMAS,
+    VALID_TASKS,
+    Tasks,
+)
+from bigbio.utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -153,10 +163,21 @@ class TestDataLoader(unittest.TestCase):
             metadata_attr = getattr(module, metadata_name)
 
             if metadata_name == "_LANGUAGES":
-                for lang in metadata_attr:
-                    if not isinstance(lang, metadata_type):
+
+                if not isinstance(metadata_attr, list):
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(metadata_attr)}`!"
+                    )
+
+                if len(metadata_attr) == 0:
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found an empty list!"
+                    )
+
+                for elem in metadata_attr:
+                    if not isinstance(elem, metadata_type):
                         raise AssertionError(
-                            f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(lang)}`!"
+                            f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(elem)}`!"
                         )
             else:
                 if not isinstance(metadata_attr, metadata_type):
