@@ -118,17 +118,17 @@ For the purposes of this annotation, we define “advanced” as having 2 or mor
 The training consists of 202 patient records with document-level annotations, 10 records
 with textual spans indicating annotator’s evidence for their annotations while test set contains 86.
 
-Note: 
+Note:
 * The inter-annotator average agreement is 84.9%
-* Whereabouts of 10 records with textual spans indicating annotator’s evidence are unknown. 
-However, author did a simple script based validation to check if any of the tags contained any text 
+* Whereabouts of 10 records with textual spans indicating annotator’s evidence are unknown.
+However, author did a simple script based validation to check if any of the tags contained any text
 in any of the training set and they do not, which confirms that atleast train and test do not
  have any evidence tagged alongside corresponding tags.
 """
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = Licenses.EXTERNAL_DUA
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
