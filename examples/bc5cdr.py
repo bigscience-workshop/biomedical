@@ -35,7 +35,7 @@ from bigbio.utils.constants import Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
-_TAGS = [Tags.DISEASE, Tags.CHEMICAL, Tags.CHEMICAL_DISEASE_RELATION, Tags.MESH]
+_TAGS = [Tags.DISEASE, Tags.CHEMICAL]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

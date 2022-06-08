@@ -36,10 +36,11 @@ from bigbio.utils.constants import Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 
 _TAGS = [
-    Tags.QA_YESNO
-    Tags.QA_FACTOID,
-    Tags.QA_LIST,
-    Tags.QA_SUMMARY,
+    Tags.YESNO,
+    Tags.FACTOID,
+    Tags.FACTOID_LIST,
+    Tags.ABSTRACTIVE,
+    Tags.EXTRACTIVE,
 ]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True

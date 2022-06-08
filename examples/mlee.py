@@ -32,7 +32,7 @@ _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
-_TAGS = []
+_TAGS = [Tags.GENE, Tags.DRUG, Tags.CELL, Tags.ORGAN, Tags.TISSUE, Tags.SPECIES]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
