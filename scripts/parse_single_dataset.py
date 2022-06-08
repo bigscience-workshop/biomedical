@@ -6,6 +6,9 @@ import numpy as np
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from rich import print as rprint
+from matplotlib import pyplot as plt
+from matplotlib_venn import venn2, venn3
+# from matplotlib_venn_wordcloud import venn2_wordcloud, venn3_wordcloud
 
 import plotly.express as px
 import pandas as pd
@@ -13,9 +16,11 @@ import pandas as pd
 from bigbio.dataloader import BigBioConfigHelpers
 from collections import defaultdict, OrderedDict, Counter
 
+from n_gram_search import get_tuples_manual_sentences
+
 
 # vanilla tokenizer
-def tokenizer(text):
+def tokenizer(text, counter):
     if not text:
         return text, []
     text = text.strip()
@@ -66,40 +71,66 @@ IBM_COLORS = [
     "#ffffff",
 ]
 
+N = 3
 
-def token_length_per_entry(entry, schema):
+
+def token_length_per_entry(entry, schema, counter):
     result = {}
     if schema == "bigbio_kb":
         for passage in entry["passages"]:
             result_key = passage['type']
             for key in _TEXT_MAPS[schema]:
                 text = passage[key][0]
-                _, toks = tokenizer(text)
+                sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
+                toks = [tok for sent in sents for tok in sent]
+                tups = ["_".join(tup) for tup in ngrams]
+                counter.update(tups)
                 result[result_key] = len(toks)
-
     else:
         for key in _TEXT_MAPS[schema]:
             text = entry[key]
-            _, toks = tokenizer(text)
+            sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
+            toks = [tok for sent in sents for tok in sent]
             result[key] = len(toks)
-    return result
+            tups = ["_".join(tup) for tup in ngrams]
+            counter.update(tups)
+    return result, counter
 
 
-def parse_token_length(dataset, data_config, st=None):
+def parse_token_length_and_n_gram(dataset, data_config, st=None):
     hist_data = []
+    n_gram_counters = []
     rprint(data_config)
     for split, data in dataset.items():
         my_bar = st.progress(0)
         total = len(data)
+        n_gram_counter = Counter()
         for i, entry in enumerate(data):
             my_bar.progress(int(i / total * 100))
-            result = token_length_per_entry(entry, data_config.schema)
+            result, n_gram_counter = token_length_per_entry(entry, data_config.schema, n_gram_counter)
             result['total_token_length'] = sum([v for k, v in result.items()])
             result["split"] = split
             hist_data.append(result)
+        # remove single count
+        # n_gram_counter = Counter({x: count for x, count in n_gram_counter.items() if count > 1})
+        n_gram_counters.append(n_gram_counter)
         my_bar.empty()
     st.write('token lengths complete!')
-    return pd.DataFrame(hist_data)
+
+    return pd.DataFrame(hist_data), n_gram_counters
+
+
+def center_title(fig):
+    fig.update_layout(
+        title={
+            'y':0.9,
+            'x':0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        font=dict(
+            size=18,
+        ))
+    return fig
 
 
 def draw_histogram(hist_data, col_name, st=None):
@@ -113,8 +144,10 @@ def draw_histogram(hist_data, col_name, st=None):
         hover_data=hist_data.columns,
         histnorm='probability',
         nbins=20,
+        title=f"{col_name} distribution by split"
     )
-    st.plotly_chart(fig, use_container_width=True)
+
+    st.plotly_chart(center_title(fig), use_container_width=True)
 
 
 def draw_bar(bar_data, x, y, st=None):
@@ -127,8 +160,9 @@ def draw_bar(bar_data, x, y, st=None):
         # marginal="box",  # or violin, rug
         barmode="group",
         hover_data=bar_data.columns,
+        title=f"{y} distribution by split"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(center_title(fig), use_container_width=True)
 
 
 def parse_metrics(metadata, st=None):
@@ -198,8 +232,7 @@ if __name__ == "__main__":
         dataset = load_dataset(
             f"bigbio/biodatasets/{data_name}/{data_name}.py", name=data_config_name)
         # general token length
-        tok_hist_data = parse_token_length(dataset, data_config, st.sidebar)
-
+        tok_hist_data, ngram_counters = parse_token_length_and_n_gram(dataset, data_config, st.sidebar)
         # draw token distribution
         draw_histogram(tok_hist_data, "total_token_length", st)
         # general counter(s)
@@ -207,12 +240,27 @@ if __name__ == "__main__":
         counters = parse_counters(metadata_helper)
         counter_type = col1.selectbox("counter_type", counters)
         label_df = parse_label_counter(metadata_helper, counter_type)
-        label_max = int(label_df[counter_type].max())
+        label_max = int(label_df[counter_type].max()-1)
         label_min = int(label_df[counter_type].min())
         filter_value = col1.slider('counter_filter (min, max)', label_min, label_max)
         label_df = label_df[label_df[counter_type] >= filter_value]
         # draw bar chart for counter
         draw_bar(label_df, "labels", counter_type, col2)
+        venn_fig, ax = plt.subplots()
+        if len(ngram_counters) == 2:
+            union_counter = ngram_counters[0] + ngram_counters[1]
+            print(ngram_counters[0].most_common(10))
+            print(ngram_counters[1].most_common(10))
+            total = len(union_counter.keys())
+            ngram_counter_sets = [set(ngram_counter.keys()) for ngram_counter in ngram_counters]
+            venn2(ngram_counter_sets, dataset.keys(), set_colors=IBM_COLORS[:3], subset_label_formatter=lambda x: f"{(x/total):1.0%}")
+        else:
+            union_counter = ngram_counters[0] + ngram_counters[1] + ngram_counters[2]
+            total = len(union_counter.keys())
+            ngram_counter_sets = [set(ngram_counter.keys()) for ngram_counter in ngram_counters]
+            venn3(ngram_counter_sets, dataset.keys(), set_colors=IBM_COLORS[:4], subset_label_formatter=lambda x: f"{(x/total):1.0%}")
+        venn_fig.suptitle(f'{N}-gram intersection for {data_name}', fontsize=20)
+        st.pyplot(venn_fig)
         # emb_df = main()
         # emb_fig = px.scatter_3d(emb_df, x='x', y='y', z='z', color='sent')
         # st.plotly_chart(emb_fig, use_container_width=True)
