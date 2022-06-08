@@ -2,6 +2,7 @@
   "SOCIAL_MEDIA" : "Social media",
   "ANATOMY" : "Anatomy",
   "ORGANISM" : "Organism",
+  "ORGAN" : "Organ", 
   "VARIANT" : "Variant/Mutation",
   "TISSUE" : "Tissue",
   "CELL" : "Cells and/or cell lines",
@@ -39,6 +40,8 @@
   "SENTENCE" : "Sentence",
   "PROCEDURE" : "Procedure, treatment",
   "DIALOGUE" : "Dialogue",
-  "ANONYMIZATION" : "Anonymizatio (De-identification)"
-  "SENTIMENT_ANALYSIS" : "Sentiment analysis"
+  "ANONYMIZATION" : "Anonymizatio (De-identification)",
+  "SENTIMENT_ANALYSIS" : "Sentiment analysis",
+  "MIRNA" : "miRNA",
+  "ABBREVIATION" : "Abbreviation"
 }
