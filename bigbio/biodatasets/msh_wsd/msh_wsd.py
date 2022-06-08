@@ -43,7 +43,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = []
+_TAGS = [Tags.ABBREVIATION]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True

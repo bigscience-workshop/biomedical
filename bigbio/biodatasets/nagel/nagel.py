@@ -26,7 +26,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import CustomLicense
 
-_TAGS = []
+_TAGS = [Tags.MUTATION, Tags.GENE, Tags.SPECIES]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

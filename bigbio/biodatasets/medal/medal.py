@@ -31,7 +31,7 @@ from bigbio.utils.license import Licenses
 
 logger = datasets.logging.get_logger(__name__)
 
-_TAGS = []
+_TAGS = [Tags.ABBREVIATION]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
@@ -74,10 +74,11 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+
 class MedalDataset(datasets.GeneratorBasedBuilder):
     """The Repository for Medical Dataset for Abbreviation Disambiguation for Natural Language Understanding (MeDAL) is
-a large medical text dataset curated for abbreviation disambiguation, designed for natural language understanding
-pre-training in the medical domain."""
+    a large medical text dataset curated for abbreviation disambiguation, designed for natural language understanding
+    pre-training in the medical domain."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -124,7 +125,9 @@ pre-training in the medical domain."""
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
         urls = _URLS
@@ -169,7 +172,7 @@ pre-training in the medical domain."""
 
         Returns
         -------
-        dict 
+        dict
             "word": str,
             "offsets": tuple (int, int)
         """
@@ -179,7 +182,7 @@ pre-training in the medical domain."""
         offset_end = offset_start + len(word)
 
         # return word and offsets
-        return {"word":word, "offsets":(offset_start, offset_end)}
+        return {"word": word, "offsets": (offset_start, offset_end)}
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
