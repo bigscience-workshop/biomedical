@@ -44,5 +44,6 @@
   "MIRNA" : "miRNA",
   "ABBREVIATION" : "Abbreviation",
   "FACT_CHECKING" : "Fact-checking",
-  "INTENT" : "Intent"
+  "INTENT" : "Intent",
+  "DIAGNOSIS" : "DIAGNOSIS"
 }
