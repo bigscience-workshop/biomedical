@@ -43,5 +43,7 @@
   "ANONYMIZATION" : "Anonymizatio (De-identification)",
   "SENTIMENT_ANALYSIS" : "Sentiment analysis",
   "MIRNA" : "miRNA",
-  "ABBREVIATION" : "Abbreviation"
+  "ABBREVIATION" : "Abbreviation",
+  "FACT_CHECKING" : "Fact-checking",
+  "INTENT" : "Intent"
 }
