@@ -19,10 +19,10 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tags, Tasks
+from bigbio.utils.constants import Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 
-_TAGS = []
+_TAGS = [Tags.MIRNA, Tags.GENE, Tags.DISEASE, Tags.SPECIES]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
@@ -272,7 +272,9 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
                             "type": a.attrib["type"],
                             "text": (a.attrib["text"],),
                             "offsets": [(start + startOffset, start + endOffset + 1)],
-                            "normalized": [{"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}],
+                            "normalized": [
+                                {"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}
+                            ],
                         }
                     )
 
@@ -307,9 +309,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for uid, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 for p, pe, re in zip(sentences, sentences_entities, relations):
@@ -327,9 +337,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for idx, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 # global id
