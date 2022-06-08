@@ -39,7 +39,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import BigBioValues, Lang, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = []
+_TAGS = [Tags.GENE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

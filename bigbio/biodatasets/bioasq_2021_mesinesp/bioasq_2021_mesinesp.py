@@ -54,7 +54,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = [Tags.DECS]
+_TAGS = [Tags.DOCUMENT_INDEXING]
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False

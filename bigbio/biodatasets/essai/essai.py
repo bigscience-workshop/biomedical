@@ -9,7 +9,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = []
+_TAGS = [Tags.NEGATION, Tags.SPECULATION, Tags.DISEASE, Tags.PROCEDURE]
 _LANGUAGES = [Lang.FR]
 _PUBMED = False
 _LOCAL = True

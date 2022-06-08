@@ -32,7 +32,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = []
+_TAGS = [Tags.ANONYMIZATION]
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False

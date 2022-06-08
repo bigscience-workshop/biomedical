@@ -34,7 +34,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
-_TAGS = [Tags.QA_MULTIPLE_CHOICE, Tags.MRC, Tags.QA_CLOZE]
+_TAGS = [Tags.MULTIPLE_CHOICE, Tags.MRC, Tags.CLOZE_TEST]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

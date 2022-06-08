@@ -25,7 +25,7 @@ from bigbio.utils.license import Licenses
 
 _DATASETNAME = "meddialog"
 
-_TAGS = []
+_TAGS = [Tags.DIALOGUE]
 _LANGUAGES = [Lang.EN, Lang.ZH]
 _PUBMED = False
 _LOCAL = False

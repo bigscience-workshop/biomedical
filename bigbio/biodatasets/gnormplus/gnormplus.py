@@ -27,7 +27,7 @@ from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
-_TAGS = []
+_TAGS = [Tags.GENE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
