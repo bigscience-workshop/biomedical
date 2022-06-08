@@ -16,6 +16,7 @@ _TAGS = [
     Tags.SPECIES,
     Tags.PROCEDURE,
     Tags.DISEASE,
+    Tags.DIAGNOSIS,
 ]
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
