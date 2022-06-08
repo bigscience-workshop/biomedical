@@ -23,7 +23,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import CustomLicense
 
-_TAGS = []
+_TAGS = [Tag.DISEASE, Tag.COVID]
 _LANGUAGES = [Lang.VI]
 _PUBMED = False
 _LOCAL = False

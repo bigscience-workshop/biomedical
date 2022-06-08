@@ -43,7 +43,7 @@ from bigbio.utils.license import Licenses
 
 _DATASETNAME = "swedish_medical_ner"
 
-_TAGS = []
+_TAGS = [Tags.DISEASE, Tags.DRUG, Tags.ANATOMY]
 _LANGUAGES = [Lang.SV]
 _PUBMED = False
 _LOCAL = False

@@ -26,7 +26,7 @@ from bigbio.utils.license import Licenses
 
 _DATASETNAME = "ask_a_patient"
 
-_TAGS = [Tags.SOCIAL_MEDIA, Tags.ADR]
+_TAGS = [Tags.ADR]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

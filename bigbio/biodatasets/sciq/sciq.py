@@ -25,7 +25,7 @@ from bigbio.utils.license import Licenses
 
 _DATASETNAME = "sciq"
 
-_TAGS = []
+_TAGS = [Tags.MULTIPLE_CHOICE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False

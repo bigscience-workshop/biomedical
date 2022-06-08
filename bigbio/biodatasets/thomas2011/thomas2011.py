@@ -53,7 +53,7 @@ from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import CustomLicense
 
 # TODO: Add BibTeX citation
-_TAGS = []
+_TAGS = [Tags.VARIANT]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

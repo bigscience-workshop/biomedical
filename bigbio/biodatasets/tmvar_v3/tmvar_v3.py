@@ -44,7 +44,7 @@ _CITATION = """\
   copyright = {Creative Commons Attribution 4.0 International}
 }
 """
-_TAGS = []
+_TAGS = [Tags.VARIANT, Tags.GENE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

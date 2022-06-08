@@ -26,7 +26,7 @@ from bigbio.utils.license import Licenses
 
 _DATASETNAME = "twadrl"
 
-_TAGS = []
+_TAGS = [Tags.ADR]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False

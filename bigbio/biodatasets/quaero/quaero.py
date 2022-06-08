@@ -9,7 +9,14 @@ from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
-_TAGS = []
+_TAGS = [
+    Tags.CHEMICAL,
+    Tags.ANATOMY,
+    Tags.DRUG,
+    Tags.SPECIES,
+    Tags.PROCEDURE,
+    Tags.DISEASE,
+]
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
 _LOCAL = False
