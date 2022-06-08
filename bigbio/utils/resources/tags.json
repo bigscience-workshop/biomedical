@@ -16,7 +16,7 @@
   "HOW" : "`How` question",
   "WHY" : "`Why` question",
   "FACTOID" : "QA with factoid answer",
-  "FACTOIND_LIST": "QA with list of factoid answer",
+  "FACTOID_LIST": "QA with list of factoid answer",
   "ABSTRACTIVE" : "Abstractive summary/answer",
   "EXTRACTIVE" : "Extractive summary/answer",
   "CLOZE_TEST" : "Cloze test",

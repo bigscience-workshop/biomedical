@@ -30,11 +30,11 @@ _TAGS = [
     Tags.DISEASE,
     Tags.CANCER,
     Tags.TISSUE,
-    Tags.ORGANISM,
+    Tags.SPECIES,
     Tags.CELL,
     Tags.GENE,
     Tags.CHEMICAL,
-    Tags.PATHWAY,
+    Tags.PATHWAY_CURATION,
 ]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True

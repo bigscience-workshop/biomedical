@@ -26,7 +26,13 @@ from bigbio.utils.license import Licenses
 _DATASETNAME = "bionlp_st_2013_pc"
 _UNIFIED_VIEW_NAME = "bigbio"
 
-_TAGS = [Tags.GENE, Tags.CHEMICAL, Tags.PATHWAY, Tags.NEGATION, Tags.SPECULATION]
+_TAGS = [
+    Tags.GENE,
+    Tags.CHEMICAL,
+    Tags.PATHWAY_CURATION,
+    Tags.NEGATION,
+    Tags.SPECULATION,
+]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

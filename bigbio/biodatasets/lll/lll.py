@@ -36,7 +36,7 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import BigBioValues, Lang, Tasks
+from bigbio.utils.constants import BigBioValues, Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 
 _TAGS = [Tags.GENE]
