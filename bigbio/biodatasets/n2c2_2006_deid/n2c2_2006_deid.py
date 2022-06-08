@@ -71,7 +71,7 @@ from bigbio.utils.license import Licenses
 _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/14/5/550/720189
-_TAGS = []
+_TAGS = [Tags.ANONYMIZATION]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True

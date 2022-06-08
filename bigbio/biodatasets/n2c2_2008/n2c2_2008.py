@@ -77,7 +77,7 @@ from bigbio.utils.license import Licenses
 _DATASETNAME = "n2c2_2008"
 
 # https://academic.oup.com/jamia/article/16/4/561/766997
-_TAGS = []
+_TAGS = [Tags.DIAGNOSIS, Tags.DISEASE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
