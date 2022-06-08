@@ -31,7 +31,7 @@ _TAGS = [
     Tags.DISEASE,
     Tags.GENE,
     Tags.CHEMICAL,
-    Tags.ORGANISM,
+    Tags.SPECIES,
     Tags.SPECULATION,
     Tags.NEGATION,
 ]

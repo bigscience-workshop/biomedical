@@ -38,7 +38,7 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import CustomLicense
 
-_TAGS = [Tags.SOCIAL_MEDIA, Tags.DISEASE, Tags.ADR, Tags.DRUG]
+_TAGS = [Tags.DISEASE, Tags.ADR, Tags.DRUG]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False

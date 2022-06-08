@@ -28,7 +28,7 @@ _DATASETNAME = "bionlp_st_2013_gro"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
-_TAGS = [Tags.GENE, Tags.ORGANISM, Tags.CELL, Tags.TISSUE]
+_TAGS = [Tags.GENE, Tags.SPECIES, Tags.CELL, Tags.TISSUE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

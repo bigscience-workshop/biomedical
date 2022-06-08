@@ -27,7 +27,7 @@ _DATASETNAME = "bionlp_st_2019_bb"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
-_TAGS = [Tags.ORGANISM]
+_TAGS = [Tags.SPECIES]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
