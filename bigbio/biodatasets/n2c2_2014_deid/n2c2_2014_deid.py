@@ -63,6 +63,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{
@@ -84,7 +85,7 @@ _DATASETNAME = "n2c2_2014_deid"
 _DESCRIPTION = """\
 The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured two tracks.
 The first of these was the de-identification track focused on identifying protected health
-information (PHI) in longitudinal clinical narratives. 
+information (PHI) in longitudinal clinical narratives.
 
 TRACK 1: NER PHI\n
 HIPAA requires that patient medical records have all identifying information removed in order to
