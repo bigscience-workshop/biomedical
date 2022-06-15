@@ -1,10 +1,6 @@
-import sys
 from datasets import load_dataset
 import streamlit as st
-import time
 import numpy as np
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 from rich import print as rprint
 from matplotlib import pyplot as plt
 from matplotlib_venn import venn2, venn3
@@ -14,9 +10,9 @@ import plotly.express as px
 import pandas as pd
 
 from bigbio.dataloader import BigBioConfigHelpers
-from collections import defaultdict, OrderedDict, Counter
+from collections import Counter
 
-from n_gram_search import get_tuples_manual_sentences
+from ngram import get_tuples_manual_sentences
 
 
 # vanilla tokenizer
@@ -261,8 +257,5 @@ if __name__ == "__main__":
             venn3(ngram_counter_sets, dataset.keys(), set_colors=IBM_COLORS[:4], subset_label_formatter=lambda x: f"{(x/total):1.0%}")
         venn_fig.suptitle(f'{N}-gram intersection for {data_name}', fontsize=20)
         st.pyplot(venn_fig)
-        # emb_df = main()
-        # emb_fig = px.scatter_3d(emb_df, x='x', y='y', z='z', color='sent')
-        # st.plotly_chart(emb_fig, use_container_width=True)
 
     st.sidebar.button("Re-run")
