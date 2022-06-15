@@ -14,6 +14,7 @@ _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{Bravo2015,
@@ -31,7 +32,7 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-A corpus identifying associations between genes and diseases by a semi-automatic 
+A corpus identifying associations between genes and diseases by a semi-automatic
 annotation procedure based on the Genetic Association Database
 """
 
@@ -74,7 +75,7 @@ class GAD(datasets.GeneratorBasedBuilder):
         )
         for i in range(10)
     ]
-    
+
     # BLURB Benchmark config https://microsoft.github.io/BLURB/
     BUILDER_CONFIGS.append(
         BigBioConfig(

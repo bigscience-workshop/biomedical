@@ -131,7 +131,7 @@ i.e. `anticoagulation` != `anticoagulation.` from doc_id: 818404
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = Licenses.EXTERNAL_DUA
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 

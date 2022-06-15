@@ -102,7 +102,7 @@ Using this reference standard, 22 systems were developed for concept extraction,
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = Licenses.EXTERNAL_DUA
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 

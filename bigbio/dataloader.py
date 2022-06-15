@@ -93,6 +93,7 @@ class BigBioKbMetadata:
     passages_type_counter: Dict[str, int]
 
     entities_count: int
+    entities_normalized_count: int
     entities_type_counter: Dict[str, int]
     entities_db_name_counter: Dict[str, int]
     entities_unique_db_ids_count: int
@@ -117,6 +118,7 @@ class BigBioKbMetadata:
         passages_type_counter = Counter()
 
         entities_count = 0
+        entities_normalized_count = 0
         entities_type_counter = Counter()
         entities_db_name_counter = Counter()
         entities_unique_db_ids = set()
@@ -143,6 +145,7 @@ class BigBioKbMetadata:
                 entities_count += 1
                 entities_type_counter[entity["type"]] += 1
                 for norm in entity["normalized"]:
+                    entities_normalized_count += 1
                     entities_db_name_counter[norm["db_name"]] += 1
                     entities_unique_db_ids.add(norm["db_id"])
 
@@ -179,6 +182,7 @@ class BigBioKbMetadata:
             passages_type_counter=dict(passages_type_counter.most_common(max_common)),
             passages_char_count=passages_char_count,
             entities_count=entities_count,
+            entities_normalized_count=entities_normalized_count,
             entities_type_counter=dict(entities_type_counter.most_common(max_common)),
             entities_db_name_counter=dict(
                 entities_db_name_counter.most_common(max_common)
@@ -391,6 +395,7 @@ class BigBioConfigHelper:
     languages: List[Lang]
     config: BigBioConfig
     is_local: bool
+    is_pubmed: bool
     is_bigbio_schema: bool
     bigbio_schema_caps: Optional[str]
     is_large: bool
@@ -503,6 +508,7 @@ class BigBioConfigHelpers:
                         languages=py_module._LANGUAGES,
                         config=config,
                         is_local=py_module._LOCAL,
+                        is_pubmed=py_module._PUBMED,
                         is_bigbio_schema=is_bigbio_schema,
                         bigbio_schema_caps=bigbio_schema_caps,
                         is_large=config.name in _LARGE_CONFIG_NAMES,

@@ -177,7 +177,7 @@ GENERAL TERMS AND CONDITIONS
     Users of the data agree to:
         acknowledge NLM as the source of the data by including the phrase "Courtesy of the U.S. National Library of Medicine" in a clear and conspicuous manner,
         properly use registration and/or trademark symbols when referring to NLM products, and
-        not indicate or imply that NLM has endorsed its products/services/applications. 
+        not indicate or imply that NLM has endorsed its products/services/applications.
 
     Users who republish or redistribute the data (services, products or raw data) agree to:
         maintain the most current version of all distributed data, or
@@ -216,7 +216,7 @@ It is hereby agreed between the data requestor, hereinafter referred to as the "
     The LICENSEE will use the data for the sole purpose of lawful use in scientific research and no other.
     The LICENSEE will be responsible for ensuring that he or she maintains up to date certification in human research subject protection and HIPAA regulations.
     The LICENSEE agrees to contribute code associated with publications arising from this data to a repository that is open to the research community.
-    This agreement may be terminated by either party at any time, but the LICENSEE's obligations with respect to PhysioNet data shall continue after termination.  
+    This agreement may be terminated by either party at any time, but the LICENSEE's obligations with respect to PhysioNet data shall continue after termination.
 
 THE DATA ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE DATA OR THE USE OR OTHER DEALINGS IN THE DATA.
 """
@@ -306,7 +306,7 @@ def load_licenses() -> Dict[str, License]:
     json_licenses = load_json_licenses()
 
     json_licenses.update(
-        {"DUA": "Data User Agreement", "EXTERNAL_DUA": "External Data User Agreement"}
+        {"DUA": "Data User Agreement"}
     )
 
     licenses_kwargs = {k: {"name": v} for k, v in json_licenses.items()}
