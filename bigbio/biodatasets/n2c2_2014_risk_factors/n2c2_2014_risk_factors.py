@@ -66,17 +66,19 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{
-title = {Automated systems for the de-identification of longitudinal
-clinical narratives: Overview of 2014 i2b2/UTHealth shared task Track 1},
+@article{KUMAR2015S6,
+title = {Creation of a new longitudinal corpus of clinical narratives},
 journal = {Journal of Biomedical Informatics},
 volume = {58},
-pages = {S11-S19},
+pages = {S6-S10},
 year = {2015},
+note = {Supplement: Proceedings of the 2014 i2b2/UTHealth Shared-Tasks and Workshop on Challenges in Natural Language Processing for Clinical Data},
 issn = {1532-0464},
-doi = {https://doi.org/10.1016/j.jbi.2015.06.007},
-url = {https://www.sciencedirect.com/science/article/pii/S1532046415001173},
-author = {Amber Stubbs and Christopher Kotfila and Özlem Uzuner}
+doi = {https://doi.org/10.1016/j.jbi.2015.09.018},
+url = {https://www.sciencedirect.com/science/article/pii/S1532046415002129},
+author = {Vishesh Kumar and Amber Stubbs and Stanley Shaw and Özlem Uzuner},
+keywords = {Corpus, NLP, Medical records, Machine learning},
+abstract = {The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured a new longitudinal corpus of 1304 records representing 296 diabetic patients. The corpus contains three cohorts: patients who have a diagnosis of coronary artery disease (CAD) in their first record, and continue to have it in subsequent records; patients who do not have a diagnosis of CAD in the first record, but develop it by the last record; patients who do not have a diagnosis of CAD in any record. This paper details the process used to select records for this corpus and provides an overview of novel research uses for this corpus. This corpus is the only annotated corpus of longitudinal clinical narratives currently available for research to the general research community.}
 }
 """
 
