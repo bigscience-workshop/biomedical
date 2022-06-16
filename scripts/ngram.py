@@ -13,7 +13,7 @@ nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("sentencizer")
 STOPWORDS = nlp.Defaults.stop_words
 
-# N = 5
+N = 5
 re_sent_ends_naive = re.compile(r'[.\n]')
 re_stripper_naive = re.compile('[^a-zA-Z\.\n]')
 

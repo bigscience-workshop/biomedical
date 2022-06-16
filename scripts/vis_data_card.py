@@ -105,12 +105,16 @@ def token_length_per_entry(entry, schema, counter):
     else:
         for key in _TEXT_MAPS[schema]:
             text = entry[key]
-            sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
-            toks = [tok for sent in sents for tok in sent]
-            result["token_length"] = len(toks)
-            result["text_type"] = key
-            tups = ["_".join(tup) for tup in ngrams]
-            counter.update(tups)
+            if not text:
+                rprint(entry)
+                continue
+            else:
+                sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
+                toks = [tok for sent in sents for tok in sent]
+                result["token_length"] = len(toks)
+                result["text_type"] = key
+                tups = ["_".join(tup) for tup in ngrams]
+                counter.update(tups)
     return result, counter
 
 
@@ -148,7 +152,7 @@ def draw_box(df, col_name, row, col, fig):
             go.Box(
                 x=split_count,
                 name=split,
-                marker_color=SPLIT_COLOR_MAP[split],
+                marker_color=SPLIT_COLOR_MAP[split.split("_")[0]],
             ),
             row=row,
             col=col,
@@ -164,7 +168,8 @@ def draw_bar(df, col_name, y_name, row, col, fig):
                 x=split_count,
                 y=y_list,
                 name=split,
-                marker_color=SPLIT_COLOR_MAP[split],
+                marker_color=SPLIT_COLOR_MAP[split.split("_")[0]],
+                showlegend=False
             ),
             row=row,
             col=col,
@@ -181,7 +186,7 @@ def parse_metrics(metadata):
 
 
 def parse_counters(metadata):
-    metadata = metadata["train"]  # using the training counter to fetch the names
+    metadata = metadata[list(metadata.keys())[0]]  # using the training counter to fetch the names
     counters = []
     for k, v in metadata.__dict__.items():
         if "counter" in k and len(v) > 0:
@@ -221,25 +226,43 @@ def draw_figure(data_name, data_config_name):
 
     # general counter(s)
     counters = parse_counters(metadata_helper)
-    rows = len(counters) + 1
-    titles = ('token length',) + tuple(' '.join(ct.split('_')[:-1]) for ct in counters)
+    rows = len(counters) // 3
+    if len(counters) >= 3:
+        counters = counters[:3]
+        cols = 3
+        specs = [[{"colspan": 3}, None, None]] + [[{}, {}, {}]] * (rows + 1)
+    elif len(counters) == 1:
+        specs = [[{}], [{}]]
+        cols = 1
+    elif len(counters) == 2:
+        specs = [[{"colspan": 2}, None]] + [[{}, {}]] * (rows + 1)
+        cols = 2
+    counter_titles = ['Label Counts by Type: ' + ct.split("_")[0] for ct in counters]
+    titles = ('token length',) + tuple(counter_titles)
     # Make figure with subplots
     fig = make_subplots(
-        rows=rows,
-        cols=1,
+        rows=rows + 2,
+        cols=cols,
         subplot_titles=titles,
-        specs=[[{"type": "box"}]] + [[{"type": "bar"}]] * len(counters),
+        specs=specs,
+        vertical_spacing=0.10,
+        horizontal_spacing=0.10
     )
+    counters.sort()
     # draw token distribution
     draw_box(tok_hist_data, "token_length", row=1, col=1, fig=fig)
     for i, ct in enumerate(counters):
+        row = i // 3 + 2
+        col = i % 3 + 1
+        print(row)
+        print(col)
         label_df = parse_label_counter(metadata_helper, ct)
         label_max = int(label_df[ct].max() - 1)
         label_min = int(label_df[ct].min())
         filter_value = int((label_max - label_min) * 0.1 + label_min)
         label_df = label_df[label_df[ct] >= filter_value]
         # draw bar chart for counter
-        draw_bar(label_df, ct, "labels", row=i+2, col=1, fig=fig)
+        draw_bar(label_df, ct, "labels", row=row, col=col, fig=fig)
 
     # add annotation
     # counter = str(counter_type)
@@ -274,13 +297,14 @@ def draw_figure(data_name, data_config_name):
 
     fig.update_annotations(font_size=12)
     fig.update_layout(
-        showlegend=False,
+        margin=dict(l=25, r=25, t=25, b=25, pad=2),
+        # showlegend=False,
         # title_text=data_name,
-        height=800,
-        width=800,
+        height=600,
+        width=1000,
     )   
 
-    fig.show()
+    # fig.show()
 
     fig_name = f"{data_name}_{data_config_name}.pdf"
     fig_path = f"figures/data_card/{fig_name}"
@@ -294,15 +318,15 @@ def draw_figure(data_name, data_config_name):
     latex_bod += r"\end{figure}" + "\n" + r"\paragraph{Dataset Description}"
     latex_bod += fr'{descriptions}' + '\n' + r'\paragraph{Licensing} ' + f'{license}' + '\n' + r'\paragraph{Languages} ' + f'{languages}' + '\n' + r'\paragraph{Tasks} ' + f'{tasks}'
 
+    fig.write_image(fig_path)
 
-    # fig.write_image(fig_path)
+    latex_name = f"{data_name}_{data_config_name}.tex"
 
-    # latex_name = f"{data_name}_{data_config_name}.tex"
-
-    # text_file = open(f"tex/{latex_name}", "w")
-    # n = text_file.write(latex_bod)
-    # text_file.close()
+    text_file = open(f"tex/{latex_name}", "w")
+    n = text_file.write(latex_bod)
+    text_file.close()
     print(latex_bod)
+    dataset.cleanup_cache_files()
 
 
 if __name__ == "__main__":
@@ -313,15 +337,15 @@ if __name__ == "__main__":
 
     for conhelper in conhelps:
         configs.append(conhelper.dataset_name)
-
-    # for data_name in configs:
-    data_name = configs[0]  # TODO CHANGE THIS
-    data_info = conhelps_local[data_name]
-    # setup data configs
-    data_helpers = conhelps.for_dataset(data_name)
-    data_configs = [d.config for d in data_helpers]
-    data_config_names = [d.config.name for d in data_helpers]
-    # data_config_name = data_config_names[0]  # TODO CHANGE THIS
-    for data_config_name in data_config_names:
-        draw_figure(data_name, data_config_name)
-
+    names = ['bc5cdr', 'scitail', 'mqp', 'paramed', 'bioasq_task_b', 'chemprot', 'biosses', 'chemprot', 'ehr_rel']
+    names = ['mqp']
+    for data_name in names:
+        # data_name = configs['data_name']  # TODO CHANGE THIS
+        # data_info = conhelps_local[data_name]
+        # setup data configs
+        data_helpers = conhelps.for_dataset(data_name)
+        data_configs = [d.config for d in data_helpers]
+        data_config_names = [d.config.name for d in data_helpers]
+        # data_config_name = data_config_names[0]  # TODO CHANGE THIS
+        for data_config_name in data_config_names:
+            draw_figure(data_name, data_config_name)
