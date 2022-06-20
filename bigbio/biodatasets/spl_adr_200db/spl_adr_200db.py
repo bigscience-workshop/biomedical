@@ -88,6 +88,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "spl_adr_200db"
+_DISPLAYNAME = "SPL ADR"
 
 _DESCRIPTION = """\
 The United States Food and Drug Administration (FDA) partnered with the National Library

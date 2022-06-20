@@ -71,7 +71,8 @@ _LICENSE = Licenses.GFDL_1p3
 
 _URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip"
 
-_DATASET_NAME = "QUAERO French Medical Corpus"
+_DATASET_NAME = "quaero"
+_DISPLAYNAME = "QUAERO"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"

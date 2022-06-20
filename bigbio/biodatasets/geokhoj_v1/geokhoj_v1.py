@@ -37,6 +37,7 @@ _LOCAL = False
 _CITATION = "NA"
 
 _DATASETNAME = "geokhoj_v1"
+_DISPLAYNAME = "GEOKhoj v1"
 
 _DESCRIPTION = """\
 GEOKhoj v1 is a annotated corpus of control/perturbation labels for 30,000 samples

@@ -42,6 +42,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "swedish_medical_ner"
+_DISPLAYNAME = "Swedish Medical NER"
 
 _LANGUAGES = [Lang.SV]
 _PUBMED = False

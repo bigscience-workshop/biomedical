@@ -51,6 +51,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "an_em"
+_DISPLAYNAME = "AnEM"
 
 _DESCRIPTION = """\
 AnEM corpus is a domain- and species-independent resource manually annotated for anatomical

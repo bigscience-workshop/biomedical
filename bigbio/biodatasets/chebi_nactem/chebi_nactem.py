@@ -29,26 +29,39 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@InProceedings{Shardlow2018,
-author = {Shardlow, M J and Nguyen, N and Owen, G and O'Donovan, C and Leach, A and McNaught, J and Turner,
-S and Ananiadou, S},
-booktitle = {Proceedings of the Eleventh International Conference on Language Resources and Evaluation ({LREC} 2018)},
-title = {A New Corpus to Support Text Mining for the Curation of Metabolites in the {ChEBI} Database},
-year = {2018},
-month = may,
-pages = {280--285},
-conference = {Eleventh International Conference on Language Resources and Evaluation (LREC 2018)},
-language = {en},
-location = {Miyazaki, Japan},
+@inproceedings{Shardlow2018,
+  title        = {
+    A New Corpus to Support Text Mining for the Curation of Metabolites in the
+    {ChEBI} Database
+  },
+  author       = {
+    Shardlow, M J and Nguyen, N and Owen, G and O'Donovan, C and Leach, A and
+    McNaught, J and Turner, S and Ananiadou, S
+  },
+  year         = 2018,
+  month        = may,
+  booktitle    = {
+    Proceedings of the Eleventh International Conference on Language Resources
+    and Evaluation ({LREC} 2018)
+  },
+  location     = {Miyazaki, Japan},
+  pages        = {280--285},
+  conference   = {
+    Eleventh International Conference on Language Resources and Evaluation
+    (LREC 2018)
+  },
+  language     = {en}
 }
 """
 
 _DATASETNAME = "chebi_nactem"
+_DISPLAYNAME = "CHEBI Corpus"
 
 _DESCRIPTION = """\
 The ChEBI corpus contains 199 annotated abstracts and 100 annotated full papers.
-All documents in the corpus have been annotated for named entities and relations between these.
-In total, our corpus provides over 15000 named entity annotations and over 6,000 relations between entities.
+All documents in the corpus have been annotated for named entities and relations
+between these. In total, our corpus provides over 15000 named entity annotations
+and over 6,000 relations between entities.
 """
 
 _HOMEPAGE = "http://www.nactem.ac.uk/chebi"

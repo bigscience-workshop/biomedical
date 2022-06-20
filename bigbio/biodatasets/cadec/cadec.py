@@ -54,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cadec"
+_DISPLAYNAME = "CADEC"
 
 _DESCRIPTION = """\
 The CADEC corpus (CSIRO Adverse Drug Event Corpus) is is a new rich annotated corpus of medical forum posts on patient-

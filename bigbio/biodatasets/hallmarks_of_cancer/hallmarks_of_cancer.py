@@ -49,6 +49,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "hallmarks_of_cancer"
+_DISPLAYNAME = "Hallmarks of Cancer"
 
 _DESCRIPTION = """\
 The Hallmarks of Cancer (HOC) Corpus consists of 1852 PubMed publication
@@ -65,7 +66,7 @@ _LICENSE = Licenses.GPL_3p0
 
 _URLs = {
     "corpus": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
-    "split_indices": "https://microsoft.github.io/BLURB/sample_code/data_generation.tar.gz"    
+    "split_indices": "https://microsoft.github.io/BLURB/sample_code/data_generation.tar.gz",
 }
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
@@ -73,17 +74,17 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _CLASS_NAMES = [
-    'evading growth suppressors',
-    'tumor promoting inflammation',
-    'enabling replicative immortality',
-    'cellular energetics',
-    'resisting cell death',
-    'activating invasion and metastasis',
-    'genomic instability and mutation',
-    'none',
-    'inducing angiogenesis',
-    'sustaining proliferative signaling',
-    'avoiding immune destruction'
+    "evading growth suppressors",
+    "tumor promoting inflammation",
+    "enabling replicative immortality",
+    "cellular energetics",
+    "resisting cell death",
+    "activating invasion and metastasis",
+    "genomic instability and mutation",
+    "none",
+    "inducing angiogenesis",
+    "sustaining proliferative signaling",
+    "avoiding immune destruction",
 ]
 
 
@@ -143,21 +144,24 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "corpuspath": Path(data_dir["corpus"]),
-                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/train_pmid.tsv"                
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/train_pmid.tsv",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "corpuspath": Path(data_dir["corpus"]),
-                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/test_pmid.tsv"
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/test_pmid.tsv",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
                     "corpuspath": Path(data_dir["corpus"]),
-                    "indicespath": Path(data_dir["split_indices"]) / "data_generation/indexing/HoC/dev_pmid.tsv"              
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/dev_pmid.tsv",
                 },
             ),
         ]
@@ -183,13 +187,15 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
                 sentence, label = example_pair
 
                 label = label.strip()
-                
+
                 if label == "":
                     label = "none"
 
                 multi_labels = [m_label.strip() for m_label in label.split("AND")]
                 unique_multi_labels = {
-                    m_label.split("--")[0].lower().lstrip() for m_label in multi_labels if m_label != "NULL"
+                    m_label.split("--")[0].lower().lstrip()
+                    for m_label in multi_labels
+                    if m_label != "NULL"
                 }
 
                 arrow_file_unique_key = 100 * document_index + example_index

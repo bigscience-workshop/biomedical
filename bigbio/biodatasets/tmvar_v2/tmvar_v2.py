@@ -43,6 +43,7 @@ publisher={Oxford University Press}
 """
 
 _DATASETNAME = "tmvar_v2"
+_DISPLAYNAME = "tmVar v2"
 
 _DESCRIPTION = """This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them.
 It can be used for NER tasks and NED tasks, This dataset has a single split"""

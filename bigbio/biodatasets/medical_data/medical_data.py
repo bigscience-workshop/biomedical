@@ -37,6 +37,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "medical_data"
+_DISPLAYNAME = "Medical Data"
 
 _DESCRIPTION = """\
     This dataset is designed to do multiclass classification on medical drugs

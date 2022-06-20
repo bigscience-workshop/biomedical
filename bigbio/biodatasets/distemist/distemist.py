@@ -42,6 +42,8 @@ _CITATION = """\
 """
 
 _DATASETNAME = "distemist"
+_DISPLAYNAME = "DisTEMIST"
+
 _DESCRIPTION = """\
 The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotations linked with Snomed-CT concepts.
 All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.

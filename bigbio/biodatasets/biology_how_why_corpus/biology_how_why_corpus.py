@@ -46,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "biology_how_why_corpus"
+_DISPLAYNAME = "BiologyHowWhyCorpus"
 
 _DESCRIPTION = """\
 This dataset consists of 185 "how" and 193 "why" biology questions authored by a domain expert, with one or more gold 

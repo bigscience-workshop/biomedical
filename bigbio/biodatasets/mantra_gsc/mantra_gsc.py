@@ -62,6 +62,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mantra_gsc"
+_DISPLAYNAME = "Mantra GSC"
 
 _DESCRIPTION = """\
 We selected text units from different parallel corpora (Medline abstract titles, drug labels, biomedical patent claims)

@@ -44,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scifact"
+_DISPLAYNAME = "SciFact"
 
 _SOURCE_CORPUS_DESCRIPTION = """\
     SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.

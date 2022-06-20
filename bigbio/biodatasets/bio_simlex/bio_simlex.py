@@ -14,11 +14,11 @@
 # limitations under the License.
 
 """
-Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of
-performance on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard word
-representation models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine
-for particular word classes (e.g. verbs).
-[bigbio_schema_name] = pairs
+Bio-SimLex enables intrinsic evaluation of word representations. This evaluation
+can serve as a predictor of performance on various downstream tasks in the
+biomedical domain. The results on Bio-SimLex using standard word representation
+models highlight the importance of developing dedicated evaluation resources for
+NLP in biomedicine for particular word classes (e.g. verbs).
 """
 
 from typing import Dict, List, Tuple
@@ -30,37 +30,39 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
-# TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{article,
-author = {Chiu, Billy and Pyysalo, Sampo and Vulić, Ivan and Korhonen, Anna},
-year = {2018},
-month = {02},
-pages = {},
-title = {Bio-SimVerb and Bio-SimLex: Wide-coverage evaluation sets of word similarity in biomedicine},
-volume = {19},
-journal = {BMC Bioinformatics},
-doi = {10.1186/s12859-018-2039-z}
-}{}
+  title        = {
+    Bio-SimVerb and Bio-SimLex: Wide-coverage evaluation sets of word
+    similarity in biomedicine
+  },
+  author       = {Chiu, Billy and Pyysalo, Sampo and Vulić, Ivan and Korhonen, Anna},
+  year         = 2018,
+  month        = {02},
+  journal      = {BMC Bioinformatics},
+  volume       = 19,
+  pages        = {},
+  doi          = {10.1186/s12859-018-2039-z}
 }
 """
 
 _DATASETNAME = "bio_simlex"
+_DISPLAYNAME = "Bio-SimLex"
 
 _DESCRIPTION = """\
-Bio-SimLex enables intrinsic evaluation of word representations. This evaluation can serve as a predictor of
-performance on various downstream tasks in the biomedical domain. The results on Bio-SimLex using standard
-word representation models highlight the importance of developing dedicated evaluation resources for NLP in biomedicine
-for particular word classes (e.g. verbs).
+Bio-SimLex enables intrinsic evaluation of word representations. This evaluation \
+can serve as a predictor of performance on various downstream tasks in the \
+biomedical domain. The results on Bio-SimLex using standard word representation \
+models highlight the importance of developing dedicated evaluation resources for \
+NLP in biomedicine for particular word classes (e.g. verbs).
 """
 
 _HOMEPAGE = "https://github.com/cambridgeltl/bio-simverb"
 
 _LICENSE = Licenses.UNKNOWN
-
 
 _URLS = {
     _DATASETNAME: "https://github.com/cambridgeltl/bio-simverb/blob/master/wvlib/word-similarities/\
@@ -70,13 +72,15 @@ bio-simlex/Bio-SimLex.txt?raw=true"
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
 class BioSimlexDataset(datasets.GeneratorBasedBuilder):
-    """Bio-SimLex enables intrinsic evaluation of word representations. Config schema as source gives score between
-    0-10 for pairs of words. The source schema casts labels as `float`, but the bigbio schema casts them as `str`."""
+    """
+    Bio-SimLex enables intrinsic evaluation of word representations. Config schema
+    as source gives score between 0-10 for pairs of words. The source schema casts
+    labels as `float`, but the bigbio schema casts them as `str`.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -131,7 +135,6 @@ class BioSimlexDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": data_dir,
                     "split": "train",

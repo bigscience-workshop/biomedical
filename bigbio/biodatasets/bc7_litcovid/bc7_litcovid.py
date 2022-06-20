@@ -27,19 +27,28 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@inproceedings{chen2021overview, 
-    title={Overview of the BioCreative VII LitCovid Track: multi-label topic classification for COVID-19 literature annotation}, 
-    author={Chen, Qingyu and Allot, Alexis and Leaman, Robert and Do{\\u{g}}an, Rezarta Islamaj and Lu, Zhiyong}, 
-    booktitle={Proceedings of the seventh BioCreative challenge evaluation workshop}, year={2021} 
+@inproceedings{chen2021overview,
+  title        = {
+    Overview of the BioCreative VII LitCovid Track: multi-label topic
+    classification for COVID-19 literature annotation
+  },
+  author       = {
+    Chen, Qingyu and Allot, Alexis and Leaman, Robert and Do{\\u{g}}an, Rezarta
+    Islamaj and Lu, Zhiyong
+  },
+  year         = 2021,
+  booktitle    = {Proceedings of the seventh BioCreative challenge evaluation workshop}
 }
+
 """
 
 _DATASETNAME = "bc7_litcovid"
+_DISPLAYNAME = "BC7-LitCovid"
 
 _DESCRIPTION = """\
-The training and development datasets contain the publicly-available
-text of over 30 thousand COVID-19-related articles and their metadata
-(e.g., title, abstract, journal). Articles in both datasets have been
+The training and development datasets contain the publicly-available \
+text of over 30 thousand COVID-19-related articles and their metadata \
+(e.g., title, abstract, journal). Articles in both datasets have been \
 manually reviewed and articles annotated by in-house models.
 """
 
@@ -74,7 +83,10 @@ _CLASS_NAMES = [
 
 
 class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
-    """Track 5 - LitCovid track Multi-label topic classification for COVID-19 literature annotation"""
+    """
+    Track 5 - LitCovid track Multi-label topic classification for
+    COVID-19 literature annotation
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)

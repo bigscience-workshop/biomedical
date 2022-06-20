@@ -48,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pdr"
+_DISPLAYNAME = "PDR"
 
 _DESCRIPTION = """
 The corpus of plant-disease relation consists of plants and diseases and their relation to PubMed abstract.

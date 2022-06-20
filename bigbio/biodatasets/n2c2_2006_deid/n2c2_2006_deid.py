@@ -69,6 +69,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
+_DISPLAYNAME = "n2c2 2006 De-identification"
 
 # https://academic.oup.com/jamia/article/14/5/550/720189
 _LANGUAGES = [Lang.EN]

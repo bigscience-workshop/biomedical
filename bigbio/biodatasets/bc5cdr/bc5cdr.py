@@ -64,10 +64,12 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bc5cdr"
+_DISPLAYNAME = "BC5CDR"
 
 _DESCRIPTION = """\
-The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of
-human annotations of all chemicals, diseases and their interactions in 1,500 PubMed articles.
+The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated \
+text corpus of human annotations of all chemicals, diseases and their \
+interactions in 1,500 PubMed articles.
 """
 
 _HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
