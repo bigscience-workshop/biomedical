@@ -6,9 +6,19 @@ from types import SimpleNamespace
 
 from bigbio.utils import resources
 from bigbio.utils.license import Licenses
-from bigbio.utils.schemas import (entailment_features, kb_features,
-                                  pairs_features, qa_features,
-                                  text2text_features, text_features)
+from bigbio.utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
+
+
+_TAGS = json.loads(pkg_resources.read_text(resources, "tags.json"))
+Tags = Enum("Tags", _TAGS)
+
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 

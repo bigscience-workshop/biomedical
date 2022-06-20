@@ -65,12 +65,13 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
 
 # https://academic.oup.com/jamia/article/14/5/550/720189
+_TAGS = [Tags.ANONYMIZATION]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True

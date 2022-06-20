@@ -21,10 +21,15 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
+# http://www.wikicfp.com/cfp/servlet/event.showcfp?eventid=4605&copyownerid=320
+# Task 1. Event detection and characterization
+# Task 2. Event argument recognition
+# Task 3. Recognition of negations and speculations
+_TAGS = [Tags.PPI, Tags.NEGATION, Tags.SPECULATION, Tags.GENE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

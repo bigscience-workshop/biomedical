@@ -5,10 +5,19 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
+_TAGS = [
+    Tags.CHEMICAL,
+    Tags.ANATOMY,
+    Tags.DRUG,
+    Tags.SPECIES,
+    Tags.PROCEDURE,
+    Tags.DISEASE,
+    Tags.DIAGNOSIS,
+]
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
 _LOCAL = False

@@ -21,13 +21,14 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2013_gro"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_TAGS = [Tags.GENE, Tags.SPECIES, Tags.CELL, Tags.TISSUE]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

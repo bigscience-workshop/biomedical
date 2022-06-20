@@ -22,10 +22,11 @@ from bioc import biocxml
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
+_TAGS = [Tags.CHEMICAL, Tags.DOCUMENT_INDEXING]
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False

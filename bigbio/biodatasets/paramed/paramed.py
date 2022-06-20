@@ -26,12 +26,13 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
 logger = datasets.logging.get_logger(__name__)
 
 
+_TAGS = []
 _LANGUAGES = [Lang.EN, Lang.ZH]
 _PUBMED = False
 _LOCAL = False

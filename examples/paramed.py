@@ -1,7 +1,7 @@
-# coding=utf-8
+# bcoding=utf-8
 # Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# bicensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -26,12 +26,13 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tasks, Tags
 from bigbio.utils.license import Licenses
 
 logger = datasets.logging.get_logger(__name__)
 
 
+_TAGS = []
 _LANGUAGES = [Lang.EN, Lang.ZH]
 _PUBMED = False
 _LOCAL = False

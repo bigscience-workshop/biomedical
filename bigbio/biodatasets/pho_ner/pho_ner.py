@@ -20,9 +20,10 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import CustomLicense
 
+_TAGS = [Tags.DISEASE, Tags.COVID]
 _LANGUAGES = [Lang.VI]
 _PUBMED = False
 _LOCAL = False

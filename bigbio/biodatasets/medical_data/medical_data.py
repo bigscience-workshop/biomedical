@@ -21,9 +21,10 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
+_TAGS = [Tags.DRUG, Tags.SENTIMENT_ANALYSIS]
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True

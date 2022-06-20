@@ -31,9 +31,10 @@ import datasets
 
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import Lang, Tags, Tasks
 from bigbio.utils.license import Licenses
 
+_TAGS = [Tags.ANATOMY, Tags.CHEMICAL, Tags.DISEASE, Tags.PROCEDURE, Tags.DIAGNOSIS]
 _LANGUAGES = [Lang.ES]
 _PUBMED = True
 _LOCAL = False
