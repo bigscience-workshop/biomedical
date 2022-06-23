@@ -24,6 +24,7 @@ METADATA: dict = {
     "_LANGUAGES": Lang,
     "_PUBMED": bool,
     "_LICENSE": Licenses,
+    "_DISPLAYNAME": str,
 }
 
 

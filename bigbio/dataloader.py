@@ -407,6 +407,7 @@ class BigBioConfigHelper:
     citation: str
     description: str
     homepage: str
+    display_name: str
     license: str
 
     _ds_module: datasets.load.DatasetModule = field(repr=False)
@@ -520,6 +521,7 @@ class BigBioConfigHelpers:
                         citation=py_module._CITATION,
                         description=py_module._DESCRIPTION,
                         homepage=py_module._HOMEPAGE,
+                        display_name=py_module._DISPLAYNAME,
                         license=py_module._LICENSE,
                         _ds_module=ds_module,
                         _py_module=py_module,
