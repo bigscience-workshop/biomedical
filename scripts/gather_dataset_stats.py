@@ -21,24 +21,15 @@ MAX_COMMON = 50
 
 
 def jsonify_license(license):
-    if isinstance(license, Licenses):
-        return {
-            "short_name": license.name,
-            "long_name": license.value.name,
-            "text": license.value.text,
-            "link": license.value.link,
-            "version": license.value.version,
-            "provenance": license.value.provenance,
-        }
-    elif isinstance(license, CustomLicense):
-        return {
-            "short_name": "CUSTOM",
-            "long_name": license.name,
-            "text": license.text,
-            "link": license.link,
-            "version": license.version,
-            "provenance": license.provenance,
-        }
+    return {
+        "short_name": license.short_name,
+        "long_name": license.name,
+        "text": license.text,
+        "link": license.link,
+        "version": license.version,
+        "provenance": license.provenance,
+    }
+
 
 def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
 
@@ -87,6 +78,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
 
         dataset_meta = {
             "dataset_name": dataset_name,
+            "display_name": helper.display_name,
             "is_pubmed": helper.is_pubmed,
             "is_local": helper.is_local,
             "languages": [el.name for el in helper.languages],
@@ -180,7 +172,7 @@ if __name__ == "__main__":
     )
 
     do_public = True
-    do_private = True
+    do_private = False
 
 
     if do_private:
