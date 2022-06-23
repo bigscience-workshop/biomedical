@@ -54,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ehr_rel"
+_DISPLAYNAME = "EHR-Rel"
 
 _DESCRIPTION = """\
 EHR-Rel is a novel open-source1 biomedical concept relatedness dataset consisting of 3630 concept pairs, six times more

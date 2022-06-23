@@ -12,9 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""\This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
-In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
-It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+"""
+This dataset contains 500 PubMed articles manually annotated with mutation 
+mentions of various kinds and dbsnp normalizations for each of them.  In 
+addition, it contains variant normalization options such as allele-specific 
+identifiers from the ClinGen Allele Registry It can be used for NER tasks and 
+NED tasks, This dataset does NOT have splits.
+"""
 import itertools
 
 import datasets
@@ -27,30 +31,38 @@ from bigbio.utils.license import Licenses
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
-  doi = {10.48550/ARXIV.2204.03637},
-  
-  url = {https://arxiv.org/abs/2204.03637},
-  
-  author = {Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic, Aleksandar and Lu, Zhiyong},
-  
-  keywords = {Computation and Language (cs.CL), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  
-  title = {tmVar 3.0: an improved variant concept recognition and normalization tool},
-  
-  publisher = {arXiv},
-  
-  year = {2022},
-  
-  copyright = {Creative Commons Attribution 4.0 International}
+  title        = {tmVar 3.0: an improved variant concept recognition and normalization tool},
+  author       = {
+    Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic,
+    Aleksandar and Lu, Zhiyong
+  },
+  year         = 2022,
+  publisher    = {arXiv},
+  doi          = {10.48550/ARXIV.2204.03637},
+  url          = {https://arxiv.org/abs/2204.03637},
+  copyright    = {Creative Commons Attribution 4.0 International},
+  keywords     = {
+    Computation and Language (cs.CL), FOS: Computer and information sciences,
+    FOS: Computer and information sciences
+  }
 }
+
 """
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
+
 _DATASETNAME = "tmvar_v3"
-_DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
-In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
-It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+_DISPLAYNAME = "tmVar v3"
+
+_DESCRIPTION = """\
+This dataset contains 500 PubMed articles manually annotated with mutation \
+mentions of various kinds and dbsnp normalizations for each of them.  In \
+addition, it contains variant normalization options such as allele-specific \
+identifiers from the ClinGen Allele Registry It can be used for NER tasks and \
+NED tasks, This dataset does NOT have splits.
+"""
+
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
 
 _LICENSE = Licenses.UNKNOWN

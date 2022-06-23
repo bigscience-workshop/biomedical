@@ -76,6 +76,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2011"
+_DISPLAYNAME = "n2c2 2011 Coreference"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
 _LANGUAGES = [Lang.EN]

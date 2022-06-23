@@ -69,7 +69,8 @@ pairs of drugs. The correct answer has to be inferred by combining
 information from a chain of reactions of drugs and proteins.
 """
 
-_DATASETNAME = "MedHop"
+_DATASETNAME = "medhop"
+_DISPLAYNAME = "MedHop"
 
 _HOMEPAGE = "http://qangaroo.cs.ucl.ac.uk/"
 

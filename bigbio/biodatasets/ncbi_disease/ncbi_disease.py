@@ -44,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ncbi_disease"
+_DISPLAYNAME = "NCBI Disease"
 
 _DESCRIPTION = """\
 The NCBI disease corpus is fully annotated at the mention and concept level to serve as a research

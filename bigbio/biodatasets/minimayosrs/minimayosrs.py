@@ -45,6 +45,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "minimayosrs"
+_DISPLAYNAME = "MiniMayoSRS"
 
 _DESCRIPTION = """\
 MiniMayoSRS is a subset of the MayoSRS and consists of 30 term pairs on which a higher inter-annotator agreement was

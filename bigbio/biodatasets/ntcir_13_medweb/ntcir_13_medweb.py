@@ -82,6 +82,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ntcir_13_medweb"
+_DISPLAYNAME = "NTCIR-13 MedWeb"
 
 _DESCRIPTION = """\
 NTCIR-13 MedWeb (Medical Natural Language Processing for Web Document) task requires

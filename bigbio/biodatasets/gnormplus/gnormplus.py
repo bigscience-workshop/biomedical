@@ -48,6 +48,7 @@ url={https://doi.org/10.1155/2015/918710}
 """
 
 _DATASETNAME = "gnormplus"
+_DISPLAYNAME = "GNormPlus"
 
 _DESCRIPTION = """\
 We re-annotated two existing gene corpora. The BioCreative II GN corpus is a widely used data set for benchmarking GN

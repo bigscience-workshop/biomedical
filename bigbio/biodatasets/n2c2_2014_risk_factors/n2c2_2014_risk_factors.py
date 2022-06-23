@@ -83,6 +83,7 @@ abstract = {The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task
 """
 
 _DATASETNAME = "n2c2_2014_risk_factors"
+_DISPLAYNAME = "n2c2 2014 Cardiac Risk Factors"
 
 _DESCRIPTION = """\
 The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured two tracks.
@@ -101,7 +102,7 @@ the patient's medical history.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE =  Licenses.DUA
+_LICENSE = Licenses.DUA
 # _LICENSE = "DUA-C/NC"
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
@@ -131,7 +132,7 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
             description="n2c2_2014 BigBio schema",
             schema="bigbio_text",
             subset_id="n2c2_2014_risk_factors",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "n2c2_2014_source"
@@ -170,10 +171,14 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
         return [
@@ -208,7 +213,9 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                 for x in self._read_tar_gz(full_path):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
-                        document = self._read_task2_file(file_object=x["file_object"], file_name=x["file_name"])
+                        document = self._read_task2_file(
+                            file_object=x["file_object"], file_name=x["file_name"]
+                        )
                         document["id"] = next(uid)
 
         elif self.config.schema == "bigbio_text":
@@ -219,7 +226,9 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
                         if task == "track2":
-                            document = self._read_task2_file(file_object=x["file_object"], file_name=x["file_name"])
+                            document = self._read_task2_file(
+                                file_object=x["file_object"], file_name=x["file_name"]
+                            )
                             document["id"] = next(uid)
 
                             labels = []
@@ -251,7 +260,11 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                 xml_flag = True
             else:
                 xml_flag = False
-            yield {"file_object": file_object, "file_name": file_name, "xml_flag": xml_flag}
+            yield {
+                "file_object": file_object,
+                "file_name": file_name,
+                "xml_flag": xml_flag,
+            }
 
     def _read_task2_file(self, file_object, file_name):
         # Fix the file
@@ -265,12 +278,19 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
         text = xmldoc.findall("TEXT")[0].text
         risk_factors = []
         for entity in entities:
-            risk_factor = {x: "" for x in ["indicator", "time", "status", "type1", "type2", "comment"]}
+            risk_factor = {
+                x: ""
+                for x in ["indicator", "time", "status", "type1", "type2", "comment"]
+            }
             for key, value in entity.attrib.items():
                 risk_factor[key] = value
 
             risk_factor["risk_factor"] = entity.tag
             risk_factors.append(risk_factor)
 
-        document = {"document_id": file_name, "text": text, "cardiac_risk_factors": risk_factors}
+        document = {
+            "document_id": file_name,
+            "text": text,
+            "cardiac_risk_factors": risk_factors,
+        }
         return document

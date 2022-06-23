@@ -47,6 +47,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mqp"
+_DISPLAYNAME = "MQP"
 
 _DESCRIPTION = """\
 Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medical questions and paraphrased versions of 

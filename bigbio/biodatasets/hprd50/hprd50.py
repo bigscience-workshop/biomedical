@@ -58,6 +58,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "hprd50"
+_DISPLAYNAME = "HPRD50"
 
 _DESCRIPTION = """\
 HPRD50 is a dataset of randomly selected, hand-annotated abstracts of biomedical papers

@@ -59,7 +59,8 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "bioasq"
+_DATASETNAME = "bioasq_task_b"
+_DISPLAYNAME = "BioASQ Task B"
 
 _BIOASQ_10B_DESCRIPTION = """\
 The data are intended to be used as training and development data for BioASQ

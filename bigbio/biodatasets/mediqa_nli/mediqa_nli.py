@@ -63,6 +63,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mediqa_nli"
+_DISPLAYNAME = "MEDIQA NLI"
 
 _DESCRIPTION = """\
 Natural Language Inference (NLI) is the task of determining whether a given hypothesis can be

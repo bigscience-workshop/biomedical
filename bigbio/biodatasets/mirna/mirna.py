@@ -81,6 +81,7 @@ language={eng}
 """
 
 _DATASETNAME = "mirna"
+_DISPLAYNAME = "miRNA"
 
 _DESCRIPTION = """\
 The corpus consists of 301 Medline citations. The documents were screened for
@@ -271,7 +272,9 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
                             "type": a.attrib["type"],
                             "text": (a.attrib["text"],),
                             "offsets": [(start + startOffset, start + endOffset + 1)],
-                            "normalized": [{"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}],
+                            "normalized": [
+                                {"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}
+                            ],
                         }
                     )
 
@@ -306,9 +309,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for uid, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 for p, pe, re in zip(sentences, sentences_entities, relations):
@@ -326,9 +337,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for idx, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 # global id

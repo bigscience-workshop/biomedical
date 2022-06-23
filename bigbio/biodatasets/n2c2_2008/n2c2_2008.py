@@ -75,6 +75,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2008"
+_DISPLAYNAME = "n2c2 2008 Obesity"
 
 # https://academic.oup.com/jamia/article/16/4/561/766997
 _LANGUAGES = [Lang.EN]

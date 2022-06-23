@@ -61,6 +61,7 @@ _CITATION = """\
 
 
 _DATASETNAME = "mednli"
+_DISPLAYNAME = "MedNLI"
 
 _DESCRIPTION = """\
 State of the art models using deep neural networks have become very good in learning an accurate

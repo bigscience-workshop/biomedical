@@ -44,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pubhealth"
+_DISPLAYNAME = "PUBHEALTH"
 
 _DESCRIPTION = """\
 A dataset of 11,832 claims for fact- checking, which are related a range of health topics

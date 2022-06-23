@@ -40,6 +40,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "nagel"
+_DISPLAYNAME = "Nagel Corpus"
 
 _DESCRIPTION = """\
 A set of 100 abstracts annotated by Kevin Nagel with protein, residue, organism triples.
@@ -165,9 +166,7 @@ class NagelDataset(datasets.GeneratorBasedBuilder):
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
-    def _generate_examples(
-        self, filepath, filepath_standoff, folder_path, split
-    ) -> (int, dict):
+    def _generate_examples(self, filepath, filepath_standoff, folder_path, split):
 
         so_annot = pd.read_csv(
             filepath_standoff,

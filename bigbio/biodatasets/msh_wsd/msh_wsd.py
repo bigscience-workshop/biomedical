@@ -66,8 +66,6 @@ _CITATION = """\
 
 """
 
-_DATASETNAME = "msh_wsd"
-
 _DESCRIPTION = """\
 Evaluation of Word Sense Disambiguation methods (WSD) in the biomedical domain is difficult because the available
 resources are either too small or too focused on specific types of entities (e.g. diseases or genes). We have
@@ -78,6 +76,9 @@ ambiguous words. Each instance containing the ambiguous word was assigned a CUI 
 For each ambiguous term/abbreviation, the data set contains a maximum of 100 instances per sense obtained from
 MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 """
+
+_DATASETNAME = "msh_wsd"
+_DISPLAYNAME = "MSH WSD"
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 

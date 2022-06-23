@@ -28,7 +28,6 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
-_DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
@@ -54,6 +53,9 @@ MLEE is an event extraction corpus consisting of manually annotated abstracts of
 on angiogenesis. It contains annotations for entities, relations, events and coreferences
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
+
+_DATASETNAME = "mlee"
+_DISPLAYNAME = "MLEE"
 
 _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 

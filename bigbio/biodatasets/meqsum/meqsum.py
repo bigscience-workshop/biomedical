@@ -47,6 +47,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "meqsum"
+_DISPLAYNAME = "MeQSum"
 
 _DESCRIPTION = """\
 Dataset for medical question summarization introduced in the ACL 2019 paper "On the Summarization of Consumer Health

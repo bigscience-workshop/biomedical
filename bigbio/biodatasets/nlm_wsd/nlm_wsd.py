@@ -72,6 +72,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "nlm_wsd"
+_DISPLAYNAME = "NLM WSD"
 
 _DESCRIPTION = """\
 In order to support research investigating the automatic resolution of word sense ambiguity using natural language
@@ -97,7 +98,6 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
