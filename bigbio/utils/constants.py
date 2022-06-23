@@ -5,10 +5,15 @@ from enum import Enum
 from types import SimpleNamespace
 
 from bigbio.utils import resources
-from bigbio.utils.license import Licenses
-from bigbio.utils.schemas import (entailment_features, kb_features,
-                                  pairs_features, qa_features,
-                                  text2text_features, text_features)
+from bigbio.utils.license import License
+from bigbio.utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 BigBioValues = SimpleNamespace(NULL="<BB_NULL_STR>")
 
@@ -23,7 +28,7 @@ METADATA: dict = {
     "_LOCAL": bool,
     "_LANGUAGES": Lang,
     "_PUBMED": bool,
-    "_LICENSE": Licenses,
+    "_LICENSE": License,
     "_DISPLAYNAME": str,
 }
 
