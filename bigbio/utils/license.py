@@ -27,6 +27,7 @@ class License:
     """
 
     name: Optional[str] = None
+    short_name: Optional[str] = None
     text: Optional[str] = None
     link: Optional[str] = None
     version: Optional[str] = None
@@ -321,6 +322,8 @@ def load_licenses() -> Dict[str, License]:
     }
 
     licenses.update(custom_licenses)
+    for k, v in licenses.items():
+        v.short_name = k
 
     return licenses
 
