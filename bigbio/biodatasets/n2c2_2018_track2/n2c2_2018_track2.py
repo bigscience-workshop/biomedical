@@ -77,6 +77,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2018_track2"
+_DISPLAYNAME = "n2c2 2018 ADE"
 
 _DESCRIPTION = """\
 The National NLP Clinical Challenges (n2c2), organized in 2018, continued the

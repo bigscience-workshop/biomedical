@@ -14,7 +14,9 @@
 # limitations under the License.
 
 """
-Relation Extraction corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical), on a set of 600 PubMed articles
+Relation Extraction corpus with multiple entity types (e.g., gene/protein,
+disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical),
+on a set of 600 PubMed articles
 """
 
 import itertools
@@ -29,34 +31,37 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
-# TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-  @misc{https://doi.org/10.48550/arxiv.2204.04263,
-  doi = {10.48550/ARXIV.2204.04263},
-
-  url = {https://arxiv.org/abs/2204.04263},
-
-  author = {Luo, Ling and Lai, Po-Ting and Wei, Chih-Hsuan and Arighi, Cecilia N and Lu, Zhiyong},
-
-  keywords = {Computation and Language (cs.CL), FOS: Computer and information sciences, FOS: Computer and information sciences},
-
-  title = {BioRED: A Comprehensive Biomedical Relation Extraction Dataset},
-
-  publisher = {arXiv},
-
-  year = {2022},
-
-  copyright = {Creative Commons Attribution 4.0 International}
+@article{DBLP:journals/corr/abs-2204-04263,
+  author    = {Ling Luo and
+               Po{-}Ting Lai and
+               Chih{-}Hsuan Wei and
+               Cecilia N. Arighi and
+               Zhiyong Lu},
+  title     = {BioRED: {A} Comprehensive Biomedical Relation Extraction Dataset},
+  journal   = {CoRR},
+  volume    = {abs/2204.04263},
+  year      = {2022},
+  url       = {https://doi.org/10.48550/arXiv.2204.04263},
+  doi       = {10.48550/arXiv.2204.04263},
+  eprinttype = {arXiv},
+  eprint    = {2204.04263},
+  timestamp = {Wed, 11 May 2022 15:24:37 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2204-04263.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
-
 """
 
 _DATASETNAME = "biored"
+_DISPLAYNAME = "BioRED"
 
-_DESCRIPTION = """Relation Extraction corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical), on a set of 600 PubMed articles
+_DESCRIPTION = """\
+Relation Extraction corpus with multiple entity types (e.g., gene/protein,
+disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical),
+on a set of 600 PubMed articles
 """
 
 _HOMEPAGE = "https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/"

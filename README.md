@@ -294,4 +294,4 @@ TBD
 
 ## Acknowledgements
 
-BigBIO is a open source, community effort made possible through the efforts of many volunteers as part of BigScience and the [Biomedical Hackathon](https://github.com/bigscience-workshop/data_tooling/wiki/datasets-hackathon).
+BigBIO is a open source, community effort made possible through the efforts of many volunteers as part of BigScience and the [Biomedical Hackathon](HACKATHON.md).

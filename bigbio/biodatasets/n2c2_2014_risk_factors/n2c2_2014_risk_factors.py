@@ -63,23 +63,27 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{
-title = {Automated systems for the de-identification of longitudinal
-clinical narratives: Overview of 2014 i2b2/UTHealth shared task Track 1},
+@article{KUMAR2015S6,
+title = {Creation of a new longitudinal corpus of clinical narratives},
 journal = {Journal of Biomedical Informatics},
 volume = {58},
-pages = {S11-S19},
+pages = {S6-S10},
 year = {2015},
+note = {Supplement: Proceedings of the 2014 i2b2/UTHealth Shared-Tasks and Workshop on Challenges in Natural Language Processing for Clinical Data},
 issn = {1532-0464},
-doi = {https://doi.org/10.1016/j.jbi.2015.06.007},
-url = {https://www.sciencedirect.com/science/article/pii/S1532046415001173},
-author = {Amber Stubbs and Christopher Kotfila and Özlem Uzuner}
+doi = {https://doi.org/10.1016/j.jbi.2015.09.018},
+url = {https://www.sciencedirect.com/science/article/pii/S1532046415002129},
+author = {Vishesh Kumar and Amber Stubbs and Stanley Shaw and Özlem Uzuner},
+keywords = {Corpus, NLP, Medical records, Machine learning},
+abstract = {The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured a new longitudinal corpus of 1304 records representing 296 diabetic patients. The corpus contains three cohorts: patients who have a diagnosis of coronary artery disease (CAD) in their first record, and continue to have it in subsequent records; patients who do not have a diagnosis of CAD in the first record, but develop it by the last record; patients who do not have a diagnosis of CAD in any record. This paper details the process used to select records for this corpus and provides an overview of novel research uses for this corpus. This corpus is the only annotated corpus of longitudinal clinical narratives currently available for research to the general research community.}
 }
 """
 
 _DATASETNAME = "n2c2_2014_risk_factors"
+_DISPLAYNAME = "n2c2 2014 Cardiac Risk Factors"
 
 _DESCRIPTION = """\
 The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured two tracks.
@@ -98,7 +102,7 @@ the patient's medical history.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE =  Licenses.DUA
+_LICENSE = Licenses.DUA
 # _LICENSE = "DUA-C/NC"
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
@@ -128,7 +132,7 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
             description="n2c2_2014 BigBio schema",
             schema="bigbio_text",
             subset_id="n2c2_2014_risk_factors",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "n2c2_2014_source"
@@ -167,10 +171,14 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
         return [
@@ -205,7 +213,9 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                 for x in self._read_tar_gz(full_path):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
-                        document = self._read_task2_file(file_object=x["file_object"], file_name=x["file_name"])
+                        document = self._read_task2_file(
+                            file_object=x["file_object"], file_name=x["file_name"]
+                        )
                         document["id"] = next(uid)
 
         elif self.config.schema == "bigbio_text":
@@ -216,7 +226,9 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
                         if task == "track2":
-                            document = self._read_task2_file(file_object=x["file_object"], file_name=x["file_name"])
+                            document = self._read_task2_file(
+                                file_object=x["file_object"], file_name=x["file_name"]
+                            )
                             document["id"] = next(uid)
 
                             labels = []
@@ -248,7 +260,11 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
                 xml_flag = True
             else:
                 xml_flag = False
-            yield {"file_object": file_object, "file_name": file_name, "xml_flag": xml_flag}
+            yield {
+                "file_object": file_object,
+                "file_name": file_name,
+                "xml_flag": xml_flag,
+            }
 
     def _read_task2_file(self, file_object, file_name):
         # Fix the file
@@ -262,12 +278,19 @@ class N2C22014RiskFactorsDataset(datasets.GeneratorBasedBuilder):
         text = xmldoc.findall("TEXT")[0].text
         risk_factors = []
         for entity in entities:
-            risk_factor = {x: "" for x in ["indicator", "time", "status", "type1", "type2", "comment"]}
+            risk_factor = {
+                x: ""
+                for x in ["indicator", "time", "status", "type1", "type2", "comment"]
+            }
             for key, value in entity.attrib.items():
                 risk_factor[key] = value
 
             risk_factor["risk_factor"] = entity.tag
             risk_factors.append(risk_factor)
 
-        document = {"document_id": file_name, "text": text, "cardiac_risk_factors": risk_factors}
+        document = {
+            "document_id": file_name,
+            "text": text,
+            "cardiac_risk_factors": risk_factors,
+        }
         return document

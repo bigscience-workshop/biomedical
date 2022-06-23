@@ -52,36 +52,44 @@ _CITATION = """\
 """
 
 _DATASETNAME = "codiesp"
+_DISPLAYNAME = "CodiEsp"
 
 _DESCRIPTION = """\
-Synthetic corpus of 1,000 manually selected clinical case studies in Spanish that was designed for \
-the Clinical Case Coding in Spanish Shared Task, as part of the CLEF 2020 conference.
+Synthetic corpus of 1,000 manually selected clinical case studies in Spanish
+that was designed for the Clinical Case Coding in Spanish Shared Task, as part
+of the CLEF 2020 conference.
 
-The goal of the task was to automatically assign ICD10 codes (CIE-10, in Spanish) to clinical case documents,
-being evaluated against manually generated ICD10 codifications. The CodiEsp corpus was selected manually by \
-practicing physicians and clinical documentalists and annotated by clinical coding professionals meeting strict \
-quality criteria. They reached an inter-annotator agreement of 88.6\% for diagnosis coding, 88.9\% for procedure \
-coding and 80.5\% for the textual reference annotation.
+The goal of the task was to automatically assign ICD10 codes (CIE-10, in
+Spanish) to clinical case documents, being evaluated against manually generated
+ICD10 codifications. The CodiEsp corpus was selected manually by practicing
+physicians and clinical documentalists and annotated by clinical coding
+professionals meeting strict quality criteria. They reached an inter-annotator
+agreement of 88.6% for diagnosis coding, 88.9% for procedure coding and 80.5%
+for the textual reference annotation.
 
-The final collection of 1,000 clinical cases that make up the corpus had a total of 16,504 sentences and \
-396,988 words. All documents are in Spanish language and CIE10 is the coding terminology (the Spanish version \
-of ICD10-CM and ICD10-PCS). The CodiEsp corpus has been randomly sampled into three subsets. \
-The train set contains 500 clinical cases, while the development and test sets have 250 clinical cases each. \
-In addition to these, a collection of 176,294 abstracts from Lilacs and Ibecs with the corresponding ICD10 \
-codes (ICD10-CM and ICD10-PCS) was provided by the task organizers. Every abstract has at least one associated \
-code, with an average of 2.5 ICD10 codes per abstract.
+The final collection of 1,000 clinical cases that make up the corpus had a total
+of 16,504 sentences and 396,988 words. All documents are in Spanish language and
+CIE10 is the coding terminology (the Spanish version of ICD10-CM and ICD10-PCS).
+The CodiEsp corpus has been randomly sampled into three subsets. The train set
+contains 500 clinical cases, while the development and test sets have 250
+clinical cases each. In addition to these, a collection of 176,294 abstracts
+from Lilacs and Ibecs with the corresponding ICD10 codes (ICD10-CM and
+ICD10-PCS) was provided by the task organizers. Every abstract has at least one
+associated code, with an average of 2.5 ICD10 codes per abstract.
 
 The CodiEsp track was divided into three sub-tracks (2 main and 1 exploratory):
 
-CodiEsp-D: The Diagnosis Coding sub-task, which requires automatic ICD10-CM [CIE10-Diagnóstico] code assignment.
+- CodiEsp-D: The Diagnosis Coding sub-task, which requires automatic ICD10-CM
+  [CIE10-Diagnóstico] code assignment.
+- CodiEsp-P: The Procedure Coding sub-task, which requires automatic ICD10-PCS
+  [CIE10-Procedimiento] code assignment.
+- CodiEsp-X: The Explainable AI exploratory sub-task, which requires to submit
+  the reference to the predicted codes (both ICD10-CM and ICD10-PCS). The goal 
+  of this novel task was not only to predict the correct codes but also to 
+  present the reference in the text that supports the code predictions.
 
-CodiEsp-P: The Procedure Coding sub-task, which requires automatic ICD10-PCS [CIE10-Procedimiento] code assignment.
-
-CodiEsp-X: The Explainable AI exploratory sub-task, which requires to submit the reference to the predicted codes \
-(both ICD10-CM and ICD10-PCS). The goal of this novel task was not only to predict the correct codes but also to \
-present the reference in the text that supports the code predictions.
-
-For further information, please visit https://temu.bsc.es/codiesp or send an email to encargo-pln-life@bsc.es
+For further information, please visit https://temu.bsc.es/codiesp or send an
+email to encargo-pln-life@bsc.es
 """
 
 _HOMEPAGE = "https://temu.bsc.es/codiesp/"

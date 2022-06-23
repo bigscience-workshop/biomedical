@@ -38,6 +38,7 @@ _CITATION = """@inproceedings{PhoNER_COVID19,
 """
 
 _DATASETNAME = "pho_ner"
+_DISPLAYNAME = "PhoNER_COVID19"
 
 _DESCRIPTION = """PhoNER_COVID19 is a dataset for recognizing COVID-19 related named entities in Vietnamese, 
 consisting of 35K entities over 10K sentences. We define 10 entity types with the aim of extracting key information 

@@ -103,6 +103,9 @@ decomposition); Chunks; Semantic Classes (UMLS: Unified Medical Language System,
 MeSH: Medical Subject Headings, EuroWordNet); Semantic Relations from UMLS.
 """
 
+_DATASETNAME = "muchmore"
+_DISPLAYNAME = "MuchMore"
+
 _HOMEPAGE = "https://muchmore.dfki.de/resources1.htm"
 
 # TODO: website says the following, but don't see a specific license

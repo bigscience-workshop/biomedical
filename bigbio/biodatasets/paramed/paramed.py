@@ -47,6 +47,7 @@ _CITATION = """\
 }
 """
 _DATASETNAME = "paramed"
+_DISPLAYNAME = "ParaMed"
 
 _DESCRIPTION = """\
 NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website. 

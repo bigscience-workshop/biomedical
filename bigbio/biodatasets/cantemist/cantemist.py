@@ -49,6 +49,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cantemist"
+_DISPLAYNAME = "CANTEMIST"
 
 _DESCRIPTION = """\
 Collection of 1301 oncological clinical case reports written in Spanish, with tumor morphology mentions \

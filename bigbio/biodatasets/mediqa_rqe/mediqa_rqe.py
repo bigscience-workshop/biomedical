@@ -41,6 +41,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mediqa_rqe"
+_DISPLAYNAME = "MEDIQA RQE"
 
 _DESCRIPTION = """\
 The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).

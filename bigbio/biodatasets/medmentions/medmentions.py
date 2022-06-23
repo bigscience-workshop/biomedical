@@ -61,6 +61,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "medmentions"
+_DISPLAYNAME = "MedMentions"
 
 _DESCRIPTION = """\
 MedMentions is a new manually annotated resource for the recognition of biomedical concepts.

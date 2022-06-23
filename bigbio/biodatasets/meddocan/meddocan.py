@@ -46,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "meddocan"
+_DISPLAYNAME = "MEDDOCAN"
 
 _DESCRIPTION = """\
 MEDDOCAN: Medical Document Anonymization Track

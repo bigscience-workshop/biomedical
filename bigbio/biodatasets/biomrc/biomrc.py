@@ -55,6 +55,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "biomrc"
+_DISPLAYNAME = "BIOMRC"
 
 _DESCRIPTION = """\
 We introduce BIOMRC, a large-scale cloze-style biomedical MRC dataset. Care was taken to reduce noise, compared to the

@@ -58,6 +58,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pharmaconer"
+_DISPLAYNAME = "PharmaCoNER"
 
 _GENERAL_DESCRIPTION = """\
 PharmaCoNER: Pharmacological Substances, Compounds and Proteins Named Entity Recognition track

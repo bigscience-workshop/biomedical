@@ -54,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "med_qa"
+_DISPLAYNAME = "MedQA"
 
 _DESCRIPTION = """\
 In this work, we present the first free-form multiple-choice OpenQA dataset for solving medical problems, MedQA,

@@ -29,6 +29,7 @@ METADATA: dict = {
     "_LANGUAGES": Lang,
     "_PUBMED": bool,
     "_LICENSE": License,
+    "_DISPLAYNAME": str,
 }
 
 

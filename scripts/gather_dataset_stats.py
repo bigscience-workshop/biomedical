@@ -16,6 +16,7 @@ from bigbio.dataloader import BigBioConfigHelpers
 from bigbio.utils.license import Licenses
 from bigbio.utils.license import CustomLicense
 
+
 MAX_COMMON = 50
 
 
@@ -86,6 +87,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
 
         dataset_meta = {
             "dataset_name": dataset_name,
+            "is_pubmed": helper.is_pubmed,
             "is_local": helper.is_local,
             "languages": [el.name for el in helper.languages],
             "bigbio_version": helper.bigbio_version,
@@ -118,6 +120,7 @@ def flatten_metadatas(dataset_metas):
 
         dataset_row = {
             "dataset_name": dataset_name,
+            "is_pubmed": dataset_meta["is_pubmed"],
             "is_local": dataset_meta["is_local"],
             "languages": dataset_meta["languages"],
             "bigbio_version": dataset_meta["bigbio_version"],

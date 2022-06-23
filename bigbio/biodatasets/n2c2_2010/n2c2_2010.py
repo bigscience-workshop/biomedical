@@ -82,6 +82,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2010"
+_DISPLAYNAME = "n2c2 2010 Concepts, Assertions, and Relations"
 
 _DESCRIPTION = """\
 The i2b2/VA corpus contained de-identified discharge summaries from Beth Israel
@@ -580,7 +581,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
             "coreferences": [],
         }
 
-    def _generate_examples(self, data_dir, split) -> (int, dict):
+    def _generate_examples(self, data_dir, split):
         if split == "train":
             samples = _read_tar_gz(
                 os.path.join(

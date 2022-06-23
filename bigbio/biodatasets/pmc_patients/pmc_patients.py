@@ -45,6 +45,7 @@ _CITATION = """\
 }"""
 
 _DATASETNAME = "pmc_patients"
+_DISPLAYNAME = "PMC-Patients"
 
 _DESCRIPTION = """\
 This dataset is used for calculating the similarity between two patient descriptions.

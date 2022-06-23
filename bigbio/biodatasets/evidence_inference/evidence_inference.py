@@ -57,7 +57,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "evidence_inference"
-
+_DISPLAYNAME = "Evidence Inference 2.0"
 
 _DESCRIPTION = """\
 The dataset consists of biomedical articles describing randomized control trials (RCTs) that compare multiple

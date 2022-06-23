@@ -50,6 +50,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "genetag"
+_DISPLAYNAME = "GENETAG"
 
 _DESCRIPTION = """\
 Named entity recognition (NER) is an important first step for text mining the biomedical literature.
