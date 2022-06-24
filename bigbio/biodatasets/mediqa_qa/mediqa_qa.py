@@ -65,8 +65,8 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class PubmedQADataset(datasets.GeneratorBasedBuilder):
-    """PubmedQA Dataset"""
+class MediqaQADataset(datasets.GeneratorBasedBuilder):
+    """MediqaQA Dataset"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
