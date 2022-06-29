@@ -83,7 +83,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2012evaluating,
     author = {
         Uzuner, Ozlem and
         Bodnari, Andreea and

@@ -76,7 +76,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2007evaluating,
     author = {
         Uzuner, Özlem and
         Luo, Yuan and

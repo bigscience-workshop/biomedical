@@ -57,7 +57,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{thomas2011challenges,
   author    = {Thomas, Philippe and Klinger, Roman and Furlong, Laura and Hofmann-Apitius, Martin and Friedrich, Christoph},
   title     = {Challenges in the association of human single nucleotide polymorphism mentions with unique database identifiers},
   journal   = {BMC Bioinformatics},

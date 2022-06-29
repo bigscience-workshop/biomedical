@@ -80,12 +80,11 @@ _LANGUAGES = [Lang.EN, Lang.DE]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
-  author={Paul Buitelaar and Thierry Declerck and Bogdan Sacaleanu and {\vS}pela Vintar and Diana Raileanu and C. Crispi},
-  title={A Multi-Layered , XML-Based Approach to the Integration of Linguistic and Semantic Annotations},
-  booktitle={Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML03)},
-  year={2003},
-  month={April}
+@inproceedings{buitelaar2003multi,
+  title={A multi-layered, xml-based approach to the integration of linguistic and semantic annotations},
+  author={Buitelaar, Paul and Declerck, Thierry and Sacaleanu, Bogdan and Vintar, {\v{S}}pela and Raileanu, Diana and Crispi, Claudia},
+  booktitle={Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML'03), Budapest, Hungary},
+  year={2003}
 }
 """
 

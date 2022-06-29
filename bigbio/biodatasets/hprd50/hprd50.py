@@ -46,14 +46,15 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author    = {Katrin Fundel, Robert Kuffner, Ralf Zimmer},
-  title     = {RelEx-Relation extraction using dependency parse trees},
-  journal   = {Bioinformatics},
-  volume    = {23},
-  year      = {2007},
-  url       = {https://academic.oup.com/bioinformatics/article/23/3/365/236564},
-  doi       = {https://doi.org/10.1093/bioinformatics/btl616},
+@article{fundel2007relex,
+  title={RelEx—Relation extraction using dependency parse trees},
+  author={Fundel, Katrin and K{\"u}ffner, Robert and Zimmer, Ralf},
+  journal={Bioinformatics},
+  volume={23},
+  number={3},
+  pages={365--371},
+  year={2007},
+  publisher={Oxford University Press}
 }
 """
 

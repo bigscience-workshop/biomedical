@@ -42,11 +42,11 @@ _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@inproceedings{
-  title={Overview of automatic clinical coding: annotations, guidelines, and \
-  solutions for non-english clinical cases at codiesp track of CLEF eHealth 2020},
+@article{miranda2020overview,
+  title={Overview of Automatic Clinical Coding: Annotations, Guidelines, and Solutions for non-English Clinical Cases at CodiEsp Track of CLEF eHealth 2020.},
   author={Miranda-Escalada, Antonio and Gonzalez-Agirre, Aitor and Armengol-Estap{\'e}, Jordi and Krallinger, Martin},
-  booktitle={Working Notes of Conference and Labs of the Evaluation (CLEF) Forum. CEUR Workshop Proceedings},
+  journal={CLEF (Working Notes)},
+  volume={2020},
   year={2020}
 }
 """

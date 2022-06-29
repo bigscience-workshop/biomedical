@@ -47,7 +47,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
+@inproceedings{khachatrian2019biorelex,
     title = "{B}io{R}el{E}x 1.0: Biological Relation Extraction Benchmark",
     author = "Khachatrian, Hrant  and
       Nersisyan, Lilit  and
