@@ -82,7 +82,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2009recognizing,
     author = {
         Uzuner, Ozlem
     },

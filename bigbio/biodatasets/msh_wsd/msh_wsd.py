@@ -47,23 +47,16 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
 _CITATION = """\
-@article{,
-    author={Jimeno-Yepes, Antonio J.
-    and McInnes, Bridget T.
-    and Aronson, Alan R.},
-    title={Exploiting MeSH indexing in MEDLINE to generate a data set for word sense disambiguation},
-    journal={BMC Bioinformatics},
-    year={2011},
-    month={Jun},
-    day={02},
-    volume={12},
-    number={1},
-    pages={223},
-    issn={1471-2105},
-    doi={10.1186/1471-2105-12-223},
-    url={https://doi.org/10.1186/1471-2105-12-223}
+@article{jimeno2011exploiting,
+  title={Exploiting MeSH indexing in MEDLINE to generate a data set for word sense disambiguation},
+  author={Jimeno-Yepes, Antonio J and McInnes, Bridget T and Aronson, Alan R},
+  journal={BMC bioinformatics},
+  volume={12},
+  number={1},
+  pages={1--14},
+  year={2011},
+  publisher={BioMed Central}
 }
-
 """
 
 _DESCRIPTION = """\

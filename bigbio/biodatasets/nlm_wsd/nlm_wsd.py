@@ -60,7 +60,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{weeber2001developing,
   title    = "Developing a test collection for biomedical word sense
               disambiguation",
   author   = "Weeber, M and Mork, J G and Aronson, A R",

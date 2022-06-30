@@ -66,7 +66,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{
+@article{stubbs2015automated,
 title = {Automated systems for the de-identification of longitudinal
 clinical narratives: Overview of 2014 i2b2/UTHealth shared task Track 1},
 journal = {Journal of Biomedical Informatics},

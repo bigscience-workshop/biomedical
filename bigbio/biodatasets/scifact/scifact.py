@@ -29,7 +29,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{wadden2020fact,
   author    = {David Wadden and Shanchuan Lin and Kyle Lo and Lucy Lu Wang and Madeleine van Zuylen and Arman Cohan and Hannaneh Hajishirzi},
   title     = {Fact or Fiction: Verifying Scientific Claims},
   year      = {2020},

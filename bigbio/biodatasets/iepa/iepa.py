@@ -38,7 +38,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@ARTICLE{,
+@ARTICLE{ding2001mining,
   title    = "Mining {MEDLINE}: abstracts, sentences, or phrases?",
   author   = "Ding, J and Berleant, D and Nettleton, D and Wurtele, E",
   journal  = "Pac Symp Biocomput",

@@ -74,7 +74,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2008identifying,
     author = {
         Uzuner, Ozlem and
         Goldstein, Ira and

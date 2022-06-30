@@ -38,18 +38,15 @@ _LOCAL = False
 
 # TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-    AUTHOR = {Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
-    TITLE = {What Disease Does This Patient Have? A Large-Scale Open Domain Question \
-             Answering Dataset from Medical Exams},
-    JOURNAL = {Applied Sciences},
-    VOLUME = {11},
-    YEAR = {2021},
-    NUMBER = {14},
-    ARTICLE-NUMBER = {6421},
-    URL = {https://www.mdpi.com/2076-3417/11/14/6421},
-    ISSN = {2076-3417},
-    DOI = {10.3390/app11146421}
+@article{jin2021disease,
+  title={What disease does this patient have? a large-scale open domain question answering dataset from medical exams},
+  author={Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
+  journal={Applied Sciences},
+  volume={11},
+  number={14},
+  pages={6421},
+  year={2021},
+  publisher={MDPI}
 }
 """
 

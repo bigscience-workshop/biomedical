@@ -34,7 +34,13 @@ from bigbio.utils.license import Licenses
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
-_CITATION = "NA"
+_CITATION = """/
+@misc{geokhoj_v1,
+  author = {Elucidata, Inc.},
+  title = {GEOKhoj v1},
+  howpublished = {\url{https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1}},
+}
+"""
 
 _DATASETNAME = "geokhoj_v1"
 _DISPLAYNAME = "GEOKhoj v1"
@@ -46,7 +52,6 @@ the GEO (Gene Expression Omnibus) database
 """
 
 _HOMEPAGE = "https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1"
-
 
 _LICENSE = Licenses.CC_BY_NC_4p0
 
