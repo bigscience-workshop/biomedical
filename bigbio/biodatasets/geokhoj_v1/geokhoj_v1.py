@@ -34,11 +34,11 @@ from bigbio.utils.license import Licenses
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
-_CITATION = """/
+_CITATION = """\
 @misc{geokhoj_v1,
   author = {Elucidata, Inc.},
   title = {GEOKhoj v1},
-  howpublished = {\url{https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1}},
+  howpublished = {\\url{https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1}},
 }
 """
 
