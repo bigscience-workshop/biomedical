@@ -1,27 +1,21 @@
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
-from datasets import load_dataset
-import numpy as np
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
-from rich import print as rprint
-from matplotlib import pyplot as plt
-from matplotlib_venn import venn2, venn3
+# from matplotlib_venn import venn2, venn3
 import json
-import plotly.express as px
+
+import numpy as np
 import pandas as pd
-
-# import plotly.plotly as py
-import plotly.tools as tls
+import plotly.graph_objects as go
 import plotly.io as pio
+from datasets import load_dataset
+from plotly.subplots import make_subplots
+from rich import print as rprint
 
-pio.kaleido.scope.mathjax = None
-
-from bigbio.dataloader import BigBioConfigHelpers
 from collections import Counter
 
 from ngram import get_tuples_manual_sentences
+
+from bigbio.dataloader import BigBioConfigHelpers
+
+pio.kaleido.scope.mathjax = None
 
 
 # vanilla tokenizer
@@ -170,7 +164,7 @@ def draw_bar(df, col_name, y_name, row, col, fig):
                 y=y_list,
                 name=split,
                 marker_color=SPLIT_COLOR_MAP[split.split("_")[0]],
-                showlegend=False
+                showlegend=False,
             ),
             row=row,
             col=col,
@@ -187,7 +181,9 @@ def parse_metrics(metadata):
 
 
 def parse_counters(metadata):
-    metadata = metadata[list(metadata.keys())[0]]  # using the training counter to fetch the names
+    metadata = metadata[
+        list(metadata.keys())[0]
+    ]  # using the training counter to fetch the names
     counters = []
     for k, v in metadata.__dict__.items():
         if "counter" in k and len(v) > 0:
@@ -240,8 +236,8 @@ def draw_figure(data_name, data_config_name):
         cols = 2
     counters.sort()
 
-    counter_titles = ['Label Counts by Type: ' + ct.split("_")[0] for ct in counters]
-    titles = ('token length',) + tuple(counter_titles)
+    counter_titles = ["Label Counts by Type: " + ct.split("_")[0] for ct in counters]
+    titles = ("token length",) + tuple(counter_titles)
     # Make figure with subplots
     fig = make_subplots(
         rows=rows + 2,
@@ -249,7 +245,7 @@ def draw_figure(data_name, data_config_name):
         subplot_titles=titles,
         specs=specs,
         vertical_spacing=0.10,
-        horizontal_spacing=0.10
+        horizontal_spacing=0.10,
     )
     # draw token distribution
     draw_box(tok_hist_data, "token_length", row=1, col=1, fig=fig)
@@ -257,7 +253,6 @@ def draw_figure(data_name, data_config_name):
         row = i // 3 + 2
         col = i % 3 + 1
         label_df = parse_label_counter(metadata_helper, ct)
-        label_max = int(label_df[ct].max() - 1)
         label_min = int(label_df[ct].min())
         # filter_value = int((label_max - label_min) * 0.01 + label_min)
         label_df = label_df[label_df[ct] >= label_min]
@@ -267,35 +262,12 @@ def draw_figure(data_name, data_config_name):
         draw_bar(label_df, ct, "labels", row=row, col=col, fig=fig)
 
     # add annotation
-    # counter = str(counter_type)
-    # counter = f'<b>Label Count by</b> ' + ' '.join(counter_type.split('_')[:-1])
-    descriptions = helper.description.replace('\n', '').replace('\t', '')
-    # descriptions = f'<b>Data description </b> ' + descriptions
+    descriptions = helper.description.replace("\n", "").replace("\t", "")
     langs = [l.value for l in helper.languages]
-    languages = ' '.join(langs)
-    # languages = '<b>Supported Languages</b> ' + languages
+    languages = " ".join(langs)
     license = helper.license.value.name
-    # license = '<b>Licensed by </b>' + license
-    tasks = [' '.join(t.name.lower().split('_')) for t in helper.tasks]
-    tasks = ', '.join(tasks)
-    # tasks = '<b>Supported Tasks</b> ' + tasks
-    # events = [descriptions, counter, license, languages, tasks]
-    # anns = []
-    # for i, e in enumerate(events):
-    #     ann = go.layout.Annotation(
-    #         # bordercolor='black',  # Remove this to hide border
-    #         align='left',  # Align text to the left
-    #         yanchor='bottom', # Align text box's top edge
-    #         text=e,  # Set text with '<br>' strings as newlines
-    #         showarrow=False, # Hide arrow head
-    #         # width=1000, # Wrap text at around 800 pixels
-    #         xref='paper',  # Place relative to figure, not axes
-    #         yref='paper',
-    #         # font={'family': 'Courier'},  # Use monospace font to keep nice indentation
-    #         x=0,  # Place on left edge
-    #         y=-0.5-(i/10)  # Place a little more than half way down
-    #     )
-    #     anns.append(ann)
+    tasks = [" ".join(t.name.lower().split("_")) for t in helper.tasks]
+    tasks = ", ".join(tasks)
 
     fig.update_annotations(font_size=12)
     fig.update_layout(
@@ -304,21 +276,41 @@ def draw_figure(data_name, data_config_name):
         # title_text=data_name,
         height=600,
         width=1000,
-    )   
+    )
 
     # fig.show()
 
     fig_name = f"{data_name}_{data_config_name}.pdf"
     fig_path = f"figures/data_card/{fig_name}"
-    data_name_display = ' '.join(data_name.split('_'))
-    latex_bod = r"\textbf{" + fr'{data_name_display}' + r'}' + '\n'
-    latex_bod += r"\begin{figure}[ht!]" + "\n" + r"\centering" + "\n" + r"\includegraphics[width=\linewidth]{"
-    latex_bod += f'{fig_path}' + r'}' + '\n'
-    latex_bod += r'''\caption{\label{fig:'''
-    latex_bod += fr'{data_name}' + r'}' 
-    latex_bod += r"Token frequency distribution by split (top) and Frequency of different kind of instances (bottom).}" + "\n"
+    data_name_display = " ".join(data_name.split("_"))
+    latex_bod = r"\textbf{" + fr"{data_name_display}" + r"}" + "\n"
+    latex_bod += (
+        r"\begin{figure}[ht!]"
+        + "\n"
+        + r"\centering"
+        + "\n"
+        + r"\includegraphics[width=\linewidth]{"
+    )
+    latex_bod += f"{fig_path}" + r"}" + "\n"
+    latex_bod += r"""\caption{\label{fig:"""
+    latex_bod += fr"{data_name}" + r"}"
+    latex_bod += (
+        r"Token frequency distribution by split (top) and Frequency of different kind of instances (bottom).}"
+        + "\n"
+    )
     latex_bod += r"\end{figure}" + "\n" + r"\paragraph{Dataset Description}"
-    latex_bod += fr'{descriptions}' + '\n' + r'\paragraph{Licensing} ' + f'{license}' + '\n' + r'\paragraph{Languages} ' + f'{languages}' + '\n' + r'\paragraph{Tasks} ' + f'{tasks}'
+    latex_bod += (
+        fr"{descriptions}"
+        + "\n"
+        + r"\paragraph{Licensing} "
+        + f"{license}"
+        + "\n"
+        + r"\paragraph{Languages} "
+        + f"{languages}"
+        + "\n"
+        + r"\paragraph{Tasks} "
+        + f"{tasks}"
+    )
 
     fig.write_image(fig_path)
 
@@ -339,15 +331,14 @@ if __name__ == "__main__":
 
     for conhelper in conhelps:
         configs.append(conhelper.dataset_name)
-    names = ['mqp', 'paramed', 'mediqa_qa', 'scitail']
-    # names = ['paramed']
+    names = ["mqp", "paramed", "mediqa_qa", "scitail"]
+    # TODO: parse all public dataset
     for data_name in names:
-        # data_name = configs['data_name']  # TODO CHANGE THIS
+        # data_name = configs['data_name']
         # data_info = conhelps_local[data_name]
         # setup data configs
         data_helpers = conhelps.for_dataset(data_name)
         data_configs = [d.config for d in data_helpers]
         data_config_names = [d.config.name for d in data_helpers]
-        # data_config_name = data_config_names[0]  # TODO CHANGE THIS
         for data_config_name in data_config_names:
             draw_figure(data_name, data_config_name)
