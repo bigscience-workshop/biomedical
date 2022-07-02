@@ -167,7 +167,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                 # test.tsv has an additional column at the beginning
                 #  Some entries are malformed, will log skipped lines
                 if len(row) < 9:
-                    logger.warning("Line %s is malformed", id_)
+                    logger.info("Line %s is malformed", id_)
                     continue
                 (
                     claim_id,
@@ -184,7 +184,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                 ]  # only take last 9 columns to fix test.tsv disparity
 
                 if label not in _CLASSES:
-                    logger.warning("Line %s is missing label", id_)
+                    logger.info("Line %s is missing label", id_)
                     continue
 
                 if self.config.schema == "source":

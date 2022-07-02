@@ -382,7 +382,7 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict) -> Dict:
         )
     if len(skipped_relations) > 0:
         example_id = brat_parse["document_id"]
-        logger.warning(
+        logger.info(
             f"Example:{example_id}: The `bigbio_kb` schema allows `relations` only between entities."
             f" Skip (for now): "
             f"{list(skipped_relations)}"

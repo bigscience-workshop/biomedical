@@ -249,7 +249,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     assert line_pieces[3] == mention
                     assert line_pieces[4] == entity_id
                     assert line_pieces[5] == rsid
-                    logger.warning(
+                    logger.info(
                         f"Adding ProteinMutation semantic_type_id in Document ID: {pmid} Line: {line}"
                     )
                 else:
@@ -275,7 +275,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                 ) = line_pieces
 
             else:
-                logger.warning(
+                logger.info(
                     f"Inconsistent entity format found. Skipping Document ID: {pmid} Line: {line}"
                 )
                 continue
