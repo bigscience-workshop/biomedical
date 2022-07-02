@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-This dataset contains 500 PubMed articles manually annotated with mutation 
-mentions of various kinds and dbsnp normalizations for each of them.  In 
-addition, it contains variant normalization options such as allele-specific 
-identifiers from the ClinGen Allele Registry It can be used for NER tasks and 
+This dataset contains 500 PubMed articles manually annotated with mutation
+mentions of various kinds and dbsnp normalizations for each of them.  In
+addition, it contains variant normalization options such as allele-specific
+identifiers from the ClinGen Allele Registry It can be used for NER tasks and
 NED tasks, This dataset does NOT have splits.
 """
 import itertools
@@ -200,7 +200,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     db_ids = db_id.split(",")
                     base_dict[db_name].extend(db_ids)
                 else:
-                    logger.warn(
+                    logger.info(
                         f"Malformed normalization in Document {doc_id}. Type: {type}, Number: {id}"
                     )
                     continue
