@@ -202,9 +202,9 @@ if __name__ == "__main__":
 
     # setup page, sidebar, columns
     st.set_page_config(layout="wide")
-    # s = st.session_state
-    # if not s:
-    #     s.pressed_first_button = False
+    s = st.session_state
+    if not s:
+        s.pressed_first_button = False
     data_name = st.sidebar.selectbox("dataset", configs_set)
     st.sidebar.write("you selected:", data_name)
     st.header(f"Dataset stats for {data_name}")
@@ -215,8 +215,8 @@ if __name__ == "__main__":
     data_config_names = [d.config.name for d in data_helpers]
     data_config_name = st.sidebar.selectbox("config", set(data_config_names))
 
-    if st.sidebar.button("fetch"): # or s.pressed_first_button:
-        # s.pressed_first_button = True
+    if st.sidebar.button("fetch") or s.pressed_first_button:
+        s.pressed_first_button = True
         helper = conhelps.for_config_name(data_config_name)
         metadata_helper = helper.get_metadata()
 

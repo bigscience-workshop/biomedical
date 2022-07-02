@@ -161,6 +161,7 @@ def draw_box(df, col_name, row, col, fig):
 
 def draw_bar(df, col_name, y_name, row, col, fig):
     for split in df["split"].unique():
+        print(split)
         split_count = df.loc[df["split"] == split, col_name].tolist()
         y_list = df.loc[df["split"] == split, y_name].tolist()
         fig.add_trace(
@@ -237,6 +238,8 @@ def draw_figure(data_name, data_config_name):
     elif len(counters) == 2:
         specs = [[{"colspan": 2}, None]] + [[{}, {}]] * (rows + 1)
         cols = 2
+    counters.sort()
+
     counter_titles = ['Label Counts by Type: ' + ct.split("_")[0] for ct in counters]
     titles = ('token length',) + tuple(counter_titles)
     # Make figure with subplots
@@ -248,19 +251,18 @@ def draw_figure(data_name, data_config_name):
         vertical_spacing=0.10,
         horizontal_spacing=0.10
     )
-    counters.sort()
     # draw token distribution
     draw_box(tok_hist_data, "token_length", row=1, col=1, fig=fig)
     for i, ct in enumerate(counters):
         row = i // 3 + 2
         col = i % 3 + 1
-        print(row)
-        print(col)
         label_df = parse_label_counter(metadata_helper, ct)
         label_max = int(label_df[ct].max() - 1)
         label_min = int(label_df[ct].min())
-        filter_value = int((label_max - label_min) * 0.1 + label_min)
-        label_df = label_df[label_df[ct] >= filter_value]
+        # filter_value = int((label_max - label_min) * 0.01 + label_min)
+        label_df = label_df[label_df[ct] >= label_min]
+        print(label_df.head(5))
+
         # draw bar chart for counter
         draw_bar(label_df, ct, "labels", row=row, col=col, fig=fig)
 
@@ -337,8 +339,8 @@ if __name__ == "__main__":
 
     for conhelper in conhelps:
         configs.append(conhelper.dataset_name)
-    names = ['bc5cdr', 'scitail', 'mqp', 'paramed', 'bioasq_task_b', 'chemprot', 'biosses', 'chemprot', 'ehr_rel']
-    names = ['mqp']
+    names = ['mqp', 'paramed', 'mediqa_qa', 'scitail']
+    # names = ['paramed']
     for data_name in names:
         # data_name = configs['data_name']  # TODO CHANGE THIS
         # data_info = conhelps_local[data_name]
