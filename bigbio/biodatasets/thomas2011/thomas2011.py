@@ -43,15 +43,16 @@ import os
 from pathlib import Path
 from shutil import rmtree
 from typing import Dict, List, Tuple
-
+import xml.etree.ElementTree as ET
 import datasets
 import pandas as pd
+import requests
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import CustomLicense
-
+import time
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -98,8 +99,7 @@ The annotations are published for academic use only and usage for development of
 # this is a backup url in case the official one will stop working
 # _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 _URLS = {
-    "source": "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
-    "bigbio_kb": "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
+    _DATASETNAME: "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/normalization-variation-corpus.gz",
 }
 
 _SUPPORTED_TASKS = [
@@ -117,35 +117,16 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
-
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="thomas2011_source",
+            name=f"{_DATASETNAME}_source",
             version=SOURCE_VERSION,
             description="Thomas et al 2011 source schema",
             schema="source",
             subset_id="thomas2011",
         ),
         BigBioConfig(
-            name="thomas2011_bigbio_kb",
+            name=f"{_DATASETNAME}_bigbio_kb",
             version=BIGBIO_VERSION,
             description="Thomas et al 2011 BigBio schema",
             schema="bigbio_kb",
@@ -153,15 +134,9 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "thomas2011_source"
+    DEFAULT_CONFIG_NAME = f"{_DATASETNAME}_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-        # Much of this design is copied from biodatasets/verspoor_2013/verspoor_2013.py
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
             features = datasets.Features(
@@ -188,54 +163,49 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        # Download gets entire git repo containing unused data from other datasets
-        # repo_dir = Path(dl_manager.download_and_extract(_URLS[0]))
-        # data_dir = repo_dir / "data"
-        # data_dir.mkdir(exist_ok=True)
-
-        # Find the relevant files from Verspor2013 and move them to a new directory
-        # thomas2011_files = repo_dir.glob("*/*/*thomas2011/**/*")
-        # for file in thomas2011_files:
-        #    if file.is_file() and "README" not in str(file):
-        #        file.rename(data_dir / file.name)
-
-        # Delete all unused files and directories from the original download
-        # for x in repo_dir.glob("[!data]*"):
-        #    if x.is_file():
-        #        x.unlink()
-        #    elif x.is_dir():
-        #        rmtree(x)
-
-        data_dir = dl_manager.download_and_extract(_URLS[self.config.schema])
+        data_dir = dl_manager.download_and_extract(_URLS[_DATASETNAME])
         return [
             datasets.SplitGenerator(
-                name=datasets.Split.TEST,
+                name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(data_dir, "annotations.txt"),
-                    "split": "test",
                 },
             )
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
+    def get_clean_pubmed_abstract(self, id):
+        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
+        params = {
+            "db": "pubmed",
+            "id": id,
+            "retmode": "xml",
+            "rettype": "medline",
+        }
+        res = requests.get(url, params=params)
+        tree = ET.XML(res.text)
+        article = tree.find("PubmedArticle").find("MedlineCitation").find("Article")
+        article_title = article.find("ArticleTitle").text + " "
+        abstract_parts = [article_title]
+        article_abstract = article.find("Abstract").findall("AbstractText")
+        for abstract_part in article_abstract:
+            abstract_parts.append(abstract_part.text)
+        return "".join(abstract_parts)
 
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-    def _generate_examples(self, filepath: str, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath: str) -> Tuple[int, Dict]:
 
         """Yields examples as (key, example) tuples."""
-        if split == "test":
-            data_ann = []
-            with open(filepath, encoding="utf-8") as ann_tsv_file:
-                csv_reader_code = csv.reader(
-                    ann_tsv_file,
-                    quotechar="'",
-                    delimiter="\t",
-                    quoting=csv.QUOTE_ALL,
-                    skipinitialspace=True,
-                )
-                for id_, row in enumerate(csv_reader_code):
-                    data_ann.append(row)
+        data_ann = []
+        with open(filepath, encoding="utf-8") as ann_tsv_file:
+            csv_reader_code = csv.reader(
+                ann_tsv_file,
+                quotechar="'",
+                delimiter="\t",
+                quoting=csv.QUOTE_ALL,
+                skipinitialspace=True,
+            )
+            for id_, row in enumerate(csv_reader_code):
+                data_ann.append(row)
 
         if self.config.schema == "source":
             for id_, row in enumerate(data_ann):
@@ -259,8 +229,22 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             ]
             df = pd.DataFrame(data_ann, columns=cols)
             uid = 0
+            curr_count = 0
             for id_ in df.doc_id.unique():
+                curr_count += 1
+                if curr_count == 3:
+                    # The PubMed API limits 3 requests per second without an API key
+                    time.sleep(0.5)
+                    curr_count = 0
                 elist = []
+                abstract_text = self.get_clean_pubmed_abstract(id_)
+                uid += 1
+                passage = {
+                    "id": uid,
+                    "type": "",
+                    "text": [abstract_text],
+                    "offsets": [[0, len(abstract_text)]],
+                }
                 for row in df.loc[df.doc_id == id_].itertuples():
                     uid += 1
                     if row.protein_or_nucleotide_sequence_mutation == "PSM":
@@ -272,7 +256,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                             "id": str(uid),
                             "type": ent_type,
                             "text": [row.covered_text],
-                            "offsets": [[int(row.off1), int(row.off2)]],
+                            "offsets": [[int(row.off1) - 1, int(row.off2) - 1]],
                             "normalized": [{"db_name": "dbSNP", "db_id": row.dbSNP_id}],
                         }
                     )
@@ -280,12 +264,8 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "id": id_,  # uid is an unique identifier for every record that starts from 1
                     "document_id": str(row[0]),
                     "entities": elist,
-                    "passages": [],
+                    "passages": [passage],
                     "events": [],
                     "coreferences": [],
                     "relations": [],
                 }
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
