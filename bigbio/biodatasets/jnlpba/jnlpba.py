@@ -179,17 +179,18 @@ class JNLPBADataset(datasets.GeneratorBasedBuilder):
             distance_from_back += len(curr_token) + 1
             sentence_words.append(curr_token)
             if ner_tag.startswith("I-"):
-                tag_text = [curr_token]
-                tag_end = distance_from_back - (len(curr_token) + 1)
+                # Keep popping elements until the next B-* tag is hit
+                tag_tokens = [curr_token]
                 curr_tag = ner_tag[2:]
                 while not ner_tag.startswith("B-"):
                     curr_token = tokens.pop()
                     ner_tag = ner_tags.pop()
                     distance_from_back += len(curr_token) + 1
                     sentence_words.append(curr_token)
-                    tag_text.append(curr_token)
-                tag_text = " ".join(list(reversed(tag_text)))
-                tag_start = tag_end - len(tag_text)
+                    tag_tokens.append(curr_token)
+                tag_text = " ".join(list(reversed(tag_tokens)))
+                tag_start = distance_from_back
+                tag_end = tag_start - len(tag_text)
                 entity = {
                     "id": next(uid),
                     "type": curr_tag,
@@ -199,9 +200,9 @@ class JNLPBADataset(datasets.GeneratorBasedBuilder):
                 }
                 entities.append(entity)
             elif ner_tag.startswith("B-"):
-                tag_end = distance_from_back
                 curr_tag = ner_tag[2:]
-                tag_start = tag_end - len(curr_token)
+                tag_start = distance_from_back
+                tag_end = tag_start - len(curr_token)
                 entity = {
                     "id": next(uid),
                     "type": curr_tag,
@@ -214,8 +215,8 @@ class JNLPBADataset(datasets.GeneratorBasedBuilder):
                 continue
         passage = " ".join(list(reversed(sentence_words)))
         for entity in entities:
-            entity_start = len(passage) - entity["offsets"][0][1]
-            entity_end = len(passage) - entity["offsets"][0][0]
+            entity_start = len(passage) - entity["offsets"][0][0]
+            entity_end = len(passage) - entity["offsets"][0][1]
             entity["offsets"][0][1] = entity_end
             entity["offsets"][0][0] = entity_start
 
@@ -226,7 +227,7 @@ class JNLPBADataset(datasets.GeneratorBasedBuilder):
         document["passages"] = [
             {
                 "id": next(uid),
-                "type": None,
+                "type": "",
                 "text": [passage],
                 "offsets": [[0, len(passage)]],
             }
