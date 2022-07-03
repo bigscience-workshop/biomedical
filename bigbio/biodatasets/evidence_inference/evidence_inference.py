@@ -77,12 +77,17 @@ _URLS = {
     _DATASETNAME: "http://evidence-inference.ebm-nlp.com/v2.0.tar.gz",
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
+_SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 
 _SOURCE_VERSION = "2.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+QA_CHOICES = [
+    "significantly increased",
+    "no significant difference",
+    "significantly decreased",
+]
 
 class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
     f"""{_DESCRIPTION}"""
@@ -99,10 +104,10 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
             subset_id="evidence-inference",
         ),
         BigBioConfig(
-            name="evidence-inference_bigbio_te",
+            name="evidence-inference_bigbio_qa",
             version=BIGBIO_VERSION,
             description="evidence-inference BigBio schema",
-            schema="bigbio_te",
+            schema="bigbio_qa",
             subset_id="evidence-inference",
         ),
     ]
@@ -124,8 +129,8 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+        elif self.config.schema == "bigbio_qa":
+            features = schemas.qa_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -236,7 +241,7 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
                 uid += 1
                 yield key, feature_dict
 
-        elif self.config.schema == "bigbio_te":
+        elif self.config.schema == "bigbio_qa":
             for key, sample in prompts.iterrows():
                 pid = sample["PromptID"]
                 pmcid = sample["PMCID"]
@@ -248,18 +253,20 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
                     continue
 
                 evidence = extract_evidence(pmcid, start, end)
-
+                context = evidence
+                question = (
+                    f"Compared to {sample['Comparator']} "
+                    f"what was the result of {sample['Intervention']} on {sample['Outcome']}?"
+                )
                 feature_dict = {
                     "id": uid,
-                    "premise": "\t".join(
-                        [
-                            sample["Intervention"],
-                            sample["Comparator"],
-                            sample["Outcome"],
-                        ]
-                    ),
-                    "hypothesis": evidence,
-                    "label": label,
+                    "question_id": pid,
+                    "document_id": pmcid,
+                    "question": question,
+                    "type": "multiple_choice",
+                    "choices": QA_CHOICES,
+                    "context": context,
+                    "answer": [label],
                 }
 
                 uid += 1
