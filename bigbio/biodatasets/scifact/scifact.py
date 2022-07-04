@@ -24,7 +24,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks, BigBioValues
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
@@ -136,6 +136,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
+            # modified from
             # https://huggingface.co/datasets/scifact/blob/main/scifact.py#L50
 
             if self.config.name == "scifact_corpus_source":
@@ -157,7 +158,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
                             {
                                 "doc_id": Value("int32"),         # source doc_id for evidence
                                 "sentence_ids": [Value("int32")], # sentence ids from doc_id
-                                "label": Value("string"),         # rationale label
+                                "label": Value("string"),         # SUPPORT or CONTRADICT
                             },
                         ],
                         "cited_doc_ids": [Value("int32")],   # The claim's "cited documents".
