@@ -89,6 +89,31 @@ QA_CHOICES = [
     "significantly decreased",
 ]
 
+# Some examples are removed due to comments on the dataset's github page
+# https://github.com/jayded/evidence-inference/blob/master/annotations/README.md#caveat
+
+INCORRECT_PROMPT_IDS = set([
+    911, 912, 1262, 1261, 3044, 3248, 3111, 3620, 4308, 4490, 4491, 4324,
+    4325, 4492, 4824, 5000, 5001, 5002, 5046, 5047, 4948, 5639, 5710, 5752,
+    5775, 5782, 5841, 5843, 5861, 5862, 5863, 5964, 5965, 5966, 5975, 4807,
+    5776, 5777, 5778, 5779, 5780, 5781, 6034, 6065, 6066, 6666, 6667, 6668,
+    6669, 7040, 7042, 7944, 8590, 8605, 8606, 8639, 8640, 8745, 8747, 8749,
+    8877, 8878, 8593, 8631, 8635, 8884, 8886, 8773, 10032, 10035, 8876, 8875,
+    8885, 8917, 8921, 8118, 10885, 10886, 10887, 10888, 10889, 10890
+])
+
+QUESTIONABLE_PROMPT_IDS = set([
+    7811, 7812, 7813, 7814, 7815, 8197, 8198, 8199,
+    8200, 8201, 9429, 9430, 9431, 8536, 9432
+])
+
+SOMEWHAT_MALFORMED_PROMPT_IDS = set([
+    3514, 346, 5037, 4715, 8767, 9295, 9297, 8870, 9862
+])
+
+SKIP_PROMPT_IDS = INCORRECT_PROMPT_IDS | QUESTIONABLE_PROMPT_IDS | SOMEWHAT_MALFORMED_PROMPT_IDS
+
+
 class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
     f"""{_DESCRIPTION}"""
 
@@ -214,18 +239,24 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
             with open(p, "r") as f:
                 return f.read()[start:end]
 
-        if self.config.schema == "source":
-            for key, sample in prompts.iterrows():
-                pid = sample["PromptID"]
-                pmcid = sample["PMCID"]
-                label = lookup(annotations, pid, "Label")
-                start = lookup(evidences, pmcid, "Evidence Start")
-                end = lookup(evidences, pmcid, "Evidence End")
 
-                if label == -1:
-                    continue
+        for key, sample in prompts.iterrows():
 
-                evidence = extract_evidence(pmcid, start, end)
+            pid = sample["PromptID"]
+            pmcid = sample["PMCID"]
+            label = lookup(annotations, pid, "Label")
+            start = lookup(evidences, pmcid, "Evidence Start")
+            end = lookup(evidences, pmcid, "Evidence End")
+
+            if pid in SKIP_PROMPT_IDS:
+                continue
+
+            if label == -1:
+                continue
+
+            evidence = extract_evidence(pmcid, start, end)
+
+            if self.config.schema == "source":
 
                 feature_dict = {
                     "id": uid,
@@ -241,18 +272,8 @@ class EvidenceInferenceDataset(datasets.GeneratorBasedBuilder):
                 uid += 1
                 yield key, feature_dict
 
-        elif self.config.schema == "bigbio_qa":
-            for key, sample in prompts.iterrows():
-                pid = sample["PromptID"]
-                pmcid = sample["PMCID"]
-                label = lookup(annotations, pid, "Label")
-                start = lookup(evidences, pmcid, "Evidence Start")
-                end = lookup(evidences, pmcid, "Evidence End")
+            elif self.config.schema == "bigbio_qa":
 
-                if label == -1:
-                    continue
-
-                evidence = extract_evidence(pmcid, start, end)
                 context = evidence
                 question = (
                     f"Compared to {sample['Comparator']} "
