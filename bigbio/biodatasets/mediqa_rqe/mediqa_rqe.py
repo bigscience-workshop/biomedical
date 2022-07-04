@@ -57,7 +57,7 @@ _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip"
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
+_SUPPORTED_TASKS = [Tasks.TEXT_PAIRS_CLASSIFICATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -79,11 +79,11 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
         ),
         # BigBio Schema
         BigBioConfig(
-            name="mediqa_rqe_bigbio_te",
+            name="mediqa_rqe_bigbio_pairs",
             version=BIGBIO_VERSION,
             description="MEDIQA RQE BigBio schema",
-            schema="bigbio_te",
-            subset_id="mediqa_rqe_bigbio_te",
+            schema="bigbio_pairs",
+            subset_id="mediqa_rqe_bigbio_pairs",
         ),
     ]
 
@@ -99,8 +99,8 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
                     "faq": datasets.Value("string"),
                 }
             )
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+        elif self.config.schema == "bigbio_pairs":
+            features = schemas.pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -142,15 +142,16 @@ class MediqaRQEDataset(datasets.GeneratorBasedBuilder):
         for row in dom.iterfind("pair"):
             pid = row.attrib["pid"]
             value = row.attrib["value"]
-            chq = row.find("chq").text
-            faq = row.find("faq").text
+            chq = row.find("chq").text.strip()
+            faq = row.find("faq").text.strip()
 
             if self.config.schema == "source":
                 yield pid, {"pid": pid, "value": value, "chq": chq, "faq": faq}
-            elif self.config.schema == "bigbio_te":
+            elif self.config.schema == "bigbio_pairs":
                 yield pid, {
                     "id": pid,
-                    "premise": chq,
-                    "hypothesis": faq,
+                    "document_id": pid,
+                    "text_1": chq,
+                    "text_2": faq,
                     "label": value,
                 }
