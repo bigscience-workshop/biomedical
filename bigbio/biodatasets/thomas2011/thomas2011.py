@@ -183,8 +183,6 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             "rettype": "medline",
         }
         res = requests.get(url, params=params)
-        blank_line_count = 0
-        required_text_lines = []
         tree = ET.XML(res.text)
         article = tree.find("PubmedArticle").find("MedlineCitation").find("Article")
         article_title = article.find("ArticleTitle").text
@@ -196,7 +194,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                 abstract_parts.append(f"{label}: {abstract_part.text}")
             else:
                 abstract_parts.append(abstract_part.text)
-        return " ".join(abstract_parts)
+        return article_title, " ".join(abstract_parts)
 
     def _generate_examples(self, filepath: str) -> Tuple[int, Dict]:
 
@@ -243,7 +241,7 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     time.sleep(0.5)
                     curr_count = 0
                 elist = []
-                abstract_text = self.get_clean_pubmed_abstract(id_)
+                article_title, abstract_text = self.get_clean_pubmed_abstract(id_)
                 uid += 1
                 passage = {
                     "id": uid,
@@ -251,18 +249,23 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
                     "text": [abstract_text],
                     "offsets": [[0, len(abstract_text)]],
                 }
+
                 for row in df.loc[df.doc_id == id_].itertuples():
                     uid += 1
                     if row.protein_or_nucleotide_sequence_mutation == "PSM":
                         ent_type = "Protein Sequence Mutation"
                     else:
                         ent_type = "Nucleotide Sequence Mutation"
+                    tag_start, tag_end = int(row.off1), int(row.off2)
+                    if tag_start > len(article_title):
+                        tag_start -= 1
+                        tag_end -= 1
                     elist.append(
                         {
                             "id": str(uid),
                             "type": ent_type,
                             "text": [row.covered_text],
-                            "offsets": [[int(row.off1) - 1, int(row.off2) - 1]],
+                            "offsets": [[tag_start, tag_end]],
                             "normalized": [{"db_name": "dbSNP", "db_id": row.dbSNP_id}],
                         }
                     )
