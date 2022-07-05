@@ -19,6 +19,8 @@ from itertools import chain
 from typing import Dict, List, Tuple
 
 import datasets
+from datasets import Value
+import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
@@ -46,31 +48,32 @@ _CITATION = """\
 _DATASETNAME = "scifact"
 _DISPLAYNAME = "SciFact"
 
-_SOURCE_CORPUS_DESCRIPTION = """\
+
+_DESCRIPTION_BASE = """\
     SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    This config has abstracts and document ids.
+    """
+
+_SOURCE_CORPUS_DESCRIPTION = f"""\
+    {_DESCRIPTION_BASE} This config has abstracts and document ids.
     """
 
 _SOURCE_CLAIMS_DESCRIPTION = """\
-    SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    This config connects the claims to the evidence and doc ids.
+    {_DESCRIPTION_BASE} This config connects the claims to the evidence and doc ids.
     """
 
-_BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION = """\
-    SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    This task is the following: given a claim and an abstract, label that sentence with a rationale/not_rationale indicating if it is evidence (can be supporting or refuting). This corresponds to the second task outlined in Section 5 of the paper."
+_BIGBIO_PAIRS_RATIONALE_DESCRIPTION = """\
+    {_DESCRIPTION_BASE} This task is the following: given a claim and a text span composed of one or more sentences from an abstract, predict a label from ("rationale", "not_rationale") indicating if the span is evidence (can be supporting or refuting) for the claim. This roughly corresponds to the second task outlined in Section 5 of the paper."
     """
 
-_BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION = """\
-    SciFact is a dataset of 1.4K expert-written scientific claims paired with evidence-containing abstracts, and annotated with labels and rationales.
-    This task is the following: given a claim and several sentences of evidence (that either support or refute the claim), label that sentence with one of {REFUTES, SUPPORTS, NOINFO}. This corresponds to the third task outlined in Section 5 of the paper.
+_BIGBIO_PAIRS_LABELPREDICTION_DESCRIPTION = """\
+    {_DESCRIPTION_BASE} This task is the following: given a claim and a text span composed of one or more sentences from an abstract, predict a label from ("SUPPORT", "NOINFO", "CONTRADICT") indicating if the span supports, provides no info, or contradicts the claim. This roughly corresponds to the thrid task outlined in Section 5 of the paper.
     """
 
 _DESCRIPTION = {
     "scifact_corpus_source": _SOURCE_CORPUS_DESCRIPTION,
     "scifact_claims_source": _SOURCE_CLAIMS_DESCRIPTION,
-    "scifact_rationale_bigbio_te": _BIGBIO_ENTAILMENT_RATIONALE_DESCRIPTION,
-    "scifact_labelprediction_bigbio_te": _BIGBIO_ENTAILMENT_LABELPREDICTION_DESCRIPTION,
+    "scifact_rationale_bigbio_pairs": _BIGBIO_PAIRS_RATIONALE_DESCRIPTION,
+    "scifact_labelprediction_bigbio_pairs": _BIGBIO_PAIRS_LABELPREDICTION_DESCRIPTION,
 }
 
 _HOMEPAGE = "https://scifact.apps.allenai.org/"
@@ -82,7 +85,7 @@ _URLS = {
     _DATASETNAME: "https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz",
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
+_SUPPORTED_TASKS = [Tasks.TEXT_PAIRS_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
 
@@ -103,28 +106,28 @@ class SciFact(datasets.GeneratorBasedBuilder):
             version=SOURCE_VERSION,
             description="scifact source schema for the corpus config",
             schema="source",
-            subset_id="scifact_corpus",
+            subset_id="scifact_corpus_source",
         ),
         BigBioConfig(
             name="scifact_claims_source",
             version=SOURCE_VERSION,
             description="scifact source schema for the claims config",
             schema="source",
-            subset_id="scifact_claims",
+            subset_id="scifact_claims_source",
         ),
         BigBioConfig(
-            name="scifact_rationale_bigbio_te",
+            name="scifact_rationale_bigbio_pairs",
             version=BIGBIO_VERSION,
-            description="scifact BigBio text entailment schema for rationale task",
-            schema="bigbio_te",
-            subset_id="scifact_rationale",
+            description="scifact BigBio text pairs classification schema for rationale task",
+            schema="bigbio_pairs",
+            subset_id="scifact_rationale_pairs",
         ),
         BigBioConfig(
-            name="scifact_labelprediction_bigbio_te",
+            name="scifact_labelprediction_bigbio_pairs",
             version=BIGBIO_VERSION,
-            description="scifact BigBio text entailment schema for label prediction task",
-            schema="bigbio_te",
-            subset_id="scifact_labelprediction",
+            description="scifact BigBio text pairs classification schema for label prediction task",
+            schema="bigbio_pairs",
+            subset_id="scifact_labelprediction_pairs",
         ),
     ]
 
@@ -133,45 +136,42 @@ class SciFact(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
 
         if self.config.schema == "source":
+            # modified from
             # https://huggingface.co/datasets/scifact/blob/main/scifact.py#L50
 
-            if self.config.subset_id == "scifact_corpus":
+            if self.config.name == "scifact_corpus_source":
                 features = datasets.Features(
                     {
-                        "doc_id": datasets.Value("int32"),  # The document's S2ORC ID.
-                        "title": datasets.Value("string"),  # The title.
-                        "abstract": datasets.features.Sequence(
-                            datasets.Value("string")
-                        ),  # The abstract, written as a list of sentences.
-                        "structured": datasets.Value(
-                            "bool"
-                        ),  # Indicator for whether this is a structured abstract.
+                        "doc_id": Value("int32"),      # The document's S2ORC ID.
+                        "title": Value("string"),      # The title.
+                        "abstract": [Value("string")], # The abstract, written as a list of sentences.
+                        "structured": Value("bool"),   # Indicator for whether this is a structured abstract.
                     }
-                )
-            elif self.config.subset_id == "scifact_claims":
-                features = datasets.Features(
-                    {
-                        "id": datasets.Value("int32"),  # An integer claim ID.
-                        "claim": datasets.Value("string"),  # The text of the claim.
-                        "evidence_doc_id": datasets.Value("string"),
-                        "evidence_label": datasets.Value(
-                            "string"
-                        ),  # Label for the rationale.
-                        "evidence_sentences": datasets.features.Sequence(
-                            datasets.Value("int32")
-                        ),  # Rationale sentences.
-                        "cited_doc_ids": datasets.features.Sequence(
-                            datasets.Value("int32")
-                        ),  # The claim's "cited documents".
-                    }
-                )
-            else:
-                raise NotImplementedError(
-                    f"{self.config.subset_id} config not implemented"
                 )
 
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment.features
+            elif self.config.name == "scifact_claims_source":
+                features = datasets.Features(
+                    {
+                        "id": Value("int32"),  # An integer claim ID.
+                        "claim": Value("string"),  # The text of the claim.
+                        "evidences": [
+                            {
+                                "doc_id": Value("int32"),         # source doc_id for evidence
+                                "sentence_ids": [Value("int32")], # sentence ids from doc_id
+                                "label": Value("string"),         # SUPPORT or CONTRADICT
+                            },
+                        ],
+                        "cited_doc_ids": [Value("int32")],   # The claim's "cited documents".
+                    }
+                )
+
+            else:
+                raise NotImplementedError(
+                    f"{self.config.name} config not implemented"
+                )
+
+        elif self.config.schema == "bigbio_pairs":
+            features = schemas.pairs.features
 
         else:
             raise NotImplementedError(f"{self.config.schema} schema not implemented")
@@ -188,7 +188,7 @@ class SciFact(datasets.GeneratorBasedBuilder):
         urls = _URLS[_DATASETNAME]
         self.config.data_dir = dl_manager.download_and_extract(urls)
 
-        if self.config.subset_id == "scifact_corpus":
+        if self.config.name == "scifact_corpus_source":
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
@@ -201,229 +201,222 @@ class SciFact(datasets.GeneratorBasedBuilder):
                 ),
             ]
 
-        return [
-            datasets.SplitGenerator(
-                name=datasets.Split.TRAIN,
-                gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_train.jsonl"
-                    ),
-                    "split": "train",
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_test.jsonl"
-                    ),
-                    "split": "test",
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.VALIDATION,
-                gen_kwargs={
-                    "filepath": os.path.join(
-                        self.config.data_dir, "data", "claims_dev.jsonl"
-                    ),
-                    "split": "dev",
-                },
-            ),
-        ]
+        # the test split is only returned in source schema
+        # this is b/c it only has claims with no cited docs or evidence
+        # the bigbio implementation of this dataset requires
+        # cited docs or evidence to construct samples
+        elif self.config.name == "scifact_claims_source":
+            return [
+                datasets.SplitGenerator(
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={
+                        "filepath": os.path.join(
+                            self.config.data_dir, "data", "claims_train.jsonl"
+                        ),
+                        "split": "train",
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.VALIDATION,
+                    gen_kwargs={
+                        "filepath": os.path.join(
+                            self.config.data_dir, "data", "claims_dev.jsonl"
+                        ),
+                        "split": "dev",
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.TEST,
+                    gen_kwargs={
+                        "filepath": os.path.join(
+                            self.config.data_dir, "data", "claims_test.jsonl"
+                        ),
+                        "split": "test",
+                    },
+                ),
+            ]
+
+        elif self.config.name in [
+            "scifact_rationale_bigbio_pairs",
+            "scifact_labelprediction_bigbio_pairs",
+        ]:
+            return [
+                datasets.SplitGenerator(
+                    name=datasets.Split.TRAIN,
+                    gen_kwargs={
+                        "filepath": os.path.join(
+                            self.config.data_dir, "data", "claims_train.jsonl"
+                        ),
+                        "split": "train",
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.VALIDATION,
+                    gen_kwargs={
+                        "filepath": os.path.join(
+                            self.config.data_dir, "data", "claims_dev.jsonl"
+                        ),
+                        "split": "dev",
+                    },
+                ),
+            ]
+
 
     def _source_generate_examples(self, filepath, split) -> Tuple[str, Dict[str, str]]:
-        # https://huggingface.co/datasets/scifact/blob/main/scifact.py#L136
-        with open(filepath) as fp:
-            for id_, row in enumerate(fp.readlines()):
-                data = json.loads(row)
-                if self.config.subset_id == "scifact_corpus":
+
+        # here we just read corpus.jsonl and return the abstracts
+        if self.config.name == "scifact_corpus_source":
+            with open(filepath) as fp:
+                for id_, row in enumerate(fp.readlines()):
+                    data = json.loads(row)
                     yield id_, {
                         "doc_id": int(data["doc_id"]),
                         "title": data["title"],
                         "abstract": data["abstract"],
                         "structured": data["structured"],
                     }
-                elif self.config.subset_id == "scifact_claims":
-                    if split == "test":
-                        yield id_, {
-                            "id": data["id"],
-                            "claim": data["claim"],
-                            "evidence_doc_id": "",
-                            "evidence_label": "",
-                            "evidence_sentences": [],
-                            "cited_doc_ids": [],
-                        }
-                    else:
-                        evidences = data["evidence"]
-                        if evidences:
-                            for id1, doc_id in enumerate(evidences):
-                                for id2, evidence in enumerate(evidences[doc_id]):
-                                    yield str(id_) + "_" + str(id1) + "_" + str(id2), {
-                                        "id": data["id"],
-                                        "claim": data["claim"],
-                                        "evidence_doc_id": doc_id,
-                                        "evidence_label": evidence["label"],
-                                        "evidence_sentences": evidence["sentences"],
-                                        "cited_doc_ids": data.get("cited_doc_ids", []),
-                                    }
-                        else:
-                            yield id_, {
-                                "id": data["id"],
-                                "claim": data["claim"],
-                                "evidence_doc_id": "",
-                                "evidence_label": "",
-                                "evidence_sentences": [],
-                                "cited_doc_ids": data.get("cited_doc_ids", []),
+
+        # here we are reading one of claims_(train|dev|test).jsonl
+        elif self.config.name == "scifact_claims_source":
+
+            # claims_test.jsonl only has "id" and "claim" keys
+            # claims_train.jsonl and claims_dev.jsonl sometimes have evidence
+            with open(filepath) as fp:
+                for id_, row in enumerate(fp.readlines()):
+                    data = json.loads(row)
+                    evidences_dict = data.get("evidence", {})
+                    evidences_list = []
+                    for doc_id, sent_lbl_list in evidences_dict.items():
+                        for sent_lbl_dict in sent_lbl_list:
+                            evidence = {
+                                "doc_id": doc_id,
+                                "sentence_ids": sent_lbl_dict["sentences"],
+                                "label": sent_lbl_dict["label"],
                             }
+                            evidences_list.append(evidence)
 
-    def _bigbio_rationale_generate_examples(
-        self, filepath, split, corpus_id2text
-    ) -> Tuple[str, Dict[str, str]]:
-        """
-        Given a claim and some rationales, decide if the claim is supported or contradicted
-        """
-        with open(filepath) as fp:
-            # Loop through each line of the file
-            for line in fp.readlines():
-                line = json.loads(line)
-                claim = line["claim"]
-
-                # test split doesn't have hypothesis or label
-                if split == "test":
-                    yield line["id"], {
-                        "id": line["id"],
-                        "premise": claim,
-                        "hypothesis": "",
-                        "label": "",
+                    yield id_, {
+                        "id": data["id"],
+                        "claim": data["claim"],
+                        "evidences": evidences_list,
+                        "cited_doc_ids": data.get("cited_doc_ids", []),
                     }
-                    continue
 
-                evidence = line["evidence"]
-                line_id = str(line["id"])
-
-                # Loop through each doc that is cited
-                # Must take set because there are some with the same doc id multiple times
-                for cited_doc_id in list(set(line[("cited_doc_ids")])):
-                    rationale_sentence_ids = set()
-                    if str(cited_doc_id) in evidence:
-
-                        # this is a list of list of ints
-                        rationale_sentence_ids = [
-                            x["sentences"] for x in evidence[str(cited_doc_id)]
-                        ]
-                        rationale_sentence_ids = set(
-                            list(chain(*rationale_sentence_ids))
-                        )
-
-                    # Loop through each sentence in the cited doc
-
-                    for id3, sentence in enumerate(corpus_id2text[cited_doc_id]):
-                        label = (
-                            "rationale"
-                            if id3 in rationale_sentence_ids
-                            else "not_rationale"
-                        )
-
-                        # original line id, doc id, and sentence number
-                        unique_id = (
-                            f"{line_id.zfill(4)}_{cited_doc_id}_{str(id3).zfill(4)}"
-                        )
-
-                        yield unique_id, {
-                            "id": unique_id,
-                            "premise": claim,
-                            "hypothesis": sentence,
-                            "label": label,
-                        }
-
-    def _bigbio_labelprediction_generate_examples(
-        self, filepath, split, corpus_id2text
-    ) -> Tuple[str, Dict[str, str]]:
-        """
-        Given a claim and sentence, decide if that sentence supports, contradicts, or has no info about the claim.
-        """
-        with open(filepath) as fp:
-            # Loop through each line of the file
-            for line in fp.readlines():
-                line = json.loads(line)
-                claim = line["claim"]
-
-                # test split doesn't have hypothesis or label
-                if split == "test":
-                    yield line["id"], {
-                        "id": line["id"],
-                        "premise": claim,
-                        "hypothesis": "",
-                        "label": "",
-                    }
-                    continue
-
-                evidence = line["evidence"]
-                line_id = str(line["id"])
-
-                # Loop through each doc that is cited
-                # Must take set because there are some with the same doc id multiple times
-                for cited_doc_id in list(set(line[("cited_doc_ids")])):
-                    unique_id = f"{line_id.zfill(4)}_{cited_doc_id}"
-
-                    rationale_sentence_ids = set()
-                    if str(cited_doc_id) not in evidence:
-                        yield unique_id, {
-                            "id": unique_id,
-                            "premise": claim,
-                            "hypothesis": " ".join(corpus_id2text[cited_doc_id]),
-                            "label": "NOINFO",
-                        }
-                        continue
-
-                    # all the labels are the same in the list
-                    label = evidence[str(cited_doc_id)][0]["label"]
-
-                    # this is a list of list of ints
-                    rationale_sentence_ids = [
-                        x["sentences"] for x in evidence[str(cited_doc_id)]
-                    ]
-                    rationale_sentence_ids = list(chain(*rationale_sentence_ids))
-                    rationale_sentences = []
-                    for idx, sentence in enumerate(corpus_id2text[cited_doc_id]):
-                        if idx in rationale_sentence_ids:
-                            rationale_sentences.append(sentence)
-
-                    yield unique_id, {
-                        "id": unique_id,
-                        "premise": claim,
-                        "hypothesis": " ".join(rationale_sentences),
-                        "label": label,
-                    }
 
     def _bigbio_generate_examples(self, filepath, split) -> Tuple[str, Dict[str, str]]:
         """
-        This first converts the corpus into a dictionary with the abstracts as values and the doc id
-        as the key. Then it calls the appropriate _generate_examples function, return whatever is
-        yielded by that function.
+        Here we always create one sample per sentence group.
+        Any sentence group in an evidence attribute will have
+        a label in {"rationale"} for the rationale task or
+        in {"SUPPORT", "CONTRADICT"} for the labelprediction task.
+        All other sentences will have either a "not_rationale"
+        label or a "NOINFO" label depending on the task.
         """
-        corpus_id2text = {}
-        with open(
-            os.path.join(self.config.data_dir, "data", "corpus.jsonl")
-        ) as corpus_fp:
 
-            for line in corpus_fp.readlines():
-                line = json.loads(line)
-                corpus_id2text[line["doc_id"]] = line["abstract"]
+        # read corpus (one row per abstract)
+        corpus_file_path = os.path.join(self.config.data_dir, "data", "corpus.jsonl")
+        df_corpus = pd.read_json(corpus_file_path, lines=True)
 
-        if self.config.subset_id == "scifact_rationale":
-            return self._bigbio_rationale_generate_examples(
-                filepath, split, corpus_id2text
-            )
-        elif self.config.subset_id == "scifact_labelprediction":
-            return self._bigbio_labelprediction_generate_examples(
-                filepath, split, corpus_id2text
-            )
+        # create one row per sentence and create sentence index
+        df_sents = df_corpus.explode('abstract')
+        df_sents = df_sents.rename(columns={"abstract": "sentence"})
+        df_sents['sent_num'] = df_sents.groupby('doc_id').transform('cumcount')
+        df_sents['doc_sent_id'] = df_sents.apply(lambda x: f"{x['doc_id']}-{x['sent_num']}", axis=1)
+
+        # read claims
+        df_claims = pd.read_json(filepath, lines=True)
+
+
+        # join claims to corpus
+        for _, claim_row in df_claims.iterrows():
+
+            evidence = claim_row['evidence']
+            cited_doc_ids = set(claim_row['cited_doc_ids'])
+            evidence_doc_ids = set([int(doc_id) for doc_id in evidence.keys()])
+
+            # assert all evidence doc IDs are in cited_doc_ids
+            assert len(evidence_doc_ids - cited_doc_ids) == 0
+
+            # this will have all abstract sentences from cited docs
+            df_claim_sents = df_sents[df_sents['doc_id'].isin(cited_doc_ids)]
+
+            # create all sentence samples as NOINFO then fix
+            noinfo_samples = {}
+            for _, row in df_claim_sents.iterrows():
+                sample = {
+                    "claim": claim_row["claim"],
+                    "claim_id": claim_row["id"],
+                    "doc_id": row['doc_id'],
+                    "sentence_ids": (row['sent_num'],),
+                    "doc_sent_ids": (row['doc_sent_id'],),
+                    "span": row['sentence'].strip(),
+                    "label": "NOINFO",
+                }
+                noinfo_samples[sample["doc_sent_ids"]] = sample
+
+            # create evidence samples and remove from noinfo samples as we go
+            evidence_samples = []
+            for doc_id_str, sent_lbl_list in evidence.items():
+                doc_id = int(doc_id_str)
+
+                for sent_lbl_dict in sent_lbl_list:
+                    sent_ids = sent_lbl_dict['sentences']
+                    doc_sent_ids = [f"{doc_id}-{sent_id}" for sent_id in sent_ids]
+                    df_evi = df_claim_sents[df_claim_sents['doc_sent_id'].isin(doc_sent_ids)]
+
+                    sample = {
+                        "claim": claim_row["claim"],
+                        "claim_id": claim_row["id"],
+                        "doc_id": doc_id,
+                        "sentence_ids": tuple(sent_ids),
+                        "doc_sent_ids": tuple(doc_sent_ids),
+                        "span": " ".join([el.strip() for el in df_evi["sentence"].values]),
+                        "label": sent_lbl_dict["label"],
+                    }
+                    evidence_samples.append(sample)
+                    for doc_sent_id in doc_sent_ids:
+                        del noinfo_samples[(doc_sent_id,)]
+
+            # combine all sample and put back in sentence order
+            all_samples = evidence_samples + list(noinfo_samples.values())
+            all_samples = sorted(all_samples, key=lambda x: (x['doc_id'], x['sentence_ids'][0]))
+
+            # add a unique ID
+            for _id, sample in enumerate(all_samples):
+                sample["id"] = f"{_id}-{sample['claim_id']}-{sample['doc_id']}-{sample['sentence_ids'][0]}"
+
+            RATIONALE_LABEL_MAP = {
+                "SUPPORT": "rationale",
+                "CONTRADICT": "rationale",
+                "NOINFO": "not_rationale",
+            }
+
+            if self.config.name == "scifact_rationale_bigbio_pairs":
+                for sample in all_samples:
+                    yield sample['id'], {
+                        "id": sample["id"],
+                        "document_id": sample["doc_id"],
+                        "text_1": sample["claim"],
+                        "text_2": sample["span"],
+                        "label": RATIONALE_LABEL_MAP[sample['label']],
+                    }
+
+            elif self.config.name == "scifact_labelprediction_bigbio_pairs":
+                for sample in all_samples:
+                    yield sample['id'], {
+                        "id": sample["id"],
+                        "document_id": sample["doc_id"],
+                        "text_1": sample["claim"],
+                        "text_2": sample["span"],
+                        "label": sample['label'],
+                    }
 
     def _generate_examples(self, filepath, split) -> Tuple[int, dict]:
 
         if "source" in self.config.name:
-            return self._source_generate_examples(filepath, split)
+            for sample in self._source_generate_examples(filepath, split):
+                yield sample
 
         elif "bigbio" in self.config.name:
-            return self._bigbio_generate_examples(filepath, split)
+            for sample in self._bigbio_generate_examples(filepath, split):
+                yield sample
