@@ -183,14 +183,20 @@ class Thomas2011Dataset(datasets.GeneratorBasedBuilder):
             "rettype": "medline",
         }
         res = requests.get(url, params=params)
+        blank_line_count = 0
+        required_text_lines = []
         tree = ET.XML(res.text)
         article = tree.find("PubmedArticle").find("MedlineCitation").find("Article")
-        article_title = article.find("ArticleTitle").text + " "
-        abstract_parts = [article_title]
+        article_title = article.find("ArticleTitle").text
+        abstract_parts = [f"{article_title}"]
         article_abstract = article.find("Abstract").findall("AbstractText")
         for abstract_part in article_abstract:
-            abstract_parts.append(abstract_part.text)
-        return "".join(abstract_parts)
+            label = abstract_part.attrib.get("Label", "")
+            if label:
+                abstract_parts.append(f"{label}: {abstract_part.text}")
+            else:
+                abstract_parts.append(abstract_part.text)
+        return " ".join(abstract_parts)
 
     def _generate_examples(self, filepath: str) -> Tuple[int, Dict]:
 

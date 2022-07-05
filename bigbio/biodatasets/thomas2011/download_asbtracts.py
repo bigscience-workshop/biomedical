@@ -2,7 +2,10 @@ import requests
 import os
 import xml.etree.ElementTree as ET
 
-for id in ["17563728", "17548681", "17566096"]:
+for id in [
+    "16338218",
+    "15645182",
+]:
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
     params = {
         "db": "pubmed",
@@ -16,12 +19,13 @@ for id in ["17563728", "17548681", "17566096"]:
     tree = ET.XML(res.text)
     article = tree.find("PubmedArticle").find("MedlineCitation").find("Article")
     article_title = article.find("ArticleTitle").text
-    abstract_parts = [article_title]
+    abstract_parts = [f"{article_title}"]
     article_abstract = article.find("Abstract").findall("AbstractText")
     for abstract_part in article_abstract:
-        print(abstract_part.attrib)
-        abstract_parts.append(abstract_part.text)
-    print(
-        f'PMID: {id}\nTitle: {abstract_parts[0]}\nAbstract: {"".join(abstract_parts[1:])}'
-    )
+        label = abstract_part.attrib.get("Label", "")
+        if label:
+            abstract_parts.append(f"{label}:{abstract_part.text}")
+        else:
+            abstract_parts.append(abstract_part.text)
+    print(f'PMID: {id}\n{"".join(abstract_parts)}')
     print("|=" * 45)
