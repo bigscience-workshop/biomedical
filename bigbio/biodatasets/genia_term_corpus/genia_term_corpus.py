@@ -29,6 +29,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -74,6 +75,7 @@ series = {JNLPBA '04}
 """
 
 _DATASETNAME = "genia_term_corpus"
+_DISPLAYNAME = "GENIA Term Corpus"
 
 _DESCRIPTION = """\
 The identification of linguistic expressions referring to entities of interest in molecular biology such as proteins,
@@ -84,7 +86,7 @@ identification of  physical biological entities as well as other important terms
 
 _HOMEPAGE = "http://www.geniaproject.org/genia-corpus/term-corpus"
 
-_LICENSE = """GENIA Project License for Annotated Corpora"""
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLS = {
     _DATASETNAME: "http://www.nactem.ac.uk/GENIA/current/GENIA-corpus/Term/GENIAcorpus3.02.tgz",
@@ -161,7 +163,7 @@ class GeniaTermCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -266,7 +268,9 @@ def parse_genia_to_bigbio_passage(passage, uid, type="", offset=0):
 def generate_bigbio_passages(example, uid):
     offset = 0
     for type in ["title", "abstract"]:
-        passage, offset = parse_genia_to_bigbio_passage(example[type], uid, type=type, offset=offset)
+        passage, offset = parse_genia_to_bigbio_passage(
+            example[type], uid, type=type, offset=offset
+        )
         yield passage
 
 
@@ -297,10 +301,14 @@ def generate_bigbio_entities(example, uid):
                     entity,
                     uid,
                     text=sentence["text"],
-                    relative_offset=relative_offsets.get((entity["text"], entity["lex"], entity["sem"]), 0),
+                    relative_offset=relative_offsets.get(
+                        (entity["text"], entity["lex"], entity["sem"]), 0
+                    ),
                     offset=sentence_offset,
                 )
                 if bigbio_entity:
-                    relative_offsets[(entity["text"], entity["lex"], entity["sem"])] = new_relative_offset
+                    relative_offsets[
+                        (entity["text"], entity["lex"], entity["sem"])
+                    ] = new_relative_offset
                     yield bigbio_entity
             sentence_offset += len(sentence["text"]) + 1

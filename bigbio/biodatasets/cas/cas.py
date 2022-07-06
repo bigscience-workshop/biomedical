@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 
 import datasets
@@ -7,38 +21,68 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.FR]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @inproceedings{grabar-etal-2018-cas,
-    title = "{CAS}: {F}rench Corpus with Clinical Cases",
-    author = "Grabar, Natalia  and
-      Claveau, Vincent  and
-      Dalloux, Cl{\'e}ment",
-    booktitle = "Proceedings of the Ninth International Workshop on Health Text Mining and Information Analysis",
-    month = oct,
-    year = "2018",
-    address = "Brussels, Belgium",
-    publisher = "Association for Computational Linguistics",
-    url = "https://aclanthology.org/W18-5614",
-    doi = "10.18653/v1/W18-5614",
-    pages = "122--128",
-    abstract = "Textual corpora are extremely important for various NLP applications as they provide information necessary for creating, setting and testing these applications and the corresponding tools. They are also crucial for designing reliable methods and reproducible results. Yet, in some areas, such as the medical area, due to confidentiality or to ethical reasons, it is complicated and even impossible to access textual data representative of those produced in these areas. We propose the CAS corpus built with clinical cases, such as they are reported in the published scientific literature in French. We describe this corpus, currently containing over 397,000 word occurrences, and the existing linguistic and semantic annotations.",
+  title        = {{CAS}: {F}rench Corpus with Clinical Cases},
+  author       = {Grabar, Natalia  and Claveau, Vincent  and Dalloux, Cl{\'e}ment},
+  year         = 2018,
+  month        = oct,
+  booktitle    = {
+    Proceedings of the Ninth International Workshop on Health Text Mining and
+    Information Analysis
+  },
+  publisher    = {Association for Computational Linguistics},
+  address      = {Brussels, Belgium},
+  pages        = {122--128},
+  doi          = {10.18653/v1/W18-5614},
+  url          = {https://aclanthology.org/W18-5614},
+  abstract     = {
+    Textual corpora are extremely important for various NLP applications as
+    they provide information necessary for creating, setting and testing these
+    applications and the corresponding tools. They are also crucial for
+    designing reliable methods and reproducible results. Yet, in some areas,
+    such as the medical area, due to confidentiality or to ethical reasons, it
+    is complicated and even impossible to access textual data representative of
+    those produced in these areas. We propose the CAS corpus built with
+    clinical cases, such as they are reported in the published scientific
+    literature in French. We describe this corpus, currently containing over
+    397,000 word occurrences, and the existing linguistic and semantic
+    annotations.
+  }
 }"""
 
-_DatasetName = "cas"
+_DATASETNAME = "cas"
+_DISPLAYNAME = "CAS"
 
 _DESCRIPTION = """\
-We manually annotated two corpora from the biomedical field. The ESSAI corpus contains clinical trial protocols in French. They were mainly obtained from the National Cancer Institute The typical protocol consists of two parts: the summary of the trial, which indicates the purpose of the trial and the methods applied; and a detailed description of the trial with the inclusion and exclusion criteria. The CAS corpus contains clinical cases published in scientific literature and training material. They are published in different journals from French-speaking countries (France, Belgium, Switzerland, Canada, African countries, tropical countries) and are related to various medical specialties (cardiology, urology, oncology, obstetrics, pulmonology, gastro-enterology). The purpose of clinical cases is to describe clinical situations of patients. Hence, their content is close to the content of clinical narratives (description of diagnoses, treatments or procedures, evolution, family history, expected audience, etc.). In clinical cases, the negation is frequently used for describing the patient signs, symptoms, and diagnosis. Speculation is present as well but less frequently.
+We manually annotated two corpora from the biomedical field. The ESSAI corpus \
+contains clinical trial protocols in French. They were mainly obtained from the \
+National Cancer Institute The typical protocol consists of two parts: the \
+summary of the trial, which indicates the purpose of the trial and the methods \
+applied; and a detailed description of the trial with the inclusion and \
+exclusion criteria. The CAS corpus contains clinical cases published in \
+scientific literature and training material. They are published in different \
+journals from French-speaking countries (France, Belgium, Switzerland, Canada, \
+African countries, tropical countries) and are related to various medical \
+specialties (cardiology, urology, oncology, obstetrics, pulmonology, \
+gastro-enterology). The purpose of clinical cases is to describe clinical \
+situations of patients. Hence, their content is close to the content of clinical \
+narratives (description of diagnoses, treatments or procedures, evolution, \
+family history, expected audience, etc.). In clinical cases, the negation is \
+frequently used for describing the patient signs, symptoms, and diagnosis. \
+Speculation is present as well but less frequently.
 
 This version only contain the annotated CAS corpus
 """
 
 _HOMEPAGE = "https://clementdalloux.fr/?page_id=28"
 
-_LICENSE = "DUA"
+_LICENSE = Licenses.DUA
 
 _URLS = {
     "cas_source": "",
@@ -104,7 +148,7 @@ class CAS(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

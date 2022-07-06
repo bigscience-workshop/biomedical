@@ -24,6 +24,7 @@ from bioc import biocxml
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.EN]
@@ -47,6 +48,7 @@ url={https://doi.org/10.1155/2015/918710}
 """
 
 _DATASETNAME = "gnormplus"
+_DISPLAYNAME = "GNormPlus"
 
 _DESCRIPTION = """\
 We re-annotated two existing gene corpora. The BioCreative II GN corpus is a widely used data set for benchmarking GN
@@ -60,7 +62,7 @@ PubTator was used as our annotation tool along with BioC formats.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
@@ -109,7 +111,10 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                         {
                             "text": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "location": {"offset": datasets.Value("int64"), "length": datasets.Value("int64")},
+                            "location": {
+                                "offset": datasets.Value("int64"),
+                                "length": datasets.Value("int64"),
+                            },
                         }
                     ],
                     "entities": [
@@ -138,7 +143,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -152,13 +157,17 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "GNormPlusCorpus/BC2GNtrain.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "GNormPlusCorpus/BC2GNtrain.BioC.xml"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "GNormPlusCorpus/BC2GNtest.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "GNormPlusCorpus/BC2GNtest.BioC.xml"
+                    ),
                 },
             ),
         ]
@@ -202,12 +211,17 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                             {
                                 "text": passage.text,
                                 "type": passage.infons["type"],
-                                "location": {"offset": passage.offset, "length": passage.total_span.length},
+                                "location": {
+                                    "offset": passage.offset,
+                                    "length": passage.total_span.length,
+                                },
                             }
                             for passage in document.passages
                         ],
                         "entities": [
-                            self._parse_bioc_entity(next(uid), entity, insert_tax_id=True)
+                            self._parse_bioc_entity(
+                                next(uid), entity, insert_tax_id=True
+                            )
                             for passage in document.passages
                             for entity in passage.annotations
                         ],

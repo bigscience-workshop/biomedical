@@ -22,6 +22,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -41,13 +42,17 @@ _CITATION = """\
 """
 
 _DATASETNAME = "distemist"
+_DISPLAYNAME = "DisTEMIST"
+
 _DESCRIPTION = """\
 The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotations linked with Snomed-CT concepts.
 All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.
 """
 
 _HOMEPAGE = "https://zenodo.org/record/6458455"
-_LICENSE = "Creative Commons Attribution 4.0 International"
+
+_LICENSE = Licenses.CC_BY_4p0
+
 _URLS = {
     _DATASETNAME: "https://zenodo.org/record/6458455/files/distemist.zip?download=1",
 }
@@ -124,7 +129,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

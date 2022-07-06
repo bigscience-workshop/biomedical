@@ -41,31 +41,23 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
 _CITATION = """\
-@article{,
-    author={Jimeno-Yepes, Antonio J.
-    and McInnes, Bridget T.
-    and Aronson, Alan R.},
-    title={Exploiting MeSH indexing in MEDLINE to generate a data set for word sense disambiguation},
-    journal={BMC Bioinformatics},
-    year={2011},
-    month={Jun},
-    day={02},
-    volume={12},
-    number={1},
-    pages={223},
-    issn={1471-2105},
-    doi={10.1186/1471-2105-12-223},
-    url={https://doi.org/10.1186/1471-2105-12-223}
+@article{jimeno2011exploiting,
+  title={Exploiting MeSH indexing in MEDLINE to generate a data set for word sense disambiguation},
+  author={Jimeno-Yepes, Antonio J and McInnes, Bridget T and Aronson, Alan R},
+  journal={BMC bioinformatics},
+  volume={12},
+  number={1},
+  pages={1--14},
+  year={2011},
+  publisher={BioMed Central}
 }
-
 """
-
-_DATASETNAME = "msh_wsd"
 
 _DESCRIPTION = """\
 Evaluation of Word Sense Disambiguation methods (WSD) in the biomedical domain is difficult because the available
@@ -78,9 +70,12 @@ For each ambiguous term/abbreviation, the data set contains a maximum of 100 ins
 MEDLINE; totaling 37,888 ambiguity cases in 37,090 MEDLINE citations.
 """
 
+_DATASETNAME = "msh_wsd"
+_DISPLAYNAME = "MSH WSD"
+
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/ii/areas/WSD/collaboration.html"
 
-_LICENSE = "DUA (UMLS)"
+_LICENSE = Licenses.UMLS_LICENSE
 
 _URLS = {_DATASETNAME: ""}
 
@@ -154,7 +149,7 @@ class MshWsdDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

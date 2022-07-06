@@ -24,12 +24,14 @@ in life sciences.
 """
 
 import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -44,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scai_disease"
+_DISPLAYNAME = "SCAI Disease"
 
 _DESCRIPTION = """\
 SCAI Disease is a dataset annotated in 2010 with mentions of diseases and
@@ -55,7 +58,7 @@ in life sciences.
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/corpus-for-disease-names-and-adverse-effects.html"
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/Disease-ae-corpus.iob",
@@ -126,7 +129,7 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -239,7 +242,7 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
                 {
                     "offsets": [token_start, token_end],
                     "text": token_text,
-                    "tag": token_tag
+                    "tag": token_tag,
                 }
             )
             if entity_text != "":
@@ -247,7 +250,7 @@ class ScaiDiseaseDataset(datasets.GeneratorBasedBuilder):
                     {
                         "offsets": [token_start, token_start + len(entity_text)],
                         "text": entity_text,
-                        "type": token_tag[2:]
+                        "type": token_tag[2:],
                     }
                 )
 

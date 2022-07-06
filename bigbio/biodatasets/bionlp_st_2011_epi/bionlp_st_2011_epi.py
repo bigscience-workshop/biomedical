@@ -22,8 +22,11 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2011_epi"
+_DISPLAYNAME = "BioNLP 2011 EPI"
+
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
@@ -54,7 +57,7 @@ of BioNLP Shared Task 2011.
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2011-epi"
 
-_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC-BY-3.0"
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2011-epi/archive/refs/heads/master.zip",
@@ -185,7 +188,7 @@ class bionlp_st_2011_epi(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
+import os
 
 import datasets
 
 from bigbio.utils import schemas
-from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.configs import BigBioConfig
+from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -68,11 +69,12 @@ pairs of drugs. The correct answer has to be inferred by combining
 information from a chain of reactions of drugs and proteins.
 """
 
-_DATASETNAME = "MedHop"
+_DATASETNAME = "medhop"
+_DISPLAYNAME = "MedHop"
 
 _HOMEPAGE = "http://qangaroo.cs.ucl.ac.uk/"
 
-_LICENSE = "CC BY-SA 3.0"
+_LICENSE = Licenses.CC_BY_SA_3p0
 
 _BASE_GDRIVE = "https://drive.google.com/uc?export=download&confirm=yTib&id="
 
@@ -134,7 +136,7 @@ class MedHopDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

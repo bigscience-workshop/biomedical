@@ -52,6 +52,7 @@ import pandas as pd
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -84,6 +85,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "psytar"
+_DISPLAYNAME = "PsyTAR"
 
 _DESCRIPTION = """\
 The "Psychiatric Treatment Adverse Reactions" (PsyTAR) dataset contains 891 drugs
@@ -99,7 +101,7 @@ SSIs and DIs)
 
 _HOMEPAGE = "https://www.askapatient.com/research/pharmacovigilance/corpus-ades-psychiatric-medications.asp"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.TEXT_CLASSIFICATION]
 
@@ -209,7 +211,7 @@ class PsyTARDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

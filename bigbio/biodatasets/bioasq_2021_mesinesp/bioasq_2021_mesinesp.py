@@ -12,35 +12,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 The main aim of MESINESP2 is to promote the development of practically relevant
-semantic indexing tools for biomedical content in non-English language.
-We have generated a manually annotated corpus, where domain experts have
-labeled a set of scientific literature, clinical trials, and patent abstracts.
-All the documents were labeled with DeCS descriptors, which is a structured controlled
-vocabulary created by BIREME to index scientific publications on BvSalud, the largest
-database of scientific documents in Spanish, which hosts records from the databases
-LILACS, MEDLINE, IBECS, among others.
+semantic indexing tools for biomedical content in non-English language. We have
+generated a manually annotated corpus, where domain experts have labeled a set
+of scientific literature, clinical trials, and patent abstracts. All the
+documents were labeled with DeCS descriptors, which is a structured controlled
+vocabulary created by BIREME to index scientific publications on BvSalud, the
+largest database of scientific documents in Spanish, which hosts records from
+the databases LILACS, MEDLINE, IBECS, among others.
 
-MESINESP track at BioASQ9 explores the efficiency of systems for assigning
-DeCS to different types of biomedical documents. To that purpose, we have
-divided the task into three subtracks depending on the document type. Then, for
-each one we generated an annotated corpus which was provided to participating teams:
+MESINESP track at BioASQ9 explores the efficiency of systems for assigning DeCS
+to different types of biomedical documents. To that purpose, we have divided the
+task into three subtracks depending on the document type. Then, for each one we
+generated an annotated corpus which was provided to participating teams:
 
-[Subtrack 1 corpus] MESINESP-L – Scientific Literature: It contains all
-Spanish records from LILACS and IBECS databases at the Virtual Health Library
-(VHL) with non-empty abstract written in Spanish.
-[Subtrack 2 corpus] MESINESP-T- Clinical Trials contains records from Registro
-Español de Estudios Clínicos (REEC). REEC doesn't provide documents with the
-structure title/abstract needed in BioASQ, for that reason we have built
-artificial abstracts based on the content available in the data crawled using the REEC API.
-[Subtrack 3 corpus] MESINESP-P – Patents: This corpus includes patents in
-Spanish extracted from Google Patents which have the IPC code “A61P” and “A61K31”.
-In addition, we also provide a set of complementary data such as: the DeCS
-terminology file, a silver standard with the participants' predictions to the task
-background set and the entities of medications, diseases, symptoms and medical
-procedures extracted from the BSC NERs documents.
+- [Subtrack 1 corpus] MESINESP-L – Scientific Literature: It contains all
+  Spanish records from LILACS and IBECS databases at the Virtual Health Library
+  (VHL) with non-empty abstract written in Spanish.
+- [Subtrack 2 corpus] MESINESP-T- Clinical Trials contains records from Registro
+  Español de Estudios Clínicos (REEC). REEC doesn't provide documents with the
+  structure title/abstract needed in BioASQ, for that reason we have built
+  artificial abstracts based on the content available in the data crawled using
+  the REEC API.
+- [Subtrack 3 corpus] MESINESP-P – Patents: This corpus includes patents in
+  Spanish extracted from Google Patents which have the IPC code “A61P” and
+  “A61K31”. In addition, we also provide a set of complementary data such as:
+  the DeCS terminology file, a silver standard with the participants' predictions
+  to the task background set and the entities of medications, diseases, symptoms
+  and medical procedures extracted from the BSC NERs documents.
 """
 
 import json
@@ -52,6 +52,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
 _PUBMED = False
@@ -74,42 +75,42 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bioasq_2021_mesinesp"
+_DISPLAYNAME = "MESINESP 2021"
 
+_DESCRIPTION = """\
+The main aim of MESINESP2 is to promote the development of practically relevant \
+semantic indexing tools for biomedical content in non-English language. We have \
+generated a manually annotated corpus, where domain experts have labeled a set \
+of scientific literature, clinical trials, and patent abstracts. All the \
+documents were labeled with DeCS descriptors, which is a structured controlled \
+vocabulary created by BIREME to index scientific publications on BvSalud, the \
+largest database of scientific documents in Spanish, which hosts records from \
+the databases LILACS, MEDLINE, IBECS, among others.
 
-_DESCRIPTION = """
-The main aim of MESINESP2 is to promote the development of practically relevant
-semantic indexing tools for biomedical content in non-English language.
-We have generated a manually annotated corpus, where domain experts have
-labeled a set of scientific literature, clinical trials, and patent abstracts.
-All the documents were labeled with DeCS descriptors, which is a structured controlled
-vocabulary created by BIREME to index scientific publications on BvSalud, the largest
-database of scientific documents in Spanish, which hosts records from the databases
-LILACS, MEDLINE, IBECS, among others.
+MESINESP track at BioASQ9 explores the efficiency of systems for assigning DeCS \
+to different types of biomedical documents. To that purpose, we have divided the \
+task into three subtracks depending on the document type. Then, for each one we \
+generated an annotated corpus which was provided to participating teams:
 
-MESINESP track at BioASQ9 explores the efficiency of systems for assigning
-DeCS to different types of biomedical documents. To that purpose, we have
-divided the task into three subtracks depending on the document type. Then, for
-each one we generated an annotated corpus which was provided to participating teams:
-
-[Subtrack 1 corpus] MESINESP-L – Scientific Literature: It contains all
-Spanish records from LILACS and IBECS databases at the Virtual Health Library
-(VHL) with non-empty abstract written in Spanish.
-[Subtrack 2 corpus] MESINESP-T- Clinical Trials contains records from Registro
-Español de Estudios Clínicos (REEC). REEC doesn't provide documents with the
-structure title/abstract needed in BioASQ, for that reason we have built
-artificial abstracts based on the content available in the data crawled using the REEC API.
-[Subtrack 3 corpus] MESINESP-P – Patents: This corpus includes patents in
-Spanish extracted from Google Patents which have the IPC code “A61P” and “A61K31”.
-In addition, we also provide a set of complementary data such as: the DeCS
-terminology file, a silver standard with the participants' predictions to the task
-background set and the entities of medications, diseases, symptoms and medical
-procedures extracted from the BSC NERs documents.
+- [Subtrack 1 corpus] MESINESP-L – Scientific Literature: It contains all \
+  Spanish records from LILACS and IBECS databases at the Virtual Health Library \
+  (VHL) with non-empty abstract written in Spanish.
+- [Subtrack 2 corpus] MESINESP-T- Clinical Trials contains records from Registro \
+  Español de Estudios Clínicos (REEC). REEC doesn't provide documents with the \
+  structure title/abstract needed in BioASQ, for that reason we have built \
+  artificial abstracts based on the content available in the data crawled using \
+  the REEC API.
+- [Subtrack 3 corpus] MESINESP-P – Patents: This corpus includes patents in \
+  Spanish extracted from Google Patents which have the IPC code “A61P” and \
+  “A61K31”. In addition, we also provide a set of complementary data such as: \
+  the DeCS terminology file, a silver standard with the participants' predictions \
+  to the task background set and the entities of medications, diseases, symptoms \
+  and medical procedures extracted from the BSC NERs documents.
 """
 
 _HOMEPAGE = "https://zenodo.org/record/5602914#.YhSXJ5PMKWt"
 
-
-_LICENSE = "CC-BY-4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: {
@@ -119,17 +120,17 @@ _URLS = {
     },
 }
 
-
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.6"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
 class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
-    """A dataset to promote the development of practically relevant
-    semantic indexing tools for biomedical content in non-English language."""
+    """\
+    A dataset to promote the development of practically relevant
+    semantic indexing tools for biomedical content in non-English language.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -216,7 +217,7 @@ class Bioasq2021MesinespDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

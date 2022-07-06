@@ -64,12 +64,13 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.ZH, Lang.JA]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{wakamiya2017overview,
   author    = {Shoko Wakamiya, Mizuki Morita, Yoshinobu Kano, Tomoko Ohkuma and Eiji Aramaki},
   title     = {Overview of the NTCIR-13 MedWeb Task},
   journal   = {Proceedings of the 13th NTCIR Conference on Evaluation of Information Access Technologies (NTCIR-13)},
@@ -81,6 +82,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ntcir_13_medweb"
+_DISPLAYNAME = "NTCIR-13 MedWeb"
 
 _DESCRIPTION = """\
 NTCIR-13 MedWeb (Medical Natural Language Processing for Web Document) task requires
@@ -104,7 +106,7 @@ these three languages.
 
 _HOMEPAGE = "http://research.nii.ac.jp/ntcir/permission/ntcir-13/perm-en-MedWeb.html"
 
-_LICENSE = "Creative Commons Attribution 4.0 International License"
+_LICENSE = Licenses.CC_BY_4p0
 
 # NOTE: Data can only be obtained (locally) by first filling out form to provide
 # information about usage context under this link: http://www.nii.ac.jp/dsc/idr/en/ntcir/ntcir.html
@@ -223,7 +225,7 @@ class NTCIR13MedWebDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

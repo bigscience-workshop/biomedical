@@ -66,15 +66,17 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
+_DISPLAYNAME = "n2c2 2006 De-identification"
 
 # https://academic.oup.com/jamia/article/14/5/550/720189
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2007evaluating,
     author = {
         Uzuner, Özlem and
         Luo, Yuan and
@@ -113,7 +115,7 @@ tags is preserved  in the source format
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -164,7 +166,7 @@ class N2C22006DeidDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

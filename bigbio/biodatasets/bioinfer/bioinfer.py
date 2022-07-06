@@ -14,7 +14,13 @@
 # limitations under the License.
 
 """
-The authors present BioInfer (Bio Information Extraction Resource), a new public resource providing an annotated corpus of biomedical English. We describe an annotation scheme capturing named entities and their relationships along with a dependency analysis of sentence syntax. We further present ontologies defining the types of entities and relationships annotated in the corpus. Currently, the corpus contains 1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, as well as syntactic dependencies.
+The authors present BioInfer (Bio Information Extraction Resource), a new public
+resource providing an annotated corpus of biomedical English. We describe an
+annotation scheme capturing named entities and their relationships along with a
+dependency analysis of sentence syntax. We further present ontologies defining
+the types of entities and relationships annotated in the corpus. Currently, the
+corpus contains 1100 sentences from abstracts of biomedical research articles
+annotated for relationships, named entities, as well as syntactic dependencies.
 """
 
 import os
@@ -26,35 +32,41 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{pyysalo2007bioinfer,
-  title={BioInfer: a corpus for information extraction in the biomedical domain},
-  author={Pyysalo, Sampo and Ginter, Filip and Heimonen, Juho and Bj{\"o}rne, Jari and Boberg, Jorma and J{\"a}rvinen, Jouni and Salakoski, Tapio},
-  journal={BMC bioinformatics},
-  volume={8},
-  number={1},
-  pages={1--24},
-  year={2007},
-  publisher={BioMed Central}
+  title        = {BioInfer: a corpus for information extraction in the biomedical domain},
+  author       = {
+    Pyysalo, Sampo and Ginter, Filip and Heimonen, Juho and Bj{\"o}rne, Jari
+    and Boberg, Jorma and J{\"a}rvinen, Jouni and Salakoski, Tapio
+  },
+  year         = 2007,
+  journal      = {BMC bioinformatics},
+  publisher    = {BioMed Central},
+  volume       = 8,
+  number       = 1,
+  pages        = {1--24}
 }
 """
 
 _DATASETNAME = "bioinfer"
+_DISPLAYNAME = "BioInfer"
 
 _DESCRIPTION = """\
-A corpus targeted at protein, gene, and RNA relationships which serves as a resource for the development of 
-information extraction systems and their components such as parsers and domain analyzers. Currently, the corpus 
-contains 1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, 
-as well as syntactic dependencies.
+A corpus targeted at protein, gene, and RNA relationships which serves as a
+resource for the development of information extraction systems and their
+components such as parsers and domain analyzers. Currently, the corpus contains
+1100 sentences from abstracts of biomedical research articles annotated for
+relationships, named entities, as well as syntactic dependencies.
 """
 
 _HOMEPAGE = "https://github.com/metalrt/ppi-dataset"
 
-_LICENSE = "Creative Commons Attribution 2.0 International (CC BY 2.0)"
+_LICENSE = Licenses.CC_BY_2p0
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/archive/refs/heads/master.zip",
@@ -67,7 +79,10 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class BioinferDataset(datasets.GeneratorBasedBuilder):
-    """1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, as well as syntactic dependencies."""
+    """
+    1100 sentences from abstracts of biomedical research articles annotated
+    for relationships, named entities, as well as syntactic dependencies.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -136,7 +151,7 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -148,14 +163,18 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "ppi-dataset-master/csv_output/BioInfer-train.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "ppi-dataset-master/csv_output/BioInfer-train.xml"
+                    ),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "ppi-dataset-master/csv_output/BioInfer-test.xml"),
+                    "filepath": os.path.join(
+                        data_dir, "ppi-dataset-master/csv_output/BioInfer-test.xml"
+                    ),
                     "split": "test",
                 },
             ),
@@ -204,7 +223,10 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _add_entity(entity):
-        offsets = [[int(o) for o in offset.split("-")] for offset in entity.attrib["charOffset"].split(",")]
+        offsets = [
+            [int(o) for o in offset.split("-")]
+            for offset in entity.attrib["charOffset"].split(",")
+        ]
         # For multiple offsets, split entity text accordingly
         if len(offsets) > 1:
             text = []
@@ -213,7 +235,9 @@ class BioinferDataset(datasets.GeneratorBasedBuilder):
                 chunk_len = end - start
                 text.append(entity.attrib["text"][i : chunk_len + i])
                 i += chunk_len
-                while i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " ":
+                while (
+                    i < len(entity.attrib["text"]) and entity.attrib["text"][i] == " "
+                ):
                     i += 1
         else:
             text = [entity.attrib["text"]]

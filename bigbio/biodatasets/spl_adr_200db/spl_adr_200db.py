@@ -65,12 +65,13 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{demner2018dataset,
   author    = {Demner-Fushman, Dina and Shooshan, Sonya and Rodriguez, Laritza and Aronson,
                Alan and Lang, Francois and Rogers, Willie and Roberts, Kirk and Tonning, Joseph},
   title     = {A dataset of 200 structured product labels annotated for adverse drug reactions},
@@ -87,6 +88,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "spl_adr_200db"
+_DISPLAYNAME = "SPL ADR"
 
 _DESCRIPTION = """\
 The United States Food and Drug Administration (FDA) partnered with the National Library
@@ -102,8 +104,7 @@ Dictionary for Regulatory Activities (MedDRA).
 _HOMEPAGE = "https://bionlp.nlm.nih.gov/tac2017adversereactions/"
 
 # NOTE: Source: https://osf.io/6h9q4/
-_LICENSE = "CC0 1.0 Universal "
-
+_LICENSE = Licenses.CC0_1p0
 _URLS = {
     _DATASETNAME: {
         "train": "https://bionlp.nlm.nih.gov/tac2017adversereactions/train_xml.tar.gz",
@@ -218,7 +219,7 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -292,7 +293,7 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
 
                 # commenting this out for now
                 # if there is no db_name then its not a useful normalization
-                #if normalization["meddra_pt_id"]:
+                # if normalization["meddra_pt_id"]:
                 #    entity_normalizations[entity_name].append(
                 #        {"db_name": None, "db_id": f"pt_{normalization['meddra_pt_id']}"}
                 #    )

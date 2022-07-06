@@ -20,6 +20,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -80,6 +81,7 @@ language={eng}
 """
 
 _DATASETNAME = "mirna"
+_DISPLAYNAME = "miRNA"
 
 _DESCRIPTION = """\
 The corpus consists of 301 Medline citations. The documents were screened for
@@ -89,7 +91,8 @@ from 201 and 100 documents respectively.
 """
 
 _HOMEPAGE = "https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics/downloads/download-mirna-test-corpus.html"
-_LICENSE = "Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)"
+
+_LICENSE = Licenses.CC_BY_NC_3p0
 
 _BASE = "https://www.scai.fraunhofer.de/content/dam/scai/de/downloads/bioinformatik/miRNA/miRNA-"
 
@@ -173,7 +176,7 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -269,7 +272,9 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
                             "type": a.attrib["type"],
                             "text": (a.attrib["text"],),
                             "offsets": [(start + startOffset, start + endOffset + 1)],
-                            "normalized": [{"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}],
+                            "normalized": [
+                                {"db_name": "miRNA-corpus", "db_id": a.attrib["id"]}
+                            ],
                         }
                     )
 
@@ -304,9 +309,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for uid, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 for p, pe, re in zip(sentences, sentences_entities, relations):
@@ -324,9 +337,17 @@ class miRNADataset(datasets.GeneratorBasedBuilder):
 
             for idx, doc in enumerate(reader):
 
-                sentences, sentences_entities, relations = self._get_passages_and_entities(doc)
+                (
+                    sentences,
+                    sentences_entities,
+                    relations,
+                ) = self._get_passages_and_entities(doc)
 
-                if len(sentences) < 1 or len(sentences_entities) < 1 or len(sentences_entities) != len(sentences):
+                if (
+                    len(sentences) < 1
+                    or len(sentences_entities) < 1
+                    or len(sentences_entities) != len(sentences)
+                ):
                     continue
 
                 # global id

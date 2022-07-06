@@ -36,12 +36,13 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{karimi2015cadec,
   title={Cadec: A corpus of adverse drug event annotations},
   author={Karimi, Sarvnaz and Metke-Jimenez, Alejandro and Kemp, Madonna and Wang, Chen},
   journal={Journal of biomedical informatics},
@@ -53,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cadec"
+_DISPLAYNAME = "CADEC"
 
 _DESCRIPTION = """\
 The CADEC corpus (CSIRO Adverse Drug Event Corpus) is is a new rich annotated corpus of medical forum posts on patient-
@@ -69,7 +71,10 @@ normalized with meddra codes), sct (entities normalized with SNOMED CT codes).
 
 _HOMEPAGE = "https://data.gov.au/dataset/ds-dap-csiro%3A10948/details?q="
 
-_LICENSE = "https://confluence.csiro.au/display/dap/CSIRO+Data+Licence"
+_LICENSE = CustomLicense(
+    name="CSIRO Data License",
+    link="https://confluence.csiro.au/display/dap/CSIRO+Data+Licence",
+)
 
 _URLS = {
     _DATASETNAME: "https://data.csiro.au/dap/ws/v2/collections/17190/data/1904643",
@@ -142,7 +147,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

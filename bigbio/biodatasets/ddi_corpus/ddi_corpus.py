@@ -14,8 +14,9 @@
 # limitations under the License.
 
 """
-The DDI corpus has been manually annotated with drugs and pharmacokinetics and pharmacodynamics
-interactions. It contains 1025 documents from two different sources: DrugBank database and MedLine.
+The DDI corpus has been manually annotated with drugs and pharmacokinetics and
+pharmacodynamics interactions. It contains 1025 documents from two different
+sources: DrugBank database and MedLine.
 """
 
 import os
@@ -28,36 +29,46 @@ import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{HERREROZAZO2013914,
-    title        = {The DDI corpus: An annotated corpus with pharmacological substances and drug–drug interactions},
-    author       = {María Herrero-Zazo and Isabel Segura-Bedmar and Paloma Martínez and Thierry Declerck},
-    year         = 2013,
-    journal      = {Journal of Biomedical Informatics},
-    volume       = 46,
-    number       = 5,
-    pages        = {914--920},
-    doi          = {https://doi.org/10.1016/j.jbi.2013.07.011},
-    issn         = {1532-0464},
-    url          = {https://www.sciencedirect.com/science/article/pii/S1532046413001123},
-    keywords     = {Biomedical corpora, Drug interaction, Information extraction},
+  title        = {
+    The DDI corpus: An annotated corpus with pharmacological substances and
+    drug-drug interactions
+  },
+  author       = {
+    María Herrero-Zazo and Isabel Segura-Bedmar and Paloma Martínez and Thierry
+    Declerck
+  },
+  year         = 2013,
+  journal      = {Journal of Biomedical Informatics},
+  volume       = 46,
+  number       = 5,
+  pages        = {914--920},
+  doi          = {https://doi.org/10.1016/j.jbi.2013.07.011},
+  issn         = {1532-0464},
+  url          = {https://www.sciencedirect.com/science/article/pii/S1532046413001123},
+  keywords     = {Biomedical corpora, Drug interaction, Information extraction}
 }
+
 """
 
 _DATASETNAME = "ddi_corpus"
+_DISPLAYNAME = "DDI Corpus"
 
 _DESCRIPTION = """\
-The DDI corpus has been manually annotated with drugs and pharmacokinetics and pharmacodynamics
-interactions. It contains 1025 documents from two different sources: DrugBank database and MedLine.
+The DDI corpus has been manually annotated with drugs and pharmacokinetics and \
+pharmacodynamics interactions. It contains 1025 documents from two different \
+sources: DrugBank database and MedLine.
 """
 
 _HOMEPAGE = "https://github.com/isegura/DDICorpus"
-_LICENSE = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) "
 
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 _URLS = {
     _DATASETNAME: "https://github.com/isegura/DDICorpus/raw/master/DDICorpus-2013(BRAT).zip",
@@ -133,7 +144,7 @@ class DDICorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

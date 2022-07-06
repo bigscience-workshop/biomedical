@@ -12,9 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""\This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
-In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
-It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+"""
+This dataset contains 500 PubMed articles manually annotated with mutation
+mentions of various kinds and dbsnp normalizations for each of them.  In
+addition, it contains variant normalization options such as allele-specific
+identifiers from the ClinGen Allele Registry It can be used for NER tasks and
+NED tasks, This dataset does NOT have splits.
+"""
 import itertools
 
 import datasets
@@ -23,35 +27,46 @@ from bioc import pubtator
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
-  doi = {10.48550/ARXIV.2204.03637},
-  
-  url = {https://arxiv.org/abs/2204.03637},
-  
-  author = {Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic, Aleksandar and Lu, Zhiyong},
-  
-  keywords = {Computation and Language (cs.CL), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  
-  title = {tmVar 3.0: an improved variant concept recognition and normalization tool},
-  
-  publisher = {arXiv},
-  
-  year = {2022},
-  
-  copyright = {Creative Commons Attribution 4.0 International}
+  title        = {tmVar 3.0: an improved variant concept recognition and normalization tool},
+  author       = {
+    Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic,
+    Aleksandar and Lu, Zhiyong
+  },
+  year         = 2022,
+  publisher    = {arXiv},
+  doi          = {10.48550/ARXIV.2204.03637},
+  url          = {https://arxiv.org/abs/2204.03637},
+  copyright    = {Creative Commons Attribution 4.0 International},
+  keywords     = {
+    Computation and Language (cs.CL), FOS: Computer and information sciences,
+    FOS: Computer and information sciences
+  }
 }
+
 """
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
+
 _DATASETNAME = "tmvar_v3"
-_DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them. 
-In addition, it contains variant normalization options such as allele-specific identifiers from the ClinGen Allele Registry
-It can be used for NER tasks and NED tasks, This dataset does NOT have splits"""
+_DISPLAYNAME = "tmVar v3"
+
+_DESCRIPTION = """\
+This dataset contains 500 PubMed articles manually annotated with mutation \
+mentions of various kinds and dbsnp normalizations for each of them.  In \
+addition, it contains variant normalization options such as allele-specific \
+identifiers from the ClinGen Allele Registry It can be used for NER tasks and \
+NED tasks, This dataset does NOT have splits.
+"""
+
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
-_LICENSE = "freely available"
+
+_LICENSE = Licenses.UNKNOWN
+
 _URLS = {_DATASETNAME: "ftp://ftp.ncbi.nlm.nih.gov/pub/lu/tmVar3/tmVar3Corpus.txt"}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "3.0.0"
@@ -127,7 +142,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -185,7 +200,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     db_ids = db_id.split(",")
                     base_dict[db_name].extend(db_ids)
                 else:
-                    logger.warn(
+                    logger.info(
                         f"Malformed normalization in Document {doc_id}. Type: {type}, Number: {id}"
                     )
                     continue

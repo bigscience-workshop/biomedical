@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-The CellFinder project aims to create a stem cell data repository by linking information from existing public databases
- and by performing text mining on the research literature. The first version of the corpus is composed
- of 10 full text documents containing more than 2,100 sentences, 65,000 tokens and 5,200 annotations for entities.
- The corpus has been annotated with six types of entities (anatomical parts, cell components, cell lines, cell types,
- genes/protein and species) with an overall inter-annotator agreement around 80%.
-(see https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/).
+The CellFinder project aims to create a stem cell data repository by linking
+information from existing public databases and by performing text mining on the
+research literature. The first version of the corpus is composed of 10 full text
+documents containing more than 2,100 sentences, 65,000 tokens and 5,200
+annotations for entities. The corpus has been annotated with six types of
+entities (anatomical parts, cell components, cell lines, cell types,
+genes/protein and species) with an overall inter-annotator agreement around 80%.
+
+See: https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/
 """
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
@@ -29,37 +32,45 @@ import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{neves2012annotating,
-  title={Annotating and evaluating text for stem cell research},
-  author={Neves, Mariana and Damaschun, Alexander and Kurtz, Andreas and Leser, Ulf},
-  booktitle={Proceedings of the Third Workshop on Building and Evaluation Resources for Biomedical Text Mining\
-   (BioTxtM 2012) at Language Resources and Evaluation (LREC). Istanbul, Turkey},
-  pages={16--23},
-  year={2012},
-  organization={Citeseer}
+  title        = {Annotating and evaluating text for stem cell research},
+  author       = {Neves, Mariana and Damaschun, Alexander and Kurtz, Andreas and Leser, Ulf},
+  year         = 2012,
+  booktitle    = {
+    Proceedings of the Third Workshop on Building and Evaluation Resources for
+    Biomedical Text Mining\ (BioTxtM 2012) at Language Resources and Evaluation
+    (LREC). Istanbul, Turkey
+  },
+  pages        = {16--23},
+  organization = {Citeseer}
 }
 """
 
 _DATASETNAME = "cellfinder"
+_DISPLAYNAME = "CellFinder"
 
 _DESCRIPTION = """\
-The CellFinder project aims to create a stem cell data repository by linking information from existing public databases
- and by performing text mining on the research literature. The first version of the corpus is composed
- of 10 full text documents containing more than 2,100 sentences, 65,000 tokens and 5,200 annotations for entities.
- The corpus has been annotated with six types of entities (anatomical parts, cell components, cell lines, cell types,
- genes/protein and species) with an overall inter-annotator agreement around 80%.
-(see https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/).
+The CellFinder project aims to create a stem cell data repository by linking \
+information from existing public databases and by performing text mining on the \
+research literature. The first version of the corpus is composed of 10 full text \
+documents containing more than 2,100 sentences, 65,000 tokens and 5,200 \
+annotations for entities. The corpus has been annotated with six types of \
+entities (anatomical parts, cell components, cell lines, cell types, \
+genes/protein and species) with an overall inter-annotator agreement around 80%.
+
+See: https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/
 """
 
 _HOMEPAGE = (
     "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
 )
-_LICENSE = "CC BY-SA 3.0"
+_LICENSE = Licenses.CC_BY_SA_3p0
 
 _SOURCE_URL = (
     "https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/resources/cellfinder/"
@@ -69,9 +80,7 @@ _URLS = {
     _DATASETNAME + "_splits": _SOURCE_URL + "cellfinder1_brat_sections.tar.gz",
 }
 
-_SUPPORTED_TASKS = [
-    Tasks.NAMED_ENTITY_RECOGNITION
-]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
@@ -145,7 +154,7 @@ class CellFinderDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

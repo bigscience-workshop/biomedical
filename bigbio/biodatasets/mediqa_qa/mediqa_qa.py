@@ -26,6 +26,7 @@ import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -40,6 +41,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mediqa_qa"
+_DISPLAYNAME = "MEDIQA QA"
 
 _DESCRIPTION = """\
 The MEDIQA challenge is an ACL-BioNLP 2019 shared task aiming to attract further research efforts in Natural Language Inference (NLI), Recognizing Question Entailment (RQE), and their applications in medical Question Answering (QA).
@@ -51,7 +53,8 @@ In the QA task, participants are tasked to:
 """
 
 _HOMEPAGE = "https://sites.google.com/view/mediqa2019"
-_LICENSE = "-"
+
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/abachaa/MEDIQA2019/archive/refs/heads/master.zip"
@@ -62,8 +65,8 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class PubmedQADataset(datasets.GeneratorBasedBuilder):
-    """PubmedQA Dataset"""
+class MediqaQADataset(datasets.GeneratorBasedBuilder):
+    """MediqaQA Dataset"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -118,7 +121,7 @@ class PubmedQADataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

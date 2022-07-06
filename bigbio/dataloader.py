@@ -70,11 +70,11 @@ _BLURB_CONFIG_NAMES = set(
         "gnormplus_bigbio_kb",  # BC2GM
         "jnlpba_bigbio_kb",  # JNLPBA
         "ncbi_disease_bigbio_kb",  # NCBI-disease
-        "bioasq_7b_bigbio_qa",  # BioASQ
+        "bioasq_blurb_bigbio_qa",  # BioASQ
         "chemprot_bigbio_kb",  # ChemProt
         "ddi_corpus_bigbio_kb",  # DDI
         "hallmarks_of_cancer_bigbio_text",  # HOC
-        "gad_fold0_bigbio_text",  #  Gene-Disease Associations (GAD)
+        "gad_blurb_bigbio_text",  #  Gene-Disease Associations (GAD)
         "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
     ]
 )
@@ -93,6 +93,7 @@ class BigBioKbMetadata:
     passages_type_counter: Dict[str, int]
 
     entities_count: int
+    entities_normalized_count: int
     entities_type_counter: Dict[str, int]
     entities_db_name_counter: Dict[str, int]
     entities_unique_db_ids_count: int
@@ -117,6 +118,7 @@ class BigBioKbMetadata:
         passages_type_counter = Counter()
 
         entities_count = 0
+        entities_normalized_count = 0
         entities_type_counter = Counter()
         entities_db_name_counter = Counter()
         entities_unique_db_ids = set()
@@ -143,6 +145,7 @@ class BigBioKbMetadata:
                 entities_count += 1
                 entities_type_counter[entity["type"]] += 1
                 for norm in entity["normalized"]:
+                    entities_normalized_count += 1
                     entities_db_name_counter[norm["db_name"]] += 1
                     entities_unique_db_ids.add(norm["db_id"])
 
@@ -179,6 +182,7 @@ class BigBioKbMetadata:
             passages_type_counter=dict(passages_type_counter.most_common(max_common)),
             passages_char_count=passages_char_count,
             entities_count=entities_count,
+            entities_normalized_count=entities_normalized_count,
             entities_type_counter=dict(entities_type_counter.most_common(max_common)),
             entities_db_name_counter=dict(
                 entities_db_name_counter.most_common(max_common)
@@ -391,6 +395,7 @@ class BigBioConfigHelper:
     languages: List[Lang]
     config: BigBioConfig
     is_local: bool
+    is_pubmed: bool
     is_bigbio_schema: bool
     bigbio_schema_caps: Optional[str]
     is_large: bool
@@ -402,6 +407,7 @@ class BigBioConfigHelper:
     citation: str
     description: str
     homepage: str
+    display_name: str
     license: str
 
     _ds_module: datasets.load.DatasetModule = field(repr=False)
@@ -503,6 +509,7 @@ class BigBioConfigHelpers:
                         languages=py_module._LANGUAGES,
                         config=config,
                         is_local=py_module._LOCAL,
+                        is_pubmed=py_module._PUBMED,
                         is_bigbio_schema=is_bigbio_schema,
                         bigbio_schema_caps=bigbio_schema_caps,
                         is_large=config.name in _LARGE_CONFIG_NAMES,
@@ -514,6 +521,7 @@ class BigBioConfigHelpers:
                         citation=py_module._CITATION,
                         description=py_module._DESCRIPTION,
                         homepage=py_module._HOMEPAGE,
+                        display_name=py_module._DISPLAYNAME,
                         license=py_module._LICENSE,
                         _ds_module=ds_module,
                         _py_module=py_module,

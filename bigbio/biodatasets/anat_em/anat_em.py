@@ -28,6 +28,7 @@ import bigbio.utils.parsing as parsing
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -46,16 +47,20 @@ _CITATION = """\
 """
 
 _DATASETNAME = "anat_em"
+_DISPLAYNAME = "AnatEM"
+
 
 _DESCRIPTION = """\
-The extended Anatomical Entity Mention corpus (AnatEM) consists of 1212 documents (approx. 250,000 words)
-manually annotated to identify over 13,000 mentions of anatomical entities. Each annotation is assigned one
-of 12 granularity-based types such as Cellular component, Tissue and Organ, defined with reference to the
-Common Anatomy Reference Ontology.
+The extended Anatomical Entity Mention corpus (AnatEM) consists of 1212 \
+documents (approx. 250,000 words) manually annotated to identify over 13,000 \
+mentions of anatomical entities. Each annotation is assigned one of 12 \
+granularity-based types such as Cellular component, Tissue and Organ, defined \
+with reference to the Common Anatomy Reference Ontology.
 """
 
 _HOMEPAGE = "http://nactem.ac.uk/anatomytagger/#AnatEM"
-_LICENSE = "Creative Commons BY-SA 3.0 license"
+
+_LICENSE = Licenses.CC_BY_SA_3p0
 
 _URLS = {_DATASETNAME: "http://nactem.ac.uk/anatomytagger/AnatEM-1.0.2.tar.gz"}
 
@@ -118,7 +123,7 @@ class AnatEMDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

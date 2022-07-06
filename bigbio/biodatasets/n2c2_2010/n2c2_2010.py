@@ -53,6 +53,7 @@ from datasets import Version
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -81,6 +82,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2010"
+_DISPLAYNAME = "n2c2 2010 Concepts, Assertions, and Relations"
 
 _DESCRIPTION = """\
 The i2b2/VA corpus contained de-identified discharge summaries from Beth Israel
@@ -101,7 +103,7 @@ Using this reference standard, 22 systems were developed for concept extraction,
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
@@ -505,7 +507,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -579,7 +581,7 @@ class N2C22010RelationsDataset(datasets.GeneratorBasedBuilder):
             "coreferences": [],
         }
 
-    def _generate_examples(self, data_dir, split) -> (int, dict):
+    def _generate_examples(self, data_dir, split):
         if split == "train":
             samples = _read_tar_gz(
                 os.path.join(

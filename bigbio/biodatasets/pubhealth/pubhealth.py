@@ -27,6 +27,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 logger = datasets.utils.logging.get_logger(__name__)
 
@@ -43,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pubhealth"
+_DISPLAYNAME = "PUBHEALTH"
 
 _DESCRIPTION = """\
 A dataset of 11,832 claims for fact- checking, which are related a range of health topics
@@ -52,7 +54,7 @@ including biomedical subjects (e.g., infectious diseases, stem cell research), g
 
 _HOMEPAGE = "https://github.com/neemakot/Health-Fact-Checking/tree/master/data"
 
-_LICENSE = "MIT License"
+_LICENSE = Licenses.MIT
 
 _URLs = {
     _DATASETNAME: "https://drive.google.com/uc?export=download&id=1eTtRs5cUlBP5dXsx-FTAlmXuB6JQi2qj"
@@ -115,7 +117,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -165,7 +167,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                 # test.tsv has an additional column at the beginning
                 #  Some entries are malformed, will log skipped lines
                 if len(row) < 9:
-                    logger.warning("Line %s is malformed", id_)
+                    logger.info("Line %s is malformed", id_)
                     continue
                 (
                     claim_id,
@@ -182,7 +184,7 @@ class PUBHEALTHDataset(datasets.GeneratorBasedBuilder):
                 ]  # only take last 9 columns to fix test.tsv disparity
 
                 if label not in _CLASSES:
-                    logger.warning("Line %s is missing label", id_)
+                    logger.info("Line %s is missing label", id_)
                     continue
 
                 if self.config.schema == "source":

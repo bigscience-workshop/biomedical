@@ -43,6 +43,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -60,6 +61,7 @@ _CITATION = """\
 
 
 _DATASETNAME = "mednli"
+_DISPLAYNAME = "MedNLI"
 
 _DESCRIPTION = """\
 State of the art models using deep neural networks have become very good in learning an accurate
@@ -76,7 +78,8 @@ drawn about the patient.
 
 
 _HOMEPAGE = "https://physionet.org/content/mednli/1.0.0/"
-_LICENSE = "PhysioNet Credentialed Health Data License 1.5.0"
+
+_LICENSE = Licenses.PHYSIONET_LICENSE_1p5
 
 _URLS = {}
 
@@ -134,7 +137,7 @@ class MedNLIDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

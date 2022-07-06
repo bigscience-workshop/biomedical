@@ -27,6 +27,7 @@ from bioc import pubtator
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -43,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ncbi_disease"
+_DISPLAYNAME = "NCBI Disease"
 
 _DESCRIPTION = """\
 The NCBI disease corpus is fully annotated at the mention and concept level to serve as a research
@@ -50,8 +52,7 @@ resource for the biomedical natural language processing community.
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/CBBresearch/Dogan/DISEASE/"
-_LICENSE = "Public Domain (CC0)"
-
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     _DATASETNAME: {
@@ -118,7 +119,7 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -158,7 +159,9 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
+    def _generate_examples(
+        self, filepath: str, split: str
+    ) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
             for i, source_example in enumerate(self._pubtator_to_source(filepath)):
                 # Some examples are duplicated in NCBI Disease. We have to make them unique to

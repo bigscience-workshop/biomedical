@@ -22,30 +22,37 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.ES, Lang.PT]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{soares2018large,
-  title={A Large Parallel Corpus of Full-Text Scientific Articles},
-  author={Soares, Felipe and Moreira, Viviane and Becker, Karin},
-  booktitle={Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC-2018)},
-  year={2018}
+  title        = {A Large Parallel Corpus of Full-Text Scientific Articles},
+  author       = {Soares, Felipe and Moreira, Viviane and Becker, Karin},
+  year         = 2018,
+  booktitle    = {
+    Proceedings of the Eleventh International Conference on Language Resources
+    and Evaluation (LREC-2018)
+  }
 }
 """
 
 _DATASETNAME = "scielo"
+_DISPLAYNAME = "SciELO"
 
 _DESCRIPTION = """\
-A parallel corpus of full-text scientific articles collected from Scielo database in the following languages: \
-English, Portuguese and Spanish. The corpus is sentence aligned for all language pairs, \
-as well as trilingual aligned for a small subset of sentences. Alignment was carried out using the Hunalign algorithm.
+A parallel corpus of full-text scientific articles collected from Scielo \
+database in the following languages: English, Portuguese and Spanish. The corpus \
+is sentence aligned for all language pairs, as well as trilingual aligned for a \
+small subset of sentences. Alignment was carried out using the Hunalign \
+algorithm.
 """
 
 _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWSRB"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "en_es": "https://ndownloader.figstatic.com/files/14019287",
@@ -123,7 +130,7 @@ class ScieloDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

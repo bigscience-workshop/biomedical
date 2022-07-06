@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 """
 This repository contains the evaluation datasets for the paper Bio-SimVerb and
 Bio-SimLex: Wide-coverage Evaluation Sets of Word Similarity in Biomedicine by
@@ -28,62 +26,48 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{chiu2018bio,
-  title={Bio-SimVerb and Bio-SimLex: wide-coverage evaluation sets of word similarity in biomedicine},
-  author={Chiu, Billy and Pyysalo, Sampo and Vuli{\'c}, Ivan and Korhonen, Anna},
-  journal={BMC bioinformatics},
-  volume={19},
-  number={1},
-  pages={1--13},
-  year={2018},
-  publisher={BioMed Central}
+@article{article,
+  title        = {
+    Bio-SimVerb and Bio-SimLex: Wide-coverage evaluation sets of word
+    similarity in biomedicine
+  },
+  author       = {Chiu, Billy and Pyysalo, Sampo and Vulić, Ivan and Korhonen, Anna},
+  year         = 2018,
+  month        = {02},
+  journal      = {BMC Bioinformatics},
+  volume       = 19,
+  pages        = {},
+  doi          = {10.1186/s12859-018-2039-z}
 }
 """
 
 _DATASETNAME = "bio_sim_verb"
-
+_DISPLAYNAME = "Bio-SimVerb"
 
 _DESCRIPTION = """
-This repository contains the evaluation datasets for the paper
-Bio-SimVerb and Bio-SimLex: Wide-coverage Evaluation Sets of Word
-Similarity in Biomedicine by Billy Chiu, Sampo Pyysalo and Anna Korhonen.
+This repository contains the evaluation datasets for the paper Bio-SimVerb and \
+Bio-SimLex: Wide-coverage Evaluation Sets of Word Similarity in Biomedicine by \
+Billy Chiu, Sampo Pyysalo and Anna Korhonen.
 """
 
 _HOMEPAGE = "https://github.com/cambridgeltl/bio-simverb"
 
-_LICENSE = """Open Access This article is distributed under the terms of the
-Creative Commons Attribution 4.0 International License
-(http://creativecommons.org/licenses/by/4.0/), which permits
-unrestricted use, distribution, and reproduction in any medium,
-provided you give appropriate credit to the original author(s) and
-the source, provide a link to the Creative Commons license, and
-indicate if changes were made. The Creative Commons Public Domain
-Dedication waiver (http://creativecommons.org/publicdomain/zero/1.0/)
-applies to the data made available in this article, unless otherwise stated."""
+_LICENSE = Licenses.UNKNOWN
 
-# TODO: Add links to the urls needed to download your dataset files.
-#  For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: "https://raw.githubusercontent.com/cambridgeltl/bio-simverb/master/wvlib/word-similarities/bio-simverb/Bio-SimVerb.txt",
 }
 
-_SUPPORTED_TASKS = [
-    Tasks.SEMANTIC_SIMILARITY
-]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -130,7 +114,11 @@ class BioSimVerb(datasets.GeneratorBasedBuilder):
             features = schemas.pairs_features
 
         return datasets.DatasetInfo(
-            description=_DESCRIPTION, features=features, homepage=_HOMEPAGE, license=_LICENSE, citation=_CITATION,
+            description=_DESCRIPTION,
+            features=features,
+            homepage=_HOMEPAGE,
+            license=str(_LICENSE),
+            citation=_CITATION,
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
@@ -152,7 +140,11 @@ class BioSimVerb(datasets.GeneratorBasedBuilder):
 
         with open(filepath, encoding="utf-8") as csv_file:
             csv_reader = csv.reader(
-                csv_file, quotechar='"', delimiter="\t", quoting=csv.QUOTE_ALL, skipinitialspace=True
+                csv_file,
+                quotechar='"',
+                delimiter="\t",
+                quoting=csv.QUOTE_ALL,
+                skipinitialspace=True,
             )
 
             if self.config.schema == "source":

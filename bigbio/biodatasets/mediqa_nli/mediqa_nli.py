@@ -45,6 +45,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -62,6 +63,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mediqa_nli"
+_DISPLAYNAME = "MEDIQA NLI"
 
 _DESCRIPTION = """\
 Natural Language Inference (NLI) is the task of determining whether a given hypothesis can be
@@ -79,7 +81,8 @@ unseen dataset for scoring each participant submission.
 
 
 _HOMEPAGE = "https://physionet.org/content/mednli-bionlp19/1.0.1/"
-_LICENSE = "PhysioNet Credentialed Health Data License 1.5.0"
+
+_LICENSE = Licenses.PHYSIONET_LICENSE_1p5
 
 _URLS = {}
 
@@ -137,7 +140,7 @@ class MEDIQANLIDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

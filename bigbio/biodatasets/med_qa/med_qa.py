@@ -30,6 +30,7 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -37,22 +38,20 @@ _LOCAL = False
 
 # TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-    AUTHOR = {Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
-    TITLE = {What Disease Does This Patient Have? A Large-Scale Open Domain Question \
-             Answering Dataset from Medical Exams},
-    JOURNAL = {Applied Sciences},
-    VOLUME = {11},
-    YEAR = {2021},
-    NUMBER = {14},
-    ARTICLE-NUMBER = {6421},
-    URL = {https://www.mdpi.com/2076-3417/11/14/6421},
-    ISSN = {2076-3417},
-    DOI = {10.3390/app11146421}
+@article{jin2021disease,
+  title={What disease does this patient have? a large-scale open domain question answering dataset from medical exams},
+  author={Jin, Di and Pan, Eileen and Oufattole, Nassim and Weng, Wei-Hung and Fang, Hanyi and Szolovits, Peter},
+  journal={Applied Sciences},
+  volume={11},
+  number={14},
+  pages={6421},
+  year={2021},
+  publisher={MDPI}
 }
 """
 
 _DATASETNAME = "med_qa"
+_DISPLAYNAME = "MedQA"
 
 _DESCRIPTION = """\
 In this work, we present the first free-form multiple-choice OpenQA dataset for solving medical problems, MedQA,
@@ -64,7 +63,7 @@ comprehension models can obtain necessary knowledge for answering the questions.
 
 _HOMEPAGE = "https://github.com/jind11/MedQA"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?export=download&confirm=t&id=1ImYUSLk9JbgHXOemfvyiDiirluZHPeQw",
@@ -139,7 +138,7 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

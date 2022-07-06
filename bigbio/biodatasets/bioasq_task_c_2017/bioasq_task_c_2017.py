@@ -24,44 +24,48 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = True
 _CITATION = """\
 @article{nentidis-etal-2017-results,
-  author    = {Nentidis, Anastasios  and Bougiatiotis, Konstantinos  and Krithara, Anastasia  and
-               Paliouras, Georgios  and Kakadiaris, Ioannis},
-  title     = {Results of the fifth edition of the {B}io{ASQ} Challenge},
-  journal   = {},
-  volume    = {BioNLP 2017},
-  year      = {2007},
-  url       = {https://aclanthology.org/W17-2306},
-  doi       = {10.18653/v1/W17-2306},
-  biburl    = {},
-  bibsource = {https://aclanthology.org/W17-2306}
+  title        = {Results of the fifth edition of the {B}io{ASQ} Challenge},
+  author       = {
+    Nentidis, Anastasios  and Bougiatiotis, Konstantinos  and Krithara,
+    Anastasia  and Paliouras, Georgios  and Kakadiaris, Ioannis
+  },
+  year         = 2007,
+  journal      = {},
+  volume       = {BioNLP 2017},
+  doi          = {10.18653/v1/W17-2306},
+  url          = {https://aclanthology.org/W17-2306},
+  biburl       = {},
+  bibsource    = {https://aclanthology.org/W17-2306}
 }
+
 """
 
 _DATASETNAME = "bioasq_task_c_2017"
+_DISPLAYNAME = "BioASQ Task C 2017"
 
 _DESCRIPTION = """\
-The training data set for this task contains annotated biomedical articles published in PubMed
-and corresponding full text from PMC. By annotated is meant that GrantIDs and corresponding
-Grant Agencies have been identified in the full text of articles.
+The training data set for this task contains annotated biomedical articles
+published in PubMed and corresponding full text from PMC. By annotated is meant
+that GrantIDs and corresponding Grant Agencies have been identified in the full
+text of articles
 """
 
 _HOMEPAGE = "http://participants-area.bioasq.org/general_information/Task5c/"
 
-_LICENSE = "NLM License Code: 8283NLM123"
+_LICENSE = Licenses.NLM_LICENSE
 
 # Website contains all data, but login required
 _URLS = {_DATASETNAME: "http://participants-area.bioasq.org/datasets/"}
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
-# this version doesn't have to be consistent with semantic versioning. Anything that is
-# provided by the original dataset as a version goes.
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -130,7 +134,7 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -162,7 +166,7 @@ class BioASQTaskC2017(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath, filespath, split) -> (int, dict):
+    def _generate_examples(self, filepath, filespath, split):
 
         with open(filepath) as f:
             task_data = json.load(f)

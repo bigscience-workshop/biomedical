@@ -33,6 +33,7 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -51,6 +52,7 @@ publisher={BioMed Central}
 """
 
 _DATASETNAME = "linnaeus"
+_DISPLAYNAME = "LINNAEUS"
 
 _DESCRIPTION = """\
 Linnaeus is a novel corpus of full-text documents manually annotated for species mentions.
@@ -58,7 +60,7 @@ Linnaeus is a novel corpus of full-text documents manually annotated for species
 
 _HOMEPAGE = "http://linnaeus.sourceforge.net/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: "https://sourceforge.net/projects/linnaeus/files/Corpora/manual-corpus-species-1.0.tar.gz/download",
@@ -142,7 +144,7 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -153,7 +155,9 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_files": os.path.join(data_dir, "manual-corpus-species-1.0")},
+                gen_kwargs={
+                    "data_files": os.path.join(data_dir, "manual-corpus-species-1.0")
+                },
             ),
         ]
 
@@ -237,7 +241,12 @@ class LinnaeusDataset(datasets.GeneratorBasedBuilder):
             text = file.read()
         # Passages
         example["passages"] = [
-            {"id": f"{txt_file.stem}__text", "text": [text], "type": "Article", "offsets": [(0, len(text))]}
+            {
+                "id": f"{txt_file.stem}__text",
+                "text": [text],
+                "type": "Article",
+                "offsets": [(0, len(text))],
+            }
         ]
         # Entities
         example["entities"] = []

@@ -31,20 +31,30 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
-  title={Discourse Complements Lexical Semantics for Non-factoid Answer Reranking},
-  author={Peter Alexander Jansen and Mihai Surdeanu and Peter Clark},
-  booktitle={ACL},
-  year={2014}
+@inproceedings{jansen-etal-2014-discourse,
+    title = "Discourse Complements Lexical Semantics for Non-factoid Answer Reranking",
+    author = "Jansen, Peter  and
+      Surdeanu, Mihai  and
+      Clark, Peter",
+    booktitle = "Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = jun,
+    year = "2014",
+    address = "Baltimore, Maryland",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P14-1092",
+    doi = "10.3115/v1/P14-1092",
+    pages = "977--986",
 }
 """
 
 _DATASETNAME = "biology_how_why_corpus"
+_DISPLAYNAME = "BiologyHowWhyCorpus"
 
 _DESCRIPTION = """\
 This dataset consists of 185 "how" and 193 "why" biology questions authored by a domain expert, with one or more gold 
@@ -56,7 +66,7 @@ Answer Reranking” (ACL 2014).
 
 _HOMEPAGE = "https://allenai.org/data/biology-how-why-corpus"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/biology-how-why-corpus/BiologyHowWhyCorpus.tar",
@@ -118,7 +128,7 @@ class BiologyHowWhyCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

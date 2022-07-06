@@ -13,18 +13,19 @@
 # limitations under the License.
 
 
-import os
-from typing import List
-from numpy import int32
-import xml.etree.ElementTree as ET
 import itertools
+import os
 import uuid
+import xml.etree.ElementTree as ET
+from typing import List
 
 import datasets
+from numpy import int32
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -47,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "osiris"
+_DISPLAYNAME = "OSIRIS"
 
 _DESCRIPTION = """\
 The OSIRIS corpus is a set of MEDLINE abstracts manually annotated
@@ -60,14 +62,15 @@ provided the original work is properly cited (Furlong et al, BMC Bioinformatics 
 _HOMEPAGE = "https://sites.google.com/site/laurafurlongweb/databases-and-tools/corpora/"
 
 
-_LICENSE = "Creative Commons Attribution 3.0 Unported License"
+_LICENSE = Licenses.CC_BY_3p0
 
 _URLS = {
-    _DATASETNAME: ["https://github.com/rockt/SETH/blob/master/resources/OSIRIS/corpus.xml?raw=true "
-                   ]}
+    _DATASETNAME: [
+        "https://github.com/rockt/SETH/blob/master/resources/OSIRIS/corpus.xml?raw=true "
+    ]
+}
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 
 _SOURCE_VERSION = "1.2.0"
@@ -107,7 +110,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
             description="osiris BigBio schema",
             schema="bigbio_kb",
             subset_id="osiris",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "osiris_source"
@@ -125,7 +128,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
                         {
                             "g_id": datasets.Value("string"),
                             "g_lex": datasets.Value("string"),
-                            "offsets": [[datasets.Value("int32")]]
+                            "offsets": [[datasets.Value("int32")]],
                         }
                     ],
                     "variants": [
@@ -133,9 +136,9 @@ class Osiris(datasets.GeneratorBasedBuilder):
                             "v_id": datasets.Value("string"),
                             "v_lex": datasets.Value("string"),
                             "v_norm": datasets.Value("string"),
-                            "offsets": [[datasets.Value("int32")]]
+                            "offsets": [[datasets.Value("int32")]],
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -146,7 +149,7 @@ class Osiris(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -167,20 +170,25 @@ class Osiris(datasets.GeneratorBasedBuilder):
         ]
 
     def _get_offsets(self, parent: ET.Element, child: ET.Element) -> List[int32]:
-        '''
+        """
         Retrieves character offsets for child from parent.
-        '''
-        parent_text = " ".join([" ".join([t for t in c.itertext()])
-                               for c in list(parent) if c.tag != "Pmid"])
+        """
+        parent_text = " ".join(
+            [
+                " ".join([t for t in c.itertext()])
+                for c in list(parent)
+                if c.tag != "Pmid"
+            ]
+        )
         child_text = " ".join([t for t in child.itertext()])
         start = parent_text.index(child_text)
         end = start + len(child_text)
         return [start, end]
 
     def _get_dict(self, elem: ET.Element) -> dict:
-        '''
+        """
         Retrieves dict from XML element.
-        '''
+        """
         elem_d = dict()
         for child in elem:
             elem_d[child.tag] = {}
@@ -200,37 +208,33 @@ class Osiris(datasets.GeneratorBasedBuilder):
         return elem_d
 
     def _handle_missing_variants(self, row: dict) -> dict:
-        '''
-        If variant is not present in the row this function adds one variant 
+        """
+        If variant is not present in the row this function adds one variant
         with no data (to make looping though items possible) and returns the new row.
         These mocked variants will be romoved after parsing.
         Otherwise returns unchanged row.
-        '''
+        """
 
         if row.get("variant", 0) == 0:
             row["variant"] = [
-                {
-                    "v_id": "",
-                    "v_lex": "",
-                    "v_norm": "",
-                    "offsets": [0, 0]
-                }
+                {"v_id": "", "v_lex": "", "v_norm": "", "offsets": [0, 0]}
             ]
         return row
 
     def _get_entities(self, row: dict) -> List[dict]:
-        '''
-        Retrieves two lists of dicts for genes and variants. 
+        """
+        Retrieves two lists of dicts for genes and variants.
         After that, chains both together.
-        '''
+        """
         genes = [
             {
                 "id": str(uuid.uuid4()),
                 "offsets": [gene["offsets"]],
                 "text": [gene["g_lex"]],
                 "type": "gene",
-                "normalized":  [{"db_name": "NCBI Gene", "db_id": gene["g_id"]}]
-            } for gene in row["gene"]
+                "normalized": [{"db_name": "NCBI Gene", "db_id": gene["g_id"]}],
+            }
+            for gene in row["gene"]
         ]
 
         variants = [
@@ -239,8 +243,17 @@ class Osiris(datasets.GeneratorBasedBuilder):
                 "offsets": [variant["offsets"]],
                 "text": [variant["v_lex"]],
                 "type": "variant",
-                "normalized":  [{"db_name": "HGVS-like" if variant["v_id"] == "No" else "dbSNP", "db_id": variant["v_norm"] if variant["v_id"] == "No" else variant["v_id"]}]
-            } for variant in row["variant"] if variant['v_id'] != ""
+                "normalized": [
+                    {
+                        "db_name": "HGVS-like" if variant["v_id"] == "No" else "dbSNP",
+                        "db_id": variant["v_norm"]
+                        if variant["v_id"] == "No"
+                        else variant["v_id"],
+                    }
+                ],
+            }
+            for variant in row["variant"]
+            if variant["v_id"] != ""
         ]
         return list(itertools.chain(genes, variants))
 
@@ -259,23 +272,29 @@ class Osiris(datasets.GeneratorBasedBuilder):
                     "Pmid": row["Pmid"]["text"],
                     "Title": {
                         "offsets": [row["Title"]["offsets"]],
-                        "text": row["Title"]["text"]
+                        "text": row["Title"]["text"],
                     },
                     "Abstract": {
                         "offsets": [row["Abstract"]["offsets"]],
-                        "text": row["Abstract"]["text"]
+                        "text": row["Abstract"]["text"],
                     },
-                    "genes": [{
-                        "g_id": gene["g_id"],
-                        "g_lex": gene["g_lex"],
-                        "offsets": [gene["offsets"]],
-                    } for gene in row["gene"]],
-                    "variants": [{
-                        "v_id": variant["v_id"],
-                        "v_lex": variant["v_lex"],
-                        "v_norm": variant["v_norm"],
-                        "offsets": [variant["offsets"]]
-                    } for variant in row["variant"]]
+                    "genes": [
+                        {
+                            "g_id": gene["g_id"],
+                            "g_lex": gene["g_lex"],
+                            "offsets": [gene["offsets"]],
+                        }
+                        for gene in row["gene"]
+                    ],
+                    "variants": [
+                        {
+                            "v_id": variant["v_id"],
+                            "v_lex": variant["v_lex"],
+                            "v_norm": variant["v_norm"],
+                            "offsets": [variant["offsets"]],
+                        }
+                        for variant in row["variant"]
+                    ],
                 }
 
         elif self.config.schema == "bigbio_kb":
@@ -306,5 +325,5 @@ class Osiris(datasets.GeneratorBasedBuilder):
                     "entities": self._get_entities(row),
                     "relations": [],
                     "events": [],
-                    "coreferences": []
+                    "coreferences": [],
                 }

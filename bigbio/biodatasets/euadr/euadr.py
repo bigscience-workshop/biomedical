@@ -1,9 +1,11 @@
-import datasets
 import os
+
+import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -26,16 +28,27 @@ abstract = {Corpora with specific entities and relationships annotated are essen
 }
 """
 
-_DatasetName = "euadr"
+_DATASETNAME = "euadr"
+_DISPLAYNAME = "EU-ADR"
 
 _DESCRIPTION = """\
-Corpora with specific entities and relationships annotated are essential to train and evaluate text-mining systems that are developed to extract specific structured information from a large corpus. In this paper we describe an approach where a named-entity recognition system produces a first annotation and annotators revise this annotation using a web-based interface. The agreement figures achieved show that the inter-annotator agreement is much better than the agreement with the system provided annotations. The corpus has been annotated for drugs, disorders, genes and their inter-relationships. For each of the drug–disorder, drug–target, and target–disorder relations three experts have annotated a set of 100 abstracts. These annotated relationships will be used to train and evaluate text-mining software to capture these relationships in texts.
-
+Corpora with specific entities and relationships annotated are essential to \
+train and evaluate text-mining systems that are developed to extract specific \
+structured information from a large corpus. In this paper we describe an \
+approach where a named-entity recognition system produces a first annotation and \
+annotators revise this annotation using a web-based interface. The agreement \
+figures achieved show that the inter-annotator agreement is much better than the \
+agreement with the system provided annotations. The corpus has been annotated \
+for drugs, disorders, genes and their inter-relationships. For each of the \
+drug-disorder, drug-target, and target-disorder relations three experts \
+have annotated a set of 100 abstracts. These annotated relationships will be \
+used to train and evaluate text-mining software to capture these relationships \
+in texts.
 """
 
 _HOMEPAGE = "https://www.sciencedirect.com/science/article/pii/S1532046412000573"
 
-_LICENSE = "Elsevier user license"
+_LICENSE = Licenses.UNKNOWN
 
 _URL = "https://biosemantics.erasmusmc.nl/downloads/euadr.tgz"
 
@@ -86,7 +99,7 @@ class EUADR(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

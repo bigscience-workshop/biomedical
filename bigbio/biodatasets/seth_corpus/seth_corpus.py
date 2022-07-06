@@ -29,6 +29,7 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
@@ -49,6 +50,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "seth_corpus"
+_DISPLAYNAME = "SETH Corpus"
 
 _DESCRIPTION = (
     """SNP named entity recognition corpus consisting of 630 PubMed citations."""
@@ -56,8 +58,7 @@ _DESCRIPTION = (
 
 _HOMEPAGE = "https://github.com/rockt/SETH"
 
-_LICENSE = "Apache License 2.0"
-
+_LICENSE = Licenses.APACHE_2p0
 _URLS = {
     "source": "https://github.com/rockt/SETH/archive/refs/heads/master.zip",
     "bigbio_kb": "https://github.com/rockt/SETH/archive/refs/heads/master.zip",
@@ -172,7 +173,7 @@ class SethCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

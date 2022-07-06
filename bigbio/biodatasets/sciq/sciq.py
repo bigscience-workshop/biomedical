@@ -21,8 +21,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "sciq"
+_DISPLAYNAME = "SciQ"
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
@@ -44,15 +46,17 @@ _CITATION = """
 }
 """
 
-_DESCRIPTION = """
-The SciQ dataset contains 13,679 crowdsourced science exam questions about Physics, Chemistry and Biology, \
-among others. The questions are in multiple-choice format with 4 answer options each. \
-For most questions, an additional paragraph with supporting evidence for the correct answer is provided.
+_DESCRIPTION = """\
+The SciQ dataset contains 13,679 crowdsourced science exam questions about \
+Physics, Chemistry and Biology, among others. The questions are in \
+multiple-choice format with 4 answer options each. For most questions, an \
+additional paragraph with supporting evidence for the correct answer is \
+provided.
 """
 
 _HOMEPAGE = "https://allenai.org/data/sciq"
 
-_LICENSE = "CC BY-NC 3.0"
+_LICENSE = Licenses.CC_BY_NC_3p0
 
 _URLs = "https://ai2-public-datasets.s3.amazonaws.com/sciq/SciQ.zip"
 
@@ -106,7 +110,7 @@ class SciQ(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
