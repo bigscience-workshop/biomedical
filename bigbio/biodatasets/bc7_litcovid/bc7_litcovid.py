@@ -81,6 +81,8 @@ _CLASS_NAMES = [
     "Diagnosis",
 ]
 
+logger = datasets.utils.logging.get_logger(__name__)
+
 
 class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
     """
@@ -174,6 +176,19 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def validate_entry(self, e, index) -> bool:
+        """
+        Validates if an entry has all the required fields
+        """
+        fields_to_validate = ["pmid", "abstract", "label"]
+        for key in fields_to_validate:
+            if e[key]:
+                continue
+            else:
+                logger.warn(f"Entry {index} missing {key}")
+                return False
+        return True
+
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
@@ -183,34 +198,36 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
         df = pd.read_csv(filepath, sep=",").astype(str).replace({"nan": None})
 
         for index, e in df.iterrows():
+            if self.validate_entry(e, index):
+                if self.config.schema == "source":
+                    yield idx, {
+                        "pmid": e["pmid"],
+                        "journal": e["journal"],
+                        "title": e["title"],
+                        "abstract": e["abstract"],
+                        "keywords": e["keywords"].split(";")
+                        if e["keywords"] is not None
+                        else [],
+                        "pub_type": e["pub_type"].split(";")
+                        if e["pub_type"] is not None
+                        else [],
+                        "authors": e["authors"].split(";")
+                        if e["authors"] is not None
+                        else [],
+                        "doi": e["doi"],
+                        "labels": e["label"].split(";"),
+                    }
 
-            if self.config.schema == "source":
+                elif self.config.schema == "bigbio_text":
 
-                yield idx, {
-                    "pmid": e["pmid"],
-                    "journal": e["journal"],
-                    "title": e["title"],
-                    "abstract": e["abstract"],
-                    "keywords": e["keywords"].split(";")
-                    if e["keywords"] is not None
-                    else [],
-                    "pub_type": e["pub_type"].split(";")
-                    if e["pub_type"] is not None
-                    else [],
-                    "authors": e["authors"].split(";")
-                    if e["authors"] is not None
-                    else [],
-                    "doi": e["doi"],
-                    "labels": e["label"].split(";"),
-                }
-
-            elif self.config.schema == "bigbio_text":
-
-                yield idx, {
-                    "id": idx,
-                    "document_id": e["pmid"],
-                    "text": e["abstract"],
-                    "labels": e["label"].split(";"),
-                }
+                    yield idx, {
+                        "id": idx,
+                        "document_id": e["pmid"],
+                        "text": e["abstract"],
+                        "labels": e["label"].split(";"),
+                    }
+            else:
+                logger.warning(f"Entry {index} skipped for missing keys")
+                continue
 
             idx += 1
