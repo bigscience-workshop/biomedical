@@ -14,6 +14,7 @@ from collections import Counter
 from ngram import get_tuples_manual_sentences
 
 from bigbio.dataloader import BigBioConfigHelpers
+import sys
 
 pio.kaleido.scope.mathjax = None
 
@@ -90,6 +91,10 @@ def token_length_per_entry(entry, schema, counter):
             result_key = passage["type"]
             for key in _TEXT_MAPS[schema]:
                 text = passage[key][0]
+                if not text:
+                    print("WARNING: text key does not exist")
+                    rprint(entry)
+                    continue
                 sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
                 toks = [tok for sent in sents for tok in sent]
                 tups = ["_".join(tup) for tup in ngrams]
@@ -100,6 +105,7 @@ def token_length_per_entry(entry, schema, counter):
         for key in _TEXT_MAPS[schema]:
             text = entry[key]
             if not text:
+                print("WARNING: text key does not exist")
                 rprint(entry)
                 continue
             else:
@@ -112,14 +118,14 @@ def token_length_per_entry(entry, schema, counter):
     return result, counter
 
 
-def parse_token_length_and_n_gram(dataset, data_config):
+def parse_token_length_and_n_gram(dataset, schema_type):
     hist_data = []
     n_gram_counters = []
     for split, data in dataset.items():
         n_gram_counter = Counter()
         for i, entry in enumerate(data):
             result, n_gram_counter = token_length_per_entry(
-                entry, data_config.schema, n_gram_counter
+                entry, schema_type, n_gram_counter
             )
             result["split"] = split
             hist_data.append(result)
@@ -129,19 +135,10 @@ def parse_token_length_and_n_gram(dataset, data_config):
     return pd.DataFrame(hist_data), n_gram_counters
 
 
-def center_title(fig):
-    fig.update_layout(
-        title={"y": 0.9, "x": 0.5, "xanchor": "center", "yanchor": "top"},
-        font=dict(
-            size=18,
-        ),
-    )
-    return fig
-
-
 def draw_box(df, col_name, row, col, fig):
     for split in df["split"].unique():
         split_count = df.loc[df["split"] == split, col_name].tolist()
+        print(split)
         fig.add_trace(
             go.Box(
                 x=split_count,
@@ -155,7 +152,6 @@ def draw_box(df, col_name, row, col, fig):
 
 def draw_bar(df, col_name, y_name, row, col, fig):
     for split in df["split"].unique():
-        print(split)
         split_count = df.loc[df["split"] == split, col_name].tolist()
         y_list = df.loc[df["split"] == split, y_name].tolist()
         fig.add_trace(
@@ -170,14 +166,6 @@ def draw_bar(df, col_name, y_name, row, col, fig):
             col=col,
         )
     fig.update_traces(orientation="h")  # horizontal box plots
-
-
-def parse_metrics(metadata):
-    for k, m in metadata.items():
-        mattrs = m.__dict__
-        for m, attr in mattrs.items():
-            if type(attr) == int and attr > 0:
-                print(f"{k}-{m}: {attr}")
 
 
 def parse_counters(metadata):
@@ -205,27 +193,89 @@ def parse_label_counter(metadata, counter_type):
     return pd.DataFrame(hist_data)
 
 
-def draw_figure(data_name, data_config_name):
+def gen_latex(dataset_name, helper, splits, schemas, fig_path):
+    descriptions = helper.description.replace("\n", "").replace("\t", "")
+    langs = [l.value for l in helper.languages]
+    languages = " ".join(langs)
+    if type(helper.license) is dict:
+        license = helper.license.value.name
+    else:
+        license = helper.license.name
+    tasks = [" ".join(t.name.lower().split("_")) for t in helper.tasks]
+    tasks = ", ".join(tasks)
+    schemas = " ".join([r"{\tt "] + list(schemas) + ["}"])  # TODO \tt
+    splits = ", ".join(list(splits))
+    data_name_display = " ".join(data_name.split("_"))
+    latex_bod = r"\clearpage" + "\n" + r"\section*{" + fr"{data_name_display}" + " Data Card" + r"}" + "\n"
+    latex_bod += (
+        r"\begin{figure}[ht!]"
+        + "\n"
+        + r"\centering"
+        + "\n"
+        + r"\includegraphics[width=\linewidth]{"
+    )
+    latex_bod += f"{fig_path}" + r"}" + "\n"
+    latex_bod += r"\caption{\label{fig:"
+    latex_bod += fr"{data_name}" + r"}"
+    latex_bod += (
+        r"Token frequency distribution by split (top) and frequency of different kind of instances (bottom).}"
+        + "\n"
+    )
+    latex_bod += r"\end{figure}" + "\n" + r"\textbf{Dataset Description} "
+    latex_bod += (
+        fr"{descriptions}"
+        + "\n"
+        + r"\textbf{Homepage:} "
+        + f"{helper.homepage}"
+        + "\n"
+        + r"\textbf{URL:} "
+        + f"{helper.homepage}"  # TODO change this later
+        + "\n"
+        + r"\textbf{Licensing:} "
+        + f"{license}"
+        + "\n"
+        + r"\textbf{Languages:} "
+        + f"{languages}"
+        + "\n"
+        + r"\textbf{Tasks:} "
+        + f"{tasks}"
+        + "\n"
+        + r"\textbf{Schemas:} "
+        + f"{schemas}"
+        + "\n"
+        + r"\textbf{Splits:} "
+        + f"{splits}"
+    )
+    return latex_bod
+
+
+def write_latex(latex_body, latex_name):
+    text_file = open(f"tex/{latex_name}", "w")
+    text_file.write(latex_body)
+    text_file.close()
+
+
+def draw_figure(data_name, data_config_name, schema_type):
     helper = conhelps.for_config_name(data_config_name)
-    metadata_helper = helper.get_metadata()
+    metadata_helper = helper.get_metadata()  # calls load_dataset for meta parsing
     rprint(metadata_helper)
-
-    parse_metrics(metadata_helper)
-
-    # load HF dataset
-    data_idx = data_config_names.index(data_config_name)
-    data_config = data_configs[data_idx]
+    splits = metadata_helper.keys()
+    # calls HF load_dataset _again_ for token parsing
     dataset = load_dataset(
         f"bigbio/biodatasets/{data_name}/{data_name}.py", name=data_config_name
     )
     # general token length
-    tok_hist_data, ngram_counters = parse_token_length_and_n_gram(dataset, data_config)
+    tok_hist_data, ngram_counters = parse_token_length_and_n_gram(dataset, schema_type)
+    rprint(helper)
 
     # general counter(s)
+    # TODO generate the pdf and fix latex
+
     counters = parse_counters(metadata_helper)
+    print(counters)
     rows = len(counters) // 3
     if len(counters) >= 3:
-        counters = counters[:3]
+        # counters = counters[:3]
         cols = 3
         specs = [[{"colspan": 3}, None, None]] + [[{}, {}, {}]] * (rows + 1)
     elif len(counters) == 1:
@@ -248,7 +298,8 @@ def draw_figure(data_name, data_config_name):
         horizontal_spacing=0.10,
     )
     # draw token distribution
-    draw_box(tok_hist_data, "token_length", row=1, col=1, fig=fig)
+    if "token_length" in tok_hist_data.keys():
+        draw_box(tok_hist_data, "token_length", row=1, col=1, fig=fig)
     for i, ct in enumerate(counters):
         row = i // 3 + 2
         col = i % 3 + 1
@@ -261,14 +312,6 @@ def draw_figure(data_name, data_config_name):
         # draw bar chart for counter
         draw_bar(label_df, ct, "labels", row=row, col=col, fig=fig)
 
-    # add annotation
-    descriptions = helper.description.replace("\n", "").replace("\t", "")
-    langs = [l.value for l in helper.languages]
-    languages = " ".join(langs)
-    license = helper.license.value.name
-    tasks = [" ".join(t.name.lower().split("_")) for t in helper.tasks]
-    tasks = ", ".join(tasks)
-
     fig.update_annotations(font_size=12)
     fig.update_layout(
         margin=dict(l=25, r=25, t=25, b=25, pad=2),
@@ -279,66 +322,56 @@ def draw_figure(data_name, data_config_name):
     )
 
     # fig.show()
-
     fig_name = f"{data_name}_{data_config_name}.pdf"
+
     fig_path = f"figures/data_card/{fig_name}"
-    data_name_display = " ".join(data_name.split("_"))
-    latex_bod = r"\textbf{" + fr"{data_name_display}" + r"}" + "\n"
-    latex_bod += (
-        r"\begin{figure}[ht!]"
-        + "\n"
-        + r"\centering"
-        + "\n"
-        + r"\includegraphics[width=\linewidth]{"
-    )
-    latex_bod += f"{fig_path}" + r"}" + "\n"
-    latex_bod += r"""\caption{\label{fig:"""
-    latex_bod += fr"{data_name}" + r"}"
-    latex_bod += (
-        r"Token frequency distribution by split (top) and Frequency of different kind of instances (bottom).}"
-        + "\n"
-    )
-    latex_bod += r"\end{figure}" + "\n" + r"\paragraph{Dataset Description}"
-    latex_bod += (
-        fr"{descriptions}"
-        + "\n"
-        + r"\paragraph{Licensing} "
-        + f"{license}"
-        + "\n"
-        + r"\paragraph{Languages} "
-        + f"{languages}"
-        + "\n"
-        + r"\paragraph{Tasks} "
-        + f"{tasks}"
-    )
-
     fig.write_image(fig_path)
-
-    latex_name = f"{data_name}_{data_config_name}.tex"
-
-    text_file = open(f"tex/{latex_name}", "w")
-    n = text_file.write(latex_bod)
-    text_file.close()
-    print(latex_bod)
     dataset.cleanup_cache_files()
+
+    return helper, splits, fig_path
 
 
 if __name__ == "__main__":
     # load helpers
-    conhelps_local = load_helper(local="scripts/bigbio-public-metadatas-6-8.json")
+    # each entry in local metadata is the dataset name
+    dc_local = load_helper(local="scripts/bigbio-public-metadatas-6-8.json")
+    # each entry is the config
     conhelps = load_helper()
-    configs = list()
+    dc = list()
+    # TODO uncomment this
+    # for conhelper in conhelps:
+    #     # print(f"{conhelper.dataset_name}-{conhelper.config.subset_id}-{conhelper.config.schema}")
+    #     dc.append(conhelper.dataset_name)
 
-    for conhelper in conhelps:
-        configs.append(conhelper.dataset_name)
-    names = ["mqp", "paramed", "mediqa_qa", "scitail"]
-    # TODO: parse all public dataset
-    for data_name in names:
-        # data_name = configs['data_name']
-        # data_info = conhelps_local[data_name]
-        # setup data configs
-        data_helpers = conhelps.for_dataset(data_name)
-        data_configs = [d.config for d in data_helpers]
-        data_config_names = [d.config.name for d in data_helpers]
-        for data_config_name in data_config_names:
-            draw_figure(data_name, data_config_name)
+    # datacard per data, metadata chart per config
+    # for data_name, meta in dc_local.items():
+    #     config_metas = meta['config_metas']
+    #     config_metas_keys = config_metas.keys()
+    #     if len(config_metas_keys) > 1:
+    #         print(f'dataset {data_name} has more than one config')
+    #     schemas = set()
+    #     for config_name, config in config_metas.items():
+    #         bigbio_schema = config['bigbio_schema']
+    #         helper, splits, fig_path = draw_figure(data_name, config_name, bigbio_schema)
+    #         schemas.add(helper.bigbio_schema_caps)
+    #         latex_bod = gen_latex(data_name, helper, splits, schemas, fig_path)
+    #         latex_name = f"{data_name}_{config_name}.tex"
+    #         write_latex(latex_bod, latex_name)
+    #         print(latex_bod)
+
+    # TODO try this code first, then use this for the whole loop
+    data_name = sys.argv[1]
+    meta = dc_local[data_name]
+    config_metas = meta['config_metas']
+    config_metas_keys = config_metas.keys()
+    if len(config_metas_keys) >= 1:
+        print(f'dataset {data_name} has more than one config')
+    schemas = set()
+    for config_name, config in config_metas.items():
+        bigbio_schema = config['bigbio_schema']
+        helper, splits, fig_path = draw_figure(data_name, config_name, bigbio_schema)
+        schemas.add(helper.bigbio_schema_caps)
+        latex_bod = gen_latex(data_name, helper, splits, schemas, fig_path)
+        latex_name = f"{data_name}_{config_name}.tex"
+        write_latex(latex_bod, latex_name)
+        print(latex_bod)
