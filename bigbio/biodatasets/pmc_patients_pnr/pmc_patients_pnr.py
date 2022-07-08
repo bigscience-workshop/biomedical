@@ -14,7 +14,11 @@
 # limitations under the License.
 
 """
-PMC-Patients dataset consists of 4 tasks. One of the task is Patient Note Recognition (PNR). PMC-Patients PNR dataset is modeled as a paragraph-level sequential labeling task, similar to the named entity recognition (NER) task. For each article, given input as a sequence of texts p1, p2, ..., pn, where n is the number of paragraphs, the output is a sequence of BIO tags t1, t2, ..., tn.
+PMC-Patients dataset consists of 4 tasks. One of the task is Patient Note Recognition (PNR).
+PMC-Patients PNR dataset is modeled as a paragraph-level sequential labeling task,
+similar to the named entity recognition (NER) task.
+For each article, given input as a sequence of texts p1, p2, ..., pn, where n is the number of paragraphs,
+the output is a sequence of BIO tags t1, t2, ..., tn.
 """
 
 import json
@@ -22,9 +26,7 @@ import os
 from typing import Dict, List, Tuple
 
 import datasets
-import pandas as pd
 
-from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
@@ -66,7 +68,12 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class PMCPatientsPNRDataset(datasets.GeneratorBasedBuilder):
-    """PMC-Patients dataset consists of 4 tasks. One of the task is Patient Note Recognition (PNR). PMC-Patients PNR dataset is modeled as a paragraph-level sequential labeling task, similar to the named entity recognition (NER) task. For each article, given input as a sequence of texts p1, p2, ..., pn, where n is the number of paragraphs, the output is a sequence of BIO tags t1, t2, ..., tn. 
+    """
+    PMC-Patients dataset consists of 4 tasks. One of the task is Patient Note Recognition (PNR).
+    PMC-Patients PNR dataset is modeled as a paragraph-level sequential labeling task,
+    similar to the named entity recognition (NER) task.
+    For each article, given input as a sequence of texts p1, p2, ..., pn, where n is the number of paragraphs,
+    the output is a sequence of BIO tags t1, t2, ..., tn.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -142,9 +149,7 @@ class PMCPatientsPNRDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(
-        self, filepath, split: str, data_dir: str
-    ) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath, split: str, data_dir: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         with open(filepath, "r") as j:
