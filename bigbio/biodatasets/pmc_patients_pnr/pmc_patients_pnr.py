@@ -60,7 +60,7 @@ _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?id=1vFCLy_CF8fxPDZvDtHPR6Dl6x9l0TyvW&export=download",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = []
 
 _SOURCE_VERSION = "1.2.0"
 
