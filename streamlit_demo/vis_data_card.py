@@ -86,14 +86,16 @@ N = 3
 
 def token_length_per_entry(entry, schema, counter):
     result = {}
+    entry_id = entry['id']
     if schema == "bigbio_kb":
         for passage in entry["passages"]:
             result_key = passage["type"]
             for key in _TEXT_MAPS[schema]:
                 text = passage[key][0]
                 if not text:
-                    print("WARNING: text key does not exist")
-                    rprint(entry)
+                    print(f"WARNING: text key does not exist: entry {entry_id}")
+                    result["token_length"] = 0
+                    result["text_type"] = result_key
                     continue
                 sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
                 toks = [tok for sent in sents for tok in sent]
@@ -105,8 +107,9 @@ def token_length_per_entry(entry, schema, counter):
         for key in _TEXT_MAPS[schema]:
             text = entry[key]
             if not text:
-                print("WARNING: text key does not exist")
-                rprint(entry)
+                print(f"WARNING: text key does not exist, entry {entry_id}")
+                result["token_length"] = 0
+                result["text_type"] = key
                 continue
             else:
                 sents, ngrams = get_tuples_manual_sentences(text.lower(), N)
@@ -129,14 +132,19 @@ def parse_token_length_and_n_gram(dataset, schema_type):
             )
             result["split"] = split
             hist_data.append(result)
-            # print(result)
         n_gram_counters.append(n_gram_counter)
 
     return pd.DataFrame(hist_data), n_gram_counters
 
 
+def resolve_splits(df_split):
+    official_splits = set(df_split).intersection(set(SPLIT_COLOR_MAP.keys()))
+    return official_splits
+
+
 def draw_box(df, col_name, row, col, fig):
-    for split in df["split"].unique():
+    splits = resolve_splits(df["split"].unique())
+    for split in splits:
         split_count = df.loc[df["split"] == split, col_name].tolist()
         print(split)
         fig.add_trace(
@@ -151,7 +159,8 @@ def draw_box(df, col_name, row, col, fig):
 
 
 def draw_bar(df, col_name, y_name, row, col, fig):
-    for split in df["split"].unique():
+    splits = resolve_splits(df["split"].unique())
+    for split in splits:
         split_count = df.loc[df["split"] == split, col_name].tolist()
         y_list = df.loc[df["split"] == split, y_name].tolist()
         fig.add_trace(
@@ -194,7 +203,12 @@ def parse_label_counter(metadata, counter_type):
 
 
 def gen_latex(dataset_name, helper, splits, schemas, fig_path):
-    descriptions = helper.description.replace("\n", "").replace("\t", "")
+    if type(helper.description) is dict:
+        # TODO hacky, change this to include all decsriptions
+        descriptions = helper.description[list(helper.description.keys())[0]]
+    else:
+        descriptions = helper.description
+    descriptions = descriptions.replace("\n", "").replace("\t", "")
     langs = [l.value for l in helper.languages]
     languages = " ".join(langs)
     if type(helper.license) is dict:
