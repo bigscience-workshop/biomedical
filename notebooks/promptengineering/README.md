@@ -467,7 +467,7 @@ class CustomDataset(datasets.GeneratorBasedBuilder):
 
 ```
 
-You can find this in the `bigbio_scripts` folder where this tutorial is located.
+You can find this in the `bigbio_scripts` folder where this tutorial is located; you may also need an `__init__.py` file in the folder housing this script.
 
 The contents of the tutorial will not dive into how to create your own dataloader (this information can be found [here](https://github.com/bigscience-workshop/biomedical/blob/master/CONTRIBUTING.md)). Provided you can use this tutorial to make prompts on your own custom dataset.
 
