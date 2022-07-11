@@ -13197,7 +13197,7 @@ div#notebook {
 (2) Generate a new prompt task in <code>LmEval</code> <br>
 (3) Evaluate a model of choice for your dataset!</p>
 <p>We will be using the dataset <code>Biosses</code> within BigBio and treating this as a "custom" dataset to illustrate how to use PromptSource and Lm-Eval-Harness.</p>
-<p><strong>NOTE</strong> This tutorial uses 3 packages: <code>promptsource</code>, <code>lm-eval-harness</code> and <code>bigbio</code>. All of these need to be installed (instructions will be provided) but will require some work outside of the notebook in order to run. Also note, while the prompting templates + bigbio may work as intended, <code>lm-eval-harness</code> may not have all the metrics or specifications required for your custom implementation.</p>
+<p><strong>NOTE</strong> This tutorial uses 3 packages: <code>promptsource</code>, <code>lm-eval-harness</code> and <code>bigbio</code>. All of these need to be installed (instructions will be provided) but will require some work outside of the notebook in order to run. Also note, while the prompting templates + bigbio may work as intended, <code>lm-eval-harness</code> may not have all the metrics or specifications required for your custom implementation. You may need to add these manually. Feel free to contact us if you need specific help, as these packages are independently maintained, but we are happy to help.</p>
 
 </div>
 </div>
@@ -13233,7 +13233,7 @@ source bigbioprompting/bin/activate  # activate environment</code></pre>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Step-1:-Install-lm-evaluation-harness">Step 1: Install lm-evaluation-harness<a class="anchor-link" href="#Step-1:-Install-lm-evaluation-harness">&#182;</a></h3><p>In order to integrate your templates and evaluate your prompt, we will work with <code>lm-evaluation-harness</code>. First, we download the package as follows:</p>
 
-<pre><code>git clone --branch bigbio --single-branch git@github.com:bigscience-workshop/lm-evaluation-harness.git
+<pre><code>git clone --branch bigbio --single-branch git@github.com:hakunanatasha/lm-evaluation-harness.git
 cd lm-evaluation-harness
 pip install -e .
 cd ..</code></pre>
@@ -13241,7 +13241,7 @@ cd ..</code></pre>
 
 <pre><code>pip uninstall bigbio
 pip uninstall promptsource  # make sure it matches your environment pip</code></pre>
-<p><strong>NOTE</strong> If this takes too long, download the other libraries, install lm-eval-harness, and make sure your bigbio/promptsource version point to the correct locations.s</p>
+<p><strong>NOTE</strong> If this takes too long, download the other libraries, install lm-eval-harness, and make sure your bigbio/promptsource version point to the correct locations.</p>
 
 </div>
 </div>
@@ -13260,13 +13260,6 @@ cd ../</code></pre>
 <h4 id="Creating-prompts-for-datasets-in-BigBio">Creating prompts for datasets in <code>BigBio</code><a class="anchor-link" href="#Creating-prompts-for-datasets-in-BigBio">&#182;</a></h4><p>Install the <code>BigBio</code> repository in your chosen environment.</p>
 
 <pre><code>pip install git+https://github.com/bigscience-workshop/biomedical.git</code></pre>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 
 </div>
 </div>
@@ -13298,7 +13291,7 @@ pip install protobuf==3.19.4</code></pre>
 username=bigscience
 password=bigscience</code></pre>
 <p>Your directory structure within promptsource should look as such:</p>
-<p><img src="prompt_structure1.png" alt="Directory Structure"></p>
+<p><img src="images/prompt_structure1.png" alt="Directory Structure"></p>
 
 </div>
 </div>
@@ -13310,9 +13303,9 @@ password=bigscience</code></pre>
 
 <pre><code>streamlit run promptsource/app.py</code></pre>
 <p>You will first be prompted to log with this screen <br></p>
-<p><img src="guilogin.png" alt="GuiLogin"></p>
+<p><img src="images/guilogin.png" alt="GuiLogin"></p>
 <p>Log in with both username and password that matches your <code>cred.cfg</code>. You will then arrive at the GUI interface.</p>
-<p><img src="guiprompt.png" alt="GuiLogin"></p>
+<p><img src="images/guiprompt.png" alt="GuiLogin"></p>
 
 </div>
 </div>
@@ -13331,7 +13324,7 @@ password=bigscience</code></pre>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Step-3b:-Create-a-&quot;custom&quot;-dataset">Step 3b: Create a "custom" dataset<a class="anchor-link" href="#Step-3b:-Create-a-&quot;custom&quot;-dataset">&#182;</a></h3><p>For this example, we will adapt Biosses and create a new task. To do this, modify the <code>BigBio</code> repo. In this tutorial, you will find the file <code>custom_dataset.py</code> that contains a copy of the biosses file, but adapted to allow us to walk through how one might make a custom prompt.</p>
 <p>In your <code>BigBio</code> repo, place <code>custom_dataset</code> in the <code>bigbio/biodatasets/custom_dataset</code> folder. Your structure should look as such:</p>
-<p><img src="customdataset.png" alt="cdataset"></p>
+<p><img src="images/customdataset.png" alt="cdataset"></p>
 <p>The custom dataloading script is simply adapted as follows:</p>
 <p><code>python</code></p>
 <p>The contents of the tutorial will not dive into how to create your own dataloader (this information can be found <a href="https://github.com/bigscience-workshop/biomedical/blob/master/CONTRIBUTING.md">here</a>). Provided you can use this tutorial to make prompts on your own custom dataset.</p>
@@ -13344,9 +13337,9 @@ password=bigscience</code></pre>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Step-4:-Make-your-own-prompt!">Step 4: Make your own prompt!<a class="anchor-link" href="#Step-4:-Make-your-own-prompt!">&#182;</a></h3><p>To create a prompt, use the tab on the left-hand-side of the app.</p>
 <p>In "Choose a mode" choose <strong>Sourcing</strong></p>
-<p><img src="source.png" alt="source"></p>
+<p><img src="images/source.png" alt="source"></p>
 <p>Choose a dataset (ex: <code>custom_dataset</code>) and a subset corresponding to a bigbio view (ex: <code>custom_bigbio_pairs</code>).</p>
-<p><img src="datasetsubset.png" alt="dset"></p>
+<p><img src="images/datasetsubset.png" alt="dset"></p>
 
 </div>
 </div>
@@ -13356,16 +13349,16 @@ password=bigscience</code></pre>
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The main body of the prompt creator will show pre-existing prompts, or allow you to create new ones. <strong>Creating prompts will require you to have some understanding of the dataset</strong>.</p>
 <p>For this example, we are going to use semantic similarity between text pairs. We will call this prompt <code>is_similar</code>. Here, we access the key <code>text_1</code> and <code>text_2</code> within the <code>BigBio-Pairs</code> schema. Our metric is <strong>Accuracy</strong> (yes/no).</p>
-<p><img src="issimilar.png" alt="ismodulator"></p>
+<p><img src="images/issimilar.png" alt="issimilar"></p>
 <p>After you click "create", you will receive an empty template as follows:</p>
-<p><img src="empty.png" alt="emptytemplate"></p>
+<p><img src="images/empty.png" alt="emptytemplate"></p>
 <p>For this task, we are creating a natural language generation-based task. Our metric is "Accuracy", as we do not have choices in text. Write your template as follows. <br></p>
 
 <pre><code>Does "{{text_1}}" and "{{text_2}}" say similar things?|||
 {{answer_choices[0 if label|float &lt; 2.5 else 1]}}</code></pre>
 <p><br></p>
 <p>You can use the "Select Example" menu on the left to toggle through examples. You can observe whether your prompt operates as expected using the input example on the right hand side:</p>
-<p><img src="customexample.png" alt="customexample"></p>
+<p><img src="images/customexample.png" alt="customexample"></p>
 <p>If you want more details on how to write prompts, you can follow Jinja templating tips <a href="https://github.com/OpenBioLink/promptsource/blob/main/CONTRIBUTING.md">here</a>.</p>
 
 </div>
@@ -13378,7 +13371,7 @@ password=bigscience</code></pre>
 <p>For your custom dataset, you should find it here:</p>
 
 <pre><code>promptsource/promptsource/templates/custom_dataset/custom_dataset/templates.yaml</code></pre>
-<p><img src="exampleprompttemplate.png" alt="exampleprompttemplate"></p>
+<p><img src="images/exampleprompttemplate.png" alt="exampleprompttemplate"></p>
 <p>All templated prompts will appear in this one file.</p>
 <p>With that, you've generated your own template for prompting! Now we will evaluate it!</p>
 
@@ -13468,7 +13461,7 @@ password=bigscience</code></pre>
 <h3 id="Step-7:-Run-your-task">Step 7: Run your task<a class="anchor-link" href="#Step-7:-Run-your-task">&#182;</a></h3><p>Use the <code>main.py</code> script in <code>lm-evaluation-harness</code> as such:</p>
 
 <pre><code>python main.py --model hf-seq2seq --model_args pretrained=t5-small --tasks custom_dataset --device cuda</code></pre>
-<p><img src="results.png" alt="results"></p>
+<p><img src="images/results.png" alt="results"></p>
 
 </div>
 </div>
@@ -13476,7 +13469,7 @@ password=bigscience</code></pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h5 id="Advanced-notes">Advanced notes<a class="anchor-link" href="#Advanced-notes">&#182;</a></h5><p>Not all tasks/templates are supported by <code>lm-eval-harness</code> at the moment. You can add your own tasks to the source code <a href="https://github.com/bigscience-workshop/lm-evaluation-harness/blob/e92591534c2f49619d0a703539abb686547bc71b/lm_eval/base.py#L1062">here</a>.</p>
+<h5 id="Advanced-notes">Advanced notes<a class="anchor-link" href="#Advanced-notes">&#182;</a></h5><p>Not all tasks/templates are supported by <code>lm-eval-harness</code> at the moment. You can add your own tasks metrics to the source code <a href="https://github.com/hakunanatasha/lm-evaluation-harness/blob/cbf3f98ce9d554a6b5ecde4c00f34337ef895eac/lm_eval/base.py#L1055">here</a>.</p>
 <p>Note, depending on if the task is generation versus scoring (i.e. accuraacy), you may have to implement a custom metric function and edit the loop that evaluates metrics.</p>
 
 </div>
