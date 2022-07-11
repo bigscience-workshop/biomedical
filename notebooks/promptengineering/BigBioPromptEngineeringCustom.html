@@ -13326,7 +13326,316 @@ password=bigscience</code></pre>
 <p>In your <code>BigBio</code> repo, place <code>custom_dataset</code> in the <code>bigbio/biodatasets/custom_dataset</code> folder. Your structure should look as such:</p>
 <p><img src="images/customdataset.png" alt="cdataset"></p>
 <p>The custom dataloading script is simply adapted as follows:</p>
-<p><code>python</code></p>
+<div class="highlight"><pre><span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2020 The HuggingFace Datasets Authors and the current dataset script contributor.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BioSSES computes similarity of biomedical sentences by utilizing WordNet as the</span>
+<span class="sd">general domain ontology and UMLS as the biomedical domain specific ontology.</span>
+<span class="sd">The original paper outlines the approaches with respect to using annotator</span>
+<span class="sd">score as golden standard. Source view will return all annotator score</span>
+<span class="sd">individually whereas the Bigbio view will return the mean of the annotator</span>
+<span class="sd">score.</span>
+
+<span class="sd">Note: The original files are Word documents, compressed using RAR. This data</span>
+<span class="sd">loader uses a version that privides the same data in text format.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">bigbio.utils</span> <span class="kn">import</span> <span class="n">schemas</span>
+<span class="kn">from</span> <span class="nn">bigbio.utils.configs</span> <span class="kn">import</span> <span class="n">BigBioConfig</span>
+<span class="kn">from</span> <span class="nn">bigbio.utils.constants</span> <span class="kn">import</span> <span class="n">Lang</span><span class="p">,</span> <span class="n">Tasks</span>
+<span class="kn">from</span> <span class="nn">bigbio.utils.license</span> <span class="kn">import</span> <span class="n">Licenses</span>
+
+<span class="n">_DATASETNAME</span> <span class="o">=</span> <span class="s2">&quot;custom_dataset&quot;</span>
+<span class="n">_DISPLAYNAME</span> <span class="o">=</span> <span class="s2">&quot;custom_dataset&quot;</span>
+
+<span class="n">_LANGUAGES</span> <span class="o">=</span> <span class="p">[</span><span class="n">Lang</span><span class="o">.</span><span class="n">EN</span><span class="p">]</span>
+<span class="n">_PUBMED</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">_LOCAL</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">_CITATION</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">@article{souganciouglu2017biosses,</span>
+<span class="s2">  title={BIOSSES: a semantic sentence similarity estimation system for the biomedical domain},</span>
+<span class="s2">  author={Soğancıoğlu, Gizem, Hakime Öztürk, and Arzucan Özgür},</span>
+<span class="s2">  journal={Bioinformatics},</span>
+<span class="s2">  volume={33},</span>
+<span class="s2">  number={14},</span>
+<span class="s2">  pages={i49--i58},</span>
+<span class="s2">  year={2017},</span>
+<span class="s2">  publisher={Oxford University Press}</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">_DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">BioSSES computes similarity of biomedical sentences by utilizing WordNet as the</span>
+<span class="s2">general domain ontology and UMLS as the biomedical domain specific ontology.</span>
+<span class="s2">The original paper outlines the approaches with respect to using annotator</span>
+<span class="s2">score as golden standard. Source view will return all annotator score</span>
+<span class="s2">individually whereas the Bigbio view will return the mean of the annotator</span>
+<span class="s2">score.</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">_HOMEPAGE</span> <span class="o">=</span> <span class="s2">&quot;https://tabilab.cmpe.boun.edu.tr/BIOSSES/DataSet.html&quot;</span>
+
+<span class="n">_LICENSE</span> <span class="o">=</span> <span class="n">Licenses</span><span class="o">.</span><span class="n">GPL_3p0</span>
+
+<span class="n">_URLs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;bigbio_pairs&quot;</span><span class="p">:</span> <span class="s2">&quot;https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_SUPPORTED_TASKS</span> <span class="o">=</span> <span class="p">[</span><span class="n">Tasks</span><span class="o">.</span><span class="n">SEMANTIC_SIMILARITY</span><span class="p">]</span>
+<span class="n">_SOURCE_VERSION</span> <span class="o">=</span> <span class="s2">&quot;1.0.0&quot;</span>
+<span class="n">_BIGBIO_VERSION</span> <span class="o">=</span> <span class="s2">&quot;1.0.0&quot;</span>
+
+
+<span class="c1"># The BIOSSES dataset does not provide canonical train/dev/test splits.</span>
+<span class="c1"># However the BLUE and BLURB datasets use the following split definitions.</span>
+<span class="c1"># see https://github.com/bigscience-workshop/biomedical/issues/664</span>
+
+<span class="n">TRAIN_INDEXES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">78</span><span class="p">,</span>
+    <span class="mi">45</span><span class="p">,</span>
+    <span class="mi">35</span><span class="p">,</span>
+    <span class="mi">50</span><span class="p">,</span>
+    <span class="mi">27</span><span class="p">,</span>
+    <span class="mi">13</span><span class="p">,</span>
+    <span class="mi">87</span><span class="p">,</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">58</span><span class="p">,</span>
+    <span class="mi">99</span><span class="p">,</span>
+    <span class="mi">55</span><span class="p">,</span>
+    <span class="mi">74</span><span class="p">,</span>
+    <span class="mi">66</span><span class="p">,</span>
+    <span class="mi">39</span><span class="p">,</span>
+    <span class="mi">44</span><span class="p">,</span>
+    <span class="mi">18</span><span class="p">,</span>
+    <span class="mi">84</span><span class="p">,</span>
+    <span class="mi">76</span><span class="p">,</span>
+    <span class="mi">19</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">,</span>
+    <span class="mi">75</span><span class="p">,</span>
+    <span class="mi">46</span><span class="p">,</span>
+    <span class="mi">15</span><span class="p">,</span>
+    <span class="mi">86</span><span class="p">,</span>
+    <span class="mi">60</span><span class="p">,</span>
+    <span class="mi">14</span><span class="p">,</span>
+    <span class="mi">51</span><span class="p">,</span>
+    <span class="mi">79</span><span class="p">,</span>
+    <span class="mi">29</span><span class="p">,</span>
+    <span class="mi">34</span><span class="p">,</span>
+    <span class="mi">94</span><span class="p">,</span>
+    <span class="mi">28</span><span class="p">,</span>
+    <span class="mi">62</span><span class="p">,</span>
+    <span class="mi">42</span><span class="p">,</span>
+    <span class="mi">21</span><span class="p">,</span>
+    <span class="mi">30</span><span class="p">,</span>
+    <span class="mi">11</span><span class="p">,</span>
+    <span class="mi">53</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">,</span>
+    <span class="mi">12</span><span class="p">,</span>
+    <span class="mi">26</span><span class="p">,</span>
+    <span class="mi">48</span><span class="p">,</span>
+    <span class="mi">31</span><span class="p">,</span>
+    <span class="mi">32</span><span class="p">,</span>
+    <span class="mi">77</span><span class="p">,</span>
+    <span class="mi">37</span><span class="p">,</span>
+    <span class="mi">95</span><span class="p">,</span>
+    <span class="mi">85</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">,</span>
+    <span class="mi">56</span><span class="p">,</span>
+    <span class="mi">43</span><span class="p">,</span>
+    <span class="mi">61</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">,</span>
+    <span class="mi">67</span><span class="p">,</span>
+    <span class="mi">65</span><span class="p">,</span>
+    <span class="mi">54</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">,</span>
+    <span class="mi">73</span><span class="p">,</span>
+    <span class="mi">98</span><span class="p">,</span>
+    <span class="mi">17</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">,</span>
+    <span class="mi">92</span><span class="p">,</span>
+    <span class="mi">93</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">DEV_INDEXES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">88</span><span class="p">,</span>
+    <span class="mi">82</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">,</span>
+    <span class="mi">63</span><span class="p">,</span>
+    <span class="mi">47</span><span class="p">,</span>
+    <span class="mi">68</span><span class="p">,</span>
+    <span class="mi">40</span><span class="p">,</span>
+    <span class="mi">90</span><span class="p">,</span>
+    <span class="mi">100</span><span class="p">,</span>
+    <span class="mi">24</span><span class="p">,</span>
+    <span class="mi">41</span><span class="p">,</span>
+    <span class="mi">91</span><span class="p">,</span>
+    <span class="mi">80</span><span class="p">,</span>
+    <span class="mi">9</span><span class="p">,</span>
+    <span class="mi">72</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">TEST_INDEXES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">59</span><span class="p">,</span>
+    <span class="mi">96</span><span class="p">,</span>
+    <span class="mi">70</span><span class="p">,</span>
+    <span class="mi">22</span><span class="p">,</span>
+    <span class="mi">81</span><span class="p">,</span>
+    <span class="mi">38</span><span class="p">,</span>
+    <span class="mi">57</span><span class="p">,</span>
+    <span class="mi">23</span><span class="p">,</span>
+    <span class="mi">33</span><span class="p">,</span>
+    <span class="mi">89</span><span class="p">,</span>
+    <span class="mi">69</span><span class="p">,</span>
+    <span class="mi">49</span><span class="p">,</span>
+    <span class="mi">7</span><span class="p">,</span>
+    <span class="mi">71</span><span class="p">,</span>
+    <span class="mi">97</span><span class="p">,</span>
+    <span class="mi">25</span><span class="p">,</span>
+    <span class="mi">83</span><span class="p">,</span>
+    <span class="mi">64</span><span class="p">,</span>
+    <span class="mi">52</span><span class="p">,</span>
+    <span class="mi">20</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">CustomDataset</span><span class="p">(</span><span class="n">datasets</span><span class="o">.</span><span class="n">GeneratorBasedBuilder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Custom Version of BIOSSES : Biomedical Semantic Similarity Estimation System&quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_CONFIG_NAME</span> <span class="o">=</span> <span class="s2">&quot;custom_source&quot;</span>
+    <span class="n">SOURCE_VERSION</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">_SOURCE_VERSION</span><span class="p">)</span>
+    <span class="n">BIGBIO_VERSION</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">_BIGBIO_VERSION</span><span class="p">)</span>
+
+    <span class="n">BUILDER_CONFIGS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BigBioConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom_source&quot;</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">SOURCE_VERSION</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;custom source schema&quot;</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">=</span><span class="s2">&quot;source&quot;</span><span class="p">,</span>
+            <span class="n">subset_id</span><span class="o">=</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">BigBioConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom_bigbio_pairs&quot;</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">BIGBIO_VERSION</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;custom simplified BigBio schema&quot;</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">=</span><span class="s2">&quot;bigbio_pairs&quot;</span><span class="p">,</span>
+            <span class="n">subset_id</span><span class="o">=</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;custom_source&quot;</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Features</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;text_1&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;text_2&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;annotator_a&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;annotator_b&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;annotator_c&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;annotator_d&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;annotator_e&quot;</span><span class="p">:</span> <span class="n">datasets</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;custom_bigbio_pairs&quot;</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">schemas</span><span class="o">.</span><span class="n">pairs_features</span>
+
+        <span class="k">return</span> <span class="n">datasets</span><span class="o">.</span><span class="n">DatasetInfo</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">_DESCRIPTION</span><span class="p">,</span>
+            <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+            <span class="n">supervised_keys</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">homepage</span><span class="o">=</span><span class="n">_HOMEPAGE</span><span class="p">,</span>
+            <span class="n">license</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">_LICENSE</span><span class="p">),</span>
+            <span class="n">citation</span><span class="o">=</span><span class="n">_CITATION</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_split_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dl_manager</span><span class="p">):</span>
+
+        <span class="n">my_urls</span> <span class="o">=</span> <span class="n">_URLs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">schema</span><span class="p">]</span>
+        <span class="n">dl_dir</span> <span class="o">=</span> <span class="n">dl_manager</span><span class="o">.</span><span class="n">download_and_extract</span><span class="p">(</span><span class="n">my_urls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">datasets</span><span class="o">.</span><span class="n">SplitGenerator</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">datasets</span><span class="o">.</span><span class="n">Split</span><span class="o">.</span><span class="n">TRAIN</span><span class="p">,</span>
+                <span class="n">gen_kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">dl_dir</span><span class="p">,</span>
+                    <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;indexes&quot;</span><span class="p">:</span> <span class="n">TRAIN_INDEXES</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">),</span>
+            <span class="n">datasets</span><span class="o">.</span><span class="n">SplitGenerator</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">datasets</span><span class="o">.</span><span class="n">Split</span><span class="o">.</span><span class="n">VALIDATION</span><span class="p">,</span>
+                <span class="n">gen_kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">dl_dir</span><span class="p">,</span>
+                    <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;validation&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;indexes&quot;</span><span class="p">:</span> <span class="n">DEV_INDEXES</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">),</span>
+            <span class="n">datasets</span><span class="o">.</span><span class="n">SplitGenerator</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">datasets</span><span class="o">.</span><span class="n">Split</span><span class="o">.</span><span class="n">TEST</span><span class="p">,</span>
+                <span class="n">gen_kwargs</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">dl_dir</span><span class="p">,</span>
+                    <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;indexes&quot;</span><span class="p">:</span> <span class="n">TEST_INDEXES</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_generate_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">indexes</span><span class="p">):</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;sentence_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indexes</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">uid</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span>
+                    <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_id&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;text_1&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_1&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;text_2&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_2&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;annotator_a&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_a&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;annotator_b&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_b&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;annotator_c&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_c&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;annotator_d&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_d&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;annotator_e&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_e&quot;</span><span class="p">],</span>
+                <span class="p">}</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">schema</span> <span class="o">==</span> <span class="s2">&quot;bigbio_pairs&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">uid</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span>
+                    <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_id&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;text_1&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_1&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;text_2&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;sentence_2&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_a&quot;</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_b&quot;</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_c&quot;</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_d&quot;</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;annotator_e&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="o">/</span> <span class="mi">5</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+</pre></div>
+<p>You can find this in the <code>bigbio_scripts</code> folder where this tutorial is located.</p>
 <p>The contents of the tutorial will not dive into how to create your own dataloader (this information can be found <a href="https://github.com/bigscience-workshop/biomedical/blob/master/CONTRIBUTING.md">here</a>). Provided you can use this tutorial to make prompts on your own custom dataset.</p>
 
 </div>
