@@ -374,18 +374,33 @@ if __name__ == "__main__":
     #         print(latex_bod)
 
     # TODO try this code first, then use this for the whole loop
+    # skipped medal, too large, no nagel/pcr/pubtator_central/spl_adr_200db in local
     data_name = sys.argv[1]
-    meta = dc_local[data_name]
-    config_metas = meta['config_metas']
-    config_metas_keys = config_metas.keys()
-    if len(config_metas_keys) >= 1:
-        print(f'dataset {data_name} has more than one config')
     schemas = set()
-    for config_name, config in config_metas.items():
-        bigbio_schema = config['bigbio_schema']
+    # LOCAL
+    # meta = dc_local[data_name]
+    # config_metas = meta['config_metas']
+    # config_metas_keys = config_metas.keys()
+    # if len(config_metas_keys) >= 1:
+    #     print(f'dataset {data_name} has more than one config')
+    # for config_name, config in config_metas.items():
+    #     bigbio_schema = config['bigbio_schema']
+    #     helper, splits, fig_path = draw_figure(data_name, config_name, bigbio_schema)
+    #     schemas.add(helper.bigbio_schema_caps)
+    #     latex_bod = gen_latex(data_name, helper, splits, schemas, fig_path)
+    #     latex_name = f"{data_name}_{config_name}.tex"
+    #     write_latex(latex_bod, latex_name)
+    #     print(latex_bod)
+    # NON LOCAL
+    config_helpers = conhelps.for_dataset(data_name)
+    for config_helper in config_helpers:
+        rprint(config_helper)
+        bigbio_schema = config_helper.config.schema
+        config_name = config_helper.config.name
         helper, splits, fig_path = draw_figure(data_name, config_name, bigbio_schema)
         schemas.add(helper.bigbio_schema_caps)
         latex_bod = gen_latex(data_name, helper, splits, schemas, fig_path)
         latex_name = f"{data_name}_{config_name}.tex"
         write_latex(latex_bod, latex_name)
         print(latex_bod)
+
