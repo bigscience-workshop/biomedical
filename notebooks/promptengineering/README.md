@@ -519,7 +519,7 @@ You should be able to find your updated template in `promptsource/promptsource/t
 For your custom dataset, you should find it here:
 
 ```
-promptsource/promptsource/templates/custom_dataset/custom_dataset/templates.yaml
+promptsource/promptsource/templates/custom_dataset/custom_dataset_bigbio_pairs/templates.yaml
 ```
 
 ![exampleprompttemplate](images/exampleprompttemplate.png)
