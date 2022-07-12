@@ -29,8 +29,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{schulz-etal-2020-biomedical,
@@ -52,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ehr_rel"
+_DISPLAYNAME = "EHR-Rel"
 
 _DESCRIPTION = """\
 EHR-Rel is a novel open-source1 biomedical concept relatedness dataset consisting of 3630 concept pairs, six times more
@@ -62,7 +65,7 @@ A detailed analysis of the concepts in the dataset reveals a far larger coverage
 
 _HOMEPAGE = "https://github.com/babylonhealth/EHR-Rel"
 
-_LICENSE = "Apache License 2.0"
+_LICENSE = Licenses.APACHE_2p0
 
 _URLS = {
     _DATASETNAME: "https://github.com/babylonhealth/EHR-Rel/archive/refs/heads/master.zip",
@@ -143,7 +146,7 @@ class EHRRelDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

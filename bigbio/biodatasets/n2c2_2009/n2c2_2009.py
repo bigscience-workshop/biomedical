@@ -58,8 +58,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/UzunerSC10,
@@ -83,6 +85,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2009"
+_DISPLAYNAME = "n2c2 2009 Medications"
 
 _DESCRIPTION = """\
 The Third i2b2 Workshop on Natural Language Processing Challenges for Clinical Records
@@ -129,7 +132,7 @@ i.e. `anticoagulation` != `anticoagulation.` from doc_id: 818404
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -589,7 +592,7 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -659,7 +662,7 @@ class N2C22009MedicationDataset(datasets.GeneratorBasedBuilder):
             "coreferences": [],
         }
 
-    def _generate_examples(self, data_dir, split) -> (int, dict):
+    def _generate_examples(self, data_dir, split):
         train_test_set = _read_train_test_data_from_tar_gz(data_dir)
         train_set = _get_train_set(data_dir, train_test_set)
         test_set = _get_test_set(train_set, train_test_set)

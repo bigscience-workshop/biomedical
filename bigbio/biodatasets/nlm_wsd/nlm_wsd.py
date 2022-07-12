@@ -54,11 +54,13 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{weeber2001developing,
   title    = "Developing a test collection for biomedical word sense
               disambiguation",
   author   = "Weeber, M and Mork, J G and Aronson, A R",
@@ -70,6 +72,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "nlm_wsd"
+_DISPLAYNAME = "NLM WSD"
 
 _DESCRIPTION = """\
 In order to support research investigating the automatic resolution of word sense ambiguity using natural language
@@ -84,7 +87,7 @@ of the instances. Evaluations were only used when the evaluators completed all 1
 
 _HOMEPAGE = "https://lhncbc.nlm.nih.gov/restricted/ii/areas/WSD/index.html"
 
-_LICENSE = "DUA (UMLS)"
+_LICENSE = Licenses.UMLS_LICENSE
 
 _URLS = {
     "UMLS": "UMLS1999.tar.gz",
@@ -95,7 +98,6 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -189,7 +191,7 @@ class NlmWsdDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

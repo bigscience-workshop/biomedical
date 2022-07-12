@@ -20,8 +20,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -58,7 +60,7 @@ The filenames are the corresponding PubMed IDs (PMID).
 
 _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
 _URLs = {
     "source": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
@@ -127,7 +129,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

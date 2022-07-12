@@ -13,18 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import os
 import re
+
 import datasets
-import glob
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
-
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "twadrl"
-
+_DISPLAYNAME = "TwADR-L"
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @inproceedings{limsopatham-collier-2016-normalising,
@@ -49,7 +52,7 @@ mapped to how they are formally written in medical ontologies (SIDER 4). \
 
 _HOMEPAGE = "https://zenodo.org/record/55013"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLs = "https://zenodo.org/record/55013/files/datasets.zip"
 
@@ -98,7 +101,7 @@ class TwADRL(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -6,9 +6,11 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.FR]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @InProceedings{neveol14quaero, 
@@ -65,11 +67,12 @@ All questions regarding the task or data should be addressed to aurelie.neveol@l
 
 _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
-_LICENSE = "GFDL"
+_LICENSE = Licenses.GFDL_1p3
 
 _URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip"
 
-_DATASET_NAME = "QUAERO French Medical Corpus"
+_DATASET_NAME = "quaero"
+_DISPLAYNAME = "QUAERO"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
@@ -150,7 +153,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

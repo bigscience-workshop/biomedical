@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-A corpus for plant and chemical entities and for the relationships between them. The corpus contains 2218 plant
-and chemical entities and 600 plant-chemical relationships which are drawn from 1109 sentences in 245 PubMed
-abstracts.
+A corpus for plant and chemical entities and for the relationships between them.
+The corpus contains 2218 plant and chemical entities and 600 plant-chemical
+relationships which are drawn from 1109 sentences in 245 PubMed abstracts.
 """
 from pathlib import Path
 from typing import Dict, Iterator, Tuple
@@ -26,31 +26,39 @@ import bigbio.utils.parsing as parsing
 import bigbio.utils.schemas as schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{choi2016corpus,
-  title={A corpus for plant-chemical relationships in the biomedical domain},
-  author={Choi, Wonjun and Kim, Baeksoo and Cho, Hyejin and Lee, Doheon and Lee, Hyunju},
-  journal={BMC bioinformatics},
-  volume={17},
-  number={1},
-  pages={1--15},
-  year={2016},
-  publisher={Springer}
+  title        = {A corpus for plant-chemical relationships in the biomedical domain},
+  author       = {
+    Choi, Wonjun and Kim, Baeksoo and Cho, Hyejin and Lee, Doheon and Lee,
+    Hyunju
+  },
+  year         = 2016,
+  journal      = {BMC bioinformatics},
+  publisher    = {Springer},
+  volume       = 17,
+  number       = 1,
+  pages        = {1--15}
 }
 """
 
 _DATASETNAME = "pcr"
+_DISPLAYNAME = "PCR"
 
 _DESCRIPTION = """
-A corpus for plant / herb and chemical entities and for the relationships between them. The corpus contains 2218 plant
-and chemical entities and 600 plant-chemical relationships which are drawn from 1109 sentences in 245 PubMed abstracts.
+A corpus for plant / herb and chemical entities and for the relationships \
+between them. The corpus contains 2218 plant and chemical entities and 600 \
+plant-chemical relationships which are drawn from 1109 sentences in 245 PubMed \
+abstracts.
 """
 
 _HOMEPAGE = "http://210.107.182.73/plantchemcorpus.htm"
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {_DATASETNAME: "http://210.107.182.73/1109_corpus_units_STformat.tar"}
 
@@ -62,8 +70,8 @@ _BIGBIO_VERSION = "1.0.0"
 
 class PCRDataset(datasets.GeneratorBasedBuilder):
     """
-    The corpus of plant-chemical relation consists of plants / herbs and chemicals and relations
-    between them.
+    The corpus of plant-chemical relation consists of plants / herbs and
+    chemicals and relations between them.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -142,7 +150,7 @@ class PCRDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

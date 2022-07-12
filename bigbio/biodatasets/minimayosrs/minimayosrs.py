@@ -26,8 +26,10 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{pedersen2007measures,
@@ -43,6 +45,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "minimayosrs"
+_DISPLAYNAME = "MiniMayoSRS"
 
 _DESCRIPTION = """\
 MiniMayoSRS is a subset of the MayoSRS and consists of 30 term pairs on which a higher inter-annotator agreement was
@@ -51,7 +54,7 @@ achieved. The average correlation between physicians is 0.68. The average correl
 
 _HOMEPAGE = "https://conservancy.umn.edu/handle/11299/196265"
 
-_LICENSE = "CC0 1.0 Universal"
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     _DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MiniMayoSRS.csv?sequence=2&isAllowed=y"
@@ -113,7 +116,7 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -137,7 +140,14 @@ class MinimayosrsDataset(datasets.GeneratorBasedBuilder):
             filepath,
             sep=",",
             header=0,
-            names=["label_physicians", "label_coders", "code_1", "code_2", "text_1", "text_2"],
+            names=[
+                "label_physicians",
+                "label_coders",
+                "code_1",
+                "code_2",
+                "text_1",
+                "text_2",
+            ],
         )
 
         if self.config.schema == "source":

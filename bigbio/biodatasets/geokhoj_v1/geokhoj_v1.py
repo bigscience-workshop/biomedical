@@ -29,12 +29,21 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
-_CITATION = "NA"
+_CITATION = """\
+@misc{geokhoj_v1,
+  author = {Elucidata, Inc.},
+  title = {GEOKhoj v1},
+  howpublished = {\\url{https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1}},
+}
+"""
 
 _DATASETNAME = "geokhoj_v1"
+_DISPLAYNAME = "GEOKhoj v1"
 
 _DESCRIPTION = """\
 GEOKhoj v1 is a annotated corpus of control/perturbation labels for 30,000 samples
@@ -44,7 +53,7 @@ the GEO (Gene Expression Omnibus) database
 
 _HOMEPAGE = "https://github.com/ElucidataInc/GEOKhoj-datasets/tree/main/geokhoj_v1"
 
-_LICENSE = "CC BY-NC 4.0"
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 _URLS = {
     "source": "https://github.com/ElucidataInc/GEOKhoj-datasets/blob/main/geokhoj_v1/geokhoj_V1.zip?raw=True",
@@ -90,7 +99,9 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
-                    "label": datasets.features.ClassLabel(names={0: "control", 1: "perturbation"}),
+                    "label": datasets.features.ClassLabel(
+                        names={0: "control", 1: "perturbation"}
+                    ),
                     "text": datasets.Value("string"),
                 }
             )
@@ -102,7 +113,7 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -114,14 +125,18 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "geokhoj_v1/data/train/geo_samples_train.csv"),
+                    "filepath": os.path.join(
+                        data_dir, "geokhoj_v1/data/train/geo_samples_train.csv"
+                    ),
                     "split": "train",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "geokhoj_v1/data/test/geo_samples_test.csv"),
+                    "filepath": os.path.join(
+                        data_dir, "geokhoj_v1/data/test/geo_samples_test.csv"
+                    ),
                     "split": "test",
                 },
             ),
@@ -133,11 +148,7 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             for id_, row in df.iterrows():
-                yield id_, {
-                    "id": row[0], 
-                    "label": row[1], 
-                    "text": row[2]
-                }
+                yield id_, {"id": row[0], "label": row[1], "text": row[2]}
 
         elif self.config.schema == "bigbio_text":
             for id_, row in df.iterrows():

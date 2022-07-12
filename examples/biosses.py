@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-BioSSES computes similarity of biomedical sentences by utilizing WordNet as the 
-general domain ontology and UMLS as the biomedical domain specific ontology. 
-The original paper outlines the approaches with respect to using annotator 
-score as golden standard. Source view will return all annotator score 
-individually whereas the Bigbio view will return the mean of the annotator 
+BioSSES computes similarity of biomedical sentences by utilizing WordNet as the
+general domain ontology and UMLS as the biomedical domain specific ontology.
+The original paper outlines the approaches with respect to using annotator
+score as golden standard. Source view will return all annotator score
+individually whereas the Bigbio view will return the mean of the annotator
 score.
 
 Note: The original files are Word documents, compressed using RAR. This data
@@ -29,10 +29,12 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "biosses"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """
 @article{souganciouglu2017biosses,
@@ -48,17 +50,17 @@ _CITATION = """
 """
 
 _DESCRIPTION = """
-BioSSES computes similarity of biomedical sentences by utilizing WordNet as the 
-general domain ontology and UMLS as the biomedical domain specific ontology. 
-The original paper outlines the approaches with respect to using annotator 
-score as golden standard. Source view will return all annotator score 
-individually whereas the Bigbio view will return the mean of the annotator 
+BioSSES computes similarity of biomedical sentences by utilizing WordNet as the
+general domain ontology and UMLS as the biomedical domain specific ontology.
+The original paper outlines the approaches with respect to using annotator
+score as golden standard. Source view will return all annotator score
+individually whereas the Bigbio view will return the mean of the annotator
 score.
 """
 
 _HOMEPAGE = "https://tabilab.cmpe.boun.edu.tr/BIOSSES/DataSet.html"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
 _URLs = {
     "source": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
@@ -68,6 +70,118 @@ _URLs = {
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
+
+# The BIOSSES dataset does not provide canonical train/dev/test splits.
+# However the BLUE and BLURB datasets use the following split definitions.
+# see https://github.com/bigscience-workshop/biomedical/issues/664
+
+TRAIN_INDEXES = [
+    78,
+    45,
+    35,
+    50,
+    27,
+    13,
+    87,
+    1,
+    58,
+    99,
+    55,
+    74,
+    66,
+    39,
+    44,
+    18,
+    84,
+    76,
+    19,
+    10,
+    75,
+    46,
+    15,
+    86,
+    60,
+    14,
+    51,
+    79,
+    29,
+    34,
+    94,
+    28,
+    62,
+    42,
+    21,
+    30,
+    11,
+    53,
+    6,
+    12,
+    26,
+    48,
+    31,
+    32,
+    77,
+    37,
+    95,
+    85,
+    36,
+    56,
+    43,
+    61,
+    16,
+    5,
+    67,
+    65,
+    54,
+    3,
+    73,
+    98,
+    17,
+    4,
+    92,
+    93,
+]
+DEV_INDEXES = [
+    88,
+    82,
+    8,
+    63,
+    47,
+    68,
+    40,
+    90,
+    100,
+    24,
+    41,
+    91,
+    80,
+    9,
+    72,
+    2,
+]
+TEST_INDEXES = [
+    59,
+    96,
+    70,
+    22,
+    81,
+    38,
+    57,
+    23,
+    33,
+    89,
+    69,
+    49,
+    7,
+    71,
+    97,
+    25,
+    83,
+    64,
+    52,
+    20,
+]
 
 
 class BiossesDataset(datasets.GeneratorBasedBuilder):
@@ -118,7 +232,7 @@ class BiossesDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -133,13 +247,31 @@ class BiossesDataset(datasets.GeneratorBasedBuilder):
                 gen_kwargs={
                     "filepath": dl_dir,
                     "split": "train",
+                    "indexes": TRAIN_INDEXES,
                 },
-            )
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepath": dl_dir,
+                    "split": "validation",
+                    "indexes": DEV_INDEXES,
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": dl_dir,
+                    "split": "test",
+                    "indexes": TEST_INDEXES,
+                },
+            ),
         ]
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, filepath, split, indexes):
 
         df = pd.read_csv(filepath, sep="\t", encoding="utf-8")
+        df = df[df["sentence_id"].isin(indexes)]
 
         if self.config.schema == "source":
             for uid, row in df.iterrows():

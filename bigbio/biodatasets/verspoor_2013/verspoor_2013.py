@@ -14,14 +14,16 @@
 # limitations under the License.
 
 """
-This dataset contains annotations for a small corpus of full text journal publications
-on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
-Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
-capture the core concepts and relations relevant to cataloguing  and interpreting human
-genetic variation and its relationship to disease, as described in the published literature.
-The schema was inspired by the needs of the database curators of the International Society
-for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
-application to genetic variation information in a range of diseases.
+This dataset contains annotations for a small corpus of full text journal
+publications on the subject of inherited colorectal cancer. It is suitable for
+Named Entity Recognition and Relation Extraction tasks. It uses the Variome
+Annotation Schema,  a schema that aims to capture the core concepts and
+relations relevant to cataloguing  and interpreting human genetic variation and
+its relationship to disease, as described in the published literature. The
+schema was inspired by the needs of the database curators of the International
+Society for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is
+intended to have application to genetic variation information in a range of
+diseases.
 """
 
 from pathlib import Path
@@ -33,37 +35,46 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{verspoor2013annotating,
-title={Annotating the biomedical literature for the human variome},
-author={Verspoor, Karin and Jimeno Yepes, Antonio and Cavedon, Lawrence and McIntosh, Tara and Herten-Crabb, Asha and Thomas, Zo{"e} and Plazzer, John-Paul},
-journal={Database},
-volume={2013},
-year={2013},
-publisher={Oxford Academic}
+  title        = {Annotating the biomedical literature for the human variome},
+  author       = {
+    Verspoor, Karin and Jimeno Yepes, Antonio and Cavedon, Lawrence and
+    McIntosh, Tara and Herten-Crabb, Asha and Thomas, Zo{"e} and Plazzer,
+    John-Paul
+  },
+  year         = 2013,
+  journal      = {Database},
+  publisher    = {Oxford Academic},
+  volume       = 2013
 }
-"""  # noqa: E501
-
+"""
 
 _DATASETNAME = "verspoor_2013"
+_DISPLAYNAME = "Verspoor 2013"
 
 _DESCRIPTION = """\
-This dataset contains annotations for a small corpus of full text journal publications
-on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
-Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
-capture the core concepts and relations relevant to cataloguing  and interpreting human
-genetic variation and its relationship to disease, as described in the published literature.
-The schema was inspired by the needs of the database curators of the International Society
-for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
-application to genetic variation information in a range of diseases."""
+This dataset contains annotations for a small corpus of full text journal \
+publications on the subject of inherited colorectal cancer. It is suitable for \
+Named Entity Recognition and Relation Extraction tasks. It uses the Variome \
+Annotation Schema,  a schema that aims to capture the core concepts and \
+relations relevant to cataloguing  and interpreting human genetic variation and \
+its relationship to disease, as described in the published literature. The \
+schema was inspired by the needs of the database curators of the International \
+Society for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is \
+intended to have application to genetic variation information in a range of \
+diseases.
+"""
 
 
 _HOMEPAGE = "NA"
 
-_LICENSE = "NA"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = ["http://github.com/rockt/SETH/zipball/master/"]
 
@@ -78,14 +89,16 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
-    """This dataset contains annotations for a small corpus of full text journal publications
+    """\
+    This dataset contains annotations for a small corpus of full text journal publications
     on the subject of inherited colorectal cancer. It is suitable for Named Entity Recognition and
     Relation Extraction tasks. It uses the Variome Annotation Schema,  a schema that aims to
     capture the core concepts and relations relevant to cataloguing  and interpreting human
     genetic variation and its relationship to disease, as described in the published literature.
     The schema was inspired by the needs of the database curators of the International Society
     for Gastrointestinal Hereditary Tumours (InSiGHT) database, but is intended to have
-    application to genetic variation information in a range of diseases."""
+    application to genetic variation information in a range of diseases.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -194,7 +207,7 @@ class Verspoor2013Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

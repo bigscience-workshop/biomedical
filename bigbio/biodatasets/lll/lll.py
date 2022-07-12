@@ -36,9 +36,11 @@ import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks, BigBioValues
+from bigbio.utils.constants import BigBioValues, Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
     @article{article,
@@ -53,6 +55,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "lll"
+_DISPLAYNAME = "LLL05"
 
 _DESCRIPTION = """\
 The LLL05 challenge task is to learn rules to extract protein/gene interactions from biology abstracts from the Medline
@@ -68,7 +71,7 @@ sentences.
 
 _HOMEPAGE = "http://genome.jouy.inra.fr/texte/LLLchallenge"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: [
@@ -140,7 +143,12 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                             "ref_id": datasets.Value("string"),
                         }
                     ],
-                    "lemmas": [{"ref_id": datasets.Value("string"), "lemma": datasets.Value("string")}],
+                    "lemmas": [
+                        {
+                            "ref_id": datasets.Value("string"),
+                            "lemma": datasets.Value("string"),
+                        }
+                    ],
                     "syntactic_relations": [
                         {
                             "type": datasets.Value("string"),
@@ -158,7 +166,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -170,7 +178,10 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_paths": [train_path, train_coref_path], "split": "train"},
+                gen_kwargs={
+                    "data_paths": [train_path, train_coref_path],
+                    "split": "train",
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
@@ -213,7 +224,9 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                     "id": f"{document_['id']}-agent-{word['id']}",
                                     "type": "agent",
                                     "text": [word["text"]],
-                                    "offsets": [[word["offsets"][0], word["offsets"][1]]],
+                                    "offsets": [
+                                        [word["offsets"][0], word["offsets"][1]]
+                                    ],
                                     "normalized": [],
                                 }
                             )
@@ -224,7 +237,9 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                     "id": f"{document_['id']}-target-{word['id']}",
                                     "type": "target",
                                     "text": [word["text"]],
-                                    "offsets": [[word["offsets"][0], word["offsets"][1]]],
+                                    "offsets": [
+                                        [word["offsets"][0], word["offsets"][1]]
+                                    ],
                                     "normalized": [],
                                 }
                             )
@@ -235,12 +250,7 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
                                 "type": "genic_interaction",
                                 "arg1_id": f"{document_['id']}-agent-{relation['ref_id1']}",
                                 "arg2_id": f"{document_['id']}-target-{relation['ref_id2']}",
-                                "normalized": [
-                                    {
-                                        "db_name": None,
-                                        "db_id": None,
-                                    }
-                                ],
+                                "normalized": [],
                             }
                             for relation in document["genic_interactions"]
                         ]
@@ -274,7 +284,14 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
             key, value = line.split("\t", 1)
             if key in ["ID", "sentence"]:
                 document[key.lower()] = value
-            elif key in ["words", "genic_interactions", "agents", "targets", "lemmas", "syntactic_relations"]:
+            elif key in [
+                "words",
+                "genic_interactions",
+                "agents",
+                "targets",
+                "lemmas",
+                "syntactic_relations",
+            ]:
                 document[key.lower()] = self._parse_elements(value, key)
             else:
                 raise NotImplementedError()
@@ -295,7 +312,11 @@ class LLLDataset(datasets.GeneratorBasedBuilder):
         args = atom.split("(", 1)[1][:-1].split(",")
         if type == "words":
             # fix offsets for python slicing
-            return {"id": args[0], "text": args[1].strip("'"), "offsets": [int(args[2]), int(args[3])+1]}
+            return {
+                "id": args[0],
+                "text": args[1].strip("'"),
+                "offsets": [int(args[2]), int(args[3]) + 1],
+            }
         elif type == "genic_interactions":
             return {"ref_id1": args[0], "ref_id2": args[1]}
         elif type == "agents":

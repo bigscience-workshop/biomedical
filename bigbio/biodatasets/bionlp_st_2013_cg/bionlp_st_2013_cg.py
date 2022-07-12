@@ -21,11 +21,15 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2013_cg"
+_DISPLAYNAME = "BioNLP 2013 CG"
+
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2013-overview,
@@ -55,7 +59,7 @@ levels up to whole organisms. Final test set submissions were accepted from six 
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-cg"
 
-_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC BY-SA 3.0"
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLs = {
     "bionlp_st_2013_cg": "https://github.com/openbiocorpora/bionlp-st-2013-cg/archive/refs/heads/master.zip",
@@ -205,7 +209,7 @@ class bionlp_st_2013_cg(datasets.GeneratorBasedBuilder):
             # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
             # License for the dataset if available
-            license=_LICENSE,
+            license=str(_LICENSE),
             # Citation for the dataset
             citation=_CITATION,
         )

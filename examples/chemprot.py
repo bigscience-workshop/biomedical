@@ -26,8 +26,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -48,7 +50,7 @@ The BioCreative VI Chemical-Protein interaction dataset identifies entities of c
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
 
-_LICENSE = "Public Domain Mark 1.0"
+_LICENSE = Licenses.PUBLIC_DOMAIN_MARK_1p0
 
 _URLs = {
     "source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
@@ -121,7 +123,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

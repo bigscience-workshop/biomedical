@@ -11,16 +11,28 @@ import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
+from types import ModuleType
 from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 import datasets
 from datasets import DatasetDict, Features
 
-from bigbio.utils.constants import (SCHEMA_TO_FEATURES, TASK_TO_SCHEMA,
-                                    VALID_SCHEMAS, VALID_TASKS, Tasks)
-from bigbio.utils.schemas import (entailment_features, kb_features,
-                                  pairs_features, qa_features,
-                                  text2text_features, text_features)
+from bigbio.utils.constants import (
+    METADATA,
+    SCHEMA_TO_FEATURES,
+    TASK_TO_SCHEMA,
+    VALID_SCHEMAS,
+    VALID_TASKS,
+    Tasks,
+)
+from bigbio.utils.schemas import (
+    entailment_features,
+    kb_features,
+    pairs_features,
+    qa_features,
+    text2text_features,
+    text_features,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +123,8 @@ class TestDataLoader(unittest.TestCase):
         if schema == "source":
             return
 
+        with self.subTest("Check metadata"):
+            self.test_metadata(module)
         with self.subTest("IDs globally unique"):
             self.test_are_ids_globally_unique(self.dataset)
         with self.subTest("Check schema validity"):
@@ -134,6 +148,42 @@ class TestDataLoader(unittest.TestCase):
         elif schema == "QA":
             with self.subTest("Check multiple choice"):
                 self.test_multiple_choice(self.dataset)
+
+    def test_metadata(self, module: ModuleType):
+        """
+        Check if all metadata for a dataloader are present
+        """
+
+        for metadata_name, metadata_type in METADATA.items():
+            if not hasattr(module, metadata_name):
+                raise AssertionError(
+                    f"Required dataloader attribute '{metadata_name}' is not defined!"
+                )
+
+            metadata_attr = getattr(module, metadata_name)
+
+            if metadata_name == "_LANGUAGES":
+
+                if not isinstance(metadata_attr, list):
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(metadata_attr)}`!"
+                    )
+
+                if len(metadata_attr) == 0:
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found an empty list!"
+                    )
+
+                for elem in metadata_attr:
+                    if not isinstance(elem, metadata_type):
+                        raise AssertionError(
+                            f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(elem)}`!"
+                        )
+            else:
+                if not isinstance(metadata_attr, metadata_type):
+                    raise AssertionError(
+                        f"Dataloader attribute '{metadata_name}' must be of type `{metadata_type}`! Found `{type(metadata_attr)}`!"
+                    )
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
@@ -541,9 +591,10 @@ class TestDataLoader(unittest.TestCase):
 
                     if len(example["choices"]) > 0:
                         # can change "==" to "in" if we include ranking later
-                        assert (
-                            example["type"] in ["multiple_choice", "yesno"]
-                        ), f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
+                        assert example["type"] in [
+                            "multiple_choice",
+                            "yesno",
+                        ], f"`choices` is populated, but type is not 'multiple_choice' or 'yesno' {example}"
 
                     if example["type"] in ["multiple_choice", "yesno"]:
                         assert (

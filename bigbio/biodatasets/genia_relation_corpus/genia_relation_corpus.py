@@ -32,8 +32,10 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{pyysalo-etal-2009-static,
@@ -71,6 +73,7 @@ doi = {10.1142/S0219720010005014}
 """
 
 _DATASETNAME = "genia_relation_corpus"
+_DISPLAYNAME = "GENIA Relation Corpus"
 
 _DESCRIPTION = """\
 The extraction of various relations stated to hold between biomolecular entities is one of the most frequently
@@ -84,7 +87,7 @@ static relations, relations such as part-of that hold between entities without (
 
 _HOMEPAGE = "http://www.geniaproject.org/genia-corpus/relation-corpus"
 
-_LICENSE = """GENIA Project License for Annotated Corpora"""
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLS = {
     _DATASETNAME: {
@@ -171,7 +174,7 @@ class GeniaRelationCorpusDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

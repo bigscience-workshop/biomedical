@@ -23,8 +23,10 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.FR, Lang.DE, Lang.NL, Lang.ES]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{10.1093/jamia/ocv037,
@@ -60,6 +62,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mantra_gsc"
+_DISPLAYNAME = "Mantra GSC"
 
 _DESCRIPTION = """\
 We selected text units from different parallel corpora (Medline abstract titles, drug labels, biomedical patent claims)
@@ -69,7 +72,7 @@ concepts, based on a subset of the Unified Medical Language System and covering 
 
 _HOMEPAGE = "https://biosemantics.erasmusmc.nl/index.php/resources/mantra-gsc"
 
-_LICENSE = "CC BY 4.0"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     _DATASETNAME: "http://biosemantics.org/MantraGSC/Mantra-GSC.zip",
@@ -163,7 +166,7 @@ class MantraGSCDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

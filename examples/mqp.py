@@ -27,8 +27,10 @@ from datasets import load_dataset
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -54,8 +56,7 @@ but contextually similar ) or dissimilar (syntactically may look similar but con
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
 
-_LICENSE = ""
-
+_LICENSE = Licenses.UNKNOWN
 _URLs = {
     "source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
     "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
@@ -111,7 +112,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -53,6 +53,84 @@ Notes
 
 * Arthroskopie.00130237.eng.abstr.chunkmorph.annotated.xml seems to be empty
 
+
+* entity spans can overlap. an example from the first sample:
+
+{'id': 'Arthroskopie.00130003.eng.abstr-s1-t1',
+  'type': 'umlsterm',
+  'text': ['posterior'],
+  'offsets': [[4, 13]],
+  'normalized': [{'db_name': 'UMLS', 'db_id': 'C0032009'}]},
+{'id': 'Arthroskopie.00130003.eng.abstr-s1-t8',
+  'type': 'umlsterm',
+  'text': ['posterior cruciate ligament'],
+  'offsets': [[4, 31]],
+  'normalized': [{'db_name': 'UMLS', 'db_id': 'C0080039'}]},
+{'id': 'Arthroskopie.00130003.eng.abstr-s1-t2',
+  'type': 'umlsterm',
+  'text': ['ligament'],
+  'offsets': [[23, 31]],
+  'normalized': [{'db_name': 'UMLS', 'db_id': 'C0023685'},
+   {'db_name': 'UMLS', 'db_id': 'C0023686'}]},
+
+
+* semantic relations are defined beween concepts but entities can
+  have multiple concpets associated with them. in the bigbio
+  schema we skip relations between multiple concept of the
+  same entity. an example of a relation that is kept from the
+  source schema is below,
+
+In [35]: dsd['train'][0]['sentences'][0]['tokens']
+Out[35]:
+[{'id': 'w1', 'pos': 'DT', 'lemma': 'the', 'text': 'The'},
+ {'id': 'w2', 'pos': 'JJ', 'lemma': 'posterior', 'text': 'posterior'},
+ {'id': 'w3', 'pos': 'JJ', 'lemma': 'cruciate', 'text': 'cruciate'},
+ {'id': 'w4', 'pos': 'NN', 'lemma': 'ligament', 'text': 'ligament'},
+ {'id': 'w5', 'pos': 'PUNCT', 'lemma': None, 'text': '('},
+ {'id': 'w6', 'pos': 'NN', 'lemma': None, 'text': 'PCL'},
+ {'id': 'w7', 'pos': 'PUNCT', 'lemma': None, 'text': ')'},
+ {'id': 'w8', 'pos': 'VBZ', 'lemma': 'be', 'text': 'is'},
+ {'id': 'w9', 'pos': 'DT', 'lemma': 'the', 'text': 'the'},
+ {'id': 'w10', 'pos': 'JJS', 'lemma': 'strong', 'text': 'strongest'},
+ {'id': 'w11', 'pos': 'NN', 'lemma': 'ligament', 'text': 'ligament'},
+ {'id': 'w12', 'pos': 'IN', 'lemma': 'of', 'text': 'of'},
+ {'id': 'w13', 'pos': 'DT', 'lemma': 'the', 'text': 'the'},
+ {'id': 'w14', 'pos': 'JJ', 'lemma': 'human', 'text': 'human'},
+ {'id': 'w15', 'pos': 'NN', 'lemma': 'knee', 'text': 'knee'},
+ {'id': 'w16', 'pos': 'JJ', 'lemma': 'joint', 'text': 'joint'},
+ {'id': 'w17', 'pos': 'PUNCT', 'lemma': None, 'text': '.'}]
+
+
+In [36]: dsd['train'][0]['sentences'][0]['semrels'][0]
+Out[36]: {'id': 'r1', 'term1': 't3.1', 'term2': 't6.1', 'reltype': 'surrounds'}
+
+In [37]: dsd['train'][0]['sentences'][0]['umlsterms'][2]
+Out[37]:
+{'id': 't3',
+ 'from': 'w11',
+ 'to': 'w11',
+ 'concepts': [{'id': 't3.1',
+   'cui': 'C0023685',
+   'preferred': 'Ligaments',
+   'tui': 'T024',
+   'mshs': [{'code': 'A2.513'}]},
+  {'id': 't3.2',
+   'cui': 'C0023686',
+   'preferred': 'Articular ligaments',
+   'tui': 'T023',
+   'mshs': [{'code': 'A2.513.514'}, {'code': 'A2.835.583.512'}]}]}
+
+In [38]: dsd['train'][0]['sentences'][0]['umlsterms'][5]
+Out[38]:
+{'id': 't6',
+ 'from': 'w16',
+ 'to': 'w16',
+ 'concepts': [{'id': 't6.1',
+   'cui': 'C0022417',
+   'preferred': 'Joints',
+   'tui': 'T030',
+   'mshs': [{'code': 'A2.835.583'}]}]}
+
 """
 
 import itertools
@@ -74,16 +152,17 @@ from datasets import Features, Value
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN, Lang.DE]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
-  author={Paul Buitelaar and Thierry Declerck and Bogdan Sacaleanu and {\vS}pela Vintar and Diana Raileanu and C. Crispi},
-  title={A Multi-Layered , XML-Based Approach to the Integration of Linguistic and Semantic Annotations},
-  booktitle={Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML03)},
-  year={2003},
-  month={April}
+@inproceedings{buitelaar2003multi,
+  title={A multi-layered, xml-based approach to the integration of linguistic and semantic annotations},
+  author={Buitelaar, Paul and Declerck, Thierry and Sacaleanu, Bogdan and Vintar, {\v{S}}pela and Raileanu, Diana and Crispi, Claudia},
+  booktitle={Proceedings of EACL 2003 Workshop on Language Technology and the Semantic Web (NLPXML'03), Budapest, Hungary},
+  year={2003}
 }
 """
 
@@ -101,6 +180,9 @@ decomposition); Chunks; Semantic Classes (UMLS: Unified Medical Language System,
 MeSH: Medical Subject Headings, EuroWordNet); Semantic Relations from UMLS.
 """
 
+_DATASETNAME = "muchmore"
+_DISPLAYNAME = "MuchMore"
+
 _HOMEPAGE = "https://muchmore.dfki.de/resources1.htm"
 
 # TODO: website says the following, but don't see a specific license
@@ -111,8 +193,7 @@ _HOMEPAGE = "https://muchmore.dfki.de/resources1.htm"
 # multilingual information on the basis of a domain ontology and classification.
 # For the main task of multilingual domain modelling, the project will focus
 # on German and English. "
-_LICENSE = "other"
-
+_LICENSE = Licenses.UNKNOWN
 _URLs = {
     "muchmore_source": [
         "https://muchmore.dfki.de/pubs/springer_english_train_plain.tar.gz",
@@ -141,7 +222,12 @@ _URLs = {
 # took version from annotated file names
 _SOURCE_VERSION = "4.2.0"
 _BIGBIO_VERSION = "1.0.0"
-_SUPPORTED_TASKS = [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [
+    Tasks.TRANSLATION,
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+    Tasks.RELATION_EXTRACTION,
+]
 
 NATIVE_ENCODING = "ISO-8859-1"
 FILE_NAME_PATTERN = r"^(.+?)\.(eng|ger)\.abstr(\.chunkmorph\.annotated\.xml)?$"
@@ -289,7 +375,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -518,6 +604,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
             ]
 
             entities = []
+            rel_map = {}
             for sentence in sentences:
                 sid = sentence["id"]
                 ii_sid = int(sid[1:])
@@ -543,6 +630,8 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     offsets = [(w_from_start, w_to_end)]
                     main_text = text[w_from_start:w_to_end]
                     umls_cuis = [el["cui"] for el in umlsterm["concepts"]]
+                    for concept in umlsterm["concepts"]:
+                        rel_map[concept["id"]] = entity_id
 
                     entity = {
                         "id": "{}-{}".format(xroot.get("id"), entity_id),
@@ -555,6 +644,30 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                     }
                     entities.append(entity)
 
+            relations = []
+            for sentence in sentences:
+                sid = sentence["id"]
+                for semrel in sentence["semrels"]:
+                    semrel_id = semrel["id"]
+                    rel_id = "{}-{}-{}-{}".format(
+                        sid, semrel_id, semrel["term1"], semrel["term2"],
+                    )
+                    arg1_id = "{}-{}".format(xroot.get("id"), rel_map[semrel["term1"]])
+                    arg2_id = "{}-{}".format(xroot.get("id"), rel_map[semrel["term2"]])
+                    # some semrels are between multiple normalizations of
+                    # a single entity. we skip these. see docstring at top
+                    # of module for more complete description
+                    if arg1_id == arg2_id:
+                        continue
+                    relation = {
+                        "id": "{}-{}".format(xroot.get("id"), rel_id),
+                        "type": semrel["reltype"],
+                        "arg1_id": arg1_id,
+                        "arg2_id": arg2_id,
+                        "normalized": []
+                    }
+                    relations.append(relation)
+
             yield _id, {
                 "id": xroot.get("id"),
                 "document_id": xroot.get("id"),
@@ -562,7 +675,7 @@ class MuchMoreDataset(datasets.GeneratorBasedBuilder):
                 "entities": entities,
                 "coreferences": [],
                 "events": [],
-                "relations": [],
+                "relations": relations,
             }
 
     def _generate_plain_examples(self, file_names_and_pointers):

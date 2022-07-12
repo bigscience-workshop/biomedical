@@ -64,14 +64,17 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
+_DISPLAYNAME = "n2c2 2006 Smoking Status"
 
 # https://academic.oup.com/jamia/article/15/1/14/779738
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2008identifying,
     author = {
         Uzuner, Ozlem and
         Goldstein, Ira and
@@ -106,7 +109,7 @@ a past smoker, a current smoker, a smoker, a non-smoker and an unknown. A total 
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
@@ -176,7 +179,7 @@ class N2C22006SmokingDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
