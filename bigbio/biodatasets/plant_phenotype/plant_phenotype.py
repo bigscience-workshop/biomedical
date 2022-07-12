@@ -33,6 +33,7 @@ TODO: Before submitting your script, delete this doc string and replace it with 
 """
 
 import os
+import itertools as it
 from typing import List, Tuple, Dict
 
 import datasets
@@ -81,9 +82,9 @@ _LICENSE = ""
 # This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: [
-        "https://github.com/DMCB-GIST/PPRcorpus/blob/main/corpus/PPR_dev_corpus.txt",
-        "https://github.com/DMCB-GIST/PPRcorpus/blob/main/corpus/PPR_test_corpus.txt",
         "https://github.com/DMCB-GIST/PPRcorpus/blob/main/corpus/PPR_train_corpus.txt",
+        "https://github.com/DMCB-GIST/PPRcorpus/blob/main/corpus/PPR_dev_corpus.txt",
+        "https://github.com/DMCB-GIST/PPRcorpus/blob/main/corpus/PPR_test_corpus.txt",  
     ],
 }
 
@@ -134,25 +135,33 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
 
             features = datasets.Features(
                {
-                   "pmid": datasets.Value("string"),
-                   "section": datasets.Value("int64"),
                    "passage_id": datasets.Value("string"),
-                   "text": datasets.Value("string"),
+                   "pmid": datasets.Value("string"),
+                   "section": datasets.Value("int32"),
+                   "text": datasets.Value("string"), 
+                #    "passages": [
+                #        {
+                #            'id': datasets.Value("string"),
+                #            'text': datasets.Value("string"),
+                #            'offsets': datasets.sequence(datasets.Value("int32")),
+                #        }
+                #    ]
+
                    "entities": [
                        {
-                           "offsets": [datasets.Value("int64")],
+                           "offsets": datasets.sequence(datasets.Value("int32")),
                            "text": datasets.Value("string"),
                            "type": datasets.Value("string"),
-                           "entity_id": datasets.Value("string"),
+                        #    "entity_id": datasets.Value("string"),
                        }
                    ],
                    "relations": [
                        {
-                           "type": datasets.Value("string"),
-                           "entity1_offsets": datasets.Sequence(datasets.Value("int64")),
+                           "relation_type": datasets.Value("string"),
+                           "entity1_offsets": datasets.Sequence(datasets.Value("int32")),
                            "entity1_text": datasets.Value("string"),
                            "entity1_type": datasets.Value("string"),
-                           "entity2_offsets": datasets.Sequence(datasets.Value("int64")),
+                           "entity2_offsets": datasets.Sequence(datasets.Value("int32")),
                            "entity2_text": datasets.Value("string"),
                            "entity2_type": datasets.Value("string"),
                        }
@@ -173,77 +182,247 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
-
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-
-        # TODO: KEEP if your dataset is PUBLIC; remove if not
+        
         urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
-
-        # TODO: KEEP if your dataset is LOCAL; remove if NOT
-        if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
-        else:
-            data_dir = self.config.data_dir
-
-        # Not all datasets have predefined canonical train/val/test splits.
-        # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
+        train, dev, test = dl_manager.download_and_extract(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "train.jsonl"),
-                    "split": "train",
+                    "filepath": train,
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "test.jsonl"),
-                    "split": "test",
+                    "filepath": test,
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "dev.jsonl"),
-                    "split": "dev",
+                    "filepath": dev,
                 },
             ),
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
 
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-
-    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath,) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
 
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
+        with open(filepath, 'r') as f:
+            chunks = f.read().strip().split('\n\n')
 
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
+        
+        #EDIT
+        if self.config.schema == 'source':
+            for id_, doc in self._generate_source_examples(chunks):
+                yield id_, doc
+                    
+            
+        #EDIT
+        elif self.config.schema == 'bigbio_kb':
+            for id_, doc in self._generate_bigbio_kb_examples(chunks):
+                yield id_, doc
 
-        if self.config.schema == "source":
-            # TODO: yield (key, example) tuples in the original dataset schema
-            for key, example in thing:
-                yield key, example
+    def _generate_whole_documents(self, chunks):
+        '''
+        Collect individual sentence annotations into whole abstracts
+        '''
+        prev_pmid = -1
+        pmid = ""
+        doc_chunks = []
+        
+        for c in chunks:
+            lines = c.split('\n')
+            dataset_id, passage_text = lines[0].split('\t')
+            annotations = [l.split('\t') for l in lines[1:]]
+            if len(annotations) == 0:
+                continue
+                
+            
+            # Get info on passage
+            pmid, section = dataset_id.split('_')
+            if prev_pmid == -1:
+                prev_pmid = pmid
+            if prev_pmid != pmid:
+                out = {
+                    'pmid': prev_pmid,
+                    'doc_chunks': doc_chunks,
+                }
+                # Reset everything for next PMID
+                prev_pmid = pmid
+                
+                yield out
+                
+                
+                
+            doc_chunks.append({'passage':passage_text, 'annotations':annotations, "sentence_id": dataset_id})
+        
+        # Take care of last document
+        yield {
+                'pmid': pmid,
+                'doc_chunks': doc_chunks,
+            }
+    
+    def _generate_source_examples(self, chunks):
+        '''
+        Generate examples in format of source schema
+        '''
+        
+        for c in chunks:
+            lines = c.split('\n')
+            passage_id, passage_text = lines[0].split('\t')
+            annotations = [l.split('\t') for l in lines[1:]]
+            if len(annotations) == 0:
+                continue
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
-            # TODO: yield (key, example) tuples in the bigbio schema
-            for key, example in thing:
-                yield key, example
+            # Get info on passage
+            pmid, section = passage_id.split('_')
+            section = int(section)
+            pmid = annotations[0][0]
+
+            # Grab entities and relations
+            entities = []
+            relations = []
+            for a in annotations:
+                if len(a) == 5:
+                    entities.append({
+                        "offsets": (int(a[1]), int(a[2])),
+                        "text": a[3],
+                        "type": a[4],
+                    })
+
+                elif len(a) == 10:
+                    relations.append(
+                        {
+                        "relation_type": a[1],
+                        "entity1_offsets": (int(a[2]),int(a[3])),
+                        "entity1_text": a[4],
+                        "entity1_type": a[5],
+                        "entity2_offsets": (int(a[6]), int(a[7])),
+                        "entity2_text": a[8],
+                        "entity2_type": a[9],
+                    }
+                    )
+                else:
+                    # This is a special case that occurs for a single data point
+                    relations.append(
+                        {
+                        "relation_type": a[1],
+                        "entity1_offsets": (int(a[2]),int(a[3])),
+                        "entity1_text": a[4],
+                        "entity1_type": a[5],
+                        "entity2_offsets": (int(a[8]), int(a[9])),
+                        "entity2_text": a[10],
+                        "entity2_type": a[11],
+                    }
+                    )
+                    
+                # Consolidate into document
+                document = {
+                    'passage_id': passage_id,
+                    'pmid': pmid,
+                    'section': section,
+                    'text': passage_text,
+                    'entities': entities,
+                    'relations': relations,
+                }
+                
+                yield passage_id, document
+
+    def _generate_bigbio_kb_examples(self, chunks):
+        '''
+        Generator for training examples in bigbio_kb schema format
+        '''
+        uid = it.count(1)
+        for document in self._generate_whole_documents(chunks):
+            pmid = document['pmid']
+            offset_delta = 0
+            id_ = str(next(uid))
+            
+            passages = []
+            entities = []
+            relations = []
+
+            # Iterate through each section of the article
+            for c in document['doc_chunks']:
+                passage = c['passage']
+                annotations = c['annotations']
+
+                passages.append(
+                    {
+                        "id": str(next(uid)),
+                        "text": [passage],
+                        "offsets": [(offset_delta, offset_delta + len(passage) )],
+                    }
+                )
+                
+
+                entities_sublist = []
+                for a in annotations:
+                    if len(a) == 5:
+                        entities_sublist.append({
+                            "id": str(next(uid)),
+                            "type": a[4],
+                            "text": [a[3]],
+                            "offsets": [(int(a[1]) + offset_delta, int(a[2]) + offset_delta)],
+                        })
+                    
+                        
+                        
+                # Create mapping of offsets to entity_id
+                ent2id = {tuple(x['offsets']): x['id'] for x in entities_sublist}
+                
+                for a in annotations:
+                    if len(a) == 10:
+                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
+                        e2_offsets = [(int(a[6]) + offset_delta, int(a[7]) + offset_delta)]
+                        relations.append(
+                            {
+                                "id": str(next(uid)),
+                                "type": a[1],
+                                'arg1_id': ent2id[tuple(e1_offsets)],
+                                'arg2_id': ent2id[tuple(e2_offsets)]
+                        }
+                        )
+
+
+                    # Special case for a single annotation    
+                    elif len(a) > 10:
+                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
+                        e2_offsets = [(int(a[8]) + offset_delta, int(a[9]) + offset_delta)]
+                        relations.append(
+                            {
+                                "id": str(next(uid)),
+                                "type": a[1],
+                                'arg1_id': ent2id[tuple(e1_offsets)],
+                                'arg2_id': ent2id[tuple(e2_offsets)]
+                        }
+                        )
+
+                
+                    
+                offset_delta += len(passage) + 1
+
+                
+            doc = {
+                    'id': id_,
+                    'document_id': pmid,
+                    'passages': passages,
+                    'entities': entities,
+                    'relations': relations,
+                }
+            
+            yield id_, doc
+            
+            passages = []
+            entities = []
+            relations = []
+            id_ = next(uid)
+    
 
 
 # This template is based on the following template from the datasets package:
