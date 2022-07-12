@@ -26,8 +26,10 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{pedersen2007measures,
@@ -43,22 +45,24 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mayosrs"
+_DISPLAYNAME = "MayoSRS"
 
 _DESCRIPTION = """\
-MayoSRS consists of 101 clinical term pairs whose relatedness was determined by
+MayoSRS consists of 101 clinical term pairs whose relatedness was determined by \
 nine medical coders and three physicians from the Mayo Clinic.
 """
 
 _HOMEPAGE = "https://conservancy.umn.edu/handle/11299/196265"
 
-_LICENSE = "CC0 1.0 Universal"
+_LICENSE = Licenses.CC0_1p0
 
-_URLS = {_DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"}
+_URLS = {
+    _DATASETNAME: "https://conservancy.umn.edu/bitstream/handle/11299/196265/MayoSRS.csv?sequence=1&isAllowed=y"
+}
 
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -108,7 +112,7 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -133,7 +137,12 @@ class MayosrsDataset(datasets.GeneratorBasedBuilder):
 
         if split == "train":
 
-            data = pd.read_csv(filepath, sep=",", header=0, names=["label", "code_1", "code_2", "text_1", "text_2"])
+            data = pd.read_csv(
+                filepath,
+                sep=",",
+                header=0,
+                names=["label", "code_1", "code_2", "text_1", "text_2"],
+            )
 
             if self.config.schema == "source":
                 for id_, row in data.iterrows():

@@ -32,9 +32,11 @@ from bioc import biocxml
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
@@ -70,7 +72,8 @@ human annotations of all chemicals, diseases and their interactions in 1,500 Pub
 
 _HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
 
-_LICENSE = "Public Domain Mark 1.0"
+_LICENSE = Licenses.PUBLIC_DOMAIN_MARK_1p0
+
 
 _URLs = {
     "source": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
@@ -158,7 +161,7 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

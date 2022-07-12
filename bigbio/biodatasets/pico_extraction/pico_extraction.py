@@ -22,14 +22,16 @@ The script loads dataset in bigbio schema (using knowledgebase schema: schemas/k
 import json
 from typing import Dict, List, Tuple, Union
 
+import datasets
 import numpy as np
 
-import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{zlabinger-etal-2020-effective,
@@ -50,6 +52,8 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pico_extraction"
+_DISPLAYNAME = "PICO Annotation"
+
 
 _DESCRIPTION = """\
 This dataset contains annotations for Participants, Interventions, and Outcomes (referred to as PICO task).
@@ -59,9 +63,11 @@ To get the final annotations, we perform the majority voting.
 
 _HOMEPAGE = "https://github.com/Markus-Zlabinger/pico-annotation"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
-_DATA_PATH = "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
+_DATA_PATH = (
+    "https://raw.githubusercontent.com/Markus-Zlabinger/pico-annotation/master/data"
+)
 _URLS = {
     _DATASETNAME: {
         "sentence_file": f"{_DATA_PATH}/sentences.json",
@@ -112,7 +118,9 @@ def _get_entities_pico(
     ents = []
     for annotation_type, annotations in annotation_dict.items():
         # get indices from three annotators by majority voting
-        indices = np.where(np.round(np.mean(annotations[sentence_id]["annotations"], axis=0)) == 1)[0]
+        indices = np.where(
+            np.round(np.mean(annotations[sentence_id]["annotations"], axis=0)) == 1
+        )[0]
 
         if len(indices) > 0:  # if annotations exist for this sentence
             split_indices = []
@@ -193,7 +201,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -214,7 +222,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, split, sentence_file, annotation_files) -> (int, dict):
+    def _generate_examples(self, split, sentence_file, annotation_files):
         """Yields examples as (key, example) tuples."""
 
         sentences, annotation_dict = _pico_extraction_data_loader(
@@ -276,7 +284,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
                         "type": ent["annotation_type"],
                         "text": [ent["annotation_text"]],
                         "offsets": [[ent["char_start"], ent["char_end"]]],
-                        "normalized": [{"db_name": None, "db_id": None}],
+                        "normalized": [],
                     }
                     data["entities"].append(entity)
                     uid += 1

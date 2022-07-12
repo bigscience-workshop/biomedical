@@ -32,8 +32,10 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{CampillosLlanos2021,
@@ -54,6 +56,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ctebmsp"
+_DISPLAYNAME = "CT-EBM-SP"
 
 _ABSTRACTS_DESCRIPTION = """\
 The "abstracts" subset of the Clinical Trials for Evidence-Based Medicine in Spanish
@@ -86,15 +89,14 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "http://www.lllf.uam.es/ESP/nlpmedterm_en.html"
 
-_LICENSE = (
-    "Creative Commons Non-Commercial Attribution (CC-BY-NC-A) 4.0 International License"
-)
+_LICENSE = Licenses.CC_BY_NC_4p0
 
 _URLS = {
     _DATASETNAME: "http://www.lllf.uam.es/ESP/nlpdata/wp2/CT-EBM-SP.zip",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -220,7 +222,7 @@ class CTEBMSpDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

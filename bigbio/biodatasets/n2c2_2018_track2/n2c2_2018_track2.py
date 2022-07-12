@@ -47,8 +47,10 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/HenryBFSU20,
@@ -75,6 +77,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2018_track2"
+_DISPLAYNAME = "n2c2 2018 ADE"
 
 _DESCRIPTION = """\
 The National NLP Clinical Challenges (n2c2), organized in 2018, continued the
@@ -116,7 +119,7 @@ of the art in a particular task, learn from it, and build on it.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
@@ -363,7 +366,7 @@ class N2C2AdverseDrugEventsMedicationExtractionDataset(datasets.GeneratorBasedBu
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

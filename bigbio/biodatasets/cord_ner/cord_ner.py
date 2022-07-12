@@ -12,21 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
-CORD-NER dataset covers 75 fine-grained entity types: In addition to the common biomedical entity types (e.g., genes, chemicals and diseases), it covers many new entity types related explicitly to the COVID-19 studies (e.g., coronaviruses, viral proteins, evolution, materials, substrates and immune responses), which may benefit research on COVID-19 related virus, spreading mechanisms, and potential vaccines. CORD-NER annotation is a combination of four sources with different NER methods.
+CORD-NER dataset covers 75 fine-grained entity types: In addition to the common
+biomedical entity types (e.g., genes, chemicals and diseases), it covers many
+new entity types related explicitly to the COVID-19 studies (e.g.,
+coronaviruses, viral proteins, evolution, materials, substrates and immune
+responses), which may benefit research on COVID-19 related virus, spreading
+mechanisms, and potential vaccines. CORD-NER annotation is a combination of four
+sources with different NER methods.
 """
-
-import os
 import json
-from typing import List, Tuple, Dict
+import os
+from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/corr/abs-2003-12218,
@@ -35,8 +42,8 @@ _CITATION = """\
                Yingjun Guan and
                Bangzheng Li and
                Jiawei Han},
-  title     = {Comprehensive Named Entity Recognition on {CORD-19} with Distant or
-               Weak Supervision},
+  title     = {Comprehensive Named Entity Recognition on {CORD-19} with 
+               Distant or Weak Supervision},
   journal   = {CoRR},
   volume    = {abs/2003.12218},
   year      = {2020},
@@ -49,18 +56,24 @@ _CITATION = """\
 }
 """
 
-
 _DATASETNAME = "cord_ner"
-
+_DISPLAYNAME = "CORD-NER"
 
 _DESCRIPTION = """\
-CORD-NER dataset covers 75 fine-grained entity types: In addition to the common biomedical entity types (e.g., genes, chemicals and diseases), it covers many new entity types related explicitly to the COVID-19 studies (e.g., coronaviruses, viral proteins, evolution, materials, substrates and immune responses), which may benefit research on COVID-19 related virus, spreading mechanisms, and potential vaccines. CORD-NER annotation is a combination of four sources with different NER methods.
+CORD-NER dataset covers 75 fine-grained entity types: In addition to the common
+biomedical entity types (e.g., genes, chemicals and diseases), it covers many
+new entity types related explicitly to the COVID-19 studies (e.g.,
+coronaviruses, viral proteins, evolution, materials, substrates and immune
+responses), which may benefit research on COVID-19 related virus, spreading
+mechanisms, and potential vaccines. CORD-NER annotation is a combination of four
+sources with different NER methods.
 """
 
 _HOMEPAGE = "https://xuanwang91.github.io/2020-03-20-cord19-ner/"
 
 
-_LICENSE = """
+_LICENSE = CustomLicense(
+    text="""
     This dataset is made from multiple datasets by Allen Institute 
     for AI in partnership with the Chan Zuckerberg Initiative, Georgetown 
     University’s Center for Security and Emerging Technology, Microsoft Research, 
@@ -69,6 +82,7 @@ _LICENSE = """
     and Technology Policy . The licenses are different depending on the source.
     The full license details can be found here: https://www.kaggle.com/datasets/allen-institute-for-ai/CORD-19-research-challenge?select=metadata.csv
     """
+)
 
 _URLS = {
     _DATASETNAME: {
@@ -81,7 +95,6 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -125,12 +138,6 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "cord_ner_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
-
         if self.config.schema == "source":
             if self.config.name == "cord_ner_source":
                 features = datasets.Features(
@@ -205,7 +212,7 @@ class CordNERDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -26,12 +26,14 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{,
@@ -55,7 +57,7 @@ The annotations span molecular, cellular, tissue, and organ-level processes.
 
 _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 
-_LICENSE = "CC BY-NC-SA 3.0"
+_LICENSE = Licenses.CC_BY_NC_SA_3p0
 
 _URLs = {
     "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
@@ -203,7 +205,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
             # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
             # License for the dataset if available
-            license=_LICENSE,
+            license=str(_LICENSE),
             # Citation for the dataset
             citation=_CITATION,
         )

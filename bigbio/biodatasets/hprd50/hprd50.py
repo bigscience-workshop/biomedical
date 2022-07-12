@@ -39,23 +39,27 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 # TODO: Add BibTeX citation
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author    = {Katrin Fundel, Robert Kuffner, Ralf Zimmer},
-  title     = {RelEx-Relation extraction using dependency parse trees},
-  journal   = {Bioinformatics},
-  volume    = {23},
-  year      = {2007},
-  url       = {https://academic.oup.com/bioinformatics/article/23/3/365/236564},
-  doi       = {https://doi.org/10.1093/bioinformatics/btl616},
+@article{fundel2007relex,
+  title={RelEx—Relation extraction using dependency parse trees},
+  author={Fundel, Katrin and K{\"u}ffner, Robert and Zimmer, Ralf},
+  journal={Bioinformatics},
+  volume={23},
+  number={3},
+  pages={365--371},
+  year={2007},
+  publisher={Oxford University Press}
 }
 """
 
 _DATASETNAME = "hprd50"
+_DISPLAYNAME = "HPRD50"
 
 _DESCRIPTION = """\
 HPRD50 is a dataset of randomly selected, hand-annotated abstracts of biomedical papers
@@ -75,7 +79,7 @@ Recognition and Relation Extraction.
 
 _HOMEPAGE = ""
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: "https://github.com/metalrt/ppi-dataset/zipball/master",
@@ -275,7 +279,7 @@ class HPRD50Dataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

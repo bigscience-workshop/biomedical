@@ -22,8 +22,10 @@ import pandas as pd
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @dataset{luis_gasco_2022_6458455,
@@ -40,13 +42,17 @@ _CITATION = """\
 """
 
 _DATASETNAME = "distemist"
+_DISPLAYNAME = "DisTEMIST"
+
 _DESCRIPTION = """\
 The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotations linked with Snomed-CT concepts.
 All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.
 """
 
 _HOMEPAGE = "https://zenodo.org/record/6458455"
-_LICENSE = "Creative Commons Attribution 4.0 International"
+
+_LICENSE = Licenses.CC_BY_4p0
+
 _URLS = {
     _DATASETNAME: "https://zenodo.org/record/6458455/files/distemist.zip?download=1",
 }
@@ -106,8 +112,12 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
                             "type": datasets.Value("string"),
                             "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "concept_codes": datasets.Sequence(datasets.Value("string")),
-                            "semantic_relations": datasets.Sequence(datasets.Value("string")),
+                            "concept_codes": datasets.Sequence(
+                                datasets.Value("string")
+                            ),
+                            "semantic_relations": datasets.Sequence(
+                                datasets.Value("string")
+                            ),
                         }
                     ],
                 }
@@ -119,7 +129,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -141,7 +151,10 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(
-        self, entities_mapping_file_path: Path, linking_mapping_file_path: Path, text_files_dir: Path
+        self,
+        entities_mapping_file_path: Path,
+        linking_mapping_file_path: Path,
+        text_files_dir: Path,
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         entities_mapping = pd.read_csv(entities_mapping_file_path, sep="\t")
@@ -159,9 +172,13 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
             # doc_text = doc_text.replace("\n", "")
 
             if filename in linking_file_names:
-                entities_df: pd.DataFrame = linking_mapping[linking_mapping["filename"] == filename]
+                entities_df: pd.DataFrame = linking_mapping[
+                    linking_mapping["filename"] == filename
+                ]
             else:
-                entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]
+                entities_df: pd.DataFrame = entities_mapping[
+                    entities_mapping["filename"] == filename
+                ]
 
             example = {
                 "id": f"{uid}",

@@ -12,15 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
-import os
+from pathlib import Path
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/bioinformatics/BakerSGAHSK16,
@@ -46,6 +48,9 @@ _CITATION = """\
 }
 """
 
+_DATASETNAME = "hallmarks_of_cancer"
+_DISPLAYNAME = "Hallmarks of Cancer"
+
 _DESCRIPTION = """\
 The Hallmarks of Cancer (HOC) Corpus consists of 1852 PubMed publication
 abstracts manually annotated by experts according to a taxonomy. The taxonomy
@@ -57,11 +62,11 @@ The filenames are the corresponding PubMed IDs (PMID).
 
 _HOMEPAGE = "https://github.com/sb895/Hallmarks-of-Cancer"
 
-_LICENSE = "GNU General Public License v3.0"
+_LICENSE = Licenses.GPL_3p0
 
 _URLs = {
-    "source": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
-    "bigbio_text": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
+    "corpus": "https://github.com/sb895/Hallmarks-of-Cancer/archive/refs/heads/master.zip",
+    "split_indices": "https://microsoft.github.io/BLURB/sample_code/data_generation.tar.gz",
 }
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
@@ -69,17 +74,17 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 _CLASS_NAMES = [
-    "Activating invasion and metastasis",
-    "Avoiding immune destruction",
-    "Cellular energetics",
-    "Enabling replicative immortality",
-    "Evading growth suppressors",
-    "Genomic instability and mutation",
-    "Inducing angiogenesis",
-    "Resisting cell death",
-    "NULL",
-    "Sustaining proliferative signaling",
-    "Tumor promoting inflammation",
+    "evading growth suppressors",
+    "tumor promoting inflammation",
+    "enabling replicative immortality",
+    "cellular energetics",
+    "resisting cell death",
+    "activating invasion and metastasis",
+    "genomic instability and mutation",
+    "none",
+    "inducing angiogenesis",
+    "sustaining proliferative signaling",
+    "avoiding immune destruction",
 ]
 
 
@@ -114,7 +119,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
                 {
                     "document_id": datasets.Value("string"),
                     "text": datasets.Value("string"),
-                    "label": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
+                    "label": [datasets.ClassLabel(names=_CLASS_NAMES)],
                 }
             )
 
@@ -126,7 +131,7 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -138,46 +143,73 @@ class HallmarksOfCancerDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": data_dir,
-                    "split": "train",
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/train_pmid.tsv",
                 },
-            )
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/test_pmid.tsv",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "corpuspath": Path(data_dir["corpus"]),
+                    "indicespath": Path(data_dir["split_indices"])
+                    / "data_generation/indexing/HoC/dev_pmid.tsv",
+                },
+            ),
         ]
 
-    def _generate_examples(self, filepath, split):
+    def _generate_examples(self, corpuspath: Path, indicespath: Path):
 
-        path_name = list(filepath.values())[0] + "/*"
-        texts = glob.glob(path_name + "/text/*")
-        labels = glob.glob(path_name + "/labels/")
+        indices = indicespath.read_text(encoding="utf8").strip("\n").split(",")
+        dataset_dir = corpuspath / "Hallmarks-of-Cancer-master"
+        texts_dir = dataset_dir / "text"
+        labels_dir = dataset_dir / "labels"
+
         uid = 1
+        for document_index, document in enumerate(indices):
+            text_file = texts_dir / document
+            label_file = labels_dir / document
+            text = text_file.read_text(encoding="utf8").strip("\n")
+            labels = label_file.read_text(encoding="utf8").strip("\n")
 
-        for idx, tf_name in enumerate(texts):
-            filenname = os.path.basename(tf_name)
-            with open(tf_name, encoding="utf-8") as f:
-                lines = f.readlines()
-                text_body = "".join([j.strip() for j in lines])
+            sentences = text.split("\n")
+            labels = labels.split("<")[1:]
 
-            label_file_name = labels[0] + "/" + filenname
-            with open(label_file_name, encoding="utf-8") as f:
-                lines = f.readlines()
-                label_body = "".join([j.strip() for j in lines])
-                label_body = [i.strip() for i in label_body.split("<")]
-                label_body = sum([k.split("AND") for k in label_body if len(k) > 1], [])
-                label_body = [i.split("--")[0].strip() for i in label_body]
+            for example_index, example_pair in enumerate(zip(sentences, labels)):
+                sentence, label = example_pair
 
-            if self.config.schema == "source":
-                yield idx, {
-                    "document_id": filenname.split(".")[0],
-                    "text": text_body,
-                    "label": label_body,
-                }
-            elif self.config.schema == "bigbio_text":
+                label = label.strip()
 
-                yield idx, {
-                    "id": uid,
-                    "document_id": filenname.split(".")[0],
-                    "text": text_body,
-                    "labels": [label_body],
+                if label == "":
+                    label = "none"
+
+                multi_labels = [m_label.strip() for m_label in label.split("AND")]
+                unique_multi_labels = {
+                    m_label.split("--")[0].lower().lstrip()
+                    for m_label in multi_labels
+                    if m_label != "NULL"
                 }
 
-                uid += 1
+                arrow_file_unique_key = 100 * document_index + example_index
+                if self.config.schema == "source":
+                    yield arrow_file_unique_key, {
+                        "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
+                        "text": sentence,
+                        "label": list(unique_multi_labels),
+                    }
+                elif self.config.schema == "bigbio_text":
+                    yield arrow_file_unique_key, {
+                        "id": uid,
+                        "document_id": f"{text_file.name.split('.')[0]}_{example_index}",
+                        "text": sentence,
+                        "labels": list(unique_multi_labels),
+                    }
+                    uid += 1

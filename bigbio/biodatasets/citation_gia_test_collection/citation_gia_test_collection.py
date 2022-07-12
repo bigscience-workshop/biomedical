@@ -25,54 +25,58 @@ import html
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{Wei2015,
-  doi = {10.1155/2015/918710},
-  url = {https://doi.org/10.1155/2015/918710},
-  year = {2015},
-  publisher = {Hindawi Limited},
-  volume = {2015},
-  pages = {1--7},
-  author = {Chih-Hsuan Wei and Hung-Yu Kao and Zhiyong Lu},
-  title = {{GNormPlus}: An Integrative Approach for Tagging Genes,  Gene Families,  and Protein Domains},
-  journal = {{BioMed} Research International}
+  title        = {
+    {GNormPlus}: An Integrative Approach for Tagging Genes,  Gene Families,
+    and Protein Domains
+  },
+  author       = {Chih-Hsuan Wei and Hung-Yu Kao and Zhiyong Lu},
+  year         = 2015,
+  journal      = {{BioMed} Research International},
+  publisher    = {Hindawi Limited},
+  volume       = 2015,
+  pages        = {1--7},
+  doi          = {10.1155/2015/918710},
+  url          = {https://doi.org/10.1155/2015/918710}
 }
 """
 
 _DATASETNAME = "citation_gia_test_collection"
+_DISPLAYNAME = "Citation GIA Test Collection"
 
 _DESCRIPTION = """\
-The Citation GIA Test Collection was recently created for gene 
-indexing at the NLM and includes 151 PubMed abstracts with both 
-mention-level and document-level annotations. 
-They are selected because both have a focus on human genes.
+The Citation GIA Test Collection was recently created for gene indexing at the
+NLM and includes 151 PubMed abstracts with both mention-level and document-level
+annotations. They are selected because both have a focus on human genes.
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = "Unknown"
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: [
-        "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"]
+        "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
+    ]
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.NAMED_ENTITY_DISAMBIGUATION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
 class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
     """
-    The Citation GIA Test Collection was recently created for gene indexing at the NLM and includes 
-    151 PubMed abstracts with both mention-level and document-level annotations. 
-    They are selected because both have a focus on human genes.
+    The Citation GIA Test Collection was recently created for gene indexing at the
+    NLM and includes 151 PubMed abstracts with both mention-level and document-level
+    annotations. They are selected because both have a focus on human genes.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -92,7 +96,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             description="citation_gia_test_collection BigBio schema",
             schema="bigbio_kb",
             subset_id="citation_gia_test_collection",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "citation_gia_test_collection_source"
@@ -124,7 +128,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
                                 }
                             ],
                         }
-                    ]
+                    ],
                 }
             )
 
@@ -135,7 +139,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -148,16 +152,18 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir[0], "GNormPlusCorpus/NLMIAT.BioC.xml"),
+                    "filepath": os.path.join(
+                        data_dir[0], "GNormPlusCorpus/NLMIAT.BioC.xml"
+                    ),
                     "split": "NLMIAT",
                 },
             ),
         ]
 
     def _get_entities(self, annot_d: dict) -> dict:
-        ''''
+        """'
         Converts annotation dict to entity dict.
-        '''
+        """
         ent = {
             "id": str(uuid.uuid4()),
             "type": annot_d["type"],
@@ -173,13 +179,15 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
 
         return ent
 
-    def _get_offsets_entities(child, parent_text: str, child_text: str, offset: int) -> List[int]:
-        '''
-        Extracts child text offsets from parent text for entities. 
+    def _get_offsets_entities(
+        child, parent_text: str, child_text: str, offset: int
+    ) -> List[int]:
+        """
+        Extracts child text offsets from parent text for entities.
         Some offsets that were present in the datset were wrong mainly because of string encodings.
-        Also a little fraction of parent strings doesn't contain its respective child strings. 
-        Hence few assertion errors in the entitity offsets checking test. 
-        '''
+        Also a little fraction of parent strings doesn't contain its respective child strings.
+        Hence few assertion errors in the entitity offsets checking test.
+        """
         if child_text in parent_text:
             index = parent_text.index(child_text)
             start = index + offset
@@ -191,10 +199,10 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
         return [start, end]
 
     def _process_annot(self, annot: ET.Element, passages: dict) -> dict:
-        ''''
+        """'
         Converts annotation XML Element to Python dict.
-        '''
-        parent_text = " ".join([p['text'] for p in passages.values()])
+        """
+        parent_text = " ".join([p["text"] for p in passages.values()])
         annot_d = dict()
         a_d = {a.tag: a.text for a in annot}
 
@@ -203,21 +211,21 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             if a.tag == "location":
                 offset = int(a.attrib["offset"])
                 annot_d["offsets"] = self._get_offsets_entities(
-                    html.escape(parent_text[offset:]),
-                    html.escape(a_d["text"]), offset)
+                    html.escape(parent_text[offset:]), html.escape(a_d["text"]), offset
+                )
 
             elif a.tag != "infon":
                 annot_d[a.tag] = html.escape(a.text)
 
             else:
                 annot_d[a.attrib["key"]] = html.escape(a.text)
-                
+
         return annot_d
 
     def _parse_elem(self, elem: ET.Element) -> dict:
-        ''''
+        """'
         Converts document XML Element to Python dict.
-        '''
+        """
         elem_d = dict()
         passages = dict()
         annotations = elem.findall(".//annotation")
@@ -228,8 +236,21 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
 
         for child in elem:
             if child.tag == "passage":
-                elem_d[child.tag].append({c.tag: html.escape(" ".join(list(filter(
-                    lambda item: item, [t.strip('\n') for t in c.itertext()])))) for c in child})
+                elem_d[child.tag].append(
+                    {
+                        c.tag: html.escape(
+                            " ".join(
+                                list(
+                                    filter(
+                                        lambda item: item,
+                                        [t.strip("\n") for t in c.itertext()],
+                                    )
+                                )
+                            )
+                        )
+                        for c in child
+                    }
+                )
 
             elif child.tag == "id":
                 elem_d[child.tag] = html.escape(child.text)
@@ -240,11 +261,10 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
             passages[infon] = passage
 
         elem_d["passages"] = passages
-        elem_d.pop('passage', None)
+        elem_d.pop("passage", None)
 
         for a in annotations:
-            elem_d["entities"].append(
-                self._process_annot(a, elem_d["passages"]))
+            elem_d["entities"].append(self._process_annot(a, elem_d["passages"]))
 
         return elem_d
 
@@ -258,31 +278,35 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
                 row = self._parse_elem(elem)
                 uid += 1
                 passages = row["passages"]
-                yield uid,  {
+                yield uid, {
                     "id": str(uid),
                     "passages": [
                         {
                             "id": str(uuid.uuid4()),
                             "type": "title",
                             "text": [passages["title"]["text"]],
-                            "offsets": [[
-                                int(passages["title"]["offset"]),
-                                int(passages["title"]["offset"]) +
-                                len(passages["title"]["text"])
-                            ]],
+                            "offsets": [
+                                [
+                                    int(passages["title"]["offset"]),
+                                    int(passages["title"]["offset"])
+                                    + len(passages["title"]["text"]),
+                                ]
+                            ],
                         },
                         {
                             "id": str(uuid.uuid4()),
                             "type": "abstract",
                             "text": [passages["abstract"]["text"]],
-                            "offsets": [[
-                                int(passages["abstract"]["offset"]),
-                                int(passages["abstract"]["offset"]) +
-                                len(passages["abstract"]["text"])
-                            ]],
-                        }
+                            "offsets": [
+                                [
+                                    int(passages["abstract"]["offset"]),
+                                    int(passages["abstract"]["offset"])
+                                    + len(passages["abstract"]["text"]),
+                                ]
+                            ],
+                        },
                     ],
-                    "entities": [self._get_entities(a) for a in row["entities"]]
+                    "entities": [self._get_entities(a) for a in row["entities"]],
                 }
 
         elif self.config.schema == "bigbio_kb":
@@ -291,7 +315,7 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
                 row = self._parse_elem(elem)
                 uid += 1
                 passages = row["passages"]
-                yield uid,  {
+                yield uid, {
                     "id": str(uid),
                     "document_id": str(uuid.uuid4()),
                     "passages": [
@@ -299,26 +323,29 @@ class CitationGIATestCollection(datasets.GeneratorBasedBuilder):
                             "id": str(uuid.uuid4()),
                             "type": "title",
                             "text": [passages["title"]["text"]],
-                            "offsets": [[
-                                int(passages["title"]["offset"]),
-                                int(passages["title"]["offset"]) +
-                                len(passages["title"]
-                                    ["text"])
-                            ]],
+                            "offsets": [
+                                [
+                                    int(passages["title"]["offset"]),
+                                    int(passages["title"]["offset"])
+                                    + len(passages["title"]["text"]),
+                                ]
+                            ],
                         },
                         {
                             "id": str(uuid.uuid4()),
                             "type": "abstract",
                             "text": [passages["abstract"]["text"]],
-                            "offsets": [[
-                                int(passages["abstract"]["offset"]),
-                                int(passages["abstract"]["offset"]) +
-                                len(passages["abstract"]["text"])
-                            ]],
-                        }
+                            "offsets": [
+                                [
+                                    int(passages["abstract"]["offset"]),
+                                    int(passages["abstract"]["offset"])
+                                    + len(passages["abstract"]["text"]),
+                                ]
+                            ],
+                        },
                     ],
                     "entities": [self._get_entities(a) for a in row["entities"]],
                     "relations": [],
                     "events": [],
-                    "coreferences": []
+                    "coreferences": [],
                 }

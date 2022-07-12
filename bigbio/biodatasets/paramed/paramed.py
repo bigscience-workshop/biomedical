@@ -27,14 +27,16 @@ import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 logger = datasets.logging.get_logger(__name__)
 
 
 _LANGUAGES = [Lang.EN, Lang.ZH]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{liu2021paramed,
   author    = {Liu, Boxiang and Huang, Liang},
   title     = {ParaMed: a parallel corpus for English–Chinese translation in the biomedical domain},
   journal   = {BMC Medical Informatics and Decision Making},
@@ -45,6 +47,7 @@ _CITATION = """\
 }
 """
 _DATASETNAME = "paramed"
+_DISPLAYNAME = "ParaMed"
 
 _DESCRIPTION = """\
 NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website. 
@@ -54,7 +57,7 @@ http://nejmqianyan.cn/. The corpus contains all article pairs (around 2000 pairs
 
 _HOMEPAGE = "https://github.com/boxiangliu/ParaMed"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
@@ -113,7 +116,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
