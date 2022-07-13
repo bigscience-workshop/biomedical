@@ -21,10 +21,10 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.constants import BigBioValues, Lang, Tasks
 from bigbio.utils.license import Licenses
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
@@ -35,9 +35,9 @@ _CITATION = """\
   year         = 2022,
   note         = {{Funded by the Plan de Impulso de las Tecnologías del Lenguaje (Plan TL).}},
   publisher    = {Zenodo},
-  version      = {2.0.0},
-  doi          = {10.5281/zenodo.6458455},
-  url          = {https://doi.org/10.5281/zenodo.6458455}
+  version      = {5.1},
+  doi          = {10.5281/zenodo.6671292},
+  url          = {https://doi.org/10.5281/zenodo.6671292}
 }
 """
 
@@ -49,17 +49,17 @@ The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotat
 All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.
 """
 
-_HOMEPAGE = "https://zenodo.org/record/6458455"
+_HOMEPAGE = "https://zenodo.org/record/6671292"
 
 _LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
-    _DATASETNAME: "https://zenodo.org/record/6458455/files/distemist.zip?download=1",
+    _DATASETNAME: "https://zenodo.org/record/6671292/files/distemist.zip?download=1",
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
-_SOURCE_VERSION = "2.0.0"
+_SOURCE_VERSION = "5.1.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -74,22 +74,36 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="distemist_source",
+            name="distemist_entities_source",
             version=SOURCE_VERSION,
-            description="DisTEMIST source schema",
+            description="DisTEMIST (subtrack 1: entities) source schema",
             schema="source",
-            subset_id="distemist",
+            subset_id="distemist_entities",
+        ),
+         BigBioConfig(
+            name="distemist_linking_source",
+            version=SOURCE_VERSION,
+            description="DisTEMIST (subtrack 2: linking) source schema",
+            schema="source",
+            subset_id="distemist_linking",
         ),
         BigBioConfig(
-            name="distemist_bigbio_kb",
+            name="distemist_entities_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="DisTEMIST BigBio schema",
+            description="DisTEMIST (subtrack 1: entities) BigBio schema",
             schema="bigbio_kb",
-            subset_id="distemist",
+            subset_id="distemist_entities",
+        ),
+        BigBioConfig(
+            name="distemist_linking_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="DisTEMIST (subtrack 2: linking) BigBio schema",
+            schema="bigbio_kb",
+            subset_id="distemist_linking",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "distemist_source"
+    DEFAULT_CONFIG_NAME = "distemist_entities_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -137,31 +151,33 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
+        base_bath = Path(data_dir) / 'distemist' / 'training'
+        if self.config.subset_id == 'distemist_entities':
+            entity_mapping_files = [base_bath / 'subtrack1_entities' / 'distemist_subtrack1_training_mentions.tsv']
+        else:
+            entity_mapping_files = [
+                base_bath / 'subtrack2_linking' / 'distemist_subtrack2_training1_linking.tsv',
+                base_bath / 'subtrack2_linking' / 'distemist_subtrack2_training2_linking.tsv'
+            ]
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "entities_mapping_file_path": Path(data_dir)
-                    / "training/subtrack1_entities/distemist_subtrack1_training_mentions.tsv",
-                    "linking_mapping_file_path": Path(data_dir)
-                    / "training/subtrack2_linking/distemist_subtrack1_training1_linking.tsv",
-                    "text_files_dir": Path(data_dir) / "training/text_files",
+                    "entity_mapping_files": entity_mapping_files,
+                    "text_files_dir": base_bath / 'text_files',
                 },
             ),
         ]
 
     def _generate_examples(
         self,
-        entities_mapping_file_path: Path,
-        linking_mapping_file_path: Path,
+        entity_mapping_files: List[Path],        
         text_files_dir: Path,
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        entities_mapping = pd.read_csv(entities_mapping_file_path, sep="\t")
-        linking_mapping = pd.read_csv(linking_mapping_file_path, sep="\t")
-
+        entities_mapping = pd.concat([pd.read_csv(file, sep="\t") for file in entity_mapping_files])
+        
         entity_file_names = set(entities_mapping["filename"])
-        linking_file_names = set(linking_mapping["filename"])
 
         # entity_file_names = entity_file_names.difference(linking_file_names)
 
@@ -171,15 +187,8 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
             doc_text = text_file.read_text()
             # doc_text = doc_text.replace("\n", "")
 
-            if filename in linking_file_names:
-                entities_df: pd.DataFrame = linking_mapping[
-                    linking_mapping["filename"] == filename
-                ]
-            else:
-                entities_df: pd.DataFrame = entities_mapping[
-                    entities_mapping["filename"] == filename
-                ]
-
+            entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]
+               
             example = {
                 "id": f"{uid}",
                 "document_id": filename,
@@ -208,12 +217,15 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
                 if self.config.schema == "source":
                     entity["concept_codes"] = []
                     entity["semantic_relations"] = []
-                    if filename in linking_file_names:
+                    if self.config.subset_id == 'distemist_linking':
                         entity["concept_codes"] = row.code.split("+")
                         entity["semantic_relations"] = row.semantic_rel.split("+")
 
                 elif self.config.schema == "bigbio_kb":
-                    entity["normalized"] = []
+                    if self.config.subset_id == 'distemist_linking':
+                        entity["normalized"] = [{'db_id' : row.code, 'db_name' : 'SNOMED_CT'}]
+                    else:
+                        entity["normalized"] = [{'db_id' : BigBioValues.NULL, 'db_name' : BigBioValues.NULL}]
 
                 entities.append(entity)
 
