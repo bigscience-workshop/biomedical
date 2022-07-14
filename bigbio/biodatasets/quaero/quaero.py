@@ -1,13 +1,12 @@
-import os
+from pathlib import Path
 
 import datasets
-from pathlib import Path
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks, BigBioValues
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
-from bigbio.utils.parsing import parse_brat_file, brat_parse_to_bigbio_kb
+from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
@@ -167,9 +166,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 # These kwargs will be passed to _generate_examples
-                gen_kwargs={
-                    "filepath": data_dir, 
-                    "split": "test"},
+                gen_kwargs={"filepath": data_dir, "split": "test"},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
@@ -189,35 +186,32 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             subset = "MEDLINE"
 
         folder = Path(filepath) / "QUAERO_FrenchMed" / "corpus" / split / subset
-        
+
         if self.config.schema == "source":
-            for guid, txt_file in enumerate(folder.glob('*.txt')):
-                example = parse_brat_file(txt_file, parse_notes=True)        
+            for guid, txt_file in enumerate(folder.glob("*.txt")):
+                example = parse_brat_file(txt_file, parse_notes=True)
                 example["id"] = guid
                 # Remove unsupported items from BRAT
-                del example['events']
-                del example['relations']
-                del example['equivalences']
-                del example['attributes']
-                del example['normalizations']
+                del example["events"]
+                del example["relations"]
+                del example["equivalences"]
+                del example["attributes"]
+                del example["normalizations"]
                 yield guid, example
         elif self.config.schema == "bigbio_kb":
-            for guid, txt_file in enumerate(folder.glob('*.txt')):
-                example = parse_brat_file(txt_file, parse_notes=True)        
-                annotator_notes = example['notes']
-                document_id = example['document_id']
-                
+            for guid, txt_file in enumerate(folder.glob("*.txt")):
+                example = parse_brat_file(txt_file, parse_notes=True)
+                annotator_notes = example["notes"]
+                document_id = example["document_id"]
+
                 example = brat_parse_to_bigbio_kb(example)
                 example["id"] = guid
-                
+
                 for note in annotator_notes:
                     entity_id = f'{document_id}_{note["ref_id"]}'
-                    for e in example['entities']:
+                    for e in example["entities"]:
                         if e["id"] == entity_id:
-                            e['normalized'].append({'db_id' : note['text'], 'db_name' : 'UMLS'})
+                            e["normalized"].append({"db_id": note["text"], "db_name": "UMLS"})
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
-
-        
-
