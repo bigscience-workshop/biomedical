@@ -1,23 +1,29 @@
-# BigBIO: Biomedical Datasets
+# BigBIO: Biomedical Dataset Library
 
-BigBIO (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric machine learning. Our goals include
+BigBIO (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric machine learning. Our goals include:
 
 - Lightweight, programmatic access to biomedical datasets at scale
-- Promote reproducibility in data processing
+- Promoting reproducibility in data processing
 - Better documentation for dataset provenance, licensing, and other key attributes
-- Easier generation of meta-datasets (e.g., prompting, masssive MTL)
+- Easier generation of meta-datasets for natural language prompting, multi-task learning
 
-Currently BigBIO provides support for
+Currently BigBIO provides support for:
 
-- more than 120 biomedical datasets
-- 10 languages
+- 126+ biomedical datasets
+- 10+ languages
+- 12 task categories
 - Harmonized dataset schemas by task type
 - Metadata on *licensing*, *coarse/fine-grained task types*, *domain*, and more!
 
 
 ### Documentation
 
-- Tutorials: *Coming Soon!*
+- Tutorials
+  - [Materializing Meta-datasets](https://github.com/bigscience-workshop/biomedical/blob/master/notebooks/materializing_meta_datasets/materializing-meta-datasets.ipynb)   
+  - [Prompt Engineering and Evaluation](https://github.com/bigscience-workshop/biomedical/tree/master/notebooks/promptengineering)  
+  - BigBIO Report Card (Unit tests, Benchmarks, and more)
+  - Streamlit Visualization Demo
+- [BigBIO Data Cards]()
 - [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6): Implement or suggest new datasets
 - [Contributor Guide](CONTRIBUTING.md)
 - [Task Schema Overview](task_schemas.md)
@@ -243,54 +249,65 @@ dsd = load_dataset(**load_dataset_kwargs)
 
 BigBIO includes support for almost all datasets included in other popular English biomedical benchmarks.
 
-| Task Type |    Dataset    | BigBIO (Ours)|  BLUE | BLURB | In-BoXBART | Requires DUA |
-|:---------:|:-------------:|:---------------------:|:-----:|:-----:|:----------:|:------------:|
-|    NER    | BC5-chem      |          ✓         |  ✓ |  ✓ |    ✓    |         |
-|    NER    | BC5-disease   |          ✓         |  ✓ |  ✓ |    ✓    |         |
-|    NER    | NCBI-disease  |          ✓         |  |  ✓ |    ✓    |         |
-|     RE    | ChemProt      |          ✓         |  ✓ |  ✓ |    ✓    |         |
-|     RE    | DDI           |          ✓         |  ✓ |  ✓ |    ✓    |         |
-|    STS   | BIOSSES       |          ✓         |  ✓ |  ✓ |       |         |
-|     DC    | HoC           |          ✓         |  ✓ |  ✓ |    ✓    |         |
-|     QA    | PubMedQA      |          ✓         |  |  ✓ |       |         |
-|     QA    | BioASQ        |          ✓         |  |  ✓ |    ✓    |     ✓     |
-|     TE    | MedSTS        |          TBD         |  ✓ |  |       |      ✓      |
-|    NER   | ShARe/CLEFE   |          TBD         |  ✓ |  |       |     ✓       |
-|    NER   | i2b2-2010     |          ✓         |  ✓ |  |       |     ✓     |
-|    NLI   | MedNLI        |          ✓         |  ✓ |  |       |     ✓       |
-|    NER    | BC2GM         |          ✓         |  |  ✓ |    ✓    |           |
-|    NER    | JNLPBA        |          ✓         |  |  ✓ |    ✓    |           |
-|    NER    | EBM PICO      |          ✓         |  |  ✓ |       |           |
-|     RE    | GAD           |          ✓         |  |  ✓ |       |           |
-|     SR    | Accelerometer |        Private         |  |  |    ✓    |           |
-|     SR    | Acromegaly    | Private |  |  |    ✓    |           |
-|    NER    | AnatEM        |          ✓         |  |  |    ✓    |           |
-|     SR    | Cooking       |      Private        |  |  |    ✓    |           |
-|    NER    | BC4CHEMD      |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP09      |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP11EPI   |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP11ID    |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP13CG    |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP13GE    |          ✓         |  |  |    ✓    |           |
-|    NER    | BioNLP13PC    |          ✓         |  |  |    ✓    |           |
-|     SR    | COVID         | Private |  |  |    ✓    |           |
-|    NER    | CRAFT         |        TBD        |  |  |    ✓    |           |
-|     DI    | DI-2006       |          ✓         |  |  |    ✓    |           |
-|    NER    | Ex-PTM        |          ✓         |  |  |    ✓    |           |
-|    POS    | Genia         |          ✓         |  |  |    ✓    |           |
-|     SR    | HRT           | Private |  |  |    ✓    |           |
-|    RFI    | RFHD-2014     |        TBD        |  |  |    ✓    |           |
-|    NER    | Linnaeus      |          ✓         |  |  |    ✓    |           |
-|     SA    | Medical Drugs |          ✓         |  |  |    ✓    |           |
+| Task Type | Dataset       | BigBIO (ours) | BLUE  | BLURB | BoX | DUA |
+|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
+| NER       | BC2GM         | ✓          |   | ✓  | ✓       |             |
+| NER       | BC5-chem      | ✓          | ✓  | ✓  | ✓       |          |
+| NER       | BC5-disease   | ✓          | ✓  | ✓  | ✓       |          |
+| NER       | EBM PICO      | ✓          |   | ✓  |        |             |
+| NER       | JNLPBA        | ✓          |   | ✓  | ✓       |             |
+| NER       | NCBI-disease  | ✓          |   | ✓  | ✓       |          |
+| RE        | ChemProt      | ✓          | ✓  | ✓  | ✓       |          |
+| RE        | DDI           | ✓          | ✓  | ✓  | ✓       |          |
+| RE        | GAD           | ✓          |   | ✓  |        |             |
+| QA        | PubMedQA      | ✓          |   | ✓  |    ✓    |          |
+| QA        | BioASQ        | ✓          |   | ✓  |  ✓       | ✓         |
+| DC        | HoC           | ✓          | ✓  |   ✓  | ✓       |          |
+| STS       | BIOSSES       | ✓          | ✓  |   ✓  |        |          |
+| STS       | MedSTS        | *                | ✓  |   |        |   ✓          |
+| NER       | n2c2 2010     | ✓          | ✓  |   |  ✓      | ✓         |
+| NER       | ShARe/CLEF 2013   | *          | ✓  |   |        |   ✓          |
+| NLI       | MedNLI        | ✓          | ✓  |   |        |    ✓         | 
+| NER        | n2c2 deid 2006  | ✓          |   |   | ✓       |    ✓           |
+| DC       | n2c2 RFHD 2014     | ✓       |   |   | ✓       |   ✓           |
+| NER       | AnatEM        | ✓          |   |   | ✓       |             |
+| NER       | BC4CHEMD      | ✓          |   |   | ✓       |             |
+| NER       | BioNLP09      | ✓          |   |   | ✓       |             |
+| NER       | BioNLP11EPI   | ✓          |   |   | ✓       |             |
+| NER       | BioNLP11ID    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13CG    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13GE    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13PC    | ✓          |   |   | ✓       |             |
+| NER       | CRAFT         | *                |   |   | ✓       |             |
+| NER       | Ex-PTM        | ✓          |   |   | ✓       |             |
+| NER       | Linnaeus      | ✓          |   |   | ✓       |             |
+| POS       | GENIA         | *                |   |   | ✓       |             |
+| SA        | Medical Drugs | ✓          |   |   | ✓       |  |
+| SR        | COVID         |          |   |   | private       |             |
+| SR        | Cooking       |          |   |   | private      |             |
+| SR        | HRT           |          |   |   | private      |             |
+| SR        | Accelerometer |          |   |   | private       |             |
+| SR        | Acromegaly    |          |   |   | private      |             |
 
 
 ## Citing
 If you use BigBIO in your work, please cite
 
 ```
-TBD
+@article{fries2022bigbio,
+	title = {
+		BigBIO: A Framework for Data-Centric Biomedical Natural Language
+		Processing
+	},
+	author = {
+		Fries, Jason Alan and Weber, Leon and Seelam, Natasha and Altay,
+		Gabriel and Datta, Debajyoti and Garda, Samuele and Kang, Myungsun
+		and Su, Ruisi and Kusa, Wojciech and Cahyawijaya, Samuel and others
+	},
+	journal = {arXiv preprint arXiv:2206.15076},
+	year = 2022
+}
 ```
-
 
 ## Acknowledgements
 
