@@ -211,7 +211,8 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                     entity_id = f'{document_id}_{note["ref_id"]}'
                     for e in example["entities"]:
                         if e["id"] == entity_id:
-                            e["normalized"].append({"db_id": note["text"], "db_name": "UMLS"})
+                            for cui in note["text"].strip().split(" "):
+                                e["normalized"].append({"db_id": cui, "db_name": "UMLS"})
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
