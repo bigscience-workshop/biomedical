@@ -191,7 +191,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             for guid, txt_file in enumerate(folder.glob("*.txt")):
                 example = parse_brat_file(txt_file, parse_notes=True)
                 example["id"] = guid
-                # Remove unsupported items from BRAT
+                # Remove unused items from BRAT
                 del example["events"]
                 del example["relations"]
                 del example["equivalences"]
