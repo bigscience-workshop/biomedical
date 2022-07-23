@@ -2,6 +2,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
+from bigbio.utils.constants import BigBioValues
 
 import bioc
 import datasets
@@ -285,7 +286,7 @@ def parse_brat_file(
             fields = line.split("\t")
 
             ann["id"] = fields[0]
-            ann["text"] = fields[2]
+            ann["text"] = fields[2] if len(fields) == 3 else BigBioValues.NULL
 
             info = fields[1].split()
 
