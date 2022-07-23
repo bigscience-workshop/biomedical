@@ -213,7 +213,7 @@ written to be used with the
 [datasets](https://huggingface.co/docs/datasets/) package.
 
 
-All of these scripts live in dataset specific directories in the `biogbio/biodatasets` folder.
+All of these scripts live in dataset specific directories in the `bigbio/biodatasets` folder.
 If you cloned the repo, you will find the `bigbio` directory at the top level of the repo.
 If you pip installed the package from github, the `bigbio` directory will be in
 the `site-packages` directory of your python environment.
