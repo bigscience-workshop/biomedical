@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import datasets
@@ -7,8 +8,6 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
-
-import re
 
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
