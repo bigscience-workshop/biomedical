@@ -8,6 +8,8 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
+import re
+
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
 _LOCAL = False
@@ -188,7 +190,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
         folder = Path(filepath) / "QUAERO_FrenchMed" / "corpus" / split / subset
 
         if self.config.schema == "source":
-            for guid, txt_file in enumerate(folder.glob("*.txt")):
+            for guid, txt_file in enumerate(sorted(folder.glob("*.txt"))):
                 example = parse_brat_file(txt_file, parse_notes=True)
                 example["id"] = guid
                 # Remove unused items from BRAT
@@ -199,7 +201,7 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                 del example["normalizations"]
                 yield guid, example
         elif self.config.schema == "bigbio_kb":
-            for guid, txt_file in enumerate(folder.glob("*.txt")):
+            for guid, txt_file in enumerate(sorted(folder.glob("*.txt"))):
                 example = parse_brat_file(txt_file, parse_notes=True)
                 annotator_notes = example["notes"]
                 document_id = example["document_id"]
@@ -211,8 +213,9 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                     entity_id = f'{document_id}_{note["ref_id"]}'
                     for e in example["entities"]:
                         if e["id"] == entity_id:
-                            for cui in note["text"].strip().split(" "):
-                                e["normalized"].append({"db_id": cui, "db_name": "UMLS"})
+                            for cui in re.split("[\s\+,]", note["text"].strip()):
+                                if cui:
+                                    e["normalized"].append({"db_id": cui, "db_name": "UMLS"})
                 yield guid, example
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
