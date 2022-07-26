@@ -142,14 +142,10 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                     "relations": [
                         {
                             "relation_type": datasets.Value("string"),
-                            "entity1_offsets": datasets.Sequence(
-                                datasets.Value("int32")
-                            ),
+                            "entity1_offsets": datasets.Sequence(datasets.Value("int32")),
                             "entity1_text": datasets.Value("string"),
                             "entity1_type": datasets.Value("string"),
-                            "entity2_offsets": datasets.Sequence(
-                                datasets.Value("int32")
-                            ),
+                            "entity2_offsets": datasets.Sequence(datasets.Value("int32")),
                             "entity2_text": datasets.Value("string"),
                             "entity2_type": datasets.Value("string"),
                         }
@@ -364,9 +360,7 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                                 "id": str(next(uid)),
                                 "type": a[4],
                                 "text": [a[3]],
-                                "offsets": [
-                                    (int(a[1]) + offset_delta, int(a[2]) + offset_delta)
-                                ],
+                                "offsets": [(int(a[1]) + offset_delta, int(a[2]) + offset_delta)],
                                 "normalized": [],
                             }
                         )
@@ -378,12 +372,8 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                 # Extract relations
                 for a in annotations:
                     if len(a) == 10:
-                        e1_offsets = [
-                            (int(a[2]) + offset_delta, int(a[3]) + offset_delta)
-                        ]
-                        e2_offsets = [
-                            (int(a[6]) + offset_delta, int(a[7]) + offset_delta)
-                        ]
+                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
+                        e2_offsets = [(int(a[6]) + offset_delta, int(a[7]) + offset_delta)]
                         relations.append(
                             {
                                 "id": str(next(uid)),
@@ -396,12 +386,8 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
 
                     # Special case for a single annotation
                     elif len(a) > 10:
-                        e1_offsets = [
-                            (int(a[2]) + offset_delta, int(a[3]) + offset_delta)
-                        ]
-                        e2_offsets = [
-                            (int(a[8]) + offset_delta, int(a[9]) + offset_delta)
-                        ]
+                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
+                        e2_offsets = [(int(a[8]) + offset_delta, int(a[9]) + offset_delta)]
                         relations.append(
                             {
                                 "id": str(next(uid)),
