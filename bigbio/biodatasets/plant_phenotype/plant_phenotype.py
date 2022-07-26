@@ -35,8 +35,11 @@ from typing import List, Tuple, Dict
 import datasets
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
+_LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 
 _CITATION = """\
@@ -52,6 +55,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "plant_phenotype"
+_DISPLAYNAME = "Plant-Phenotype"
 
 _DESCRIPTION = """\
 The Plant-Phenotype corpus is a text corpus with human annotations of plants, 
@@ -60,7 +64,7 @@ phenotypes, and their relations on a corpus in 600 PubMed abstracts.
 
 _HOMEPAGE = "https://github.com/DMCB-GIST/PPRcorpus"
 
-_LICENSE = ""
+_LICENSE = Licenses.UNKNOWN
 
 _URLS = {
     _DATASETNAME: [
@@ -160,7 +164,7 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -235,12 +239,11 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                     "pmid": prev_pmid,
                     "doc_chunks": doc_chunks,
                 }
+                yield out
+
                 # Reset everything for next PMID
                 prev_pmid = pmid
-                passages = []
-                all_annotations = []
-
-                yield out
+                doc_chunks = []
 
             doc_chunks.append(
                 {
@@ -342,14 +345,17 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                 passage = c["passage"]
                 annotations = c["annotations"]
 
+                # Extract passages
                 passages.append(
                     {
                         "id": str(next(uid)),
                         "text": [passage],
+                        "type": "sentence",
                         "offsets": [(offset_delta, offset_delta + len(passage))],
                     }
                 )
 
+                # Extract entities
                 entities_sublist = []
                 for a in annotations:
                     if len(a) == 5:
@@ -361,12 +367,15 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                                 "offsets": [
                                     (int(a[1]) + offset_delta, int(a[2]) + offset_delta)
                                 ],
+                                "normalized": [],
                             }
                         )
 
                 # Create mapping of offsets to entity_id
                 ent2id = {tuple(x["offsets"]): x["id"] for x in entities_sublist}
+                entities.extend(entities_sublist)
 
+                # Extract relations
                 for a in annotations:
                     if len(a) == 10:
                         e1_offsets = [
@@ -381,6 +390,7 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                                 "type": a[1],
                                 "arg1_id": ent2id[tuple(e1_offsets)],
                                 "arg2_id": ent2id[tuple(e2_offsets)],
+                                "normalized": [],
                             }
                         )
 
@@ -409,6 +419,8 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                 "passages": passages,
                 "entities": entities,
                 "relations": relations,
+                "events": [],
+                "coreferences": [],
             }
 
             yield id_, doc
