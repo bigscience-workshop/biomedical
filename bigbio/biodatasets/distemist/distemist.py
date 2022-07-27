@@ -173,7 +173,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         """Yields examples as (key, example) tuples."""
         entities_mapping = pd.concat([pd.read_csv(file, sep="\t") for file in entity_mapping_files])
 
-        entity_file_names = set(entities_mapping["filename"])
+        entity_file_names = entities_mapping["filename"].unique()
 
         for uid, filename in enumerate(entity_file_names):
             text_file = text_files_dir / f"{filename}.txt"
