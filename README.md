@@ -249,7 +249,7 @@ dsd = load_dataset(**load_dataset_kwargs)
 
 BigBIO includes support for almost all datasets included in other popular English biomedical benchmarks.
 
-| Task Type | Dataset       | BigBIO (ours) | BLUE  | BLURB | BoX | DUA |
+| Task Type | Dataset       | [BigBIO (ours)](https://arxiv.org/abs/2206.15076) | [BLUE](https://arxiv.org/abs/1906.05474)  | [BLURB](https://microsoft.github.io/BLURB/) | [BoX](https://arxiv.org/abs/2204.07600) | DUA needed |
 |:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
 | NER       | BC2GM         | ✓          |   | ✓  | ✓       |             |
 | NER       | BC5-chem      | ✓          | ✓  | ✓  | ✓       |          |
@@ -289,6 +289,7 @@ BigBIO includes support for almost all datasets included in other popular Englis
 | SR        | Accelerometer |          |   |   | private       |             |
 | SR        | Acromegaly    |          |   |   | private      |             |
 
+\* denotes dataset implementation in-progress
 
 ## Citing
 If you use BigBIO in your work, please cite
