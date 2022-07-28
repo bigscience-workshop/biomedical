@@ -28,16 +28,19 @@ _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@dataset{luis_gasco_2022_6458455,
-  author       = {Luis Gasco and Eulàlia Farré and Miranda-Escalada, Antonio and Salvador Lima and Martin Krallinger},
-  title        = {{DisTEMIST corpus: detection and normalization of disease mentions in spanish clinical cases}},
-  month        = apr,
-  year         = 2022,
-  note         = {{Funded by the Plan de Impulso de las Tecnologías del Lenguaje (Plan TL).}},
-  publisher    = {Zenodo},
-  version      = {5.1},
-  doi          = {10.5281/zenodo.6671292},
-  url          = {https://doi.org/10.5281/zenodo.6671292}
+@article{miranda2022overview,
+
+title={Overview of DisTEMIST at BioASQ: Automatic detection and normalization of diseases
+    from clinical texts: results, methods, evaluation and multilingual resources},
+
+author={Miranda-Escalada, Antonio and Gascó, Luis and Lima-López, Salvador and Farré-Maduell,
+    Eulàlia and Estrada, Darryl and Nentidis, Anastasios and Krithara, Anastasia and Katsimpras,
+    Georgios and Paliouras, Georgios and Krallinger, Martin},
+
+booktitle={Working Notes of Conference and Labs of the Evaluation (CLEF) Forum.
+    CEUR Workshop Proceedings},
+
+year={2022}
 }
 """
 
