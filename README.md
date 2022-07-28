@@ -22,8 +22,8 @@ Currently BigBIO provides support for:
   - [Materializing Meta-datasets](https://github.com/bigscience-workshop/biomedical/blob/master/notebooks/materializing_meta_datasets/materializing-meta-datasets.ipynb)   
   - [Prompt Engineering and Evaluation](https://github.com/bigscience-workshop/biomedical/tree/master/notebooks/promptengineering)  
   - BigBIO Report Card (Unit tests, Benchmarks, and more)
-  - Streamlit Visualization Demo
-- [BigBIO Data Cards]()
+  - [Streamlit Visualization Demo](https://github.com/bigscience-workshop/biomedical/tree/master/streamlit_demo)
+- [BigBIO Data Cards](https://github.com/bigscience-workshop/biomedical/tree/master/figures/data_card)
 - [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6): Implement or suggest new datasets
 - [Contributor Guide](CONTRIBUTING.md)
 - [Task Schema Overview](task_schemas.md)
