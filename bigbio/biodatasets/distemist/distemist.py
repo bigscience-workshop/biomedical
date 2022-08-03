@@ -21,7 +21,7 @@ import pandas as pd
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import BigBioValues, Lang, Tasks
+from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
@@ -224,7 +224,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
                             {"db_id": code, "db_name": "SNOMED_CT"} for code in row.code.split("+")
                         ]
                     else:
-                        entity["normalized"] = [{"db_id": BigBioValues.NULL, "db_name": BigBioValues.NULL}]
+                        entity["normalized"] = []
 
                 entities.append(entity)
 
