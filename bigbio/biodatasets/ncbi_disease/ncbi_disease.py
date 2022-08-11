@@ -231,7 +231,14 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                     # We need a unique identifier for this entity, so build it from the document id and entity id
                     unified_entity_id = "_".join([doc.pmid, entity.id, str(i)])
                     # The user can provide a callable that returns the database name.
-                    db_name = "omim" if "OMIM" in entity.id else "mesh"
+                    db_name = "OMIM" if "OMIM" in entity.id else "MESH"
+                    normalized = []
+                    for x in entity.id.split('|'):
+                        if x.startswith('OMIM'):
+                            normalized.append({"db_name": "OMIM", "db_id": x.strip().split(':')[-1]})
+                        else:
+                            normalized.append({"db_name": "MESH", "db_id": x.strip()})
+
                     unified_entities.append(
                         {
                             "id": unified_entity_id,

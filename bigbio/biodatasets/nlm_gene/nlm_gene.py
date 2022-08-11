@@ -171,7 +171,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _get_bioc_entity(
-        span, db_id_key="NCBI Gene identifier", splitters=",;|-"
+        span, db_id_key="NCBIGene", splitters=",;|-"
     ) -> dict:
         """Parse BioC entity annotation."""
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
@@ -258,7 +258,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                     for passage in xdoc.passages:
                         for span in passage.annotations:
                             ent = self._get_bioc_entity(
-                                span, db_id_key="NCBI Gene identifier"
+                                span, db_id_key="NCBIGene"
                             )
                             ent["id"] = uid  # override BioC default id
                             data["entities"].append(ent)
