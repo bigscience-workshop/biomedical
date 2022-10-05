@@ -202,9 +202,9 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class BlurbDataset(datasets.GeneratorBasedBuilder):
-    """BIOSSES : Biomedical Semantic Similarity Estimation System"""
+    """Blurb train/dev/test splits for easy NER access"""
 
-    DEFAULT_CONFIG_NAME = "biosses_source"
+    DEFAULT_CONFIG_NAME = "bc5chem"
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
