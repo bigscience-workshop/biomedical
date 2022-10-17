@@ -56,6 +56,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ctebmsp"
+_DISPLAYNAME = "CT-EBM-SP"
 
 _ABSTRACTS_DESCRIPTION = """\
 The "abstracts" subset of the Clinical Trials for Evidence-Based Medicine in Spanish
@@ -95,6 +96,7 @@ _URLS = {
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 

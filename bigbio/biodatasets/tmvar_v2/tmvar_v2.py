@@ -43,6 +43,7 @@ publisher={Oxford University Press}
 """
 
 _DATASETNAME = "tmvar_v2"
+_DISPLAYNAME = "tmVar v2"
 
 _DESCRIPTION = """This dataset contains 158 PubMed articles manually annotated with mutation mentions of various kinds and dbsnp normalizations for each of them.
 It can be used for NER tasks and NED tasks, This dataset has a single split"""
@@ -248,7 +249,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                     assert line_pieces[3] == mention
                     assert line_pieces[4] == entity_id
                     assert line_pieces[5] == rsid
-                    logger.warning(
+                    logger.info(
                         f"Adding ProteinMutation semantic_type_id in Document ID: {pmid} Line: {line}"
                     )
                 else:
@@ -274,7 +275,7 @@ class TmvarV2Dataset(datasets.GeneratorBasedBuilder):
                 ) = line_pieces
 
             else:
-                logger.warning(
+                logger.info(
                     f"Inconsistent entity format found. Skipping Document ID: {pmid} Line: {line}"
                 )
                 continue

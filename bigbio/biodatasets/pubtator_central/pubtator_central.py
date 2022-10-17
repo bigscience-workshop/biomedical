@@ -72,6 +72,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pubtator_central"
+_DISPLAYNAME = "PubTator Central"
 
 _DESCRIPTION = """\
 PubTator Central (PTC, https://www.ncbi.nlm.nih.gov/research/pubtator/) is a web service for

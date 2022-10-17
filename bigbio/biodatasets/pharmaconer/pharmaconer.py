@@ -38,7 +38,7 @@ _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
+@inproceedings{gonzalez2019pharmaconer,
     title = "PharmaCoNER: Pharmacological Substances, Compounds and proteins Named Entity Recognition track",
     author = "Gonzalez-Agirre, Aitor  and
       Marimon, Montserrat  and
@@ -58,6 +58,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pharmaconer"
+_DISPLAYNAME = "PharmaCoNER"
 
 _GENERAL_DESCRIPTION = """\
 PharmaCoNER: Pharmacological Substances, Compounds and Proteins Named Entity Recognition track

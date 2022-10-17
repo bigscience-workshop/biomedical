@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely
-relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
-The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema
-
+The BioCreative VI Chemical-Protein interaction dataset identifies entities of
+chemicals and proteins and their likely relation to one other. Compounds are
+generally agonists (activators) or antagonists (inhibitors) of proteins. The
+script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb)
+AND/OR source (default) schema
 """
 import os
 from typing import Dict, Tuple
@@ -34,9 +35,9 @@ _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
-  title     = {Overview of the BioCreative VI chemical–protein interaction Track},
+  title     = {Overview of the BioCreative VI chemical-protein interaction Track},
   journal   = {Proceedings of the BioCreative VI Workshop,},
-  volume    = {141–146},
+  volume    = {141-146},
   year      = {2017},
   url       = {https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/},
   doi       = {},
@@ -45,8 +46,13 @@ _CITATION = """\
 }
 """
 _DESCRIPTION = """\
-The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
+The BioCreative VI Chemical-Protein interaction dataset identifies entities of
+chemicals and proteins and their likely relation to one other. Compounds are
+generally agonists (activators) or antagonists (inhibitors) of proteins.
 """
+
+_DATASETNAME = "chemprot"
+_DISPLAYNAME = "ChemProt"
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
 

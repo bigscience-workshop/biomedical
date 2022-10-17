@@ -2,6 +2,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
+from bigbio.utils.constants import BigBioValues
 
 import bioc
 import datasets
@@ -285,7 +286,7 @@ def parse_brat_file(
             fields = line.split("\t")
 
             ann["id"] = fields[0]
-            ann["text"] = fields[2]
+            ann["text"] = fields[2] if len(fields) == 3 else BigBioValues.NULL
 
             info = fields[1].split()
 
@@ -382,7 +383,7 @@ def brat_parse_to_bigbio_kb(brat_parse: Dict) -> Dict:
         )
     if len(skipped_relations) > 0:
         example_id = brat_parse["document_id"]
-        logger.warning(
+        logger.info(
             f"Example:{example_id}: The `bigbio_kb` schema allows `relations` only between entities."
             f" Skip (for now): "
             f"{list(skipped_relations)}"

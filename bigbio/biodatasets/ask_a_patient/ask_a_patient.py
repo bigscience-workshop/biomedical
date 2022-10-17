@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "ask_a_patient"
+_DISPLAYNAME = "AskAPatient"
 
 _LANGUAGES = [Lang.EN]
 _PUBMED = True

@@ -73,6 +73,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2018_track1"
+_DISPLAYNAME = "n2c2 2018 Selection Criteria"
 
 _DESCRIPTION = """\
 Track 1 of the 2018 National NLP Clinical Challenges shared tasks focused
@@ -284,7 +285,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
             "labels": labels,
         }
 
-    def _generate_examples(self, file_path) -> (int, dict):
+    def _generate_examples(self, file_path):
         samples = _read_zip(file_path)
 
         _id = 0

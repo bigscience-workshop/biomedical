@@ -47,12 +47,15 @@ _CITATION = """\
 """
 
 _DATASETNAME = "anat_em"
+_DISPLAYNAME = "AnatEM"
+
 
 _DESCRIPTION = """\
-The extended Anatomical Entity Mention corpus (AnatEM) consists of 1212 documents (approx. 250,000 words)
-manually annotated to identify over 13,000 mentions of anatomical entities. Each annotation is assigned one
-of 12 granularity-based types such as Cellular component, Tissue and Organ, defined with reference to the
-Common Anatomy Reference Ontology.
+The extended Anatomical Entity Mention corpus (AnatEM) consists of 1212 \
+documents (approx. 250,000 words) manually annotated to identify over 13,000 \
+mentions of anatomical entities. Each annotation is assigned one of 12 \
+granularity-based types such as Cellular component, Tissue and Organ, defined \
+with reference to the Common Anatomy Reference Ontology.
 """
 
 _HOMEPAGE = "http://nactem.ac.uk/anatomytagger/#AnatEM"

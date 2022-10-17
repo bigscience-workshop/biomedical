@@ -14,16 +14,20 @@
 # limitations under the License.
 
 """
-BioRelEx is a biological relation extraction dataset. Version 1.0 contains 2010 annotated sentences that describe
-binding interactions between various biological entities (proteins, chemicals, etc.). 1405 sentences are for training,
-another 201 sentences are for validation. They are publicly available at https://github.com/YerevaNN/BioRelEx/releases.
-Another 404 sentences are for testing which are kept private for at this Codalab competition https:
-//competitions.codalab.org/competitions/20468. All sentences contain words "bind", "bound" or "binding". For every
-sentence we provide: 1) Complete annotations of all biological entities that appear in the sentence 2) Entity types (32
-types) and grounding information for most of the proteins and families (links to uniprot, interpro and other databases)
-3) Coreference between entities in the same sentence (e.g. abbreviations and synonyms) 4) Binding interactions between
-the annotated entities 5) Binding interaction types: positive, negative (A does not bind B) and neutral (A may bind to
-B)
+BioRelEx is a biological relation extraction dataset. Version 1.0 contains 2010
+annotated sentences that describe binding interactions between various
+biological entities (proteins, chemicals, etc.). 1405 sentences are for
+training, another 201 sentences are for validation. They are publicly available
+at https://github.com/YerevaNN/BioRelEx/releases. Another 404 sentences are for
+testing which are kept private for at this Codalab competition
+https://competitions.codalab.org/competitions/20468. All sentences contain words
+"bind", "bound" or "binding". For every sentence we provide: 1) Complete
+annotations of all biological entities that appear in the sentence 2) Entity
+types (32 types) and grounding information for most of the proteins and families
+(links to uniprot, interpro and other databases) 3) Coreference between entities
+in the same sentence (e.g. abbreviations and synonyms) 4) Binding interactions
+between the annotated entities 5) Binding interaction types: positive, negative
+(A does not bind B) and neutral (A may bind to B)
 """
 
 import itertools as it
@@ -43,7 +47,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
+@inproceedings{khachatrian2019biorelex,
     title = "{B}io{R}el{E}x 1.0: Biological Relation Extraction Benchmark",
     author = "Khachatrian, Hrant  and
       Nersisyan, Lilit  and
@@ -65,19 +69,23 @@ _CITATION = """\
 """
 
 _DATASETNAME = "biorelex"
+_DISPLAYNAME = "BioRelEx"
 
 _DESCRIPTION = """\
-BioRelEx is a biological relation extraction dataset. Version 1.0 contains 2010 annotated sentences that describe
-binding interactions between various biological entities (proteins, chemicals, etc.). 1405 sentences are for training,
-another 201 sentences are for validation. They are publicly available at https://github.com/YerevaNN/BioRelEx/releases.
-Another 404 sentences are for testing which are kept private for at this Codalab competition https:
-//competitions.codalab.org/competitions/20468. All sentences contain words "bind", "bound" or "binding". For every
-sentence we provide: 1) Complete annotations of all biological entities that appear in the sentence 2) Entity types (32
-types) and grounding information for most of the proteins and families (links to uniprot, interpro and other databases)
-3) Coreference between entities in the same sentence (e.g. abbreviations and synonyms) 4) Binding interactions between
-the annotated entities 5) Binding interaction types: positive, negative (A does not bind B) and neutral (A may bind to
-B)
-"""
+BioRelEx is a biological relation extraction dataset. Version 1.0 contains 2010
+annotated sentences that describe binding interactions between various
+biological entities (proteins, chemicals, etc.). 1405 sentences are for
+training, another 201 sentences are for validation. They are publicly available
+at https://github.com/YerevaNN/BioRelEx/releases. Another 404 sentences are for
+testing which are kept private for at this Codalab competition
+https://competitions.codalab.org/competitions/20468. All sentences contain words
+"bind", "bound" or "binding". For every sentence we provide: 1) Complete
+annotations of all biological entities that appear in the sentence 2) Entity
+types (32 types) and grounding information for most of the proteins and families
+(links to uniprot, interpro and other databases) 3) Coreference between entities
+in the same sentence (e.g. abbreviations and synonyms) 4) Binding interactions
+between the annotated entities 5) Binding interaction types: positive, negative
+(A does not bind B) and neutral (A may bind to B)"""
 
 _HOMEPAGE = "https://github.com/YerevaNN/BioRelEx"
 

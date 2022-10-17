@@ -24,6 +24,8 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2013_pc"
+_DISPLAYNAME = "BioNLP 2013 PC"
+
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]

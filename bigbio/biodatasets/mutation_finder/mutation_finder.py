@@ -45,6 +45,7 @@ url = {http://dx.doi.org/10.1093/bioinformatics/btm235}
 """
 
 _DATASETNAME = "mutation_finder"
+_DISPLAYNAME = "MutationFinder"
 
 _DESCRIPTION = """\
 Gold standard corpus for mutation extraction systems consisting of 1515 human-annotated mutation mentions in 813
