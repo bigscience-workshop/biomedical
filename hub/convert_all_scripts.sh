@@ -8,6 +8,6 @@ for dset in anat_em an_em ask_a_patient bc5cdr bc7_litcovid bioasq_2021_mesinesp
     TARGET=$SOURCEDIR"/"$dset"/"$dset".py"
     SAVENAME=$SAVEDIR"/"$dset"_hub.py"
     echo $dset
-    python make_hub_script.py --script $TARGET --savename
+    python make_hub_script.py --script $TARGET --savename $SAVENAME
     echo "------------"
 done

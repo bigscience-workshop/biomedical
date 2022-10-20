@@ -47,7 +47,7 @@ def fix_script(script: List[str]) -> List[str]:
         if "bigbio.utils" in line:
             start_idx.append(idx)
         elif "_LANGUAGES" in line:
-            new_lines.append("_LANGUAGES = ['" + language + "']\n")
+            new_lines.append("_LANGUAGES = [" + language + "]\n")
 
         # NOTE: this might fail if _LICENSE is used without spacing... so i checked
         # with also the Licenses. call
@@ -101,9 +101,14 @@ def get_language(lines: List[str]) -> str:
     if len(language) != 1:
         raise ValueError("Language not found")
     else:
-        language = lang_dict[language[0].split("Lang.")[1]]
+        language = language[0].split(",")
+        language = [lang_dict[i.split("Lang.")[1]] for i in language]
+        language = ["'" + str(i) + "'" for i in language]
 
-    return language
+        if len(language) == 1:
+            return language[0]
+        else:
+            return ", ".join(language)
 
 
 if __name__ == "__main__":
