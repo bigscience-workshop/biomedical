@@ -25,6 +25,13 @@ repos:
     #           - --remove-unused-variables
     #           - --remove-all-unused-imports
     #           - --expand-star-imports
+    -   repo: https://github.com/PyCQA/flake8
+        rev: 5.0.4
+        hooks:
+        -   id: flake8
+            args:
+                - --max-line-length
+                - '119'
     -   repo: https://github.com/PyCQA/isort
         rev: 5.10.1
         hooks:
