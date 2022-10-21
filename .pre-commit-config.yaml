@@ -2,6 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 # See https://github.com/crmne/cookiecutter-modern-datascience
 fail_fast: true
+exclude: '^$'
 files: ^bigbio/biodatasets/
 repos:
     -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -54,5 +55,6 @@ repos:
             name: running bigbio unit tests
             entry: python -m tests.test_bigbio
             language: system
+            files: ^bigbio/biodatasets/
             pass_filenames: true
-            always_run: true
+            # always_run: true
