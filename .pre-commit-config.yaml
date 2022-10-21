@@ -48,11 +48,11 @@ repos:
               - '119'
               - --target-version
               - py38
-    # -   repo: local
-    #     hooks:
-    #     -   id: test-bigbio
-    #         name: running bigbio unit tests
-    #         entry: python -m tests.test_bigbio
-    #         language: system
-    #         pass_filenames: false
-    #         always_run: true
+    -   repo: local
+        hooks:
+        -   id: test-bigbio
+            name: running bigbio unit tests
+            entry: python -m tests.test_bigbio
+            language: system
+            pass_filenames: true
+            always_run: true

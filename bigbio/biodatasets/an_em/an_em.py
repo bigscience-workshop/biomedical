@@ -54,7 +54,7 @@ _DATASETNAME = "an_em"
 _DISPLAYNAME = "AnEM"
 
 _DESCRIPTION = """\
-AnEM corpus is a domain- and species-independent resource manually annotated for anatomical \
+AnEM corpus is a domain- and species-independent resource manually annotated for anatomical
 entity mentions using a fine-grained classification system. The corpus consists of 500 documents \
 (over 90,000 words) selected randomly from citation abstracts and full-text papers with \
 the aim of making the corpus representative of the entire available biomedical scientific \
