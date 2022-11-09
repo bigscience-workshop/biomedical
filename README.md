@@ -22,8 +22,8 @@ Currently BigBIO provides support for:
   - [Materializing Meta-datasets](https://github.com/bigscience-workshop/biomedical/blob/master/notebooks/materializing_meta_datasets/materializing-meta-datasets.ipynb)   
   - [Prompt Engineering and Evaluation](https://github.com/bigscience-workshop/biomedical/tree/master/notebooks/promptengineering)  
   - BigBIO Report Card (Unit tests, Benchmarks, and more)
-  - Streamlit Visualization Demo
-- [BigBIO Data Cards]()
+  - [Streamlit Visualization Demo](https://github.com/bigscience-workshop/biomedical/tree/master/streamlit_demo)
+- [BigBIO Data Cards](https://github.com/bigscience-workshop/biomedical/tree/master/figures/data_card)
 - [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6): Implement or suggest new datasets
 - [Contributor Guide](CONTRIBUTING.md)
 - [Task Schema Overview](task_schemas.md)
@@ -249,7 +249,7 @@ dsd = load_dataset(**load_dataset_kwargs)
 
 BigBIO includes support for almost all datasets included in other popular English biomedical benchmarks.
 
-| Task Type | Dataset       | BigBIO (ours) | BLUE  | BLURB | BoX | DUA |
+| Task Type | Dataset       | [BigBIO (ours)](https://arxiv.org/abs/2206.15076) | [BLUE](https://arxiv.org/abs/1906.05474)  | [BLURB](https://microsoft.github.io/BLURB/) | [BoX](https://arxiv.org/abs/2204.07600) | DUA needed |
 |:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
 | NER       | BC2GM         | ✓          |   | ✓  | ✓       |             |
 | NER       | BC5-chem      | ✓          | ✓  | ✓  | ✓       |          |
@@ -289,6 +289,7 @@ BigBIO includes support for almost all datasets included in other popular Englis
 | SR        | Accelerometer |          |   |   | private       |             |
 | SR        | Acromegaly    |          |   |   | private      |             |
 
+\* denotes dataset implementation in-progress
 
 ## Citing
 If you use BigBIO in your work, please cite
