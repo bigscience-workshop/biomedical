@@ -1,0 +1,245 @@
+# coding=utf-8
+# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+The Repository for Medical Dataset for Abbreviation Disambiguation for Natural Language Understanding (MeDAL) is
+a large medical text dataset curated for abbreviation disambiguation, designed for natural language understanding
+pre-training in the medical domain. This script loads the MeDAL dataset in the bigbio KB schema and/or source schema.
+"""
+
+import pandas as pd
+from typing import Dict, List, Tuple
+
+import datasets
+
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
+
+logger = datasets.logging.get_logger(__name__)
+
+_LANGUAGES = ['English']
+_PUBMED = True
+_LOCAL = False
+_CITATION = """\
+@inproceedings{,
+    title = {MeDAL\: Medical Abbreviation Disambiguation Dataset for Natural Language Understanding Pretraining},
+    author = {Wen, Zhi and Lu, Xing Han and Reddy, Siva},
+    booktitle = {Proceedings of the 3rd Clinical Natural Language Processing Workshop},
+    month = {Nov},
+    year = {2020},
+    address = {Online},
+    publisher = {Association for Computational Linguistics},
+    url = {https://www.aclweb.org/anthology/2020.clinicalnlp-1.15},
+    pages = {130--135},
+}
+"""
+
+_DATASETNAME = "medal"
+_DISPLAYNAME = "MeDAL"
+
+_DESCRIPTION = """\
+The Repository for Medical Dataset for Abbreviation Disambiguation for Natural Language Understanding (MeDAL) is
+a large medical text dataset curated for abbreviation disambiguation, designed for natural language understanding
+pre-training in the medical domain.
+"""
+
+_HOMEPAGE = "https://github.com/BruceWen120/medal"
+
+_LICENSE = 'National Library of Medicine Terms and Conditions'
+
+_URL = "https://zenodo.org/record/4482922/files/"
+_URLS = {
+    "train": _URL + "train.csv",
+    "test": _URL + "test.csv",
+    "valid": _URL + "valid.csv",
+}
+
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_DISAMBIGUATION]
+
+_SOURCE_VERSION = "1.0.0"
+
+_BIGBIO_VERSION = "1.0.0"
+
+
+class MedalDataset(datasets.GeneratorBasedBuilder):
+    """The Repository for Medical Dataset for Abbreviation Disambiguation for Natural Language Understanding (MeDAL) is
+    a large medical text dataset curated for abbreviation disambiguation, designed for natural language understanding
+    pre-training in the medical domain."""
+
+    SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
+    BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
+
+    BUILDER_CONFIGS = [
+        BigBioConfig(
+            name="medal_source",
+            version=SOURCE_VERSION,
+            description="MeDAL source schema",
+            schema="source",
+            subset_id="medal",
+        ),
+        BigBioConfig(
+            name="medal_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="MeDAL BigBio schema",
+            schema="bigbio_kb",
+            subset_id="medal",
+        ),
+    ]
+
+    DEFAULT_CONFIG_NAME = "medal_source"
+
+    def _info(self) -> datasets.DatasetInfo:
+
+        if self.config.schema == "source":
+            features = datasets.Features(
+                {
+                    "abstract_id": datasets.Value("int32"),
+                    "text": datasets.Value("string"),
+                    "location": datasets.Sequence(datasets.Value("int32")),
+                    "label": datasets.Sequence(datasets.Value("string")),
+                }
+            )
+
+        elif self.config.schema == "bigbio_kb":
+            features = kb_features
+
+        return datasets.DatasetInfo(
+            description=_DESCRIPTION,
+            features=features,
+            homepage=_HOMEPAGE,
+            license=str(_LICENSE),
+            citation=_CITATION,
+        )
+
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
+        """Returns SplitGenerators."""
+
+        urls = _URLS
+        data_dir = dl_manager.download_and_extract(urls)
+
+        urls_to_dl = _URLS
+        try:
+            dl_dir = dl_manager.download_and_extract(urls_to_dl)
+        except Exception:
+            logger.warning(
+                "This dataset is downloaded through Zenodo which is flaky. If this download failed try a few times before reporting an issue"
+            )
+            raise
+
+        return [
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                # These kwargs will be passed to _generate_examples
+                gen_kwargs={"filepath": dl_dir["train"], "split": "train"},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                # These kwargs will be passed to _generate_examples
+                gen_kwargs={"filepath": dl_dir["test"], "split": "test"},
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                # These kwargs will be passed to _generate_examples
+                gen_kwargs={"filepath": dl_dir["valid"], "split": "val"},
+            ),
+        ]
+
+    def _generate_offsets(self, text, location):
+        """Generate offsets from text and word location.
+
+        Parameters
+        ----------
+        text : text
+            Abstract text
+        location : int
+            location of abbreviation in text, indexed by number of words in abstract
+
+        Returns
+        -------
+        dict
+            "word": str,
+            "offsets": tuple (int, int)
+        """
+        words = text.split(" ")
+        word = words[location]
+        offset_start = sum(len(word) for word in words[0:location]) + location
+        offset_end = offset_start + len(word)
+
+        # return word and offsets
+        return {"word": word, "offsets": (offset_start, offset_end)}
+
+    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+        """Yields examples as (key, example) tuples."""
+
+        with open(filepath, encoding="utf-8") as file:
+            data = pd.read_csv(
+                file,
+                sep=",",
+                dtype={"ABSTRACT_ID": str, "TEXT": str, "LOCATION": int, "LABEL": str},
+            )
+
+            if self.config.schema == "source":
+                for id_, row in enumerate(data.itertuples()):
+                    yield id_, {
+                        "abstract_id": int(row.ABSTRACT_ID),
+                        "text": row.TEXT,
+                        "location": [row.LOCATION],
+                        "label": [row.LABEL],
+                    }
+            elif self.config.schema == "bigbio_kb":
+                uid = 0  # global unique id
+                for id_, row in enumerate(data.itertuples()):
+                    word_offsets = self._generate_offsets(row.TEXT, row.LOCATION)
+                    example = {
+                        "id": str(uid),
+                        "document_id": row.ABSTRACT_ID,
+                        "passages": [],
+                        "entities": [],
+                        "relations": [],
+                        "events": [],
+                        "coreferences": [],
+                    }
+                    uid += 1
+
+                    example["passages"].append(
+                        {
+                            "id": str(uid),
+                            "type": "PubMed abstract",
+                            "text": [row.TEXT],
+                            "offsets": [(0, len(row.TEXT))],
+                        }
+                    )
+
+                    uid += 1
+
+                    example["entities"].append(
+                        {
+                            "id": str(uid),
+                            "type": "abbreviation",
+                            "text": [word_offsets["word"]],
+                            "offsets": [word_offsets["offsets"]],
+                            "normalized": [
+                                {
+                                    "db_name": "medal",
+                                    "db_id": row.LABEL,
+                                }
+                            ],
+                        }
+                    )
+                    uid += 1
+                    yield id_, example

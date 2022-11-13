@@ -1,0 +1,18 @@
+2022.10.20
+
+These are the scripts that need to be manually looked into to convert;
+they seem to fail because of usually license/language but otherwise only blurb fails to schema (And this is a multi-subset so we know it will)
+
+- blurb (schema)
+- cadec (License)
+- codiesp (license)
+- mantra_gsc (language)
+- mutation_finder (license)
+- n2c2_2014_risk_factors (license)
+- nagel (license)
+- pho_ner (license)
+- thomas2011 (license)
+
+The language failures originally were due to multi-language datasets. I have fixed this. Mantra_GSC has a couple of extra uses of _LANGUAGES that make it tricky. It is worth doing this by hand.
+
+The licenses are also simple - they are issues with custom license often taking more than one line. Worth doing the few by hand.
