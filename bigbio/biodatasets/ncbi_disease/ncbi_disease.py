@@ -233,9 +233,12 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                     # The user can provide a callable that returns the database name.
                     db_name = "OMIM" if "OMIM" in entity.id else "MESH"
                     normalized = []
-                    for x in entity.id.split('|'):
-                        if x.startswith('OMIM'):
-                            normalized.append({"db_name": "OMIM", "db_id": x.strip().split(':')[-1]})
+
+                    for x in entity.id.split("|"):
+                        if x.startswith("OMIM") or x.startswith("omim"):
+                            normalized.append(
+                                {"db_name": "OMIM", "db_id": x.strip().split(":")[-1]}
+                            )
                         else:
                             normalized.append({"db_name": "MESH", "db_id": x.strip()})
 
@@ -245,7 +248,7 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                             "type": entity.type,
                             "text": [entity.text],
                             "offsets": [[entity.start, entity.end]],
-                            "normalized": [{"db_name": db_name, "db_id": entity.id}],
+                            "normalized": normalized,
                         }
                     )
 
