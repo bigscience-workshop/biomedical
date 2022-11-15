@@ -2,6 +2,10 @@ Install streamlit, spacy, and rich:
 
 ```
 pip install streamlit==1.9.2
+pip install plotly
+pip install matplotlib
+pip install matplotlib_venn
+pip install nltk
 pip install spacy
 pip install rich
 ```
