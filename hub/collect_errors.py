@@ -22,13 +22,18 @@ for ds_info in ds_infos:
     print()
     for config in ds_configs:
 
-        if ds_info.id == "bigscience-biomedical/pubtator_central" and config != "pubtator_central_sample_source":
+        if (
+                ds_info.id == "bigscience-biomedical/pubtator_central" and
+                config != "pubtator_central_sample_source"
+        ):
             continue
 
         try:
             dsd = load_dataset(ds_info.id, name=config)
             works[(ds_info.id, config)] = "works"
         except BaseException as oops:
+            if 'This is a local dataset' in str(oops):
+                continue
             errors[(ds_info.id, config)] = oops
 
 
