@@ -4,11 +4,12 @@ from enum import Enum
 import logging
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Dict, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Dict, Iterable, List, Tuple
 
-import bioc
 import datasets
 
+if TYPE_CHECKING:
+    import bioc
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ kb_features = datasets.Features(
 )
 
 
-def get_texts_and_offsets_from_bioc_ann(ann: bioc.BioCAnnotation) -> Tuple:
+def get_texts_and_offsets_from_bioc_ann(ann: "bioc.BioCAnnotation") -> Tuple:
 
     offsets = [(loc.offset, loc.offset + loc.length) for loc in ann.locations]
 
