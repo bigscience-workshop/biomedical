@@ -20,13 +20,11 @@ from typing import Dict, List, Tuple
 import datasets
 from bioc import biocxml
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
-from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -65,7 +63,7 @@ identification tasks in biomedical text.
 
 _HOMEPAGE = "https://zenodo.org/record/5089049"
 
-_LICENSE = Licenses.CC0_1p0
+_LICENSE = 'Creative Commons Zero v1.0 Universal'
 
 _URLS = {
     "source": "https://zenodo.org/record/5089049/files/NLM-Gene-Corpus.zip",
@@ -135,7 +133,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
                 )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -182,7 +180,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             if splitter in db_ids:
                 connector = splitter
         normalized = [
-            {"db_name": "NCBIGene", "db_id": db_id} for db_id in db_ids.split(connector)
+            {"db_name": db_id_key, "db_id": db_id} for db_id in db_ids.split(connector)
         ]
 
         return {

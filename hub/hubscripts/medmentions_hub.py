@@ -41,12 +41,11 @@ from typing import List
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -86,7 +85,7 @@ Reviewers and Annotators, an estimate of the Precision of the annotations, was 9
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/MedMentions"
 
-_LICENSE = Licenses.CC0_1p0
+_LICENSE = 'Creative Commons Zero v1.0 Universal'
 
 _URLS = {
     "medmentions_full": [
@@ -176,7 +175,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -240,7 +239,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                                     "normalized": [
                                         {
                                             "db_name": "UMLS",
-                                            "db_id": entity["concept_id"].split(':')[-1],
+                                            "db_id": entity["concept_id"],
                                         }
                                     ],
                                 }

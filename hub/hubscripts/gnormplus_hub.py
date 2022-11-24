@@ -21,13 +21,11 @@ from typing import Dict, List, Tuple
 import datasets
 from bioc import biocxml
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
-from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -62,7 +60,7 @@ PubTator was used as our annotation tool along with BioC formats.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = Licenses.UNKNOWN
+_LICENSE = 'License information unavailable'
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
@@ -135,7 +133,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
         else:
             raise NotImplementedError(self.config.schema)
 
@@ -172,7 +170,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBIGene", insert_tax_id=False):
+    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBI", insert_tax_id=False):
         offsets, texts = get_texts_and_offsets_from_bioc_ann(bioc_ann)
         _type = bioc_ann.infons["type"]
 
