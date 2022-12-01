@@ -304,9 +304,11 @@ def parse_brat_file(
     ann_lines = []
     for suffix in annotation_file_suffixes:
         annotation_file = txt_file.with_suffix(suffix)
-        if annotation_file.exists():
+        try:
             with annotation_file.open() as f:
                 ann_lines.extend(f.readlines())
+        except FileNotFoundError:
+            continue
 
     example["text_bound_annotations"] = []
     example["events"] = []
