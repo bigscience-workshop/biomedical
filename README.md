@@ -1,5 +1,7 @@
 # BigBIO: Biomedical Dataset Library
 
+**UPDATE** For ease of use, many of our scripts are migrating to the [Official BigBio Hub](https://huggingface.co/bigscience-biomedical). Please check it out!
+
 BigBIO (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric machine learning. Our goals include:
 
 - Lightweight, programmatic access to biomedical datasets at scale
