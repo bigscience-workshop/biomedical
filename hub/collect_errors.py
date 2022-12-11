@@ -23,7 +23,7 @@ for ds_info in ds_infos:
     for config in ds_configs:
 
         if (
-                ds_info.id == "bigscience-biomedical/pubtator_central" and
+                ds_info.id == "bigbio/pubtator_central" and
                 config != "pubtator_central_sample_source"
         ):
             continue

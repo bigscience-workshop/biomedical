@@ -7,7 +7,7 @@ from huggingface_hub import create_repo
 from huggingface_hub import HfApi
 
 
-HF_ORG = "bigscience-biomedical"
+HF_ORG = "bigbio"
 
 
 def list_datasets():
