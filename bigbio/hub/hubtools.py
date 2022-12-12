@@ -8,6 +8,7 @@ from huggingface_hub import HfApi
 
 
 HF_ORG = "bigbio"
+HF_DATASETS_URL_BASE = "https://huggingface.co/datasets"
 
 
 def list_datasets():

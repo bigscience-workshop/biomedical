@@ -4,7 +4,7 @@ from datasets import load_dataset
 from datasets import get_dataset_config_names
 from huggingface_hub import get_repo_discussions
 
-from hubtools import list_datasets
+from bigbio.hub.hubtools import list_datasets
 
 
 ds_infos = list_datasets()
