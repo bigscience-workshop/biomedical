@@ -736,7 +736,7 @@ class TestDataLoader(unittest.TestCase):
 
         non_empty_features = set()
         if schema == "KB":
-            features = kb_features
+            features = bigbiohub.kb_features
             for task in self._SUPPORTED_TASKS:
                 if task in _TASK_TO_FEATURES:
                     non_empty_features.update(_TASK_TO_FEATURES[task])
