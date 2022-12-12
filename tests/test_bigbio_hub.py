@@ -34,11 +34,11 @@ METADATA = {
 }
 
 _TASK_TO_FEATURES = {
-    bigbiohub.Tasks.NAMED_ENTITY_RECOGNITION: {"entities"},
-    bigbiohub.Tasks.RELATION_EXTRACTION: {"relations", "entities"},
-    bigbiohub.Tasks.NAMED_ENTITY_DISAMBIGUATION: {"entities", "normalized"},
-    bigbiohub.Tasks.COREFERENCE_RESOLUTION: {"entities", "coreferences"},
-    bigbiohub.Tasks.EVENT_EXTRACTION: {"events"},
+    bigbiohub.Tasks.NAMED_ENTITY_RECOGNITION.name: {"entities"},
+    bigbiohub.Tasks.RELATION_EXTRACTION.name: {"relations", "entities"},
+    bigbiohub.Tasks.NAMED_ENTITY_DISAMBIGUATION.name: {"entities", "normalized"},
+    bigbiohub.Tasks.COREFERENCE_RESOLUTION.name: {"entities", "coreferences"},
+    bigbiohub.Tasks.EVENT_EXTRACTION.name: {"events"},
 }
 
 
