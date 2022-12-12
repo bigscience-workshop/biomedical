@@ -2,7 +2,13 @@
 
 """
 Script to automate hub migration.
-Assumes `bigbiohub.py` script is present
+Assumes `bigbiohub.py` script is present.
+
+Use as follows:
+    python make_hub_script.py \
+        --script /path/to/dataset \
+        --savename /name/of/adapted/script
+
 """
 import argparse
 from bigbio.utils.constants import Lang
