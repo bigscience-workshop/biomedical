@@ -136,6 +136,8 @@ TBA - Links may not be applicable yet!
 
 Currently, only admins will be merging all accepted changes to the Hub.
 
+Feel free to join our [Discord](https://discord.com/invite/Cwf3nT3ajP)!
+
 ## Citing
 If you use BigBIO in your work, please cite
 
