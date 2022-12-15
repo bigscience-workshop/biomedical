@@ -80,7 +80,7 @@ Python 3.3+ has venv automatically installed; official information is found [her
 ```
 python3 -m venv <your_env_name_here>
 source <your_env_name_here>/bin/activate  # activate environment
-pip install -r requirements.txt # Install this while in the datasets folder
+pip install -r dev-requirements.txt # Install this while in the datasets folder
 ```
 Make sure your `pip` package points to your environment's source.
 
@@ -131,7 +131,7 @@ If the recommended parser does not work for you dataset, please alert us in [Dis
 
 
 ##### Example scripts:
-To help you implement a dataset, we offer [example scripts](examples/).
+To help you implement a dataset, we offer [example scripts](examples/). Checkout which task, and [schema](task_schemas.md) best suit your dataset!
 
 #### Running & Debugging:
 You can run your data loader script during development by appending the following
