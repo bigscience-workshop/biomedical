@@ -39,7 +39,7 @@ from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
 # TODO: import the schema that fits your dataset:
-from .bigbiohub import Tasks
+from .bigbiohub import 
 
 # TODO: add True or False boolean value indicating if this dataset is local or not
 _LOCAL = 
