@@ -19,7 +19,7 @@ Currently `BigBIO` provides support for:
 
 ## How to Use `BigBIO`
 
-The preferred way to use these datasets is to access them from the [Official `BigBIO` Hub](https://huggingface.co/bigscience-biomedical). 
+The preferred way to use these datasets is to access them from the [Official `BigBIO` Hub](https://huggingface.co/bigbio). 
 
 
 Minimally, ensure you have the `datasets` library installed. Preferably, install the requirements as follows:
