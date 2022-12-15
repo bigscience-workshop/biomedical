@@ -124,11 +124,15 @@ TBA - Links may not be applicable yet!
 
 ## Contributing
 
-Please follow our [contributing guide](contributing.md) for detailed instructions.
+`BigBIO` is an open source project - your involvement is warmly welcome! If you're excited to join us, we recommend the following steps:
 
-- See our [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6) to implement or suggest new datasets
-- Implement your idea following guidelines set by the contributions guide
-- Wait for admin approval to merge to the main repo
+- Looking for ideas? See our [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6) to see what we may need help with.
+
+- Have your own idea? Contact an admin in the form of an [issue](https://github.com/bigscience-workshop/biomedical/issues/new?assignees=&labels=&template=add-dataset.md&title=).
+
+- Implement your idea following guidelines set by the [official contributing guide](contributing.md)
+
+- Wait for admin approval; approval is iterative, but if accepted will belong to the main repository.
 
 Currently, only admins will be merging all accepted changes to the Hub.
 
