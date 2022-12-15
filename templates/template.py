@@ -35,9 +35,11 @@ import os
 from typing import List, Tuple, Dict
 
 import datasets
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
+
+# TODO: import the schema that fits your dataset:
+from .bigbiohub import Tasks
 
 # TODO: add True or False boolean value indicating if this dataset is local or not
 _LOCAL = 
