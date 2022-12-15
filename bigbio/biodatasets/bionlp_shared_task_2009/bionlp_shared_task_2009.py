@@ -47,6 +47,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bionlp_shared_task_2009"
+_DISPLAYNAME = "BioNLP 2009"
 
 _DESCRIPTION = """\
 The BioNLP Shared Task 2009 was organized by GENIA Project and its corpora were curated based

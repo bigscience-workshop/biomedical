@@ -75,6 +75,7 @@ series = {JNLPBA '04}
 """
 
 _DATASETNAME = "genia_term_corpus"
+_DISPLAYNAME = "GENIA Term Corpus"
 
 _DESCRIPTION = """\
 The identification of linguistic expressions referring to entities of interest in molecular biology such as proteins,

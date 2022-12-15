@@ -14,9 +14,9 @@
 # limitations under the License.
 
 """
-DIANN's corpus consists of a collection of 500 abstracts from Elsevier journal papers
-related to the biomedical domain, where both Spanish and English versions are available,
-with annotations for disabilities appearing in these abstracts.
+DIANN's corpus consists of a collection of 500 abstracts from Elsevier journal
+papers related to the biomedical domain, where both Spanish and English versions
+are available, with annotations for disabilities appearing in these abstracts.
 """
 
 from collections import defaultdict
@@ -55,22 +55,25 @@ _CITATION = """\
 """
 
 _DATASETNAME = "diann_iber_eval"
+_DISPLAYNAME = "DIANN"
 
 _DESCRIPTION = """\
-DIANN's corpus consists of a collection of 500 abstracts from Elsevier journal papers
-related to the biomedical domain, where both Spanish and English versions are available.
+DIANN's corpus consists of a collection of 500 abstracts from Elsevier journal \
+papers related to the biomedical domain, where both Spanish and English versions \
+are available.
 
-This dataset contains annotations for disabilities appearing in these abstracts,
-usually expressed either with a specific word, such as "blindness", or as the limitation
-or lack of a human function, such as "lack of vision".
+This dataset contains annotations for disabilities appearing in these abstracts, \
+usually expressed either with a specific word, such as "blindness", or as the \
+limitation or lack of a human function, such as "lack of vision".
 
 (Spanish)
-El corpus DIANN se compone de una colección de 500 resúmenes de artículos de revista Elsevier
-del ámbito biomédico, con versiones en español e inglés.
+El corpus DIANN se compone de una colección de 500 resúmenes de artículos de \
+revista Elsevier del ámbito biomédico, con versiones en español e inglés.
 
-Este conjunto de datos contiene anotaciones para discapacidades que aparecen en dichos resúmenes,
-expresadas por medio de palabras específicas, como "ablepsia", or como la limitación o falta de
-una función, como "falta de visión".
+Este conjunto de datos contiene anotaciones para discapacidades que aparecen en \
+dichos resúmenes, expresadas por medio de palabras específicas, como \
+"ablepsia", or como la limitación o falta de una función, como "falta de \
+visión".
 """
 
 _HOMEPAGE = "http://nlp.uned.es/diann/"

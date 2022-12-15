@@ -55,6 +55,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scicite"
+_DISPLAYNAME = "SciCite"
 
 _DESCRIPTION = """\
 SciCite is a dataset of 11K manually annotated citation intents based on

@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-A large annotated corpus of patient eligibility criteria extracted from 1,000 interventional, Phase IV clinical
-trials registered in ClinicalTrials.gov. This dataset includes 12,409 annotated eligibility criteria, represented
-by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12 relationship types.
-"""
+A large annotated corpus of patient eligibility criteria extracted from 1,000
+interventional, Phase IV clinical trials registered in ClinicalTrials.gov. This
+dataset includes 12,409 annotated eligibility criteria, represented by 41,487
+distinctive entities of 15 entity types and 25,017 relationships of 12
+relationship types."""
 from pathlib import Path
 from typing import Dict, Iterator, List, Tuple
 
@@ -33,24 +34,30 @@ _PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @article{kury2020chia,
-  title={Chia, a large annotated corpus of clinical trial eligibility criteria},
-  author={Kury, Fabr{\'\\i}cio and Butler, Alex and Yuan, Chi and Fu, Li-heng and Sun, Yingcheng and Liu,
-          Hao and Sim, Ida and Carini, Simona and Weng, Chunhua},
-  journal={Scientific data},
-  volume={7},
-  number={1},
-  pages={1--11},
-  year={2020},
-  publisher={Nature Publishing Group}
+  title        = {Chia, a large annotated corpus of clinical trial eligibility criteria},
+  author       = {
+    Kury, Fabr{\'\\i}cio and Butler, Alex and Yuan, Chi and Fu, Li-heng and
+    Sun, Yingcheng and Liu, Hao and Sim, Ida and Carini, Simona and Weng,
+    Chunhua
+  },
+  year         = 2020,
+  journal      = {Scientific data},
+  publisher    = {Nature Publishing Group},
+  volume       = 7,
+  number       = 1,
+  pages        = {1--11}
 }
 """
 
 _DATASETNAME = "chia"
+_DISPLAYNAME = "CHIA"
 
 _DESCRIPTION = """\
-A large annotated corpus of patient eligibility criteria extracted from 1,000 interventional, Phase IV clinical
-trials registered in ClinicalTrials.gov. This dataset includes 12,409 annotated eligibility criteria, represented
-by 41,487 distinctive entities of 15 entity types and 25,017 relationships of 12 relationship types.
+A large annotated corpus of patient eligibility criteria extracted from 1,000
+interventional, Phase IV clinical trials registered in ClinicalTrials.gov. This
+dataset includes 12,409 annotated eligibility criteria, represented by 41,487
+distinctive entities of 15 entity types and 25,017 relationships of 12
+relationship types.
 """
 
 _HOMEPAGE = "https://github.com/WengLab-InformaticsResearch/CHIA"

@@ -16,13 +16,15 @@
 """
 BioScope
 ---
-The corpus consists of three parts, namely medical free texts, biological full papers and biological scientific
-abstracts. The dataset contains annotations at the token level for negative and speculative keywords and at the
-sentence level for their linguistic scope. The annotation process was carried out by two independent linguist
-annotators and a chief linguist – also responsible for setting up the annotation guidelines – who resolved cases
-where the annotators disagreed. The resulting corpus consists of more than 20.000 sentences that were considered
-for annotation and over 10% of them actually contain one (or more) linguistic annotation suggesting negation or
-uncertainty.
+The corpus consists of three parts, namely medical free texts, biological full
+papers and biological scientific abstracts. The dataset contains annotations at
+the token level for negative and speculative keywords and at the sentence level
+for their linguistic scope. The annotation process was carried out by two
+independent linguist annotators and a chief linguist - also responsible for
+setting up the annotation guidelines - who resolved cases where the annotators
+disagreed. The resulting corpus consists of more than 20.000 sentences that were
+considered for annotation and over 10% of them actually contain one (or more)
+linguistic annotation suggesting negation or uncertainty.
 """
 
 import os
@@ -55,12 +57,16 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bioscope"
+_DISPLAYNAME = "BioScope"
+
 
 _DESCRIPTION = """\
-The BioScope corpus consists of medical and biological texts annotated for negation, speculation and their linguistic 
-scope. This was done to allow a comparison between the development of systems for negation/hedge detection and scope 
-resolution. The BioScope corpus was annotated by two independent linguists following the guidelines written by our 
-linguist expert before the annotation of the corpus was initiated.
+The BioScope corpus consists of medical and biological texts annotated for
+negation, speculation and their linguistic scope. This was done to allow a
+comparison between the development of systems for negation/hedge detection and
+scope resolution. The BioScope corpus was annotated by two independent linguists
+following the guidelines written by our linguist expert before the annotation of
+the corpus was initiated.
 """
 
 _HOMEPAGE = "https://rgai.inf.u-szeged.hu/node/105"

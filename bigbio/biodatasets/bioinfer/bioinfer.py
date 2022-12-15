@@ -14,7 +14,13 @@
 # limitations under the License.
 
 """
-The authors present BioInfer (Bio Information Extraction Resource), a new public resource providing an annotated corpus of biomedical English. We describe an annotation scheme capturing named entities and their relationships along with a dependency analysis of sentence syntax. We further present ontologies defining the types of entities and relationships annotated in the corpus. Currently, the corpus contains 1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, as well as syntactic dependencies.
+The authors present BioInfer (Bio Information Extraction Resource), a new public
+resource providing an annotated corpus of biomedical English. We describe an
+annotation scheme capturing named entities and their relationships along with a
+dependency analysis of sentence syntax. We further present ontologies defining
+the types of entities and relationships annotated in the corpus. Currently, the
+corpus contains 1100 sentences from abstracts of biomedical research articles
+annotated for relationships, named entities, as well as syntactic dependencies.
 """
 
 import os
@@ -33,24 +39,29 @@ _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{pyysalo2007bioinfer,
-  title={BioInfer: a corpus for information extraction in the biomedical domain},
-  author={Pyysalo, Sampo and Ginter, Filip and Heimonen, Juho and Bj{\"o}rne, Jari and Boberg, Jorma and J{\"a}rvinen, Jouni and Salakoski, Tapio},
-  journal={BMC bioinformatics},
-  volume={8},
-  number={1},
-  pages={1--24},
-  year={2007},
-  publisher={BioMed Central}
+  title        = {BioInfer: a corpus for information extraction in the biomedical domain},
+  author       = {
+    Pyysalo, Sampo and Ginter, Filip and Heimonen, Juho and Bj{\"o}rne, Jari
+    and Boberg, Jorma and J{\"a}rvinen, Jouni and Salakoski, Tapio
+  },
+  year         = 2007,
+  journal      = {BMC bioinformatics},
+  publisher    = {BioMed Central},
+  volume       = 8,
+  number       = 1,
+  pages        = {1--24}
 }
 """
 
 _DATASETNAME = "bioinfer"
+_DISPLAYNAME = "BioInfer"
 
 _DESCRIPTION = """\
-A corpus targeted at protein, gene, and RNA relationships which serves as a resource for the development of 
-information extraction systems and their components such as parsers and domain analyzers. Currently, the corpus 
-contains 1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, 
-as well as syntactic dependencies.
+A corpus targeted at protein, gene, and RNA relationships which serves as a
+resource for the development of information extraction systems and their
+components such as parsers and domain analyzers. Currently, the corpus contains
+1100 sentences from abstracts of biomedical research articles annotated for
+relationships, named entities, as well as syntactic dependencies.
 """
 
 _HOMEPAGE = "https://github.com/metalrt/ppi-dataset"
@@ -68,7 +79,10 @@ _BIGBIO_VERSION = "1.0.0"
 
 
 class BioinferDataset(datasets.GeneratorBasedBuilder):
-    """1100 sentences from abstracts of biomedical research articles annotated for relationships, named entities, as well as syntactic dependencies."""
+    """
+    1100 sentences from abstracts of biomedical research articles annotated
+    for relationships, named entities, as well as syntactic dependencies.
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
