@@ -307,7 +307,7 @@ def parse_brat_file(
         try:
             with annotation_file.open() as f:
                 ann_lines.extend(f.readlines())
-        except FileNotFoundError:
+        except Exception:
             continue
 
     example["text_bound_annotations"] = []
