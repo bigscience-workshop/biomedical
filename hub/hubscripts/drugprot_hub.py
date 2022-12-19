@@ -55,7 +55,7 @@ between them corresponding to a specific set of biologically relevant relation t
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-1/"
 
-_LICENSE = 'Creative Commons Attribution Share Alike 3.0 Unported'
+_LICENSE = 'Creative Commons Attribution 4.0 International'
 
 _URLS = {_DATASETNAME: "https://zenodo.org/record/5042151/files/drugprot-gs-training-development.zip?download=1"}
 
