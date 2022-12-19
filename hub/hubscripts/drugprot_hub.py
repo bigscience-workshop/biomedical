@@ -57,7 +57,7 @@ _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/t
 
 _LICENSE = 'Creative Commons Attribution 4.0 International'
 
-_URLS = {_DATASETNAME: "https://zenodo.org/record/5042151/files/drugprot-gs-training-development.zip?download=1"}
+_URLS = {_DATASETNAME: "https://zenodo.org/record/5119892/files/drugprot-training-development-test-background.zip?download=1"}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
