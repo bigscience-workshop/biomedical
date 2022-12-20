@@ -24,19 +24,18 @@ from typing import Dict, Iterable, List
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import text2text_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
 logger = datasets.logging.get_logger(__name__)
 
 
-_LANGUAGES = [Lang.EN, Lang.ZH]
+_LANGUAGES = ['English', 'Chinese']
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{liu2021paramed,
   author    = {Liu, Boxiang and Huang, Liang},
   title     = {ParaMed: a parallel corpus for English–Chinese translation in the biomedical domain},
   journal   = {BMC Medical Informatics and Decision Making},
@@ -47,6 +46,7 @@ _CITATION = """\
 }
 """
 _DATASETNAME = "paramed"
+_DISPLAYNAME = "ParaMed"
 
 _DESCRIPTION = """\
 NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website. 
@@ -56,7 +56,7 @@ http://nejmqianyan.cn/. The corpus contains all article pairs (around 2000 pairs
 
 _HOMEPAGE = "https://github.com/boxiangliu/ParaMed"
 
-_LICENSE = Licenses.CC_BY_4p0
+_LICENSE = 'Creative Commons Attribution 4.0 International'
 
 _URLs = {
     "source": "https://github.com/boxiangliu/ParaMed/blob/master/data/nejm-open-access.tar.gz?raw=true",
@@ -108,7 +108,7 @@ class ParamedDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_t2t":
-            features = schemas.text2text_features
+            features = text2text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.

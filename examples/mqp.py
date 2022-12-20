@@ -24,12 +24,11 @@ from typing import Dict, Tuple
 import datasets
 from datasets import load_dataset
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import pairs_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
@@ -47,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mqp"
+_DISPLAYNAME = "MQP"
 
 _DESCRIPTION = """\
 Medical Question Pairs dataset by McCreery et al (2020) contains pairs of medical questions and paraphrased versions of 
@@ -54,12 +54,11 @@ the question prepared by medical professional. Paraphrased versions were labelle
 but contextually similar ) or dissimilar (syntactically may look similar but contextually dissimilar). Labels 1: similar, 0: dissimilar
 """
 
-_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
+_HOMEPAGE = "https://github.com/curai/medical-question-pair-dataset"
 
-_LICENSE = Licenses.UNKNOWN
+_LICENSE = 'License information unavailable'
 _URLs = {
-    "source": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
-    "bigbio_pairs": "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
+    _DATASETNAME: "https://raw.githubusercontent.com/curai/medical-question-pair-dataset/master/mqp.csv",
 }
 
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
@@ -106,7 +105,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
 
         # Using in pairs schema
         elif self.config.schema == "bigbio_pairs":
-            features = schemas.pairs_features
+            features = pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -118,7 +117,7 @@ class MQPDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        my_urls = _URLs[self.config.schema]
+        my_urls = _URLs[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(my_urls)
 
         return [
