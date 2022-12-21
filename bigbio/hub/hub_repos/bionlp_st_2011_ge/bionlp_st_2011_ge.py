@@ -72,8 +72,9 @@ _HOMEPAGE = "https://sites.google.com/site/bionlpst/bionlp-shared-task-2011/geni
 _LICENSE = 'Creative Commons Attribution 3.0 Unported'
 
 _URLs = {
-    "source": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
-    "bigbio_kb": "https://github.com/openbiocorpora/bionlp-st-2011-ge/archive/refs/heads/master.zip",
+    "train": "data/train.zip",
+    "validation": "data/devel.zip",
+    "test": "data/test.zip",
 }
 
 _SUPPORTED_TASKS = [
@@ -215,26 +216,20 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
 
-        my_urls = _URLs[self.config.schema]
-        data_dir = Path(dl_manager.download_and_extract(my_urls))
-        data_files = {
-            "train": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "train",
-            "dev": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "devel",
-            "test": data_dir / f"bionlp-st-2011-ge-master" / "original-data" / "test",
-        }
+        data_files = dl_manager.download_and_extract(_URLs)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_files": data_files["train"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["train"])},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={"data_files": data_files["dev"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["validation"])},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"data_files": data_files["test"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["test"])},
             ),
         ]
 
@@ -248,20 +243,29 @@ class bionlp_st_2011_ge(datasets.GeneratorBasedBuilder):
         return kb_example
 
     def _generate_examples(self, data_files: Path):
-        if self.config.schema == "source":
-            txt_files = list(data_files.glob("*txt"))
-            for guid, txt_file in enumerate(txt_files):
-                example = parse_brat_file(txt_file)
-                example["id"] = str(guid)
-                yield guid, example
-        elif self.config.schema == "bigbio_kb":
-            txt_files = list(data_files.glob("*txt"))
-            for guid, txt_file in enumerate(txt_files):
-                example = brat_parse_to_bigbio_kb(
-                    parse_brat_file(txt_file)
-                )
-                example = self._standardize_arguments_roles(example)
-                example["id"] = str(guid)
-                yield guid, example
-        else:
-            raise ValueError(f"Invalid config: {self.config.name}")
+
+            if self.config.schema == "source":
+                guid = 0
+                for data_file in data_files:
+                    txt_file = Path(data_file)
+                    if txt_file.suffix != ".txt":
+                        continue
+                    example = parse_brat_file(txt_file)
+                    example["id"] = str(guid)
+                    yield guid, example
+                    guid += 1
+            elif self.config.schema == "bigbio_kb":
+                guid = 0
+                for data_file in data_files:
+                    txt_file = Path(data_file)
+                    if txt_file.suffix != ".txt":
+                        continue
+                    example = brat_parse_to_bigbio_kb(
+                        parse_brat_file(txt_file)
+                    )
+                    example = self._standardize_arguments_roles(example)
+                    example["id"] = str(guid)
+                    yield guid, example
+                    guid += 1
+            else:
+                raise ValueError(f"Invalid config: {self.config.name}")

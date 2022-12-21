@@ -31,7 +31,7 @@ _DISPLAYNAME = "BioNLP 2019 BB"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -76,48 +76,16 @@ and applications in microbiology.
 
 _HOMEPAGE = "https://sites.google.com/view/bb-2019/dataset"
 
-_LICENSE = 'License information unavailable'
+_LICENSE = "License information unavailable"
 
+_SUBTASKS = ["norm", "norm+ner", "rel", "rel+ner", "kb", "kb+ner"]
+_FILENAMES = ["train", "dev", "test"]
 _URLs = {
-    "source": {
-        "norm": {
-            "train": "https://drive.google.com/uc?export=download&id=1aXbshxgytZ1Dhbmw7OULPFarPO1FbcM3",
-            "dev": "https://drive.google.com/uc?export=download&id=14jRZWF8VeluEYrV9EybV3LeGm4q5nH6s",
-            "test": "https://drive.google.com/uc?export=download&id=1BPDCFTVMmIlOowYA-DkeNNFjwTfHYPG6",
-        },
-        "norm+ner": {
-            "train": "https://drive.google.com/uc?export=download&id=1yKxBPMej8EYdVeU4QS1xquFfXM76F-2K",
-            "dev": "https://drive.google.com/uc?export=download&id=1Xk7h9bax533QWclO3Ur7aS07OATBF_bG",
-            "test": "https://drive.google.com/uc?export=download&id=1Cb5hQIPS3LIeUL-UWdqyWfKB52xUz9cp",
-        },
-        "rel": {
-            "train": "https://drive.google.com/uc?export=download&id=1gnc-ScNpssC3qrA7cVox4Iei7i96sYqC",
-            "dev": "https://drive.google.com/uc?export=download&id=1wJM9XOfmvIBcX23t9bzQX5fLZwWQJIwS",
-            "test": "https://drive.google.com/uc?export=download&id=1smhKA4LEPK5UJEyBLseq0mBaT9REUevu",
-        },
-        "rel+ner": {
-            "train": "https://drive.google.com/uc?export=download&id=1CPx9NxTPQbygqMtxw3d0hNFajhecqgss",
-            "dev": "https://drive.google.com/uc?export=download&id=1lVyCCuAJ5TmmTDz4S0dISBNiWGR745_7",
-            "test": "https://drive.google.com/uc?export=download&id=1uE8oY5m-7mSA-W-e6vownnAVV97IwHhA",
-        },
-        "kb": {
-            "train": "https://drive.google.com/uc?export=download&id=1Iuce3T_IArXWBbIJ7RXb_STaPnWKQBN-",
-            "dev": "https://drive.google.com/uc?export=download&id=14yON_Tc9dm8esWYDVxL-krw23sgTCcdL",
-            "test": "https://drive.google.com/uc?export=download&id=1wVqI_t9mirGUk71BkwkcKJv0VNGyaHDs",
-        },
-        "kb+ner": {
-            "train": "https://drive.google.com/uc?export=download&id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L",
-            "dev": "https://drive.google.com/uc?export=download&id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG",
-            "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
-        },
-    },
-    "bigbio_kb": {
-        "kb+ner": {
-            "train": "https://drive.google.com/uc?export=download&id=1WMl9eD4OZXq8zkkmHp3hSEvAqaAVui6L",
-            "dev": "https://drive.google.com/uc?export=download&id=1oOfOfjIfg1XnesXwaKvSDfqgnchuximG",
-            "test": "https://drive.google.com/uc?export=download&id=1_dRbgpGJUBCfF-iN2qOAgOBRvYmE7byW",
-        },
-    },
+    subtask: {
+        filename: f"data/{subtask}/BioNLP-OST-2019_BB-{subtask}_{filename}.zip"
+        for filename in _FILENAMES
+    }
+    for subtask in _SUBTASKS
 }
 
 _SUPPORTED_TASKS = [
@@ -282,48 +250,47 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
     def _split_generators(
         self, dl_manager: datasets.DownloadManager
     ) -> List[datasets.SplitGenerator]:
-        version = self.config.name.split("_")[-2]
-        if version == "bigbio":
-            version = "kb+ner"
-        my_urls = _URLs[self.config.schema][version]
-        data_files = {
-            "train": Path(dl_manager.download_and_extract(my_urls["train"]))
-            / f"BioNLP-OST-2019_BB-{version}_train",
-            "dev": Path(dl_manager.download_and_extract(my_urls["dev"]))
-            / f"BioNLP-OST-2019_BB-{version}_dev",
-            "test": Path(dl_manager.download_and_extract(my_urls["test"]))
-            / f"BioNLP-OST-2019_BB-{version}_test",
-        }
+        subtask = self.config.name.split("_")[4]
+        if subtask == "bigbio":
+            subtask = "kb+ner"
+        my_urls = _URLs[subtask]
+        data_files = dl_manager.download_and_extract(my_urls)
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={"data_files": data_files["train"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["train"])},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
-                gen_kwargs={"data_files": data_files["dev"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["dev"])},
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={"data_files": data_files["test"]},
+                gen_kwargs={"data_files": dl_manager.iter_files(data_files["test"])},
             ),
         ]
 
     def _generate_examples(self, data_files: Path):
         if self.config.schema == "source":
-            txt_files = list(data_files.glob("*txt"))
-            for guid, txt_file in enumerate(txt_files):
+            guid = 0
+            for data_file in data_files:
+                txt_file = Path(data_file)
+                if txt_file.suffix != ".txt":
+                    continue
                 example = self.parse_brat_file(txt_file)
                 example["id"] = str(guid)
                 yield guid, example
+                guid += 1
         elif self.config.schema == "bigbio_kb":
-            txt_files = list(data_files.glob("*txt"))
-            for guid, txt_file in enumerate(txt_files):
-                example = brat_parse_to_bigbio_kb(
-                    self.parse_brat_file(txt_file)
-                )
+            guid = 0
+            for data_file in data_files:
+                txt_file = Path(data_file)
+                if txt_file.suffix != ".txt":
+                    continue
+                example = brat_parse_to_bigbio_kb(self.parse_brat_file(txt_file))
                 example["id"] = str(guid)
                 yield guid, example
+                guid += 1
         else:
             raise ValueError(f"Invalid config: {self.config.name}")
 
@@ -447,9 +414,11 @@ class bionlp_st_2019_bb(datasets.GeneratorBasedBuilder):
         ann_lines = []
         for suffix in annotation_file_suffixes:
             annotation_file = txt_file.with_suffix(suffix)
-            if annotation_file.exists():
+            try:
                 with annotation_file.open(encoding="utf8") as f:
                     ann_lines.extend(f.readlines())
+            except Exception:
+                continue
 
         example["text_bound_annotations"] = []
         example["events"] = []
