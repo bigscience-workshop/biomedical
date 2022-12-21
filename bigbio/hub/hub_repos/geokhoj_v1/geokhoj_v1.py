@@ -99,7 +99,7 @@ class Geokhojv1Dataset(datasets.GeneratorBasedBuilder):
                 {
                     "id": datasets.Value("string"),
                     "label": datasets.features.ClassLabel(
-                        names={0: "control", 1: "perturbation"}
+                        names=["control", "perturbation"]
                     ),
                     "text": datasets.Value("string"),
                 }

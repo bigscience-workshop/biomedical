@@ -24,7 +24,7 @@ from .bigbiohub import kb_features
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -59,10 +59,10 @@ The corpus was developed in the context of the StemNet project (http://www.stemn
 
 _HOMEPAGE = "https://zenodo.org/record/3698568#.YlVHqdNBxeg"
 
-_LICENSE = 'Creative Commons Attribution 4.0 International'
+_LICENSE = "Creative Commons Attribution 4.0 International"
 
 # using custom url: original distribution includes trained models (>25GB) and original dataset license allow for redistribution
-_URLS = "https://huggingface.co/datasets/bigscience-biomedical/progene/resolve/main/crossvalidation_data.zip"
+_URLS = "data/crossvalidation_data.zip"
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
@@ -128,25 +128,24 @@ class ProgeneDataset(datasets.GeneratorBasedBuilder):
         urls = _URLS
         dl_dir = dl_manager.download_and_extract(urls)
         dataset_dir = os.path.join(dl_dir, "crossvalidation_data")
-        dataset_dir = pathlib.Path(dataset_dir)
-        splits = []
-        for split_num in range(0, 10):
-            for file in dataset_dir.joinpath(f"flairSplit{split_num}").iterdir():
-                if file.name == "train.txt":
-                    split_id = f"split_{split_num}_{datasets.Split.TRAIN}"
-                elif file.name == "dev.txt":
-                    split_id = f"split_{split_num}_{datasets.Split.VALIDATION}"
-                else:
-                    split_id = f"split_{split_num}_{datasets.Split.TEST}"
-
-                splits.append(
-                    datasets.SplitGenerator(
-                        name=split_id,
-                        gen_kwargs={"filepath": file, "split_id": split_id},
-                    )
-                )
-
-        return splits
+        split_filenames = {
+            "train": "train.txt",
+            "validation": "dev.txt",
+            "test": "test.txt",
+        }
+        return [
+            datasets.SplitGenerator(
+                name=f"split_{split_num}_{split}",
+                gen_kwargs={
+                    "filepath": os.path.join(
+                        dataset_dir, f"flairSplit{split_num}", filename
+                    ),
+                    "split_id": f"split_{split_num}_{split}",
+                },
+            )
+            for split_num in range(0, 10)
+            for split, filename in split_filenames.items()
+        ]
 
     def _generate_examples(self, filepath, split_id: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""

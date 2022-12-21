@@ -163,6 +163,40 @@ kb_features = datasets.Features(
 )
 
 
+TASK_TO_SCHEMA = {
+    Tasks.NAMED_ENTITY_RECOGNITION.name: "KB",
+    Tasks.NAMED_ENTITY_DISAMBIGUATION.name: "KB",
+    Tasks.EVENT_EXTRACTION.name: "KB",
+    Tasks.RELATION_EXTRACTION.name: "KB",
+    Tasks.COREFERENCE_RESOLUTION.name: "KB",
+    Tasks.QUESTION_ANSWERING.name: "QA",
+    Tasks.TEXTUAL_ENTAILMENT.name: "TE",
+    Tasks.SEMANTIC_SIMILARITY.name: "PAIRS",
+    Tasks.TEXT_PAIRS_CLASSIFICATION.name: "PAIRS",
+    Tasks.PARAPHRASING.name: "T2T",
+    Tasks.TRANSLATION.name: "T2T",
+    Tasks.SUMMARIZATION.name: "T2T",
+    Tasks.TEXT_CLASSIFICATION.name: "TEXT",
+}
+
+SCHEMA_TO_TASKS = defaultdict(set)
+for task, schema in TASK_TO_SCHEMA.items():
+    SCHEMA_TO_TASKS[schema].add(task)
+SCHEMA_TO_TASKS = dict(SCHEMA_TO_TASKS)
+
+VALID_TASKS = set(TASK_TO_SCHEMA.keys())
+VALID_SCHEMAS = set(TASK_TO_SCHEMA.values())
+
+SCHEMA_TO_FEATURES = {
+    "KB": kb_features,
+    "QA": qa_features,
+    "TE": entailment_features,
+    "T2T": text2text_features,
+    "TEXT": text_features,
+    "PAIRS": pairs_features,
+}
+
+
 def get_texts_and_offsets_from_bioc_ann(ann: "bioc.BioCAnnotation") -> Tuple:
 
     offsets = [(loc.offset, loc.offset + loc.length) for loc in ann.locations]
@@ -304,9 +338,11 @@ def parse_brat_file(
     ann_lines = []
     for suffix in annotation_file_suffixes:
         annotation_file = txt_file.with_suffix(suffix)
-        if annotation_file.exists():
+        try:
             with annotation_file.open() as f:
                 ann_lines.extend(f.readlines())
+        except Exception:
+            continue
 
     example["text_bound_annotations"] = []
     example["events"] = []

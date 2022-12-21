@@ -65,8 +65,8 @@ _HOMEPAGE = "https://github.com/WengLab-InformaticsResearch/CHIA"
 _LICENSE = 'Creative Commons Attribution 4.0 International'
 
 _URLS = {
-    _DATASETNAME: "https://figshare.com/ndownloader/files/21728850",
-    _DATASETNAME + "_wo_scope": "https://figshare.com/ndownloader/files/21728853",
+    _DATASETNAME: "data/chia_with_scope.zip",
+    _DATASETNAME + "_wo_scope": "data/chia_without_scope.zip",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]

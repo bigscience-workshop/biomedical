@@ -29,8 +29,6 @@ Because the dataset contains entities and relations, it is suitable for Named En
 Recognition and Relation Extraction.
 """
 
-import os
-from glob import glob
 from typing import Dict, List, Tuple
 from xml.etree import ElementTree
 
@@ -81,7 +79,10 @@ _HOMEPAGE = ""
 _LICENSE = 'License information unavailable'
 
 _URLS = {
-    _DATASETNAME: "https://github.com/metalrt/ppi-dataset/zipball/master",
+    _DATASETNAME: {
+        "train": "https://github.com/metalrt/ppi-dataset/raw/master/csv_output/HPRD50-train.xml",
+        "test": "https://github.com/metalrt/ppi-dataset/raw/master/csv_output/HPRD50-test.xml",
+    },
 }
 
 _SUPPORTED_TASKS = [
@@ -285,30 +286,25 @@ class HPRD50Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
-        # Files are actually a few levels down, under this subdirectory, and
-        # intermediate directory names get hashed so this is the easiest way to find it.
-        data_dir = glob(f"{data_dir}/**/csv_output")[0]
+        data_dir = dl_manager.download(urls)
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "HPRD50-train.xml"),
-                    "split": "train",
+                    "filepath": data_dir["train"],
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "HPRD50-test.xml"),
-                    "split": "test",
+                    "filepath": data_dir["test"],
                 },
             ),
         ]
 
-    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         with open(filepath, "r") as f:
