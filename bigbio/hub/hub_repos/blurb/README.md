@@ -1,8 +1,17 @@
 ---
-language: en
+language: 
+  - en
+bigbio_language:
+  - English
 license: other
 multilinguality: monolingual
+bigbio_license_shortname: MIXED
 pretty_name: BLURB
+homepage: https://microsoft.github.io/BLURB/tasks.html
+bigbio_pubmed: true
+bigbio_public: true
+bigbio_tasks:
+  - NAMED_ENTITY_RECOGNITION
 ---
 
 
@@ -13,7 +22,7 @@ pretty_name: BLURB
 - **Homepage:** https://microsoft.github.io/BLURB/tasks.html
 - **Pubmed:** True
 - **Public:** True
-- **Tasks:** Named Entity Recognition
+- **Tasks:** NER
 
 BLURB is a collection of resources for biomedical natural language processing. 
 In general domains, such as newswire and the Web, comprehensive benchmarks and 

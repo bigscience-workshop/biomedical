@@ -1,8 +1,17 @@
 ---
-language: en
+language: 
+- en
+bigbio_language:
+- English
 license: other
 multilinguality: monolingual
+bigbio_license_shortname: NLM_LICENSE
 pretty_name: BioASQ Task B
+homepage: http://participants-area.bioasq.org/datasets/
+bigbio_pubmed: true
+bigbio_public: false
+bigbio_tasks:
+- QUESTION_ANSWERING
 ---
 
 
@@ -13,7 +22,7 @@ pretty_name: BioASQ Task B
 - **Homepage:** http://participants-area.bioasq.org/datasets/
 - **Pubmed:** True
 - **Public:** False
-- **Tasks:** Question Answering
+- **Tasks:** QA
 
 
 The BioASQ corpus contains multiple question

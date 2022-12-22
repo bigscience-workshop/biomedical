@@ -1,8 +1,17 @@
 ---
-language: en
+language: 
+  - en
+bigbio_language:
+  - English
 license: cc-by-4.0
 multilinguality: momolingual
+bigbio_license_shortname: CC_BY_4p0
 pretty_name: GAD
+homepage: https://geneticassociationdb.nih.gov/
+bigbio_pubmed: true
+bigbio_public: true
+bigbio_tasks:
+  - TEXT_CLASSIFICATION
 paperswithcode_id: gad
 ---
 
@@ -14,7 +23,7 @@ paperswithcode_id: gad
 - **Homepage:** https://geneticassociationdb.nih.gov/
 - **Pubmed:** True
 - **Public:** True
-- **Tasks:** Text Classification
+- **Tasks:** TXTCLASS
 
 
 A corpus identifying associations between genes and diseases by a semi-automatic
