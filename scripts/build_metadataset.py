@@ -9,7 +9,7 @@ import requests
 
 from bigbio.hub.hubtools import get_dataset_infos
 from bigbio.hub.hubtools import list_datasets
-from bigbio.hub.hf_maps import BATCH_MAPPERS_TEXT_FROM_SCHEMA
+from bigbio.hf_maps import BATCH_MAPPERS_TEXT_FROM_SCHEMA
 
 
 SCHEMAS = ["kb", "text", "pairs", "qa", "t2t", "te"]
