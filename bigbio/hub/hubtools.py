@@ -11,14 +11,27 @@ HF_ORG = "bigbio"
 HF_DATASETS_URL_BASE = "https://huggingface.co/datasets"
 
 
-def list_datasets():
+def list_datasets(full=False):
     """List datasets
 
     https://huggingface.co/docs/huggingface_hub/package_reference/hf_api#huggingface_hub.HfApi.list_datasets
     """
     api = HfApi()
-    bb_hub_datasets = api.list_datasets(author=HF_ORG)
+    bb_hub_datasets = api.list_datasets(author=HF_ORG, full=full)
     return bb_hub_datasets
+
+
+def get_dataset_infos(dataset_ids):
+    """Get dataset info
+
+    https://huggingface.co/docs/huggingface_hub/main/en/package_reference/hf_api#huggingface_hub.HfApi.dataset_info
+    """
+    api = HfApi()
+    ds_infos = [
+        api.dataset_info(dataset_id)
+        for dataset_id in dataset_ids
+    ]
+    return ds_infos
 
 
 def create_repository(dataset_name, private=True):
