@@ -1,10 +1,12 @@
+import multiprocessing
+
 import datasets
 from loguru import logger
 import numpy as np
 from transformers import AutoTokenizer
 
 
-NUM_PROC = 8
+NUM_PROC = multiprocessing.cpu_count()
 
 
 def get_training_corpus(dataset, batch_size=1_000):
@@ -19,7 +21,7 @@ def map_batch_num_tokens(examples):
     return {"num_tokens": [len(el) for el in examples["input_ids"]]}
 
 
-meta_ds_name = "bigbio_public_text_concat"
+meta_ds_name = "bigbio-public-text-concat"
 clone_from_name = "gpt2"
 batch_size = 1_000
 vocab_size = 20_000
@@ -43,3 +45,5 @@ ds_train = ds_train.map(map_batch_num_tokens, batched=True, num_proc=NUM_PROC)
 total_tokens = sum(ds_train["num_tokens"])
 
 logger.info("ds_train has {} million tokens.".format(total_tokens/1e6))
+
+tokenizer.save_pretrained("bigbio-public-gpt2-v20k-tokenizer")

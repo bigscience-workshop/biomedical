@@ -113,4 +113,4 @@ logger.info(
 # write them to disk for fast access
 
 ds_concat_t = concatenate_datasets(list(t_ds.values()))
-ds_concat_t.save_to_disk("bigbio_public_text_concat")
+ds_concat_t.save_to_disk("bigbio-public-text-concat")
