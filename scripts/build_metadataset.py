@@ -25,14 +25,14 @@ def query_splits_from_ds_server(dataset_id, url=DATASETS_SERVER_API_URL):
 def fetch_public_dataset_info():
     dataset_infos_all = list_datasets(full=True)
     dataset_infos = {
-        dsi.id: dsi
-        for dsi in dataset_infos_all
-        if dsi.cardData["bigbio_public"]
+        dsi.id: dsi for dsi in dataset_infos_all if dsi.cardData["bigbio_public"]
     }
     return dataset_infos
 
 
-def get_ds_metas(dataset_infos):
+def get_ds_metas(dataset_infos, split_name):
+
+    logger.info(f"get_ds_metas with split_name={split_name}")
 
     ds_metas = {}
     for dsid, dsi in tqdm(dataset_infos.items()):
@@ -47,7 +47,7 @@ def get_ds_metas(dataset_infos):
         good_split = None
         for split in api_res["splits"]:
 
-            if split["split"] != "train":
+            if split["split"] != split_name:
                 continue
 
             match = re.match(config_pattern, split["config"])
@@ -97,20 +97,35 @@ def load_datasets(ds_metas):
     return o_ds, t_ds
 
 
-
+def is_ok_str(example):
+    is_str = isinstance(example["text"], str)
+    if not is_str:
+        return False
+    is_informative = len(example["text"].strip()) > 0
+    return is_str & is_informative
 
 dataset_infos = fetch_public_dataset_info()
-ds_metas = get_ds_metas(dataset_infos)
-o_ds, t_ds = load_datasets(ds_metas)
+ds_metas = {}
+ds_o = {}
+ds_t = {}
+ds_concat_t = {}
+for split_name in ["train", "validation", "test"]:
+    ds_metas[split_name] = get_ds_metas(dataset_infos, split_name)
+    ds_o[split_name], ds_t[split_name] = load_datasets(ds_metas[split_name])
 
-logger.info(
-    "top 10 datasets by samples:\n {}".format(
-        sorted([(v.num_rows, k) for k,v in t_ds.items()])[-10:]
+    logger.info(
+        "top 10 datasets by samples:\n {}".format(
+            sorted([(v.num_rows, k) for k, v in ds_t[split_name].items()])[-10:]
+        )
     )
-)
 
-# concatenate all of the bigbio datasets together
-# write them to disk for fast access
+    ds = concatenate_datasets(list(ds_t[split_name].values()))
+    logger.info(f"ds initially has {ds.num_rows} rows")
+    ds = ds.filter(is_ok_str)
+    logger.info(f"ds after text filter has {ds.num_rows} rows")
+    ds_concat_t[split_name] = ds
 
-ds_concat_t = concatenate_datasets(list(t_ds.values()))
-ds_concat_t.save_to_disk("bigbio-public-text-concat")
+    
+dsd = datasets.DatasetDict(ds_concat_t)
+for split_name, ds in dsd.items():
+    ds.save_to_disk(f"bigbio-public-text-concat-{split_name}")

@@ -13,11 +13,6 @@ from transformers import TrainingArguments
 NUM_PROC = multiprocessing.cpu_count()
 
 
-def get_training_corpus(dataset, batch_size=1_000):
-    for start_idx in range(0, len(dataset), batch_size):
-        samples = dataset[start_idx : start_idx + batch_size]
-        yield samples["text"]
-
 def map_tokenize(examples):
     return tokenizer(examples['text'])
 
@@ -25,33 +20,42 @@ def map_batch_num_tokens(examples):
     return {"num_tokens": [len(el) for el in examples["input_ids"]]}
 
 
-meta_ds_name = "bigbio-public-text-concat"
-ds_all = datasets.load_from_disk(meta_ds_name)
-ds_all = ds_all.shuffle(seed=42)
-ds_sml = ds_all.select(np.arange(500_000))
-
-ds_text = ds_sml
-#ds_train = ds_all
-
+meta_ds_base_name = "bigbio-public-text-concat"
+dsd = {}
+for split_name in ["train", "validation", "test"]:
+    meta_ds_name = f"{meta_ds_base_name}-{split_name}"
+    logger.info(f"reading {meta_ds_name}")
+    dsd[split_name] = datasets.load_from_disk(meta_ds_name)
+dsd = datasets.DatasetDict(dsd)
 
 
 model_checkpt = "gpt2"
-tokenizer_checkpt = "bigbio-public-gpt2-v20k-tokenizer"
+tokenizer_checkpt = "bigbio-public-gpt2-v25k-tokenizer"
 tokenizer = AutoTokenizer.from_pretrained(tokenizer_checkpt)
 
-batch_size = 1_000
-training_corpus = get_training_corpus(ds_text, batch_size)
-ds_tokenized = ds_text.map(
+
+for split_name in ["train", "validation", "test"]:
+    ds = dsd[split_name] # .shuffle(seed=42)
+    ds_tokenized = ds.map(
+        map_tokenize,
+        batched=True,
+        num_proc=NUM_PROC,
+        remove_columns=["text"],
+        batch_size=2_000,
+    )
+
+
+    
+
+dsd_tokenized = dsd.map(
     map_tokenize,
     batched=True,
     num_proc=NUM_PROC,
     remove_columns=["text"],
 )
 
-
-
 # block_size = tokenizer.model_max_length
-block_size = 128
+block_size = 1024
 
 
 def group_texts(examples):
@@ -71,7 +75,7 @@ def group_texts(examples):
     return result
 
 
-ds_lm = ds_tokenized.map(
+dsd_lm = dsd_tokenized.map(
     group_texts,
     batched=True,
     batch_size=1000,
@@ -79,12 +83,43 @@ ds_lm = ds_tokenized.map(
 )
 
 
-config = AutoConfig.from_pretrained(model_checkpt)
+# see Table A4 in https://arxiv.org/abs/2203.15556
+# https://huggingface.co/docs/transformers/model_doc/gpt2#transformers.GPT2Config
+CONFIG_PARAMS = {
+    "73M": {
+        "n_layer": 10,
+        "n_embd": 640,
+        "n_inner": 2560,
+        "n_head": 10,
+    },
+    "305M": {
+        "n_layer": 20,
+        "n_embd": 1024,
+        "n_inner": 4096,
+        "n_head": 16,
+    },
+    "552M": {
+        "n_layer": 24,
+        "n_embd": 1280,
+        "n_inner": 5120,
+        "n_head": 10,
+    },            
+}
+
+config = AutoConfig.from_pretrained(
+    model_checkpt,
+    vocab_size=tokenizer.vocab_size,
+    **CONFIG_PARAMS["73M"],
+)
 model = AutoModelForCausalLM.from_config(config)
+
 
 training_args = TrainingArguments(
     f"bigbio-{model_checkpt}",
     evaluation_strategy = "epoch",
+    per_device_train_batch_size=16,
+    num_train_epochs=1.0,
+    fp16=True,
     learning_rate=2e-5,
     weight_decay=0.01,
     push_to_hub=False,
@@ -93,8 +128,8 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=lm_datasets["train"],
-    eval_dataset=lm_datasets["validation"],
+    train_dataset=dsd_lm["train"],
+    eval_dataset=dsd_lm["validation"],
 )
 
 trainer.train()

@@ -14,36 +14,33 @@ def get_training_corpus(dataset, batch_size=1_000):
         samples = dataset[start_idx : start_idx + batch_size]
         yield samples["text"]
 
+
 def map_tokenize(examples):
-    return tokenizer(examples['text'])
+    return tokenizer(examples["text"])
+
 
 def map_batch_num_tokens(examples):
     return {"num_tokens": [len(el) for el in examples["input_ids"]]}
 
 
-meta_ds_name = "bigbio-public-text-concat"
+meta_ds_base_name = "bigbio-public-text-concat"
 clone_from_name = "gpt2"
 batch_size = 1_000
-vocab_size = 20_000
+vocab_size = 25_000
 
+dsd = {}
+for split_name in ["train", "validation", "test"]:
+    meta_ds_name = f"{meta_ds_base_name}-{split_name}"
+    dsd[split_name] = datasets.load_from_disk(meta_ds_name)
 
-ds_all = datasets.load_from_disk(meta_ds_name)
-ds_all = ds_all.shuffle(seed=42)
-ds_sml = ds_all.select(np.arange(500_000))
-#ds_train = ds_sml
-ds_train = ds_all
-
-
+ds_train = dsd["train"]
 clone_from_tokenizer = AutoTokenizer.from_pretrained(clone_from_name)
-
 training_corpus = get_training_corpus(ds_train, batch_size)
+
+# TODO: check why this is much faster when you save individual dataset
+# to disk as opposed to dataset dictionary.
 tokenizer = clone_from_tokenizer.train_new_from_iterator(training_corpus, vocab_size)
+tokenizer.save_pretrained("bigbio-public-gpt2-v25k-tokenizer")
 
-ds_train = ds_train.map(map_tokenize, batched=True, num_proc=NUM_PROC)
-ds_train = ds_train.map(map_batch_num_tokens, batched=True, num_proc=NUM_PROC)
 
-total_tokens = sum(ds_train["num_tokens"])
 
-logger.info("ds_train has {} million tokens.".format(total_tokens/1e6))
-
-tokenizer.save_pretrained("bigbio-public-gpt2-v20k-tokenizer")
