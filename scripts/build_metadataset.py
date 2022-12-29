@@ -104,6 +104,7 @@ def is_ok_str(example):
     is_informative = len(example["text"].strip()) > 0
     return is_str & is_informative
 
+
 dataset_infos = fetch_public_dataset_info()
 ds_metas = {}
 ds_o = {}
@@ -125,7 +126,7 @@ for split_name in ["train", "validation", "test"]:
     logger.info(f"ds after text filter has {ds.num_rows} rows")
     ds_concat_t[split_name] = ds
 
-    
+
 dsd = datasets.DatasetDict(ds_concat_t)
 for split_name, ds in dsd.items():
     ds.save_to_disk(f"bigbio-public-text-concat-{split_name}")

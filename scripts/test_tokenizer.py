@@ -37,8 +37,9 @@ tokenizer = AutoTokenizer.from_pretrained("bigbio-public-gpt2-v25k-tokenizer")
 # this tokenizes all the datasets  just to count the tokens
 # shuffling helps keep the load balanced
 for split_name in ["train", "validation", "test"]:
-    #ds = dsd[split_name].shuffle(seed=42)
-    ds = dsd[split_name]
+    logger.info(f"tokenizing {split_name}")
+    ds = dsd[split_name].shuffle(seed=42)
+    #ds = dsd[split_name]
     #ds = ds.map(map_tokenize)
     ds = ds.map(map_tokenize, batched=True, num_proc=NUM_PROC, batch_size=1000)
     ds = ds.map(map_batch_num_tokens, batched=True, num_proc=NUM_PROC)

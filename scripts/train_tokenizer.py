@@ -31,6 +31,7 @@ vocab_size = 25_000
 dsd = {}
 for split_name in ["train", "validation", "test"]:
     meta_ds_name = f"{meta_ds_base_name}-{split_name}"
+    logger.info(f"reading {meta_ds_name}")
     dsd[split_name] = datasets.load_from_disk(meta_ds_name)
 
 ds_train = dsd["train"]
@@ -41,6 +42,3 @@ training_corpus = get_training_corpus(ds_train, batch_size)
 # to disk as opposed to dataset dictionary.
 tokenizer = clone_from_tokenizer.train_new_from_iterator(training_corpus, vocab_size)
 tokenizer.save_pretrained("bigbio-public-gpt2-v25k-tokenizer")
-
-
-
