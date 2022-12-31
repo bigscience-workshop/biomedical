@@ -8,16 +8,10 @@ from transformers import AutoConfig
 from transformers import AutoModelForCausalLM
 from transformers import Trainer
 from transformers import TrainingArguments
+import wandb
 
 
 NUM_PROC = multiprocessing.cpu_count()
-
-
-def map_tokenize(examples):
-    return tokenizer(examples['text'])
-
-def map_batch_num_tokens(examples):
-    return {"num_tokens": [len(el) for el in examples["input_ids"]]}
 
 
 meta_ds_base_name = "bigbio-public-text-concat"
@@ -33,19 +27,8 @@ model_checkpt = "gpt2"
 tokenizer_checkpt = "bigbio-public-gpt2-v25k-tokenizer"
 tokenizer = AutoTokenizer.from_pretrained(tokenizer_checkpt)
 
-
-for split_name in ["train", "validation", "test"]:
-    ds = dsd[split_name] # .shuffle(seed=42)
-    ds_tokenized = ds.map(
-        map_tokenize,
-        batched=True,
-        num_proc=NUM_PROC,
-        remove_columns=["text"],
-        batch_size=2_000,
-    )
-
-
-    
+def map_tokenize(examples):
+    return tokenizer(examples['text'])
 
 dsd_tokenized = dsd.map(
     map_tokenize,
@@ -103,7 +86,7 @@ CONFIG_PARAMS = {
         "n_embd": 1280,
         "n_inner": 5120,
         "n_head": 10,
-    },            
+    },
 }
 
 config = AutoConfig.from_pretrained(
@@ -114,22 +97,35 @@ config = AutoConfig.from_pretrained(
 model = AutoModelForCausalLM.from_config(config)
 
 
+wandb.init(project="bigbio-gpt")
+
 training_args = TrainingArguments(
     f"bigbio-{model_checkpt}",
-    evaluation_strategy = "epoch",
+    logging_steps = 100,
+    save_steps = 1_000,
+    evaluation_strategy = "steps",
+    do_eval = True,
+    eval_steps = 1_000,
+    per_device_eval_batch_size=64,
+    do_train = True,
+    num_train_epochs=2.0,
+    gradient_accumulation_steps=4,
     per_device_train_batch_size=16,
-    num_train_epochs=1.0,
     fp16=True,
-    learning_rate=2e-5,
+    optim="adamw_torch",
+    lr_scheduler_type="cosine",
+    warmup_ratio=0.02,
+    learning_rate=6e-4,
     weight_decay=0.01,
-    push_to_hub=False,
+    report_to="wandb",
 )
 
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=dsd_lm["train"],
-    eval_dataset=dsd_lm["validation"],
+    # TODO: probably want to take a sub-selection of validation ds here (slows down training)
+    eval_dataset=dsd_lm["validation"].filter(lambda example, idx: idx % 32 == 0, with_indices=True),
 )
 
 trainer.train()

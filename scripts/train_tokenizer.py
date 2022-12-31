@@ -14,15 +14,7 @@ def get_training_corpus(dataset, batch_size=1_000):
         samples = dataset[start_idx : start_idx + batch_size]
         yield samples["text"]
 
-
-def map_tokenize(examples):
-    return tokenizer(examples["text"])
-
-
-def map_batch_num_tokens(examples):
-    return {"num_tokens": [len(el) for el in examples["input_ids"]]}
-
-
+        
 meta_ds_base_name = "bigbio-public-text-concat"
 clone_from_name = "gpt2"
 batch_size = 1_000
