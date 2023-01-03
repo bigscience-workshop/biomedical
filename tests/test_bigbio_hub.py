@@ -835,17 +835,15 @@ if __name__ == "__main__":
 
     # If specified as `True`, bypass hub download and check local script.
     parser.add_argument(
-        "--ishub",
-        type=bool,
+        "--test_local",
+        action="store_true",
         help="Unit testing on local script instead of hub (ONLY USE FOR PRs)",
-        default=True,
-        required=False,
     )
 
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
-    if args.ishub:
+    if not args.test_local:
         logger.info("Running Hub Unit Test")
         org_and_dataset_name = f"bigbio/{args.dataset_name}"
 

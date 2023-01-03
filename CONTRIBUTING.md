@@ -164,10 +164,10 @@ Run these commands from the top level of the `biomedical` repo (i.e. the same di
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio_hub <dataset_name> [--data_dir /path/to/local/data] --ishub False
+python -m tests.test_bigbio_hub <dataset_name> [--data_dir /path/to/local/data] --test_local
 ```
 
-You MUST include the `--ishub False` flag to specifically test the script for your PR, otherwise the script will default to downloading a dataloader script from the Hub. Your particular dataset may require use of some of the other command line args in the test script (ex: `--data_dir` for dataloaders that read local files).
+You MUST include the `--test_local` flag to specifically test the script for your PR, otherwise the script will default to downloading a dataloader script from the Hub. Your particular dataset may require use of some of the other command line args in the test script (ex: `--data_dir` for dataloaders that read local files).
 <br>
 To view full usage instructions you can use the `--help` command:
 
