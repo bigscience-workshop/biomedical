@@ -2,7 +2,8 @@
 conhelpers.md
 
 # Ignore temp testing files
-biomeddatasets/testdata/testdata.py
+bigbio/biodatasets/*/bigbiohub.py
+bigbio/biodatasets/test_scitail/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
