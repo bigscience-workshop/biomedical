@@ -7,12 +7,10 @@ import argparse
 import importlib
 import logging
 import re
-import sys
 import unittest
 from collections import defaultdict
-from pathlib import Path
 from types import ModuleType
-from typing import Dict, Iterable, Iterator, List, Optional, Union
+from typing import Dict, Iterable, Iterator, List, Optional
 
 import datasets
 from datasets import DatasetDict, Features
@@ -20,7 +18,6 @@ from huggingface_hub import HfApi
 
 # from bigbio.utils.constants import METADATA
 from bigbio.hub import bigbiohub
-
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +42,7 @@ def _get_example_text(example: dict) -> str:
     """
     Concatenate all text from passages in an example of a KB schema
     :param example: An instance of the KB schema
-    """
+    """  # noqa
     return " ".join([t for p in example["passages"] for t in p["text"]])
 
 
@@ -62,7 +59,7 @@ _CONNECTORS = re.compile(r"\+|\,|\||\;")
 class TestDataLoader(unittest.TestCase):
     """
     Test a single config from a dataloader script.
-    """
+    """  # noqa
 
     DATASET_NAME: str
     CONFIG_NAME: str
@@ -141,7 +138,7 @@ class TestDataLoader(unittest.TestCase):
     def test_metadata(self, module: ModuleType):
         """
         Check if all metadata for a dataloader are present
-        """
+        """  # noqa
 
         for metadata_name, metadata_type in METADATA.items():
             if not hasattr(module, metadata_name):
@@ -236,7 +233,7 @@ class TestDataLoader(unittest.TestCase):
     def test_are_ids_globally_unique(self, dataset_bigbio: DatasetDict):
         """
         Tests each example in a split has a unique ID.
-        """
+        """  # noqa
         logger.info("Checking global ID uniqueness")
         for split_name, split in dataset_bigbio.items():
 
@@ -285,7 +282,7 @@ class TestDataLoader(unittest.TestCase):
     def test_do_all_referenced_ids_exist(self, dataset_bigbio: DatasetDict):
         """
         Checks if referenced IDs are correctly labeled.
-        """
+        """  # noqa
         logger.info("Checking if referenced IDs are properly mapped")
         for split_name, split in dataset_bigbio.items():
 
@@ -473,7 +470,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Verify that the events' trigger offsets are correct,
         i.e.: trigger text == text extracted via the trigger offsets
-        """
+        """  # noqa
         logger.info("KB ONLY: Checking event offsets")
         errors = []
 
@@ -545,7 +542,7 @@ class TestDataLoader(unittest.TestCase):
     def test_multiple_choice(self, dataset_bigbio: DatasetDict):
         """
         Verify that each answer in a multiple choice Q/A task is in choices.
-        """
+        """  # noqa
         logger.info("QA ONLY: Checking multiple choice")
         for split in dataset_bigbio:
 
@@ -586,7 +583,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Check if `db_name` or `db_id` of `normalized` field in entities have multiple values joined with common connectors.
         Raises a warning ONLY ONCE per connector type.
-        """
+        """  # noqa
         logger.info("KB ONLY: multi-label `db_id`")
 
         warning_raised = {}
@@ -644,7 +641,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Check if features with `type` field contain multilabel values
         and raise a warning ONLY ONCE for feature type (e.g. passages)
-        """
+        """  # noqa
 
         logger.info("KB ONLY: multi-label `type` fields")
 
@@ -702,7 +699,7 @@ class TestDataLoader(unittest.TestCase):
                             break
 
     def test_schema(self, schema: str):
-        """Search supported tasks within a dataset and verify big-bio schema"""
+        """Search supported tasks within a dataset and verify big-bio schema"""  # noqa
 
         non_empty_features = set()
         if schema == "KB":
@@ -849,6 +846,7 @@ if __name__ == "__main__":
     logger.info(f"args: {args}")
 
     if args.ishub:
+        logger.info("Running Hub Unit Test")
         org_and_dataset_name = f"bigbio/{args.dataset_name}"
 
         api = HfApi()
@@ -863,8 +861,13 @@ if __name__ == "__main__":
         logger.info(f"all_config_names: {all_config_names}")
 
     else:
+        logger.info("Running (Local) Unit Test")
         org_and_dataset_name = f"bigbio/biodatasets/{args.dataset_name}/{args.dataset_name}.py"
+        print("Dataset = ", args.dataset_name)
+
         module = datasets.load.dataset_module_factory(org_and_dataset_name)
+        print(module)
+
         builder_cls = datasets.load.import_main_class(module.module_path)
         all_config_names = [el.name for el in builder_cls.BUILDER_CONFIGS]
         logger.info(f"all_config_names: {all_config_names}")
