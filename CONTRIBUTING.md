@@ -164,15 +164,23 @@ Run these commands from the top level of the `biomedical` repo (i.e. the same di
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio bigbio/biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio bigbio/biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data] --ishub False
 ```
 
-Your particular dataset may require use of some of the other command line args in the test script.
-To view full usage instructions you can use the `--help` command,
+You MUST include the `--ishub False` flag to specifically test the script for your PR, otherwise the script will default to downloading a dataloader script from the Hub. Your particular dataset may require use of some of the other command line args in the test script.
+To view full usage instructions you can use the `--help` command:
 
 ```bash
 python -m tests.test_bigbio --help
 ```
+This will explain the types of arguments you may need to test for. A brief annotation is as such:
+
+- `dataset_name`: Name of the dataset you want to test
+- `data_dir`: The location of the data for datasets where `LOCAL_ = True`
+- `config_name`: Name of the configuration you want to test. By default, the script will test all configs, but if you can use this to debug a specific split, or if your data is prohibitively large.
+- `ishub`: Use this when unit testing scripts that are not yet uploaded to the hub (this is True for most cases)
+
+If you need advanced arguments (i.e. skipping a key from a specific data split), please contact admins. 
 
 ### 5. Format your code
 
