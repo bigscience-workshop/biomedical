@@ -14,263 +14,161 @@
 # limitations under the License.
 
 """
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
+The SciTail dataset is an entailment dataset created from multiple-choice science exams and
+web sentences. Each question and the correct answer choice are converted into an assertive
+statement to form the hypothesis. We use information retrieval to obtain relevant text from
+a large text corpus of web sentences, and use these sentences as a premise P. We crowdsource
+the annotation of such premise-hypothesis pair as supports (entails) or not (neutral), in order
+to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 examples with
+entails label and 16,925 examples with neutral label.
 """
-
 import os
-from typing import List, Tuple, Dict
 
 import datasets
+import pandas as pd
+
+from .bigbiohub import entailment_features
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-# TODO: import the schema that fits your dataset:
-from .bigbiohub import 
 
-# TODO: add True or False boolean value indicating if this dataset is local or not
-_LOCAL = 
-
-# TODO: Add BibTeX citation
+_LANGUAGES = ["English"]
+_PUBMED = False
+_LOCAL = False
 _CITATION = """\
-@article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+@inproceedings{scitail,
+    author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
+    booktitle = {AAAI}
+    title = {SciTail: A Textual Entailment Dataset from Science Question Answering},
+    year = {2018}
 }
 """
 
-# TODO: create a module level variable with your dataset name (should match script name)
-#  E.g. Hallmarks of Cancer: [dataset_name] --> hallmarks_of_cancer
-_DATASETNAME = "[dataset_name]"
+_DATASETNAME = "scitail"
+_DISPLAYNAME = "SciTail"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+The SciTail dataset is an entailment dataset created from multiple-choice science exams and
+web sentences. Each question and the correct answer choice are converted into an assertive
+statement to form the hypothesis. We use information retrieval to obtain relevant text from
+a large text corpus of web sentences, and use these sentences as a premise P. We crowdsource
+the annotation of such premise-hypothesis pair as supports (entails) or not (neutral), in order
+to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 examples with
+entails label and 16,925 examples with neutral label.
 """
 
-# TODO: Add a link to an official homepage for the dataset here (if possible)
-_HOMEPAGE = ""
+_HOMEPAGE = "https://allenai.org/data/scitail"
 
-# TODO: Add the licence for the dataset here (if possible)
-# Note that this doesn't have to be a common open source license.
-# Some datasets have custom licenses. In this case, simply put the full license terms
-# into `_LICENSE`
-_LICENSE = ""
+_LICENSE = "APACHE_2p0"
 
-# TODO: Add links to the urls needed to download your dataset files.
-#  For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
-    _DATASETNAME: "url or list of urls or ... ",
+    _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
 }
 
-# TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = []  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 
-# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
-#  This version doesn't have to be consistent with semantic versioning. Anything that is
-#  provided by the original dataset as a version goes.
-_SOURCE_VERSION = ""
+_SOURCE_VERSION = "1.1.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
 
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
-class NewDataset(datasets.GeneratorBasedBuilder):
+LABEL_MAP = {"entails": "entailment", "neutral": "neutral"}
+
+
+class SciTailDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
-
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="[dataset_name]_source",
+            name="scitail_source",
             version=SOURCE_VERSION,
-            description="[dataset_name] source schema",
+            description="SciTail source schema",
             schema="source",
-            subset_id="[dataset_name]",
+            subset_id="scitail",
         ),
         BigBioConfig(
-            name="[dataset_name]_bigbio_[bigbio_schema_name]",
+            name="scitail_bigbio_te",
             version=BIGBIO_VERSION,
-            description="[dataset_name] BigBio schema",
-            schema="bigbio_[bigbio_schema_name]",
-            subset_id="[dataset_name]",
+            description="SciTail BigBio schema",
+            schema="bigbio_te",
+            subset_id="scitail",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "[dataset_name]_source"
+    DEFAULT_CONFIG_NAME = "scitail_source"
 
-    def _info(self) -> datasets.DatasetInfo:
-
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
+    def _info(self):
 
         if self.config.schema == "source":
-            # TODO: Create your source schema here
-            raise NotImplementedError()
+            features = datasets.Features(
+                {
+                    "id": datasets.Value("string"),
+                    "premise": datasets.Value("string"),
+                    "hypothesis": datasets.Value("string"),
+                    "label": datasets.Value("string"),
+                }
+            )
 
-            # EX: Arbitrary NER type dataset
-            # features = datasets.Features(
-            #    {
-            #        "doc_id": datasets.Value("string"),
-            #        "text": datasets.Value("string"),
-            #        "entities": [
-            #            {
-            #                "offsets": [datasets.Value("int64")],
-            #                "text": datasets.Value("string"),
-            #                "type": datasets.Value("string"),
-            #                "entity_id": datasets.Value("string"),
-            #            }
-            #        ],
-            #    }
-            # )
-
-        # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
-
-        # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
-
-        # For example bigbio_kb, bigbio_t2t
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
-            # e.g. features = schemas.kb_features
-            # TODO: Choose your big-bio schema here
-            raise NotImplementedError()
+        elif self.config.schema == "bigbio_te":
+            features = entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
-        """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
+    def _split_generators(self, dl_manager):
 
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
-
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-
-        # TODO: KEEP if your dataset is PUBLIC; remove if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
-
-        # TODO: KEEP if your dataset is LOCAL; remove if NOT
-        if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
-        else:
-            data_dir = self.config.data_dir
-
-        # Not all datasets have predefined canonical train/val/test splits.
-        # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "train.jsonl"),
-                    "split": "train",
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_train.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "test.jsonl"),
-                    "split": "test",
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_test.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "dev.jsonl"),
-                    "split": "dev",
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_dev.tsv"
+                    ),
                 },
             ),
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-
-    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
-        """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
-
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
+    def _generate_examples(self, filepath):
+        # since examples can contain quotes mid text set quoting to QUOTE_NONE (3) when reading tsv
+        # e.g.: ... and apply specific "tools" to examples and ...
+        data = pd.read_csv(
+            filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3
+        )
+        data["id"] = data.index
 
         if self.config.schema == "source":
-            # TODO: yield (key, example) tuples in the original dataset schema
-            for key, example in thing:
-                yield key, example
+            for _, row in data.iterrows():
+                yield row["id"], row.to_dict()
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
-            # TODO: yield (key, example) tuples in the bigbio schema
-            for key, example in thing:
-                yield key, example
-
-
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
+        elif self.config.schema == "bigbio_te":
+            # normalize labels
+            data["label"] = data["label"].apply(lambda x: LABEL_MAP[x])
+            for _, row in data.iterrows():
+                yield row["id"], row.to_dict()
