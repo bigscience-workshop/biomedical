@@ -1,5 +1,7 @@
 # Guide to Implementing a dataset
 
+All dataset loading scripts will be hosted on the [Official `BigBIO` Hub](https://huggingface.co/bigbio). We use this github repository to accept new submissions, and standardize quality control.
+
 ## Pre-Requisites
 
 Please make a github account prior to implementing a dataset; you can follow instructions to install git [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
@@ -8,8 +10,8 @@ You will also need at least Python 3.6+. If you are installing python, we recomm
 
 **Optional** Setup your GitHub account with SSH ([instructions here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).)
 
-### 1. **Setup a local version of the bigscience-biomed repo**
-Fork the bigscience-biomed dataset [repository](https://github.com/bigscience-workshop/biomedical) to your local github account. To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github.
+### 1. **Fork the BigBIO repository**
+Fork the `BigBIO`[repository](https://github.com/bigscience-workshop/biomedical). To do this, click the link to the repository and click "fork" in the upper-right corner. You should get an option to fork to your account, provided you are signed into Github.
 
 After you fork, clone the repository locally. You can do so as follows:
 
@@ -59,14 +61,14 @@ You can make an environment in any way you choose to. We highlight two possible 
 
 #### 2a) Create a conda environment
 
-The following instructions will create an Anaconda `bigscience-biomedical` environment.
+The following instructions will create an Anaconda `BigBIO` environment.
 
 - Install [anaconda](https://docs.anaconda.com/anaconda/install/) for your appropriate operating system.
 - Run the following command while in the `biomedical` folder (you can pick your python version):
 
 ```
 conda env create -f conda.yml  # Creates a conda env
-conda activate bigscience-biomedical  # Activate your conda environment
+conda activate bigbio  # Activate your conda environment
 ```
 
 You can deactivate your environment at any time by either exiting your terminal or using `conda deactivate`.
@@ -78,30 +80,35 @@ Python 3.3+ has venv automatically installed; official information is found [her
 ```
 python3 -m venv <your_env_name_here>
 source <your_env_name_here>/bin/activate  # activate environment
-pip install -r requirements.txt # Install this while in the datasets folder
+pip install -r dev-requirements.txt # Install this while in the datasets folder
 ```
 Make sure your `pip` package points to your environment's source.
 
-### 3. Implement your dataset
+### 3. Prepare the folder in `biodatasets` for your dataloader
 
 Make a new directory within the `biomedical/bigbio/biodatasets` directory:
 
     mkdir bigbio/biodatasets/<dataset_name>
 
+**NOTE**: Please use lowercase letters and underscores when choosing a `<dataset_name>`.
+
 Add an `__init__.py` file to this directory:
 
     touch bigbio/biodatasets/<dataset_name>/__init__.py
 
-Please use lowercase letters and underscores when choosing a `<dataset_name>`.
-To implement your dataset, there are three key methods that are important:
+Next, copy the contents of `template` into your dataset folder. This contains 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script.
+
+    cp templates/*.py bigbio/biodatasets/<dataset_name>/<dataset_name>.py
+
+
+### 4. Implement your dataset
+
+To implement your dataloader, you will need to follow `template.py` and fill in all necessary TODOs. There are three key methods that are important:
 
   * `_info`: Specifies the schema of the expected dataloader
   * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
   * `_generate_examples`: Create examples from data that conform to each schema defined in `_info`.
 
-To start, copy [templates/template.py](templates/template.py) to your `biomedical/bigbio/biodatasets/<dataset_name>` directory with the name `<dataset_name>.py`. Within this file, fill out all the TODOs.
-
-    cp templates/template.py bigbio/biodatasets/<dataset_name>/<dataset_name>.py
 
 For the `_info_` function, you will need to define `features` for your
 `DatasetInfo` object. For the `bigbio` config, choose the right schema from our list of examples. You can find a description of these in the [Task Schemas Document](task_schemas.md). You can find the actual schemas in the [schemas directory](bigbio/utils/schemas/).
@@ -112,7 +119,7 @@ Populate the information in the dataset according to this schema; some fields ma
 
 To enable quality control, please add the following line in your file before the class definition:
 ```python
-from bigbio.utils.constants import Tasks
+from .bigbiohub import Tasks
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 ```
 
@@ -120,11 +127,11 @@ If your dataset is in a standard format, please use a recommended parser if avai
 - BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
 - BRAT: Use [our custom brat parser](bigbio/utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
 
-If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
+If the recommended parser does not work for you dataset, please alert us in [Discord](https://discord.com/invite/Cwf3nT3ajP), Slack, or a [github issue](https://github.com/bigscience-workshop/biomedical/issues/new?assignees=&labels=&template=add-dataset.md&title=) (please make it a thread in your official project issue).
 
 
 ##### Example scripts:
-To help you implement a dataset, we offer [example scripts](examples/).
+To help you implement a dataset, we offer [example scripts](examples/). Checkout which task, and [schema](task_schemas.md) best suit your dataset!
 
 #### Running & Debugging:
 You can run your data loader script during development by appending the following

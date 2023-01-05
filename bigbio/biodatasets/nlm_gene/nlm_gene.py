@@ -182,7 +182,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             if splitter in db_ids:
                 connector = splitter
         normalized = [
-            {"db_name": db_id_key, "db_id": db_id} for db_id in db_ids.split(connector)
+            {"db_name": "NCBIGene", "db_id": db_id} for db_id in db_ids.split(connector)
         ]
 
         return {
