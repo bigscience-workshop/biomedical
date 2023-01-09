@@ -174,6 +174,7 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         splits = pd.read_csv(split_dir)
+        counter = 1
 
         with open(filepath, encoding="utf8") as file:
             data = json.load(file)
@@ -189,16 +190,17 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
                         "entities": row["entities"],
                     }
 
-                    for passage in row["passages"]:
+                    for j, passage in enumerate(row["passages"]):
+                        passage_id = passage["id"]
                         out["passages"].append({
-                            "id": passage["id"],
+                            "id": f"{uid}x{passage_id}x{j}",
                             "type": passage["type"],
                             "text": [passage["text"]],
                             "offsets": passage["offsets"],
                         })
 
                     for i, _ in enumerate(out["entities"]):
-                        out["entities"][i]["id"] = f"{uid}-{i}"
+                        out["entities"][i]["id"] = f"{uid}x{i}"
                         out["entities"][i]["normalized"] = []
 
                     out["events"] = []
