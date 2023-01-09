@@ -113,11 +113,11 @@ class BioredDataset(datasets.GeneratorBasedBuilder):
 
     TYPE_TO_DATABASE = {
         "CellLine": "Cellosaurus",
-        "ChemicalEntity": "Medical Subject Headings (MESH)",
-        "DiseaseOrPhenotypicFeature": "Medical Subject Headings (MESH) / Online Mendelian Inheritance in Man (OMIM)",
-        "GeneOrGeneProduct": "NCBI Gene",
-        "OrganismTaxon": "NCBI Taxonomy",
-        "SequenceVariant": "dbSNP / custom",
+        "ChemicalEntity": "MESH",
+        "DiseaseOrPhenotypicFeature": "MESH",  # Some diseases are normalized to OMIM (~ handled by special rules)
+        "GeneOrGeneProduct": "NCBIGene",
+        "OrganismTaxon": "NCBITaxon",
+        "SequenceVariant": "dbSNP",  # Not all variants are normalized to dbSNP (~ handled by special rules)
     }
 
     def _info(self) -> datasets.DatasetInfo:
@@ -219,13 +219,24 @@ class BioredDataset(datasets.GeneratorBasedBuilder):
                     for i, entity in enumerate(document["entities"]):
                         internal_id = pmid + "_" + str(i)
 
-                        entity_type = entity["semantic_type_id"]
-                        db_name = self.TYPE_TO_DATABASE[entity_type]
-
                         # Some entities are normalized to multiple database ids, therefore we
                         # may have multiple identifiers per mention
                         normalized_entity_ids = []
                         for database_id in entity["concept_id"].split(","):
+                            database_id = database_id.strip()
+                            entity_type = entity["semantic_type_id"]
+
+                            # First check special db_name and database id assignment rules
+                            if entity_type == "DiseaseOrPhenotypicFeature" and database_id.lower().startswith("omim"):
+                                db_name = "OMIM"
+                                database_id = database_id.split(":")[-1]
+                            elif entity_type == "SequenceVariant" and not database_id.startswith("rs"):
+                                db_name = "custom"
+
+                            # If no special rule applies -> just take the default db_name for the entity type
+                            else:
+                                db_name = self.TYPE_TO_DATABASE[entity_type]
+
                             normalized_entity_ids.append({"db_name": db_name, "db_id": database_id})
                             entity_id_to_mentions[database_id].append(internal_id)
 
