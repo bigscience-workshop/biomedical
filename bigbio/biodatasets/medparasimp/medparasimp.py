@@ -21,15 +21,6 @@ and their corresponding plain-language summarizations (PLS).
 The PLS's were created by the authors of the original abstracts.
 The dataset was obtained by scraping the Cochrane Library website.
 """
-Adding a Dataset
-Name: CPI
-Description: The compound-protein relationship (CPI) dataset consists of 2,613 sentences from abstracts containing
-annotations of proteins, small molecules, and their relationships
-Task: NER,RE,NEN
-Paper: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0220925
-Data: https://github.com/KerstenDoering/CPI-Pipeline
-License: ISC
-Motivation: High quality NER and RE annotations
 
 from typing import Dict, List, Tuple
 
