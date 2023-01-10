@@ -193,14 +193,14 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
                     for j, passage in enumerate(row["passages"]):
                         passage_id = passage["id"]
                         out["passages"].append({
-                            "id": f"{uid}x{passage_id}x{j}",
+                            "id": f"{uid}-{passage_id}-{j}",
                             "type": passage["type"],
                             "text": [passage["text"]],
                             "offsets": passage["offsets"],
                         })
 
                     for i, _ in enumerate(out["entities"]):
-                        out["entities"][i]["id"] = f"{uid}x{i}"
+                        out["entities"][i]["id"] = f"{uid}-{i}"
                         out["entities"][i]["normalized"] = []
 
                     out["events"] = []
