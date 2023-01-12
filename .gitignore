@@ -2,7 +2,7 @@
 conhelpers.md
 
 # Ignore temp testing files
-bigbio/hub/hub_repos/test_scitail/*
+#bigbio/hub/hub_repos/test_scitail/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

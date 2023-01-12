@@ -25,10 +25,10 @@ from bigbio.hub import bigbiohub
 currdir = Path(__file__).parents[1].resolve() / "bigbio/utils/resources"
 
 with open(currdir / "languages.json") as f:
-    lang_keys = set(json.load(f).keys())
+    lang_keys = set(json.load(f).values())
 
 with open(currdir / "licenses.json") as f:
-    license_keys = set(json.load(f).keys())
+    license_keys = set(json.load(f).values())
 
 
 logger = logging.getLogger(__name__)
@@ -178,7 +178,8 @@ class TestDataLoader(unittest.TestCase):
                         )
 
                     if elem not in lang_keys:
-                        raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid example`!")
+                        print(elem)
+                        raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid for {elem}`!")
             else:
                 if not isinstance(metadata_attr, metadata_type):
                     raise AssertionError(
@@ -187,7 +188,7 @@ class TestDataLoader(unittest.TestCase):
 
             if metadata_name == "_LICENSE":
                 if metadata_attr not in license_keys:
-                    raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid example`!")
+                    raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid for {metadata_attr}`!")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
