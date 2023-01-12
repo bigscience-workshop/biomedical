@@ -32,9 +32,8 @@ from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
 # Testing
-#_LANGUAGES = ["English"]
-
-_LANGUAGES = ["EnGlISH"]  # This will fail
+_LANGUAGES = ["English"]
+#_LANGUAGES = ["EnGlISH"]  # This will fail
 
 _PUBMED = False
 _LOCAL = False
@@ -63,8 +62,7 @@ entails label and 16,925 examples with neutral label.
 _HOMEPAGE = "https://allenai.org/data/scitail"
 
 # Testing
-_LICENSE = "Apple Public Source License 2.0"
-
+_LICENSE = "Apache License 2.0"
 #_LICENSE = "APACHE_2p0"  # This will fail
 
 _URLS = {
