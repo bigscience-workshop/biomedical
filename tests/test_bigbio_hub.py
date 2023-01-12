@@ -5,10 +5,13 @@ NOTE: If bypass keys/splits present, statistics are STILL printed.
 """
 import argparse
 import importlib
+# Check languages + licenses match appropriate keys'
+import json
 import logging
 import re
 import unittest
 from collections import defaultdict
+from pathlib import Path
 from types import ModuleType
 from typing import Dict, Iterable, Iterator, List, Optional
 
@@ -18,6 +21,15 @@ from huggingface_hub import HfApi
 
 # from bigbio.utils.constants import METADATA
 from bigbio.hub import bigbiohub
+
+currdir = Path(__file__).parents[1].resolve() / "bigbio/utils/resources"
+
+with open(currdir / "languages.json") as f:
+    lang_keys = set(json.load(f).keys())
+
+with open(currdir / "licenses.json") as f:
+    license_keys = set(json.load(f).keys())
+
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +149,8 @@ class TestDataLoader(unittest.TestCase):
 
     def test_metadata(self, module: ModuleType):
         """
-        Check if all metadata for a dataloader are present
+        Check if all metadata for a dataloader are present.
+        Checks if languages + licenses are appropriately named.
         """  # noqa
 
         for metadata_name, metadata_type in METADATA.items():
@@ -163,11 +176,18 @@ class TestDataLoader(unittest.TestCase):
                         raise AssertionError(
                             f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(elem)}`!"
                         )
+
+                    if elem not in lang_keys:
+                        raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid example`!")
             else:
                 if not isinstance(metadata_attr, metadata_type):
                     raise AssertionError(
                         f"Dataloader attribute '{metadata_name}' must be of type `{metadata_type}`! Found `{type(metadata_attr)}`!"
                     )
+
+            if metadata_name == "_LICENSE":
+                if metadata_attr not in license_keys:
+                    raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid example`!")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
