@@ -21,12 +21,12 @@ from huggingface_hub import HfApi
 
 # from bigbio.utils.constants import METADATA
 from bigbio.hub import bigbiohub
-from bigbio.utils.license import Licenses                                                                            
-from bigbio.utils.constants import Lang                                                                              
-                                                                                                                     
-                                                                                                                     
-lang_keys = set([el.value for el in Lang])                                                                           
-license_keys = set(Licenses.__dict__) 
+from bigbio.utils.license import Licenses
+from bigbio.utils.constants import Lang
+
+
+lang_keys = set([el.value for el in Lang])
+license_keys = set(Licenses.__dict__)
 
 
 logger = logging.getLogger(__name__)
