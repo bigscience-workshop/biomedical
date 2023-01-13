@@ -21,14 +21,12 @@ from huggingface_hub import HfApi
 
 # from bigbio.utils.constants import METADATA
 from bigbio.hub import bigbiohub
-
-currdir = Path(__file__).parents[1].resolve() / "bigbio/utils/resources"
-
-with open(currdir / "languages.json") as f:
-    lang_keys = set(json.load(f).values())
-
-with open(currdir / "licenses.json") as f:
-    license_keys = set(json.load(f).values())
+from bigbio.utils.license import Licenses                                                                            
+from bigbio.utils.constants import Lang                                                                              
+                                                                                                                     
+                                                                                                                     
+lang_keys = set([el.value for el in Lang])                                                                           
+license_keys = set(Licenses.__dict__) 
 
 
 logger = logging.getLogger(__name__)
@@ -188,7 +186,7 @@ class TestDataLoader(unittest.TestCase):
 
             if metadata_name == "_LICENSE":
                 if metadata_attr not in license_keys:
-                    raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid for {metadata_attr}`!")
+                    raise AssertionError(f"Dataloader attribute '{metadata_attr}' not valid for {metadata_name}`!")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
