@@ -62,8 +62,8 @@ entails label and 16,925 examples with neutral label.
 _HOMEPAGE = "https://allenai.org/data/scitail"
 
 # Testing
-_LICENSE = "Apache License 2.0"
-#_LICENSE = "APACHE_2p0"  # This will fail
+# _LICENSE = "Apache License 2.0" # This will fail (need to use short name)
+_LICENSE = "APACHE_2p0"  
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
