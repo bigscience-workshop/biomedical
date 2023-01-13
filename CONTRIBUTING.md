@@ -84,22 +84,22 @@ pip install -r dev-requirements.txt # Install this while in the datasets folder
 ```
 Make sure your `pip` package points to your environment's source.
 
-### 3. Prepare the folder in `biodatasets` for your dataloader
+### 3. Prepare the folder in `hub_repos` for your dataloader
 
 Make a new directory within the `biomedical/bigbio/hub/hub_repos/` directory:
 
-    mkdir bigbio/biodatasets/<dataset_name>
+    mkdir bigbio/hub/hub_repos/<dataset_name>
 
 **NOTE**: Please use lowercase letters and underscores when choosing a `<dataset_name>`.
 
 Add an `__init__.py` file to this directory:
 
-    touch bigbio/biodatasets/<dataset_name>/__init__.py
+    touch bigbio/hub/hub_repos/<dataset_name>/__init__.py
 
 Next, copy the contents of `template` into your dataset folder. This contains 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script.
 
-    cp templates/*.py bigbio/biodatasets/<dataset_name>/<dataset_name>.py
-
+    cp templates/template.py bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
+    cp templates/bigbiohub.py bigbio/hub/hub_repos/<dataset_name>/
 
 ### 4. Implement your dataset
 
@@ -195,7 +195,9 @@ This runs the black formatter, isort, and lints to ensure that the code is reada
 
 First, commit your changes to the branch to "add" the work:
 
-    git add bigbio/biodatasets/<dataset_name>/<dataset_name>.py
+    git add bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
+    git add bigbio/hub/hub_repos/<dataset_name>/bigbiohub.py
+    git add bigbio/hub/hub_repos/<dataset_name>/README.md
     git commit -m "A message describing your commits"
 
 Then, run the following commands to incorporate any new changes in the master branch of datasets as follows:
@@ -213,4 +215,4 @@ Push these changes to **your fork** with the following command:
 
 Make a Pull Request to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
 
-When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description, e.g. `resolves #17`.
+When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description (not the PR title), e.g. `resolves #17`.
