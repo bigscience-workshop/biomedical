@@ -130,7 +130,7 @@ TBA - Links may not be applicable yet!
 
 - Have your own idea? Contact an admin in the form of an [issue](https://github.com/bigscience-workshop/biomedical/issues/new?assignees=&labels=&template=add-dataset.md&title=).
 
-- Implement your idea following guidelines set by the [official contributing guide](contributing.md)
+- Implement your idea following guidelines set by the [official contributing guide](CONTRIBUTING.md)
 
 - Wait for admin approval; approval is iterative, but if accepted will belong to the main repository.
 

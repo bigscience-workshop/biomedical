@@ -86,7 +86,7 @@ Make sure your `pip` package points to your environment's source.
 
 ### 3. Prepare the folder in `biodatasets` for your dataloader
 
-Make a new directory within the `biomedical/bigbio/biodatasets` directory:
+Make a new directory within the `biomedical/bigbio/hub/hub_repos/` directory:
 
     mkdir bigbio/biodatasets/<dataset_name>
 
@@ -156,7 +156,7 @@ Make sure your dataset is implemented correctly by checking in python the follow
 ```python
 from datasets import load_dataset
 
-data = load_dataset("bigbio/biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
+data = load_dataset("bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
 ```
 
 Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).
@@ -164,21 +164,30 @@ Run these commands from the top level of the `biomedical` repo (i.e. the same di
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio bigbio/biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio_hub <dataset_name> [--data_dir /path/to/local/data] --test_local
 ```
 
-Your particular dataset may require use of some of the other command line args in the test script.
-To view full usage instructions you can use the `--help` command,
+You MUST include the `--test_local` flag to specifically test the script for your PR, otherwise the script will default to downloading a dataloader script from the Hub. Your particular dataset may require use of some of the other command line args in the test script (ex: `--data_dir` for dataloaders that read local files).
+<br>
+To view full usage instructions you can use the `--help` command:
 
 ```bash
 python -m tests.test_bigbio --help
 ```
+This will explain the types of arguments you may need to test for. A brief annotation is as such:
+
+- `dataset_name`: Name of the dataset you want to test
+- `data_dir`: The location of the data for datasets where `LOCAL_ = True`
+- `config_name`: Name of the configuration you want to test. By default, the script will test all configs, but if you can use this to debug a specific split, or if your data is prohibitively large.
+- `ishub`: Use this when unit testing scripts that are not yet uploaded to the hub (this is True for most cases)
+
+If you need advanced arguments (i.e. skipping a key from a specific data split), please contact admins. You are welcome to make a PR and ask admin for help if your code does not pass the unit tests. 
 
 ### 5. Format your code
 
 From the main directory, run the Makefile via the following command:
 
-    make check_file=bigbio/biodatasets/<dataset_name>/<dataset_name>.py
+    make check_file=bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
