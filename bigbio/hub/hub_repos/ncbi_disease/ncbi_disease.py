@@ -251,8 +251,8 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
 
                         else:
                             normalized.append(
-                                {"db_name": "MESH", "db_id": x.split(":")[-1].strip()}
-                    
+                                {"db_name": "MESH", "db_id": x.split(":")[-1].strip()})
+
                     unified_entities.append(
                         {
                             "id": unified_entity_id,
