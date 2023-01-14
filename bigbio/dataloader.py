@@ -2,7 +2,6 @@
 Utility for filtering and loading BigBio datasets.
 """
 from collections import Counter
-#from importlib.machinery import SourceFileLoader
 from importlib import import_module
 import logging
 import os
@@ -462,7 +461,6 @@ class BigBioConfigHelpers:
     ):
 
         path_to_here = pathlib.Path(__file__).parent.absolute()
-        #self.path_to_biodatasets = (path_to_here / "biodatasets").resolve()
         self.path_to_biodatasets = (path_to_here / "hub" / "hub_repos").resolve()
         self.dataloader_directories = sorted(self.path_to_biodatasets.glob("*"))
         self.dataloader_scripts = [
