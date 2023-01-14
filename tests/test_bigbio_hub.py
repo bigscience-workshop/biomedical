@@ -25,8 +25,11 @@ from bigbio.utils.license import Licenses
 from bigbio.utils.constants import Lang
 
 
+# we can use value or name here. I think most loaders use value
 lang_keys = set([el.value for el in Lang])
-license_keys = set(Licenses.__dict__)
+
+# we can use short_name or name here. I think most loaders use short_name
+license_keys = set([getattr(Licenses, key).short_name for key in Licenses.__dict__])
 
 
 logger = logging.getLogger(__name__)
@@ -177,7 +180,7 @@ class TestDataLoader(unittest.TestCase):
 
                     if elem not in lang_keys:
                         print(elem)
-                        raise AssertionError(f"Dataloader attribute '{metadata_name}' not valid for {elem}`!")
+                        raise AssertionError(f"Dataloader attribute '{elem}' not valid for {metadata_name} must be one of {lang_keys}")
             else:
                 if not isinstance(metadata_attr, metadata_type):
                     raise AssertionError(
@@ -186,7 +189,7 @@ class TestDataLoader(unittest.TestCase):
 
             if metadata_name == "_LICENSE":
                 if metadata_attr not in license_keys:
-                    raise AssertionError(f"Dataloader attribute '{metadata_attr}' not valid for {metadata_name}`!")
+                    raise AssertionError(f"Dataloader attribute '{metadata_attr}' not valid for {metadata_name} must be one of {license_keys}")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
