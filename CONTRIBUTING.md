@@ -96,10 +96,11 @@ Add an `__init__.py` file to this directory:
 
     touch bigbio/hub/hub_repos/<dataset_name>/__init__.py
 
-Next, copy the contents of `template` into your dataset folder. This contains 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script.
+Next, copy the contents of `template` into your dataset folder. This contains a `README.md` file and 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script. The `README.md` is from the `scitail` dataset and you will need to edit it for your dataset. Remove the text between square brackets before you make your PR. This file will determine what the landing page for the dataset on the hub looks like.
 
     cp templates/template.py bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
     cp templates/bigbiohub.py bigbio/hub/hub_repos/<dataset_name>/
+    cp templates/README.md bigbio/hub/hub_repos/<dataset_name>/
 
 ### 4. Implement your dataset
 
@@ -181,7 +182,7 @@ This will explain the types of arguments you may need to test for. A brief annot
 - `config_name`: Name of the configuration you want to test. By default, the script will test all configs, but if you can use this to debug a specific split, or if your data is prohibitively large.
 - `ishub`: Use this when unit testing scripts that are not yet uploaded to the hub (this is True for most cases)
 
-If you need advanced arguments (i.e. skipping a key from a specific data split), please contact admins. You are welcome to make a PR and ask admin for help if your code does not pass the unit tests. 
+If you need advanced arguments (i.e. skipping a key from a specific data split), please contact admins. You are welcome to make a PR and ask admin for help if your code does not pass the unit tests.
 
 ### 5. Format your code
 
