@@ -416,21 +416,27 @@ class BigBioConfigHelper:
 
     def get_load_dataset_kwargs(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        if from_hub:
+            path = f"bigbio/{self.dataset_name}"
+        else:
+            path = self.script
         return {
-            "path": self.script,
+            "path": path,
             "name": self.config.name,
             **extra_load_dataset_kwargs,
         }
 
     def load_dataset(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        load_dataset_kwargs = self.get_load_dataset_kwargs(from_hub=from_hub)
         return load_dataset(
-            path=self.script,
-            name=self.config.name,
+            **load_dataset_kwargs,
             **extra_load_dataset_kwargs,
         )
 
