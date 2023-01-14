@@ -4,6 +4,7 @@ language:
 bigbio_language:
   - English
 license: apache-2.0
+bigbio_license_shortname: APACHE_2p0
 multilinguality: monolingual
 pretty_name: SciTail
 homepage: https://allenai.org/data/scitail
