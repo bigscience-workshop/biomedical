@@ -391,8 +391,8 @@ class BigBioConfigHelper:
 
     script: pathlib.Path
     dataset_name: str
-    tasks: List[Tasks]
-    languages: List[Lang]
+    tasks: List[str]
+    languages: List[str]
     config: BigBioConfig
     is_local: bool
     is_pubmed: bool
@@ -497,12 +497,19 @@ class BigBioConfigHelpers:
 
                 is_bigbio_schema = config.schema.startswith("bigbio")
                 if is_bigbio_schema:
+                    # some bigbio datasets support tasks from multiple schemas
+                    # here we just choose the tasks for the schema of this config
                     bigbio_schema_caps = config.schema.split("_")[1].upper()
-                    tasks = SCHEMA_TO_TASKS[bigbio_schema_caps] & set(
-                        py_module._SUPPORTED_TASKS
-                    )
+                    schema_tasks = set([
+                        task.name for task in SCHEMA_TO_TASKS[bigbio_schema_caps]
+                    ])
+                    config_tasks = set([
+                        task.name for task in py_module._SUPPORTED_TASKS
+                    ])
+                    tasks = schema_tasks & config_tasks
+
                 else:
-                    tasks = py_module._SUPPORTED_TASKS
+                    tasks = set([task.name for task in py_module._SUPPORTED_TASKS])
                     bigbio_schema_caps = None
 
                 helpers.append(
