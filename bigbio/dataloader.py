@@ -2,7 +2,7 @@
 Utility for filtering and loading BigBio datasets.
 """
 from collections import Counter
-from importlib.machinery import SourceFileLoader
+from importlib import import_module
 import logging
 import os
 import pathlib
@@ -391,8 +391,8 @@ class BigBioConfigHelper:
 
     script: pathlib.Path
     dataset_name: str
-    tasks: List[Tasks]
-    languages: List[Lang]
+    tasks: List[str]
+    languages: List[str]
     config: BigBioConfig
     is_local: bool
     is_pubmed: bool
@@ -416,21 +416,27 @@ class BigBioConfigHelper:
 
     def get_load_dataset_kwargs(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        if from_hub:
+            path = f"bigbio/{self.dataset_name}"
+        else:
+            path = self.script
         return {
-            "path": self.script,
+            "path": path,
             "name": self.config.name,
             **extra_load_dataset_kwargs,
         }
 
     def load_dataset(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        load_dataset_kwargs = self.get_load_dataset_kwargs(from_hub=from_hub)
         return load_dataset(
-            path=self.script,
-            name=self.config.name,
+            **load_dataset_kwargs,
             **extra_load_dataset_kwargs,
         )
 
@@ -461,12 +467,11 @@ class BigBioConfigHelpers:
     ):
 
         path_to_here = pathlib.Path(__file__).parent.absolute()
-        self.path_to_biodatasets = (path_to_here / "biodatasets").resolve()
-        self.dataloader_scripts = sorted(
-            self.path_to_biodatasets.glob(os.path.join("*", "*.py"))
-        )
+        self.path_to_biodatasets = (path_to_here / "hub" / "hub_repos").resolve()
+        self.dataloader_directories = sorted(self.path_to_biodatasets.glob("*"))
         self.dataloader_scripts = [
-            el for el in self.dataloader_scripts if el.name != "__init__.py"
+            dpath / f"{dpath.name}.py"
+            for dpath in self.dataloader_directories
         ]
 
         # if helpers are passed in, just attach and go
@@ -477,13 +482,12 @@ class BigBioConfigHelpers:
                 self._helpers = [helper for helper in helpers if not helper.is_broken]
             return
 
+
         # otherwise, create all helpers available in package
         helpers = []
         for dataloader_script in self.dataloader_scripts:
             dataset_name = dataloader_script.stem
-            py_module = SourceFileLoader(
-                dataset_name, dataloader_script.as_posix()
-            ).load_module()
+            py_module = import_module(f"bigbio.hub.hub_repos.{dataset_name}.{dataset_name}")
             ds_module = datasets.load.dataset_module_factory(
                 dataloader_script.as_posix()
             )
@@ -493,12 +497,19 @@ class BigBioConfigHelpers:
 
                 is_bigbio_schema = config.schema.startswith("bigbio")
                 if is_bigbio_schema:
+                    # some bigbio datasets support tasks from multiple schemas
+                    # here we just choose the tasks for the schema of this config
                     bigbio_schema_caps = config.schema.split("_")[1].upper()
-                    tasks = SCHEMA_TO_TASKS[bigbio_schema_caps] & set(
-                        py_module._SUPPORTED_TASKS
-                    )
+                    schema_tasks = set([
+                        task.name for task in SCHEMA_TO_TASKS[bigbio_schema_caps]
+                    ])
+                    config_tasks = set([
+                        task.name for task in py_module._SUPPORTED_TASKS
+                    ])
+                    tasks = schema_tasks & config_tasks
+
                 else:
-                    tasks = py_module._SUPPORTED_TASKS
+                    tasks = set([task.name for task in py_module._SUPPORTED_TASKS])
                     bigbio_schema_caps = None
 
                 helpers.append(

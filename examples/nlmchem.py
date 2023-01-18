@@ -20,13 +20,11 @@ import bioc
 import datasets
 from bioc import biocxml
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
-from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -43,6 +41,7 @@ publisher={Nature Publishing Group}
 """
 
 _DATASETNAME = "nlmchem"
+_DISPLAYNAME = "NLM-Chem"
 
 _DESCRIPTION = """\
 NLM-Chem corpus consists of 150 full-text articles from the PubMed Central Open Access dataset,
@@ -53,8 +52,7 @@ and current state-of-the-art named entity recognition systems disagreed on bio-e
 """
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-2"
-
-_LICENSE = Licenses.CC0_1p0
+_LICENSE = 'Creative Commons Zero v1.0 Universal'
 
 # files found here `https://ftp.ncbi.nlm.nih.gov/pub/lu/BC7-NLM-Chem-track/` have issues at extraction
 # _URLs = {"biocreative": "https://ftp.ncbi.nlm.nih.gov/pub/lu/NLMChem" }
@@ -136,9 +134,9 @@ class NLMChemDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
         elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+            features = text_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.

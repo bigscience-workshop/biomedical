@@ -13,30 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely
-relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
-The script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb) AND/OR source (default) schema
-
+The BioCreative VI Chemical-Protein interaction dataset identifies entities of
+chemicals and proteins and their likely relation to one other. Compounds are
+generally agonists (activators) or antagonists (inhibitors) of proteins. The
+script loads dataset in bigbio schema (using knowledgebase schema: schemas/kb)
+AND/OR source (default) schema
 """
 import os
 from typing import Dict, Tuple
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Krallinger, M., Rabal, O., Lourenço, A.},
-  title     = {Overview of the BioCreative VI chemical–protein interaction Track},
+  title     = {Overview of the BioCreative VI chemical-protein interaction Track},
   journal   = {Proceedings of the BioCreative VI Workshop,},
-  volume    = {141–146},
+  volume    = {141-146},
   year      = {2017},
   url       = {https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/},
   doi       = {},
@@ -45,25 +45,43 @@ _CITATION = """\
 }
 """
 _DESCRIPTION = """\
-The BioCreative VI Chemical-Protein interaction dataset identifies entities of chemicals and proteins and their likely relation to one other. Compounds are generally agonists (activators) or antagonists (inhibitors) of proteins.
+The BioCreative VI Chemical-Protein interaction dataset identifies entities of
+chemicals and proteins and their likely relation to one other. Compounds are
+generally agonists (activators) or antagonists (inhibitors) of proteins.
 """
+
+_DATASETNAME = "chemprot"
+_DISPLAYNAME = "ChemProt"
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-5/"
 
-_LICENSE = Licenses.PUBLIC_DOMAIN_MARK_1p0
+_LICENSE = 'Public Domain Mark 1.0'
 
 _URLs = {
     "source": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
     "bigbio_kb": "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/ChemProt_Corpus.zip",
 }
 
-_SUPPORTED_TASKS = [
-    Tasks.RELATION_EXTRACTION,
-    Tasks.NAMED_ENTITY_RECOGNITION,
-    Tasks.NAMED_ENTITY_DISAMBIGUATION,
-]
+_SUPPORTED_TASKS = [Tasks.RELATION_EXTRACTION, Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
+
+
+# Chemprot specific variables
+# NOTE: There are 3 examples (2 in dev, 1 in training) with CPR:0
+_GROUP_LABELS = {
+    "CPR:0": "Undefined",
+    "CPR:1": "Part_of",
+    "CPR:2": "Regulator",
+    "CPR:3": "Upregulator",
+    "CPR:4": "Downregulator",
+    "CPR:5": "Agonist",
+    "CPR:6": "Antagonist",
+    "CPR:7": "Modulator",
+    "CPR:8": "Cofactor",
+    "CPR:9": "Substrate",
+    "CPR:10": "Not",
+}
 
 
 class ChemprotDataset(datasets.GeneratorBasedBuilder):
@@ -74,11 +92,18 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="chemprot_source",
+            name="chemprot_full_source",
             version=SOURCE_VERSION,
             description="chemprot source schema",
             schema="source",
-            subset_id="chemprot",
+            subset_id="chemprot_full",
+        ),
+        BigBioConfig(
+            name="chemprot_shared_task_eval_source",
+            version=SOURCE_VERSION,
+            description="chemprot source schema with only the relation types that were used in the shared task evaluation",
+            schema="source",
+            subset_id="chemprot_shared_task_eval",
         ),
         BigBioConfig(
             name="chemprot_bigbio_kb",
@@ -89,7 +114,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "chemprot_source"
+    DEFAULT_CONFIG_NAME = "chemprot_full_source"
 
     def _info(self):
 
@@ -117,7 +142,7 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -154,7 +179,8 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(sample_path, "chemprot_sample"),
                     "abstract_file": "chemprot_sample_abstracts.tsv",
                     "entity_file": "chemprot_sample_entities.tsv",
-                    "relation_file": "chemprot_sample_gold_standard.tsv",
+                    "relation_file": "chemprot_sample_relations.tsv",
+                    "gold_standard_file": "chemprot_sample_gold_standard.tsv",
                     "split": "sample",
                 },
             ),
@@ -164,7 +190,8 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(train_path, "chemprot_training"),
                     "abstract_file": "chemprot_training_abstracts.tsv",
                     "entity_file": "chemprot_training_entities.tsv",
-                    "relation_file": "chemprot_training_gold_standard.tsv",
+                    "relation_file": "chemprot_training_relations.tsv",
+                    "gold_standard_file": "chemprot_training_gold_standard.tsv",
                     "split": "train",
                 },
             ),
@@ -174,7 +201,8 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(test_path, "chemprot_test_gs"),
                     "abstract_file": "chemprot_test_abstracts_gs.tsv",
                     "entity_file": "chemprot_test_entities_gs.tsv",
-                    "relation_file": "chemprot_test_gold_standard.tsv",
+                    "relation_file": "chemprot_test_relations_gs.tsv",
+                    "gold_standard_file": "chemprot_test_gold_standard.tsv",
                     "split": "test",
                 },
             ),
@@ -184,52 +212,55 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                     "filepath": os.path.join(dev_path, "chemprot_development"),
                     "abstract_file": "chemprot_development_abstracts.tsv",
                     "entity_file": "chemprot_development_entities.tsv",
-                    "relation_file": "chemprot_development_gold_standard.tsv",
+                    "relation_file": "chemprot_development_relations.tsv",
+                    "gold_standard_file": "chemprot_development_gold_standard.tsv",
                     "split": "dev",
                 },
             ),
         ]
 
     def _generate_examples(
-        self, filepath, abstract_file, entity_file, relation_file, split
+        self,
+        filepath,
+        abstract_file,
+        entity_file,
+        relation_file,
+        gold_standard_file,
+        split,
     ):
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
-
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
 
             entities, entity_id = self._get_entities(
                 os.path.join(filepath, entity_file)
             )
 
-            relations = self._get_relations(
-                os.path.join(filepath, relation_file), entity_id
-            )
+            if self.config.subset_id == "chemprot_full":
+                relations = self._get_relations(os.path.join(filepath, relation_file))
+            elif self.config.subset_id == "chemprot_shared_task_eval":
+                relations = self._get_relations_gs(
+                    os.path.join(filepath, gold_standard_file)
+                )
+            else:
+                raise ValueError(self.config)
 
-            # NOTE: Not all relations have a gold standard (i.e. annotated by human curators).
-            empty_reln = [
-                {
-                    "type": None,
-                    "arg1": None,
-                    "arg2": None,
-                }
-            ]
             for id_, pmid in enumerate(abstracts.keys()):
                 yield id_, {
                     "pmid": pmid,
                     "text": abstracts[pmid],
                     "entities": entities[pmid],
-                    "relations": relations.get(pmid, empty_reln),
+                    "relations": relations.get(pmid, []),
                 }
 
-        if self.config.schema == "bigbio_kb":
+        elif self.config.schema == "bigbio_kb":
 
             abstracts = self._get_abstract(os.path.join(filepath, abstract_file))
             entities, entity_id = self._get_entities(
                 os.path.join(filepath, entity_file)
             )
             relations = self._get_relations(
-                os.path.join(filepath, relation_file), entity_id
+                os.path.join(filepath, relation_file), is_mapped=True
             )
 
             uid = 0
@@ -255,32 +286,23 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
                 ]
                 uid += 1
 
+                entity_to_id = {}
                 for entity in entities[pmid]:
                     _text = entity["text"]
                     entity.update({"text": [_text]})
+                    entity_to_id[entity["id"]] = str(uid)
                     entity.update({"id": str(uid)})
                     _offsets = entity["offsets"]
                     entity.update({"offsets": [_offsets]})
-                    entity.update(
-                        {"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]}
-                    )
+                    entity["normalized"] = []
                     data["entities"].append(entity)
                     uid += 1
 
-                empty_reln = [
-                    {
-                        "type": None,
-                        "arg1": None,
-                        "arg2": None,
-                    }
-                ]
-                for relation in relations.get(pmid, empty_reln):
-                    relation["arg1_id"] = relation.pop("arg1")
-                    relation["arg2_id"] = relation.pop("arg2")
+                for relation in relations.get(pmid, []):
+                    relation["arg1_id"] = entity_to_id[relation.pop("arg1")]
+                    relation["arg2_id"] = entity_to_id[relation.pop("arg2")]
                     relation.update({"id": str(uid)})
-                    relation.update(
-                        {"normalized": [{"db_name": "Pubmed", "db_id": str(pmid)}]}
-                    )
+                    relation["normalized"] = []
                     data["relations"].append(relation)
                     uid += 1
 
@@ -348,13 +370,46 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
         return entities, entity_id
 
     @staticmethod
-    def _get_relations(rel_filename: str, ent_dict: Dict[str, str]) -> Dict[str, str]:
+    def _get_relations(rel_filename: str, is_mapped: bool = False) -> Dict[str, str]:
+        """For each document in the ChemProt corpus, create an annotation for all relationships.
+
+        :param is_mapped: Whether to convert into NL the relation tags. Default is OFF
+        """
+        with open(rel_filename, "r") as f:
+            contents = [i.strip() for i in f.readlines()]
+
+        relations = {}
+
+        for line in contents:
+            pmid, label, _, _, arg1, arg2 = line.split("\t")
+            arg1 = arg1.split("Arg1:")[-1]
+            arg2 = arg2.split("Arg2:")[-1]
+
+            if pmid not in relations:
+                relations[pmid] = []
+
+            if is_mapped:
+                label = _GROUP_LABELS[label]
+
+            ann = {
+                "type": label,
+                "arg1": arg1,
+                "arg2": arg2,
+            }
+
+            relations[pmid].append(ann)
+
+        return relations
+
+    @staticmethod
+    def _get_relations_gs(rel_filename: str, is_mapped: bool = False) -> Dict[str, str]:
         """
         For each document in the ChemProt corpus, create an annotation for the gold-standard relationships.
 
         The columns include:
         (1) PMID
         (2) Relationship Label (CPR)
+        (3) Used in shared task
         (3) Interactor Argument 1 Entity Identifier
         (4) Interactor Argument 2 Entity Identifier
 
@@ -377,20 +432,15 @@ class ChemprotDataset(datasets.GeneratorBasedBuilder):
             if pmid not in relations:
                 relations[pmid] = []
 
+            if is_mapped:
+                label = _GROUP_LABELS[label]
+
             ann = {
                 "type": label,
-                "arg1": ent_dict.get(arg1, None),
-                "arg2": ent_dict.get(arg2, None),
+                "arg1": arg1,
+                "arg2": arg2,
             }
 
             relations[pmid].append(ann)
 
         return relations
-
-
-if __name__ == "__main__":
-    from datasets import load_dataset
-
-    # ds = load_dataset(__file__)
-    ds = load_dataset(__file__)
-    print(ds)
