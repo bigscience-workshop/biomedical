@@ -119,7 +119,6 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
             citation=_CITATION,
         )
 
