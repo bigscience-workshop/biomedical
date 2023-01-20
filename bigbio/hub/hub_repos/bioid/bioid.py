@@ -38,15 +38,12 @@ import bioc
 import datasets
 import pandas as pd
 
-# TODO : import the schema that fits your dataset:
 from .bigbiohub import BigBioConfig, Tasks, kb_features
 
-# TODO: add True or False boolean value indicating if this dataset is local or not
 _LOCAL = False
 _PUBMED = True
 _LANGUAGES = ["English"]
 
-# TODO: Add BibTeX citation
 _CITATION = """\
 @inproceedings{arighi2017bio,
   title={Bio-ID track overview},
@@ -58,13 +55,9 @@ _CITATION = """\
 }
 """
 
-# TODO: create a module level variable with your dataset name (should match script name)
-#  E.g. Hallmarks of Cancer: [dataset_name] --> hallmarks_of_cancer
 _DATASETNAME = "bioid"
 _DISPLAYNAME = "BIOID"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
 The Bio-ID track focuses on entity tagging and ID assignment to selected bioentity types.
 The task is to annotate text from figure legends with the entity types and IDs for taxon (organism), gene, protein, miRNA, small molecules,
@@ -72,22 +65,10 @@ cellular components, cell types and cell lines, tissues and organs. The track dr
 legends (by panel), in BioC format, and the corresponding full text articles (also BioC format) provided for context.
 """
 
-# TODO: Add a link to an official homepage for the dataset here (if possible)
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vi/track-1/"
 
-# TODO: Add the licence for the dataset here (if possible)
-# Note that this doesn't have to be a common open source license.
-# Some datasets have custom licenses. In this case, simply put the full license terms
-# into `_LICENSE`
 _LICENSE = "UNKNOWN"
 
-# TODO: Add links to the urls needed to download your dataset files.
-#  For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: "https://biocreative.bioinformatics.udel.edu/media/store/files/2017/BioIDtraining_2.tar.gz",
 }
@@ -97,40 +78,16 @@ _SUPPORTED_TASKS = [
     Tasks.NAMED_ENTITY_DISAMBIGUATION,
 ]
 
-# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
-#  This version doesn't have to be consistent with semantic versioning. Anything that is
-#  provided by the original dataset as a version goes.
 _SOURCE_VERSION = "2.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
 
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
 class BioidDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
-
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -151,14 +108,30 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "bioid_source"
 
-    ENTITY_TYPES_NOT_NORMALIZAD = [
+    ENTITY_TYPES_NOT_NORMALIZED = [
         "cell",
         "gene",
         "molecule",
         "protein",
         "subcellular",
         "tissue",
+        "organism",
     ]
+
+    DB_NAME_TO_ENTITY_TYPE = {
+        "BAO": "assay",  # https://www.ebi.ac.uk/ols/ontologies/bao
+        "CHEBI": "chemical",
+        "CL": "cell",  # https://www.ebi.ac.uk/ols/ontologies/cl
+        "Corum": "protein",  # https://mips.helmholtz-muenchen.de/corum/
+        "GO": "gene",  # https://geneontology.org/
+        "PubChem": "chemical",
+        "Rfam": "rna",  # https://rfam.org/
+        "Uberon": "anatomy",
+        "Cellosaurus": "cell",
+        "NCBI gene": "gene",
+        "NCBI taxon": "species",
+        "Uniprot": "protein",
+    }
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -219,19 +192,6 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
-
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
-
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-
-        # TODO: KEEP if your dataset is PUBLIC; remove if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
@@ -243,7 +203,6 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    # TODO
                     "data_dir": data_dir,
                     "split": "train",
                 },
@@ -350,8 +309,11 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
             else:
                 db_name = db_name_ids[0]
                 # db_name hints for entity type: skip if does not provide normalization
-                if db_name not in self.ENTITY_TYPES_NOT_NORMALIZAD:
-                    db_ids = [i.split(":")[1] for i in normalization.split("|")]
+                if db_name not in self.ENTITY_TYPES_NOT_NORMALIZED:
+                    # Uberon:UBERON:0001891
+                    # NCBI gene:9341
+                    db_id_idx = 2 if db_name == "Uberon" else 1
+                    db_ids = [i.split(":")[db_id_idx] for i in normalization.split("|")]
 
         normalized = (
             [{"db_name": db_name, "db_id": i} for i in db_ids]
@@ -359,8 +321,12 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
             else []
         )
 
-        # TODO: map to canonical entity types, ideally w/ a  dedicated enum like `Tasks`
-        entity_type = db_name
+        # ideally we should have canonical entity types w/ a  dedicated enum like `Tasks`
+
+        if db_name in self.ENTITY_TYPES_NOT_NORMALIZED:
+            entity_type = db_name
+        else:
+            entity_type = self.DB_NAME_TO_ENTITY_TYPE[db_name]
 
         return entity_type, normalized
 
