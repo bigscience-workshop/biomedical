@@ -26,14 +26,14 @@ loader uses a version that privides the same data in text format.
 import datasets
 import pandas as pd
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import pairs_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
 _DATASETNAME = "biosses"
+_DISPLAYNAME = "BIOSSES"
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = False
 _LOCAL = False
 _CITATION = """
@@ -60,7 +60,7 @@ score.
 
 _HOMEPAGE = "https://tabilab.cmpe.boun.edu.tr/BIOSSES/DataSet.html"
 
-_LICENSE = Licenses.GPL_3p0
+_LICENSE = 'GNU General Public License v3.0 only'
 
 _URLs = {
     "source": "https://huggingface.co/datasets/bigscience-biomedical/biosses/raw/main/annotation_pairs_scores.tsv",
@@ -225,7 +225,7 @@ class BiossesDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.name == "biosses_bigbio_pairs":
-            features = schemas.pairs_features
+            features = pairs_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
