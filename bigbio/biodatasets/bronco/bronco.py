@@ -247,6 +247,12 @@ class Bronco(datasets.GeneratorBasedBuilder):
                         'relations': [],
                     }
 
+                    # catch all normalized entities
+                    norm_map = {}
+                    for rel in doc['passage']['relation']:
+                        if rel['infon'][-1]['#text'] == 'Normalization':
+                            norm_map[rel['node']['@role']] = rel['node']['@refid']
+
                     # pass sentences to passages
                     for i, passage in enumerate(doc['passage']['text'].split('\n')):
                         # match the offsets on the text after removing \n
@@ -262,6 +268,7 @@ class Bronco(datasets.GeneratorBasedBuilder):
                             'offsets': [[marker, marker + len(passage)]],
                         })
 
+                    # handle entities
                     for ent in doc['passage']['annotation']:
                         offsets = []
                         text_s = []
@@ -285,9 +292,9 @@ class Bronco(datasets.GeneratorBasedBuilder):
                             'text': text_s,
                             'offsets': offsets,
                             'normalized': [{
-                                "db_name": "",
-                                "db_id": "",
-                            }],
+                                'db_name': norm_map.get(ent["@id"], ':').split(':')[0],
+                                'db_id': norm_map.get(ent["@id"], ':').split(':')[1],
+                            }]
                         })
 
                     yield uid, out
