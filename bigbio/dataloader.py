@@ -468,7 +468,10 @@ class BigBioConfigHelpers:
 
         path_to_here = pathlib.Path(__file__).parent.absolute()
         self.path_to_biodatasets = (path_to_here / "hub" / "hub_repos").resolve()
-        self.dataloader_directories = sorted(self.path_to_biodatasets.glob("*"))
+        self.dataloader_directories = sorted([
+            path for path in self.path_to_biodatasets.glob("*")
+            if path.name != "__init__.py"
+        ])
         self.dataloader_scripts = [
             dpath / f"{dpath.name}.py"
             for dpath in self.dataloader_directories
