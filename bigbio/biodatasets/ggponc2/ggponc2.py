@@ -16,11 +16,11 @@
 import json
 from pathlib import Path
 from typing import Dict, List, Tuple
+import pandas as pd
 
 import datasets
-import pandas as pd
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
@@ -74,13 +74,44 @@ _DATASETNAME = "ggponc2"
 _LICENSE = Licenses.DUA
 
 
-class GgponcDataset(datasets.GeneratorBasedBuilder):
+class Ggponc(datasets.GeneratorBasedBuilder):
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
     DEFAULT_CONFIG_NAME = "ggponc2_fine_long_bigbio_kb"
 
     BUILDER_CONFIGS = [
+        # source
+        BigBioConfig(
+            name="ggponc2_fine_long_source",
+            version=SOURCE_VERSION,
+            description="GGPONC 2.0 (fine grained categories and long spans) schema",
+            schema="source",
+            subset_id="ggponc2",
+        ),
+        BigBioConfig(
+            name="ggponc2_fine_short_source",
+            version=SOURCE_VERSION,
+            description="GGPONC 2.0 (fine grained categories and short spans) schema",
+            schema="source",
+            subset_id="ggponc2",
+        ),
+        BigBioConfig(
+            name="ggponc2_coarse_long_source",
+            version=SOURCE_VERSION,
+            description="GGPONC 2.0 (coarse categories and long spans) schema",
+            schema="source",
+            subset_id="ggponc2",
+        ),
+        BigBioConfig(
+            name="ggponc2_coarse_short_source",
+            version=SOURCE_VERSION,
+            description="GGPONC 2.0 (coarse categories and short spans) schema",
+            schema="source",
+            subset_id="ggponc2",
+        ),
+
+        # bigbio
         BigBioConfig(
             name="ggponc2_fine_long_bigbio_kb",
             version=BIGBIO_VERSION,
@@ -112,9 +143,8 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
     ]
 
     def _info(self) -> datasets.DatasetInfo:
-
-        features = schemas.kb_features
-
+        # return the same info for source and bigbio versions because `source == bigbio_kb`
+        features = kb_features
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -145,7 +175,8 @@ class GgponcDataset(datasets.GeneratorBasedBuilder):
             / "annotations/json/coarse/short/all.json",
         }
 
-        data_dir = dir_lookup[self.config.name]
+        # return the same info for source and bigbio versions because `source == bigbio_kb`
+        data_dir = dir_lookup[self.config.name.replace('source', 'bigbio_kb')]
 
         return [
             datasets.SplitGenerator(
