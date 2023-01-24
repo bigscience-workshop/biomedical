@@ -21,8 +21,7 @@ import pandas as pd
 import datasets
 from .bigbiohub import kb_features
 from .bigbiohub import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from bigbio.utils.constants import Tasks
 
 _LOCAL = True
 _CITATION = """\
@@ -63,7 +62,7 @@ Substances, External Substances) and Procedures (Therapeutic, Diagnostic), as we
 In total, annotators have created more than 200000 entity annotations. In addition, fragment relationships have been 
 annotated to explicitly indicate elliptical coordinated noun phrases, a common phenomenon in German text."""
 _HOMEPAGE = "https://www.leitlinienprogramm-onkologie.de/projekte/ggponc-english/"
-_LANGUAGES = [Lang.DE]
+_LANGUAGES = ['German']
 _URLS = {}
 _PUBMED = False
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
@@ -71,7 +70,7 @@ _SOURCE_VERSION = "2.0.0"
 _BIGBIO_VERSION = "1.0.0"
 _DISPLAYNAME = "GGPONC 2.0"
 _DATASETNAME = "ggponc2"
-_LICENSE = Licenses.DUA
+_LICENSE = "DUA"
 
 
 class Ggponc(datasets.GeneratorBasedBuilder):
