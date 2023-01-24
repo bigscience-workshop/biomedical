@@ -293,7 +293,8 @@ class Bronco(datasets.GeneratorBasedBuilder):
                             'offsets': offsets,
                             'normalized': [{
                                 'db_name': norm_map.get(ent["@id"], ':').split(':')[0],
-                                'db_id': norm_map.get(ent["@id"], ':').split(':')[1],
+                                # replace faulty connectors in db_ids
+                                'db_id': norm_map.get(ent["@id"], ':').split(':')[1].replace(",",".").replace("+",""),
                             }]
                         })
 
