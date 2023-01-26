@@ -18,8 +18,8 @@ from typing import List, Tuple, Dict
 from bioc import biocxml
 
 import datasets
-from bigbiohub import BigBioConfig
-from bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import kb_features
 from bigbio.utils.constants import Tasks
 
 
@@ -44,7 +44,7 @@ _DESCRIPTION = """\
 BRONCO150 is a corpus containing selected sentences of 150 German discharge summaries of cancer patients (hepatocelluar carcinoma or melanoma) treated at Charite Universitaetsmedizin Berlin or Universitaetsklinikum Tuebingen. All discharge summaries were manually anonymized. The original documents were scrambled at the sentence level to make reconstruction of individual reports impossible.
 """
 _HOMEPAGE = "https://www2.informatik.hu-berlin.de/~leser/bronco/index.html"
-#_LICENSE = Licenses.DUA
+_LICENSE = "DUA"
 _URLS = {}
 _PUBMED = False
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
@@ -52,7 +52,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 _DATASETNAME = "bronco"
 _DISPLAYNAME = "BRONCO"
-_LANGUAGES = 'German'
+_LANGUAGES = ['German']
 
 
 class Bronco(datasets.GeneratorBasedBuilder):
@@ -271,6 +271,6 @@ class Bronco(datasets.GeneratorBasedBuilder):
 
 
 if __name__ == "__main__":
-    datasets.load_dataset(path = 'bronco.py',
+    datasets.load_dataset(path ='bronco.py',
                           data_dir=r"C:\Users\admin\Desktop\BRONCO150",
-                          name="bronco_source")
+                          name="bronco_bigbio_kb")
