@@ -20,7 +20,7 @@ from bioc import biocxml
 import datasets
 from .bigbiohub import BigBioConfig
 from .bigbiohub import kb_features
-from bigbio.utils.constants import Tasks
+from .bigbiohub import Tasks
 
 
 _LOCAL = True
@@ -215,7 +215,9 @@ class Bronco(datasets.GeneratorBasedBuilder):
                     yield uid, out
 
             elif self.config.schema == "bigbio_kb":
-                for uid, doc in enumerate(data):
+                # reorder the documents so they appear in increasing order
+                ordered_data = [data[2], data[4], data[0], data[3], data[1]]
+                for uid, doc in enumerate(ordered_data):
                     out = {
                         'id': uid,
                         'document_id': doc.id,
