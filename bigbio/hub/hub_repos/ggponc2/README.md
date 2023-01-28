@@ -7,7 +7,7 @@ multilinguality: monolingual
 pretty_name: GGPONC2
 homepage: https://www.leitlinienprogramm-onkologie.de/projekte/ggponc-english/
 bigbio_pubmed: false
-bigbio_public: true
+bigbio_public: flase
 bigbio_tasks:
   - NAMED_ENTITY_RECOGNITION
 ---
@@ -19,7 +19,7 @@ bigbio_tasks:
 
 - **Homepage:** https://www.leitlinienprogramm-onkologie.de/projekte/ggponc-english/
 - **Pubmed:** False
-- **Public:** True
+- **Public:** False
 - **Tasks:** NER 
 
 
