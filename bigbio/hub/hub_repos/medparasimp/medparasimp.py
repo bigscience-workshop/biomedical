@@ -66,7 +66,7 @@ every sentence in the abstract; on the contrary, they are structured heterogeneo
 
 _HOMEPAGE = "https://github.com/AshOlogn/Paragraph-level-Simplification-of-Medical-Texts"
 
-_LICENSE = Licenses.CC_BY_4p0
+_LICENSE = 'CC_BY_4p0'
 
 _URLS = {
     _DATASETNAME: {
@@ -115,10 +115,11 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = [ 'English (United States)' ]
 
-# _PUBMED = False
-# _DISPLAYNAME = "Paragraph-Level Simplification of Medical Texts"
+_PUBMED = False
+
+_DISPLAYNAME = "Paragraph-Level Simplification of Medical Texts"
 
 class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
     """Paired abstracts and plain-language summaries from the Cochrane Database of Systematic Reviews."""
