@@ -22,16 +22,13 @@ The PLS's were created by the authors of the original abstracts.
 The dataset was obtained by scraping the Cochrane Library website.
 """
 
-import os
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import datasets
-from .bigbiohub import BigBioConfig
-from .bigbiohub import Tasks
 
 from bigbio.utils import schemas
-from bigbio.utils.constants import Lang
-from bigbio.utils.license import Licenses
+
+from .bigbiohub import BigBioConfig, Tasks
 
 _LOCAL = False
 
@@ -66,7 +63,7 @@ every sentence in the abstract; on the contrary, they are structured heterogeneo
 
 _HOMEPAGE = "https://github.com/AshOlogn/Paragraph-level-Simplification-of-Medical-Texts"
 
-_LICENSE = 'CC_BY_4p0'
+_LICENSE = "CC_BY_4p0"
 
 _URLS = {
     _DATASETNAME: {
@@ -115,11 +112,12 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
-_LANGUAGES = [ 'English (United States)' ]
+_LANGUAGES = ["English (United States)"]
 
 _PUBMED = False
 
 _DISPLAYNAME = "Paragraph-Level Simplification of Medical Texts"
+
 
 class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
     """Paired abstracts and plain-language summaries from the Cochrane Database of Systematic Reviews."""
@@ -246,6 +244,7 @@ class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
                     "text_2_name": "pls",
                 }
                 yield (key, example)
+
 
 if __name__ == "__main__":
     datasets.load_dataset(__file__)
