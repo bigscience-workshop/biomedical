@@ -115,9 +115,9 @@ _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+_LANGUAGES = [Lang.EN]
 
 # _PUBMED = False
-# _LANGUAGES = [Lang.EN]
 # _DISPLAYNAME = "Paragraph-Level Simplification of Medical Texts"
 
 class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
