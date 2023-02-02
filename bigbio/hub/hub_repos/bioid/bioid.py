@@ -110,7 +110,7 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
         "PubChem": "chemical",
         "Rfam": "rna",  # https://rfam.org/
         "Uberon": "anatomy",
-        "Cellosaurus": "cell",
+        "Cellosaurus": "cellline",
         "NCBI gene": "gene",
         "NCBI taxon": "species",
         "Uniprot": "protein",
