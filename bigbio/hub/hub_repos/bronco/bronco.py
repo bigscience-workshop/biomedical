@@ -14,14 +14,12 @@
 # limitations under the License.
 
 import os
-from typing import List, Tuple, Dict
-from bioc import biocxml
+from typing import Dict, List, Tuple
 
 import datasets
-from .bigbiohub import BigBioConfig
-from .bigbiohub import kb_features
-from .bigbiohub import Tasks
+from bioc import biocxml
 
+from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _LOCAL = True
 _CITATION = """\
@@ -52,7 +50,7 @@ _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 _DATASETNAME = "bronco"
 _DISPLAYNAME = "BRONCO"
-_LANGUAGES = ['German']
+_LANGUAGES = ["German"]
 
 
 class Bronco(datasets.GeneratorBasedBuilder):
@@ -104,11 +102,11 @@ class Bronco(datasets.GeneratorBasedBuilder):
                             {
                                 "id": datasets.Value("string"),
                                 "infon": {
-                                            "file": datasets.Value("string"),
-                                            "type": datasets.Value("string"),
-                                            "norm/atr": datasets.Value("string"),
-                                            "string": datasets.Value("string"),
-                                         },
+                                    "file": datasets.Value("string"),
+                                    "type": datasets.Value("string"),
+                                    "norm/atr": datasets.Value("string"),
+                                    "string": datasets.Value("string"),
+                                },
                                 "node": [
                                     {
                                         "refid": datasets.Value("string"),
@@ -117,7 +115,7 @@ class Bronco(datasets.GeneratorBasedBuilder):
                                 ],
                             }
                         ],
-                    }
+                    },
                 }
             )
 
@@ -134,7 +132,9 @@ class Bronco(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
 
@@ -156,29 +156,31 @@ class Bronco(datasets.GeneratorBasedBuilder):
             if self.config.schema == "source":
                 for uid, doc in enumerate(data):
                     out = {
-                        'id': doc.id,
-                        'passage': {
-                            'offset': doc.passages[0].offset,
-                            'text': doc.passages[0].text,
-                            'annotation': [],
-                            'relation': [],
-                        }
+                        "id": doc.id,
+                        "passage": {
+                            "offset": doc.passages[0].offset,
+                            "text": doc.passages[0].text,
+                            "annotation": [],
+                            "relation": [],
+                        },
                     }
 
                     # handle entities
                     for annotation in doc.passages[0].annotations:
                         anno = {
-                            'id': annotation.id,
-                            'infon': annotation.infons,
-                            'text': annotation.text,
-                            'location': [],
+                            "id": annotation.id,
+                            "infon": annotation.infons,
+                            "text": annotation.text,
+                            "location": [],
                         }
                         for location in annotation.locations:
-                            anno['location'].append({
-                                'offset': location.offset,
-                                'length': location.length,
-                            })
-                        out['passage']['annotation'].append(anno)
+                            anno["location"].append(
+                                {
+                                    "offset": location.offset,
+                                    "length": location.length,
+                                }
+                            )
+                        out["passage"]["annotation"].append(anno)
 
                     # handle relations
                     for relation in doc.passages[0].relations:
@@ -189,28 +191,30 @@ class Bronco(datasets.GeneratorBasedBuilder):
 
                         # relation.infons has different keys depending on the relation type
                         # these must be unified to comply with a fixed schema
-                        if relation.infons['type'] == 'Normalization':
-                            rel['infon'] = {
-                                'file': relation.infons['file'],
-                                'type': relation.infons['type'],
-                                'norm/atr': relation.infons['normalization type'],
-                                'string': relation.infons['string']
+                        if relation.infons["type"] == "Normalization":
+                            rel["infon"] = {
+                                "file": relation.infons["file"],
+                                "type": relation.infons["type"],
+                                "norm/atr": relation.infons["normalization type"],
+                                "string": relation.infons["string"],
                             }
                         else:
-                            rel['infon'] = {
-                                'file': relation.infons['file'],
-                                'type': relation.infons['type'],
-                                'norm/atr': relation.infons['attribute type'],
-                                'string': '',
+                            rel["infon"] = {
+                                "file": relation.infons["file"],
+                                "type": relation.infons["type"],
+                                "norm/atr": relation.infons["attribute type"],
+                                "string": "",
                             }
 
                         for node in relation.nodes:
-                            rel['node'].append({
-                                'refid': node.refid,
-                                'role': node.role,
-                            })
+                            rel["node"].append(
+                                {
+                                    "refid": node.refid,
+                                    "role": node.role,
+                                }
+                            )
 
-                        out['passage']['relation'].append(rel)
+                        out["passage"]["relation"].append(rel)
 
                     yield uid, out
 
@@ -219,35 +223,37 @@ class Bronco(datasets.GeneratorBasedBuilder):
                 ordered_data = [data[2], data[4], data[0], data[3], data[1]]
                 for uid, doc in enumerate(ordered_data):
                     out = {
-                        'id': uid,
-                        'document_id': doc.id,
-                        'passages': [],
-                        'entities': [],
-                        'events': [],
-                        'coreferences': [],
-                        'relations': [],
+                        "id": uid,
+                        "document_id": doc.id,
+                        "passages": [],
+                        "entities": [],
+                        "events": [],
+                        "coreferences": [],
+                        "relations": [],
                     }
 
                     # catch all normalized entities for lookup
                     norm_map = {}
                     for rel in doc.passages[0].relations:
-                        if rel.infons['type'] == 'Normalization':
+                        if rel.infons["type"] == "Normalization":
                             norm_map[rel.nodes[0].role] = rel.nodes[0].refid
 
                     # handle passages - split text into sentences
-                    for i, passage in enumerate(doc.passages[0].text.split('\n')):
+                    for i, passage in enumerate(doc.passages[0].text.split("\n")):
                         # match the offsets on the text after removing \n
                         if i == 0:
                             marker = 0
                         else:
-                            marker = out['passages'][-1]['offsets'][-1][-1] + 1
+                            marker = out["passages"][-1]["offsets"][-1][-1] + 1
 
-                        out['passages'].append({
-                            'id': f'{uid}-{i}',
-                            'text': [passage],
-                            'type': 'sentence',
-                            'offsets': [[marker, marker + len(passage)]],
-                        })
+                        out["passages"].append(
+                            {
+                                "id": f"{uid}-{i}",
+                                "text": [passage],
+                                "type": "sentence",
+                                "offsets": [[marker, marker + len(passage)]],
+                            }
+                        )
 
                     # handle entities
                     for ent in doc.passages[0].annotations:
@@ -255,24 +261,31 @@ class Bronco(datasets.GeneratorBasedBuilder):
                         text_s = []
                         for loc in ent.locations:
                             offsets.append([loc.offset, loc.offset + loc.length])
-                            text_s.append(doc.passages[0].text[loc.offset:loc.offset + loc.length])
+                            text_s.append(
+                                doc.passages[0].text[
+                                    loc.offset : loc.offset + loc.length
+                                ]
+                            )
 
-                        out['entities'].append({
-                            'id': f'{uid}-{ent.id}',
-                            'type': ent.infons['type'],
-                            'text': text_s,
-                            'offsets': offsets,
-                            'normalized': [{
-                                'db_name': norm_map.get(ent.id, ':').split(':')[0],
-                                # replace faulty connectors in db_ids
-                                'db_id': norm_map.get(ent.id, ':').split(':')[1].replace(",", ".").replace("+", ""),
-                            }]
-                        })
+                        out["entities"].append(
+                            {
+                                "id": f"{uid}-{ent.id}",
+                                "type": ent.infons["type"],
+                                "text": text_s,
+                                "offsets": offsets,
+                                "normalized": [
+                                    {
+                                        "db_name": norm_map.get(ent.id, ":").split(":")[
+                                            0
+                                        ],
+                                        # replace faulty connectors in db_ids
+                                        "db_id": norm_map.get(ent.id, ":")
+                                        .split(":")[1]
+                                        .replace(",", ".")
+                                        .replace("+", ""),
+                                    }
+                                ],
+                            }
+                        )
 
                     yield uid, out
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(path ='bronco.py',
-                          data_dir=r"C:\Users\admin\Desktop\BRONCO150",
-                          name="bronco_bigbio_kb")
