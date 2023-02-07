@@ -24,7 +24,10 @@ from .bigbiohub import BigBioConfig, Tasks, kb_features
 _LOCAL = True
 _CITATION = """\
 @article{10.1093/jamiaopen/ooab025,
-    author = {Kittner, Madeleine and Lamping, Mario and Rieke, Damian T and Götze, Julian and Bajwa, Bariya and Jelas, Ivan and Rüter, Gina and Hautow, Hanjo and Sänger, Mario and Habibi, Maryam and Zettwitz, Marit and Bortoli, Till de and Ostermann, Leonie and Ševa, Jurica and Starlinger, Johannes and Kohlbacher, Oliver and Malek, Nisar P and Keilholz, Ulrich and Leser, Ulf},
+    author = {Kittner, Madeleine and Lamping, Mario and Rieke, Damian T and Götze, Julian and Bajwa, Bariya and
+    Jelas, Ivan and Rüter, Gina and Hautow, Hanjo and Sänger, Mario and Habibi, Maryam and Zettwitz, Marit and
+    Bortoli, Till de and Ostermann, Leonie and Ševa, Jurica and Starlinger, Johannes and Kohlbacher, Oliver and
+    Malek, Nisar P and Keilholz, Ulrich and Leser, Ulf},
     title = "{Annotation and initial evaluation of a large annotated German oncological corpus}",
     journal = {JAMIA Open},
     volume = {4},
@@ -39,7 +42,10 @@ _CITATION = """\
 }
 """
 _DESCRIPTION = """\
-BRONCO150 is a corpus containing selected sentences of 150 German discharge summaries of cancer patients (hepatocelluar carcinoma or melanoma) treated at Charite Universitaetsmedizin Berlin or Universitaetsklinikum Tuebingen. All discharge summaries were manually anonymized. The original documents were scrambled at the sentence level to make reconstruction of individual reports impossible.
+BRONCO150 is a corpus containing selected sentences of 150 German discharge summaries of cancer patients (hepatocelluar
+carcinoma or melanoma) treated at Charite Universitaetsmedizin Berlin or Universitaetsklinikum Tuebingen. All discharge
+summaries were manually anonymized. The original documents were scrambled at the sentence level to make reconstruction
+of individual reports impossible.
 """
 _HOMEPAGE = "https://www2.informatik.hu-berlin.de/~leser/bronco/index.html"
 _LICENSE = "DUA"
@@ -132,9 +138,7 @@ class Bronco(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError(
-                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
-            )
+            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
         else:
             data_dir = self.config.data_dir
 
@@ -261,11 +265,7 @@ class Bronco(datasets.GeneratorBasedBuilder):
                         text_s = []
                         for loc in ent.locations:
                             offsets.append([loc.offset, loc.offset + loc.length])
-                            text_s.append(
-                                doc.passages[0].text[
-                                    loc.offset : loc.offset + loc.length
-                                ]
-                            )
+                            text_s.append(doc.passages[0].text[loc.offset: loc.offset + loc.length])
 
                         out["entities"].append(
                             {
@@ -275,9 +275,7 @@ class Bronco(datasets.GeneratorBasedBuilder):
                                 "offsets": offsets,
                                 "normalized": [
                                     {
-                                        "db_name": norm_map.get(ent.id, ":").split(":")[
-                                            0
-                                        ],
+                                        "db_name": norm_map.get(ent.id, ":").split(":")[0],
                                         # replace faulty connectors in db_ids
                                         "db_id": norm_map.get(ent.id, ":")
                                         .split(":")[1]
