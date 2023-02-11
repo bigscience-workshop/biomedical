@@ -51,13 +51,14 @@ _HOMEPAGE = ""
 
 # TODO: Add the licence for the dataset here (if possible)
 _LICENSE = "DUA"
-_LANGUAGES = "German"
+_LANGUAGES = ["German"]
 _URLS = {}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 _DATASETNAME = "cardiode"
 _DISPLAYNAME = "CARDIO:DE"
+_PUBMED = False
 
 # TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
 #  Append "Dataset" to the class name: BioASQ --> BioasqDataset
@@ -128,10 +129,8 @@ class CardioDataset(datasets.GeneratorBasedBuilder):
             doc_ids = _sort_files(Path(filepath) / 'tsv' / 'CARDIODE400_main')
             for uid, doc in enumerate(doc_ids):
                 tsv_path = Path(filepath) / 'tsv' / 'CARDIODE400_main' / f'{doc}'
-                txt_path = Path(filepath) / 'txt' / 'CARDIODE400_main' / f'{doc.replace(".tsv", ".txt")}'
-                df = _parse_tsv(tsv_path)
-                original, no_jumps = _parse_txt(txt_path)
-                yield uid, _make_bigbio_kb(uid, doc, df, original, no_jumps)
+                df, sentences = _parse_tsv(tsv_path)
+                yield uid, _make_bigbio_kb(uid, doc, df, sentences)
 
 
 def _parse_tsv(path: str) -> pd.DataFrame:
@@ -143,8 +142,13 @@ def _parse_tsv(path: str) -> pd.DataFrame:
     passages = content.split('#')
 
     # remove the first line (un-tabbed) of each sentence
-    # and split sentences into words/tokens
+    # split sentences into words/tokens
+    # and store string sentences for the passages
+    sentences = []
     for i, passage in enumerate(passages):
+        if passage.split('\n')[0].startswith('Text='):
+            sentences.append(passage.split('\n')[0]
+                             .split('Text=')[1])
         passages[i] = passage.split('\n')[1:]
 
     # clean empty sentences and tokens
@@ -166,8 +170,8 @@ def _parse_tsv(path: str) -> pd.DataFrame:
         6: 'section',
     })
 
-    # delete weird rows were label is NoneType
-    df = df[df['label'].notnull()]
+    # correct weird rows were label is NoneType
+    df['label'].fillna('_', inplace=True)
 
     # split passage and token ids
     df[['passage_id', 'token_id']] = df['passage_token_id'].str.split('-', expand=True)
@@ -181,18 +185,24 @@ def _parse_tsv(path: str) -> pd.DataFrame:
         df['lab'] = '_'
         df['span'] = None
 
-    return df.drop(columns=['label', 'idk', 'token_id'])
+    # split start and end offsets and cast to int
+    df[['offset_start', 'offset_end']] = df['token_offset'].str.split('-', expand=True)
+    df['offset_start'] = df['offset_start'].astype(int)
+    df['offset_end'] = df['offset_end'].astype(int)
+
+    # correct offset gaps between tokens
+    i = 0
+    while i < len(df) - 1:
+        gap = df.loc[i + 1]['offset_start'] - df.loc[i]['offset_end']
+        if gap > 1:
+            df.loc[i + 1:, 'offset_start'] = df.loc[i + 1:, 'offset_start'] - (gap - 1)
+            df.loc[i + 1:, 'offset_end'] = df.loc[i + 1:, 'offset_end'] - (gap - 1)
+        i += 1
+
+    return df.drop(columns=['label', 'idk', 'token_id', 'token_offset']), sentences
 
 
-def _parse_txt(path: str) -> (str, str):
-    with open(path, encoding='utf-8') as file:
-        original = file.read()
-        # remove consecutive \n
-        no_jumps = re.sub("\n{2,}", "\n", original)
-        return original, no_jumps
-
-
-def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, original: str, no_jumps: str):
+def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, sentences: list):
     out = {
         'id': str(uid),
         'document_id': doc_id,
@@ -204,8 +214,7 @@ def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, original: str, no_j
     }
 
     # handle passages
-    i = 0
-    sen_num = 0
+    i, sen_num, offset_mark = 0, 0, 0
     while i < len(df):
         pid = df.iloc[i]['passage_id']
         passage = df[df['passage_id'] == pid]
@@ -213,23 +222,27 @@ def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, original: str, no_j
         out['passages'].append({
             'id': f'{uid}-{pid}',
             'type': 'sentence',
-            'text': [no_jumps.split('\n')[int(pid) - 1]],
-            'offsets': [[int(passage.iloc[0]['token_offset'].split('-')[0]),
-                         int(passage.iloc[-1]['token_offset'].split('-')[1])]],
+            'text': [sentences[sen_num]],
+            'offsets': [[offset_mark, offset_mark + len(sentences[sen_num])]],
         })
 
         i += len(passage)
+        offset_mark += len(sentences[sen_num]) + 1
         sen_num += 1
 
     # handle entities
+    text = ' '.join(sentences)
     i = 0
     while i < len(df):
         if df.iloc[i]['lab'] != "_" and df.iloc[i]['span'] is None:
+            off_start = out['passages'][int(df.iloc[i]["passage_id"])]['text'][0].find(df.iloc[i]["text"])
+            off_end = out['passages'][int(df.iloc[i]["passage_id"])]['text'][0].find(df.iloc[i]["text"]) + len(
+                df.iloc[i]["text"])
             out['entities'].append({
                 "id": f'{uid}-{df.iloc[i]["passage_token_id"]}',
                 "type": df.iloc[i]["lab"],
-                "text": [original[int(df.iloc[i]['token_offset'].split('-')[0]):int(df.iloc[i]['token_offset'].split('-')[1])]],
-                "offsets": [[int(x) for x in df.iloc[i]['token_offset'].split('-')]],
+                "text": [text[df.iloc[i]['offset_start']:df.iloc[i]['offset_end']]],
+                "offsets": [[df.iloc[i]['offset_start'], df.iloc[i]['offset_end']]],
                 "normalized": [],
             })
             i += 1
@@ -238,9 +251,8 @@ def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, original: str, no_j
             out['entities'].append({
                 "id": f'{uid}-{df.iloc[i]["passage_token_id"]}',
                 "type": df.iloc[i]["lab"],
-                "text": [original[int(ent.iloc[0]['token_offset'].split('-')[0]):int(ent.iloc[-1]['token_offset'].split('-')[1])]],
-                "offsets": [[int(ent.iloc[0]['token_offset'].split('-')[0]),
-                             int(ent.iloc[-1]['token_offset'].split('-')[1])]],
+                "text": [text[ent.iloc[0]['offset_start']:ent.iloc[-1]['offset_end']]],
+                "offsets": [[ent.iloc[0]['offset_start'], ent.iloc[-1]['offset_end']]],
                 "normalized": [],
             })
             i += len(ent)
