@@ -24,9 +24,7 @@ import itertools
 import datasets
 from bioc import pubtator
 
-from .bigbiohub import kb_features
-from .bigbiohub import BigBioConfig
-from .bigbiohub import Tasks
+from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _CITATION = """\
 @misc{https://doi.org/10.48550/arxiv.2204.03637,
@@ -47,7 +45,7 @@ _CITATION = """\
 }
 
 """
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 
@@ -64,7 +62,7 @@ NED tasks, This dataset does NOT have splits.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
 
-_LICENSE = 'License information unavailable'
+_LICENSE = "License information unavailable"
 
 _URLS = {_DATASETNAME: "ftp://ftp.ncbi.nlm.nih.gov/pub/lu/tmVar3/tmVar3Corpus.txt"}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
@@ -75,7 +73,8 @@ logger = datasets.utils.logging.get_logger(__name__)
 
 class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
     """
-    This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds and various normalizations for each of them.
+    This dataset contains 500 PubMed articles manually annotated with mutation
+    mentions of various kinds and various normalizations for each of them.
     """
 
     DEFAULT_CONFIG_NAME = "tmvar_v3_source"
@@ -124,9 +123,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                         {
                             "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "semantic_type_id": datasets.Sequence(
-                                datasets.Value("string")
-                            ),
+                            "semantic_type_id": datasets.Value("string"),
                             "normalized": {
                                 key: datasets.Sequence(datasets.Value("string"))
                                 for key in type_to_db_mapping.keys()
@@ -205,6 +202,31 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     continue
         return base_dict
 
+    def _correct_wrong_offsets(self, entities, pmid):
+        """
+        Offsets in the document 21904390 is wrong. Correct them manually.
+        """
+        wrong_offsets = {
+            "21904390": {
+                (343, 347): [342, 346],
+                (753, 757): [751, 755],
+                (1156, 1160): [1153, 1157],
+                (1487, 1491): [1483, 1487],
+                (1631, 1635): [1627, 1631],
+                (1645, 1659): [1640, 1654],
+                (2043, 2047): [2037, 2041],
+            }
+        }
+        if pmid in wrong_offsets:
+            for entity in entities:
+                if (entity["offsets"][0][0], entity["offsets"][0][1]) in wrong_offsets[
+                    pmid
+                ]:
+                    entity["offsets"][0] = wrong_offsets[pmid][
+                        (entity["offsets"][0][0], entity["offsets"][0][1])
+                    ]
+        return entities
+
     def pubtator_to_source(self, filepath):
         """
         Converts pubtator to source schema
@@ -227,7 +249,7 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     {
                         "offsets": [[mention.start, mention.end]],
                         "text": [mention.text],
-                        "semantic_type_id": [mention.type],
+                        "semantic_type_id": mention.type,
                         "normalized": self.get_normalizations(
                             mention.id,
                             mention.type,
@@ -236,6 +258,9 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     }
                     for mention in doc.annotations
                 ]
+                document["entities"] = self._correct_wrong_offsets(
+                    document["entities"], doc.pmid
+                )
                 yield document
 
     def pubtator_to_bigbio_kb(self, filepath):
@@ -269,13 +294,16 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                         "id": next(uid),
                         "offsets": [[mention.start, mention.end]],
                         "text": [mention.text],
-                        "type": [mention.type],
+                        "type": mention.type,
                         "normalized": self.get_normalizations(
                             mention.id, mention.type, doc.pmid
                         ),
                     }
                     for mention in doc.annotations
                 ]
+                document["entities"] = self._correct_wrong_offsets(
+                    document["entities"], doc.pmid
+                )
                 db_id_mapping = {
                     "dbSNP": "dbSNP",
                     "CorrespondingGene": "NCBI Gene",
