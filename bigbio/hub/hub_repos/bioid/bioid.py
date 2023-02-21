@@ -117,7 +117,6 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
     }
 
     def _info(self) -> datasets.DatasetInfo:
-
         # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
         # You can arbitrarily nest lists and dictionaries.
         # For iterables, use lists over tuples or `datasets.Sequence`
@@ -205,15 +204,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
         annotations: Dict[str, Dict] = {}
 
         for record in df.to_dict("records"):
-
             article_id = str(record["don_article"])
+            figure = str(record["figure"])
 
             if article_id not in annotations:
                 annotations[article_id] = {}
 
-            figure = record["figure"]
-
-            if figure not in annotations:
+            if figure not in annotations[article_id]:
                 annotations[article_id][figure] = []
 
             annotations[article_id][figure].append(record)
@@ -235,14 +232,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
         data = []
 
         for file_name in os.listdir(text_dir):
-
+            # skip hidden files: what are they doing there anyway?
             if file_name.startswith(".") or not file_name.endswith(".xml"):
                 continue
 
             collection = bioc.load(os.path.join(text_dir, file_name))
 
             for document in collection.documents:
-
                 item = document.infons
 
                 assert (
@@ -325,11 +321,9 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                 yield uid, document
 
         elif self.config.schema == "bigbio_kb":
-
             uid = 0  # global unique id
 
             for document in data:
-
                 kb_document = {
                     "id": uid,
                     "document_id": document["pmc_id"],
@@ -354,7 +348,6 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                     uid += 1
 
                     for a in passage["annotations"]:
-
                         entity_type, normalized = self.get_entity(a["obj"])
 
                         kb_document["entities"].append(
