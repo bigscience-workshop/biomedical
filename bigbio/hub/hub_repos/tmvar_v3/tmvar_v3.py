@@ -92,6 +92,15 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
     )
     BUILDER_CONFIGS.append(
         BigBioConfig(
+            name=f"{_DATASETNAME}_source_fixed",
+            version=SOURCE_VERSION,
+            description=f"{_DATASETNAME} source schema with fixed offsets",
+            schema="source",
+            subset_id=f"{_DATASETNAME}",
+        )
+    )
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
             name=f"{_DATASETNAME}_bigbio_kb",
             version=BIGBIO_VERSION,
             description=f"{_DATASETNAME} BigBio schema",
@@ -258,9 +267,10 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     }
                     for mention in doc.annotations
                 ]
-                document["entities"] = self._correct_wrong_offsets(
-                    document["entities"], doc.pmid
-                )
+                if "_fixed" in self.config.name:
+                    document["entities"] = self._correct_wrong_offsets(
+                        document["entities"], doc.pmid
+                    )
                 yield document
 
     def pubtator_to_bigbio_kb(self, filepath):
