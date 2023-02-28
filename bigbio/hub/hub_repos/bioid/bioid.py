@@ -65,6 +65,18 @@ _SOURCE_VERSION = "2.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+ANN_OFFSET_FIXES = {
+    3988959: {(199, 210): (199, 209)},
+    3746197: {(94, 101): (94, 100)},
+    4383508: {(78, 94): (78, 93)},
+    4972140: {(114, 132): (114, 131)},
+    1661684: {(319, 331): (319, 330)},
+    2172014: {(48, 68): (48, 67), (108, 128): (108, 127)},
+    4772957: {(247, 260): (247, 259)},
+    5048346: {(446, 494): (446, 493)},
+    4009068: {(4, 38): (4, 30)},
+}
+
 
 class BioidDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
@@ -267,7 +279,9 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
         return data
 
-    def get_entity(self, normalization: str) -> Tuple[str, List[Dict]]:
+    def get_entity_type_and_normalized(
+        self, normalization: str
+    ) -> Tuple[str, List[Dict]]:
         """
         Compile normalization information from annotation
         """
@@ -309,6 +323,34 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
         return entity_type, normalized
 
+    def get_entity(
+        self,
+        uid: int,
+        pmcid: int,
+        annotation: dict,
+    ) -> Dict:
+        """
+        Get entity and fix wrong offsets
+        """
+
+        entity_type, normalized = self.get_entity_type_and_normalized(annotation["obj"])
+
+        offset = (int(annotation["first left"]), int(annotation["last right"]))
+        if pmcid in ANN_OFFSET_FIXES:
+            if offset in ANN_OFFSET_FIXES[pmcid]:
+                fixed_start, fixed_end = ANN_OFFSET_FIXES[pmcid][offset]
+                offset = (fixed_start, fixed_end)
+
+        entity = {
+            "id": uid,
+            "text": [annotation["text"]],
+            "type": entity_type,
+            "offsets": [offset],
+            "normalized": normalized,
+        }
+
+        return entity
+
     def _generate_examples(
         self, data_dir: str, split: str
     ) -> Iterator[Tuple[int, Dict]]:
@@ -348,17 +390,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                     uid += 1
 
                     for a in passage["annotations"]:
-                        entity_type, normalized = self.get_entity(a["obj"])
-
-                        kb_document["entities"].append(
-                            {
-                                "id": uid,
-                                "text": [a["text"]],
-                                "type": entity_type,
-                                "offsets": [[a["first left"], a["last right"]]],
-                                "normalized": normalized,
-                            }
+                        entity = self.get_entity(
+                            uid=uid,
+                            pmcid=int(document["pmc_id"]),
+                            annotation=a,
                         )
+
+                        kb_document["entities"].append(entity)
 
                         uid += 1
 
