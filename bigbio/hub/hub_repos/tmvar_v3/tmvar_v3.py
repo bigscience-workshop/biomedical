@@ -267,10 +267,12 @@ class TmvarV3Dataset(datasets.GeneratorBasedBuilder):
                     }
                     for mention in doc.annotations
                 ]
+
                 if "_fixed" in self.config.name:
                     document["entities"] = self._correct_wrong_offsets(
                         document["entities"], doc.pmid
                     )
+                    
                 yield document
 
     def pubtator_to_bigbio_kb(self, filepath):

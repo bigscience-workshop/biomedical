@@ -65,6 +65,18 @@ _SOURCE_VERSION = "2.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
 
+ANN_OFFSET_FIXES = {
+    3988959: {(199, 210): (199, 209)},
+    3746197: {(94, 101): (94, 100)},
+    4383508: {(78, 94): (78, 93)},
+    4972140: {(114, 132): (114, 131)},
+    1661684: {(319, 331): (319, 330)},
+    2172014: {(48, 68): (48, 67), (108, 128): (108, 127)},
+    4772957: {(247, 260): (247, 259)},
+    5048346: {(446, 494): (446, 493)},
+    4009068: {(4, 38): (4, 30)},
+}
+
 
 class BioidDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
@@ -117,7 +129,6 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
     }
 
     def _info(self) -> datasets.DatasetInfo:
-
         # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
         # You can arbitrarily nest lists and dictionaries.
         # For iterables, use lists over tuples or `datasets.Sequence`
@@ -205,15 +216,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
         annotations: Dict[str, Dict] = {}
 
         for record in df.to_dict("records"):
-
             article_id = str(record["don_article"])
+            figure = str(record["figure"])
 
             if article_id not in annotations:
                 annotations[article_id] = {}
 
-            figure = record["figure"]
-
-            if figure not in annotations:
+            if figure not in annotations[article_id]:
                 annotations[article_id][figure] = []
 
             annotations[article_id][figure].append(record)
@@ -235,14 +244,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
         data = []
 
         for file_name in os.listdir(text_dir):
-
+            # skip hidden files: what are they doing there anyway?
             if file_name.startswith(".") or not file_name.endswith(".xml"):
                 continue
 
             collection = bioc.load(os.path.join(text_dir, file_name))
 
             for document in collection.documents:
-
                 item = document.infons
 
                 assert (
@@ -271,7 +279,9 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
         return data
 
-    def get_entity(self, normalization: str) -> Tuple[str, List[Dict]]:
+    def get_entity_type_and_normalized(
+        self, normalization: str
+    ) -> Tuple[str, List[Dict]]:
         """
         Compile normalization information from annotation
         """
@@ -313,6 +323,34 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
 
         return entity_type, normalized
 
+    def get_entity(
+        self,
+        uid: int,
+        pmcid: int,
+        annotation: dict,
+    ) -> Dict:
+        """
+        Get entity and fix wrong offsets
+        """
+
+        entity_type, normalized = self.get_entity_type_and_normalized(annotation["obj"])
+
+        offset = (int(annotation["first left"]), int(annotation["last right"]))
+        if pmcid in ANN_OFFSET_FIXES:
+            if offset in ANN_OFFSET_FIXES[pmcid]:
+                fixed_start, fixed_end = ANN_OFFSET_FIXES[pmcid][offset]
+                offset = (fixed_start, fixed_end)
+
+        entity = {
+            "id": uid,
+            "text": [annotation["text"]],
+            "type": entity_type,
+            "offsets": [offset],
+            "normalized": normalized,
+        }
+
+        return entity
+
     def _generate_examples(
         self, data_dir: str, split: str
     ) -> Iterator[Tuple[int, Dict]]:
@@ -325,11 +363,9 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                 yield uid, document
 
         elif self.config.schema == "bigbio_kb":
-
             uid = 0  # global unique id
 
             for document in data:
-
                 kb_document = {
                     "id": uid,
                     "document_id": document["pmc_id"],
@@ -354,18 +390,13 @@ class BioidDataset(datasets.GeneratorBasedBuilder):
                     uid += 1
 
                     for a in passage["annotations"]:
-
-                        entity_type, normalized = self.get_entity(a["obj"])
-
-                        kb_document["entities"].append(
-                            {
-                                "id": uid,
-                                "text": [a["text"]],
-                                "type": entity_type,
-                                "offsets": [[a["first left"], a["last right"]]],
-                                "normalized": normalized,
-                            }
+                        entity = self.get_entity(
+                            uid=uid,
+                            pmcid=int(document["pmc_id"]),
+                            annotation=a,
                         )
+
+                        kb_document["entities"].append(entity)
 
                         uid += 1
 
