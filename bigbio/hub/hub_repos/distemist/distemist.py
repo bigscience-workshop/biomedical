@@ -203,7 +203,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         for uid, filename in enumerate(entity_file_names):
             text_file = text_files_dir / f"{filename}.txt"
 
-            doc_text = text_file.read_text()
+            doc_text = text_file.read_text(encoding='utf8')
             # doc_text = doc_text.replace("\n", "")
 
             entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]
