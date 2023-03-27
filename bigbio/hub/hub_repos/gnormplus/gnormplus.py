@@ -27,7 +27,7 @@ from .bigbiohub import Tasks
 from .bigbiohub import get_texts_and_offsets_from_bioc_ann
 
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -62,7 +62,7 @@ PubTator was used as our annotation tool along with BioC formats.
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/gnormplus/"
 
-_LICENSE = 'License information unavailable'
+_LICENSE = "UNKNOWN"
 
 _URLS = {
     _DATASETNAME: "https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/tmTools/download/GNormPlus/GNormPlusCorpus.zip"
@@ -157,17 +157,22 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "GNormPlusCorpus/BC2GNtrain.BioC.xml"
-                    ),
+                    "filepaths": [
+                        os.path.join(data_dir, "GNormPlusCorpus/BC2GNtrain.BioC.xml"),
+
+                        # This sub-part of the corpus is part of the GIA Test Collection, however in
+                        # the paper they used it only for training their models. So we also add it to the
+                        # training split.
+                        os.path.join(data_dir, "GNormPlusCorpus/NLMIAT.BioC.xml"),
+                    ],
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(
-                        data_dir, "GNormPlusCorpus/BC2GNtest.BioC.xml"
-                    ),
+                    "filepaths": [
+                        os.path.join(data_dir, "GNormPlusCorpus/BC2GNtest.BioC.xml"),
+                    ]
                 },
             ),
         ]
@@ -197,66 +202,82 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             "normalized": normalized,
         }
 
-    def _generate_examples(self, filepath) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepaths) -> Tuple[int, Dict]:
         uid = map(str, itertools.count(start=0, step=1))
 
-        with open(filepath, "r") as fp:
-            collection = biocxml.load(fp)
+        for filepath in filepaths:
+            with open(filepath, "r") as fp:
+                collection = biocxml.load(fp)
 
-            for idx, document in enumerate(collection.documents):
-                if self.config.schema == "source":
-                    features = {
-                        "doc_id": document.id,
-                        "passages": [
-                            {
-                                "text": passage.text,
-                                "type": passage.infons["type"],
-                                "location": {
-                                    "offset": passage.offset,
-                                    "length": passage.total_span.length,
-                                },
-                            }
-                            for passage in document.passages
-                        ],
-                        "entities": [
-                            self._parse_bioc_entity(
-                                next(uid), entity, insert_tax_id=True
-                            )
-                            for passage in document.passages
-                            for entity in passage.annotations
-                        ],
-                    }
-                    yield idx, features
-                elif self.config.schema == "bigbio_kb":
-                    # passage offsets/lengths do not connect, recalculate them for this schema.
-                    passage_spans = []
-                    start = 0
-                    for passage in document.passages:
-                        end = start + len(passage.text)
-                        passage_spans.append((start, end))
-                        start = end + 1
+                for _, document in enumerate(collection.documents):
+                    idx = next(uid)
+                    text = " ".join([passage.text for passage in document.passages])
 
-                    features = {
-                        "id": next(uid),
-                        "document_id": document.id,
-                        "passages": [
-                            {
-                                "id": next(uid),
-                                "type": passage.infons["type"],
-                                "text": [passage.text],
-                                "offsets": [span],
-                            }
-                            for passage, span in zip(document.passages, passage_spans)
-                        ],
-                        "entities": [
-                            self._parse_bioc_entity(next(uid), entity)
-                            for passage in document.passages
-                            for entity in passage.annotations
-                        ],
-                        "events": [],
-                        "coreferences": [],
-                        "relations": [],
-                    }
-                    yield idx, features
-                else:
-                    raise NotImplementedError(self.config.schema)
+                    insert_tax = self.config.schema == "source"
+                    entities = [
+                        self._parse_bioc_entity(next(uid), entity, insert_tax_id=insert_tax)
+                        for passage in document.passages
+                        for entity in passage.annotations
+                    ]
+
+                    # Some of the entities have a off-by-one error. Correct these annotations!
+                    self.adjust_entity_offsets(text, entities)
+
+                    if self.config.schema == "source":
+                        features = {
+                            "doc_id": document.id,
+                            "passages": [
+                                {
+                                    "text": passage.text,
+                                    "type": passage.infons["type"],
+                                    "location": {
+                                        "offset": passage.offset,
+                                        "length": passage.total_span.length,
+                                    },
+                                }
+                                for passage in document.passages
+                            ],
+                            "entities": entities,
+                        }
+
+                        yield idx, features
+                    elif self.config.schema == "bigbio_kb":
+                        # passage offsets/lengths do not connect, recalculate them for this schema.
+                        passage_spans = []
+                        start = 0
+                        for passage in document.passages:
+                            end = start + len(passage.text)
+                            passage_spans.append((start, end))
+                            start = end + 1
+
+                        features = {
+                            "id": next(uid),
+                            "document_id": document.id,
+                            "passages": [
+                                {
+                                    "id": next(uid),
+                                    "type": passage.infons["type"],
+                                    "text": [passage.text],
+                                    "offsets": [span],
+                                }
+                                for passage, span in zip(document.passages, passage_spans)
+                            ],
+                            "entities": entities,
+                            "events": [],
+                            "coreferences": [],
+                            "relations": [],
+                        }
+
+                        yield idx, features
+                    else:
+                        raise NotImplementedError(self.config.schema)
+
+    def adjust_entity_offsets(self, text: str, entities: List[Dict]):
+        for entity in entities:
+            start, end = entity["offsets"][0]
+            entity_mention = entity["text"][0]
+            if not text[start:end] == entity_mention:
+                if text[start - 1 : end - 1] == entity_mention:
+                    entity["offsets"] = [(start - 1, end - 1)]
+                elif text[start : end - 1] == entity_mention:
+                    entity["offsets"] = [(start, end - 1)]
