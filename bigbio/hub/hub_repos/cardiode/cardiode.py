@@ -25,43 +25,35 @@ from .bigbiohub import Tasks
 from .bigbiohub import kb_features
 
 _LOCAL = True
-# TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+@data{data/AFYQDY_2022,
+author = {Christoph Dieterich},
+publisher = {heiDATA},
+title = {{CARDIO:DE}},
+year = {2022},
+version = {V5},
+doi = {10.11588/data/AFYQDY},
+url = {https://doi.org/10.11588/data/AFYQDY}
 }
 """
-_DATASETNAME = "cardiode"
 
-# TODO: Add description of the dataset here
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+First freely available and distributable large German clinical corpus from the cardiovascular domain.
 """
 
-# TODO: Add a link to an official homepage for the dataset here (if possible)
-_HOMEPAGE = ""
+_HOMEPAGE = "https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi%3A10.11588%2Fdata%2FAFYQDY"
 
-# TODO: Add the licence for the dataset here (if possible)
 _LICENSE = "DUA"
 _LANGUAGES = ["German"]
 _URLS = {}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
-_SOURCE_VERSION = "1.0.0"
+_SOURCE_VERSION = "5.0.0"
 _BIGBIO_VERSION = "1.0.0"
 _DATASETNAME = "cardiode"
 _DISPLAYNAME = "CARDIO:DE"
 _PUBMED = False
 
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
+
 class CardioDataset(datasets.GeneratorBasedBuilder):
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -71,14 +63,14 @@ class CardioDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="cardiode_source",
             version=SOURCE_VERSION,
-            description="Cardio:DE source schema",
+            description="CARDIO:DE source schema",
             schema="source",
             subset_id="cardiode",
         ),
         BigBioConfig(
             name="cardiode_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="Cardio:DE BigBio schema",
+            description="CARDIO:DE BigBio schema",
             schema="bigbio_kb",
             subset_id="cardidoe",
         ),
@@ -88,8 +80,26 @@ class CardioDataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
         if self.config.schema == "source":
-            # TODO: Create your source schema here
-            raise NotImplementedError()
+            features = datasets.Features(
+                {
+                    "doc_id": datasets.Value("string"),
+                    "annotations":  [
+                        {
+                            "text": datasets.Value("string"),
+                            "tokens": [
+                                {
+                                    "id": datasets.Value("string"),
+                                    "offsets": datasets.Value("string"),
+                                    "text": datasets.Value("string"),
+                                    "type": datasets.Value("string"),
+                                    "parent_annotation_id": datasets.Value("string"),
+                                    "section": datasets.Value("string"),
+                                }
+                            ]
+                        }
+                    ]
+                }        
+            )
 
         elif self.config.schema == "bigbio_kb":
             features = kb_features
@@ -111,7 +121,6 @@ class CardioDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": os.path.join(data_dir),
                     "split": "train",
@@ -122,16 +131,15 @@ class CardioDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-
-        if self.config.schema == "source":
-            raise NotImplementedError()
-        elif self.config.schema == "bigbio_kb":
-            doc_ids = _sort_files(Path(filepath) / 'tsv' / 'CARDIODE400_main')
-            for uid, doc in enumerate(doc_ids):
-                tsv_path = Path(filepath) / 'tsv' / 'CARDIODE400_main' / f'{doc}'
-                df, sentences = _parse_tsv(tsv_path)
+        doc_ids = _sort_files(Path(filepath) / 'tsv' / 'CARDIODE400_main')
+        for uid, doc in enumerate(doc_ids):
+            tsv_path = Path(filepath) / 'tsv' / 'CARDIODE400_main' / f'{doc}'
+            df, sentences = _parse_tsv(tsv_path)
+            if self.config.schema == "source":
+                yield uid, _make_source(uid, doc, df, sentences)
+            elif self.config.schema == "bigbio_kb":
                 yield uid, _make_bigbio_kb(uid, doc, df, sentences)
-
+                
 
 def _parse_tsv(path: str) -> pd.DataFrame:
     # read whole .tsv as a string
@@ -165,7 +173,7 @@ def _parse_tsv(path: str) -> pd.DataFrame:
         1: 'token_offset',
         2: 'text',
         3: 'label',
-        4: 'idk',
+        4: 'uncertain',
         5: 'relation',
         6: 'section',
     })
@@ -199,7 +207,31 @@ def _parse_tsv(path: str) -> pd.DataFrame:
             df.loc[i + 1:, 'offset_end'] = df.loc[i + 1:, 'offset_end'] - (gap - 1)
         i += 1
 
-    return df.drop(columns=['label', 'idk', 'token_id', 'token_offset']), sentences
+    return df, sentences
+
+
+def _make_source(uid: int, doc_id: str, df: pd.DataFrame, sentences: list):
+    out = {
+        "doc_id": doc_id,
+        "annotations": []
+    }
+    for i, sentence in enumerate(sentences):
+        anno = {
+            "text" : sentence,
+            "tokens" : []
+        }
+        chunk = df[df["passage_id"] == str(i+1)]
+        for _, row in chunk.iterrows():
+            anno["tokens"].append({
+                "id": row["passage_token_id"],
+                "offsets": row["token_offset"],
+                "text": row["text"],
+                "type": row["label"],
+                "parent_annotation_id": row["relation"],
+                "section": row["section"]
+            })
+        out["annotations"].append(anno)
+    return out
 
 
 def _make_bigbio_kb(uid: int, doc_id: str, df: pd.DataFrame, sentences: list):
