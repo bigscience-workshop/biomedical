@@ -1,40 +1,43 @@
 ---
 language:
-  - en [This needs to be a supported huggingface language code]
+  - ger [This needs to be a supported huggingface language code]
 bigbio_language:
-  - English
-license: apache-2.0 [this shoudl be a supported huggingface license]
-bigbio_license_shortname: APACHE_2p0
+  - German
+license: DUA
 multilinguality: monolingual
-pretty_name: SciTail
-homepage: https://allenai.org/data/scitail
+pretty_name: CARDIO:DE
+homepage: https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi:10.11588/data/AFYQDY
 bigbio_pubmed: false
-bigbio_public: true
+bigbio_public: false
 bigbio_tasks:
-  - TEXTUAL_ENTAILMENT
-paperswithcode_id: scitail
+  - NAMED_ENTITY_RECOGNITION
 ---
 
 
-# Dataset Card for SciTail
+# Dataset Card for CARDIO.DE
 
 ## Dataset Description
 
-- **Homepage:** https://allenai.org/data/scitail
+- **Homepage:** https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi:10.11588/data/AFYQDY
 - **Pubmed:** False
-- **Public:** True
-- **Tasks:** TE [This needs to be a comma delimitted string of task short names]
+- **Public:** False
+- **Tasks:** NER
 
 
-[This can be equal to the `_DESCRIPTION` attribute of the dataset you are implementing] The SciTail dataset is an entailment dataset created from multiple-choice science exams and web sentences. Each question and the correct answer choice are converted into an assertive statement to form the hypothesis. We use information retrieval to obtain relevant text from a large text corpus of web sentences, and use these sentences as a premise P. We crowd source the annotation of such premise-hypothesis pair as supports (entails) or not (neutral), in order to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 examples with entails label and 16,925 examples with neutral label.
+We present CARDIO:DE, the first freely available and distributable large German clinical corpus from the cardiovascular domain. CARDIO:DE encompasses 500 clinical routine German doctor’s letters from Heidelberg University Hospital, which were manually annotated. Our prospective study design complies well with current data protection regulations and allows us to keep the original structure of clinical documents consistent. In order to ease access to our corpus, we manually de-identified all letters. To enable various information extraction tasks the temporal information in the documents was preserved. We added two high-quality manual annotation layers to CARDIO:DE, (1) medication information and (2) CDA-compliant section classes.
 
 
 ## Citation Information
 
 ```
-@inproceedings{scitail,
-    author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
-    booktitle = {AAAI}
-    title = {SciTail: A Textual Entailment Dataset from Science Question Answering},
-    year = {2018}
+@data{
+    data/AFYQDY_2022,
+    author = {Christoph Dieterich},
+    publisher = {heiDATA},
+    title = {{CARDIO:DE}},
+    year = {2022},
+    version = {V5},
+    doi = {10.11588/data/AFYQDY},
+    url = {https://doi.org/10.11588/data/AFYQDY}
+}
 ```

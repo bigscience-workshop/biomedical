@@ -24,14 +24,15 @@ from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _LOCAL = True
 _CITATION = """\
-@data{data/AFYQDY_2022,
-author = {Christoph Dieterich},
-publisher = {heiDATA},
-title = {{CARDIO:DE}},
-year = {2022},
-version = {V5},
-doi = {10.11588/data/AFYQDY},
-url = {https://doi.org/10.11588/data/AFYQDY}
+@data{
+    data/AFYQDY_2022,
+    author = {Christoph Dieterich},
+    publisher = {heiDATA},
+    title = {{CARDIO:DE}},
+    year = {2022},
+    version = {V5},
+    doi = {10.11588/data/AFYQDY},
+    url = {https://doi.org/10.11588/data/AFYQDY}
 }
 """
 
@@ -297,8 +298,3 @@ def _sort_files(filepath):
     doc_ids = [f"{doc_ids[i]}.tsv" for i in range(len(doc_ids))]
     return doc_ids
 
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
