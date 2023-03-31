@@ -79,7 +79,7 @@ project = atlas.map_text(
     reset_project_if_exists=True,
 )
 
-map = project.get_map('A Map That Gets Updated')
+map = project.get_map('bigbio')
 print(map)
 
 
