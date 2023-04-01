@@ -31,7 +31,7 @@ from .bigbiohub import qa_features
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-_LANGUAGES = ['English']
+_LANGUAGES = ['English', "Chinese (Simplified)", "Chinese (Traditional, Taiwan)"]
 _PUBMED = False
 _LOCAL = False
 
@@ -62,7 +62,7 @@ comprehension models can obtain necessary knowledge for answering the questions.
 
 _HOMEPAGE = "https://github.com/jind11/MedQA"
 
-_LICENSE = 'License information unavailable'
+_LICENSE = 'UNKNOWN'
 
 _URLS = {
     _DATASETNAME: "https://drive.google.com/u/0/uc?export=download&confirm=t&id=1ImYUSLk9JbgHXOemfvyiDiirluZHPeQw",

@@ -1,9 +1,12 @@
-
 ---
-language: 
+language:
 - en
-bigbio_language: 
+- zh-Hans
+- zh-Hant-TW
+bigbio_language:
 - English
+- Chinese (Simplified)
+- Chinese (Traditional, Taiwan)
 license: unknown
 multilinguality: monolingual
 bigbio_license_shortname: UNKNOWN
@@ -11,7 +14,7 @@ pretty_name: MedQA
 homepage: https://github.com/jind11/MedQA
 bigbio_pubmed: False
 bigbio_public: True
-bigbio_tasks: 
+bigbio_tasks:
 - QUESTION_ANSWERING
 ---
 
