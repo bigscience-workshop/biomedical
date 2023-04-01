@@ -1,6 +1,6 @@
 ---
 language:
-  - ger [This needs to be a supported huggingface language code]
+  - ger
 bigbio_language:
   - German
 license: DUA
