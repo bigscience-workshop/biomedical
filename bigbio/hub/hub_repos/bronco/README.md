@@ -7,7 +7,7 @@ multilinguality: monolingual
 pretty_name: BRONCO150
 homepage: https://www2.informatik.hu-berlin.de/~leser/bronco/index.html
 bigbio_pubmed: false
-bigbio_public: true
+bigbio_public: false
 bigbio_tasks:
   - NAMED_ENTITY_RECOGNITION
   - NAMED_ENTITY_DISAMBIGUATION
@@ -20,7 +20,7 @@ bigbio_tasks:
 
 - **Homepage:** https://www2.informatik.hu-berlin.de/~leser/bronco/index.html
 - **Pubmed:** False
-- **Public:** True
+- **Public:** False
 - **Tasks:** NER, NED
 
 
