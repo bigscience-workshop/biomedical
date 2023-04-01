@@ -3,7 +3,7 @@ language:
   - ger
 bigbio_language:
   - German
-license: DUA
+license: other
 multilinguality: monolingual
 pretty_name: CARDIO:DE
 homepage: https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi:10.11588/data/AFYQDY
