@@ -6,7 +6,7 @@ from nomic import atlas
 import pandas as pd
 
 
-S_MAX = 800
+S_MAX = 3200
 
 
 def load_conhelps():
@@ -55,6 +55,8 @@ for ii, conhelp in enumerate(conhelps):
         df1 = ds.to_pandas()
         df1["split"] = split
         df1["dataset"] = conhelp.display_name
+        df1['schema'] = conhelp.config.schema
+        df1['config_name'] = conhelp.config.name
         dfs.append(df1)
 
     df = pd.concat(dfs)
@@ -74,7 +76,7 @@ project = atlas.map_text(
     data=df_all.to_dict(orient="records"),
     indexed_field='text',
     name='bigbio',
-    colorable_fields=['dataset', 'split'],
+    colorable_fields=['dataset', 'split', 'schema', 'config_name'],
     description='BigBIO',
     reset_project_if_exists=True,
 )
