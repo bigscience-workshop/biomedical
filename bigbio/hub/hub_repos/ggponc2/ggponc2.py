@@ -21,7 +21,7 @@ import pandas as pd
 import datasets
 from .bigbiohub import kb_features
 from .bigbiohub import BigBioConfig
-from bigbio.utils.constants import Tasks
+from .bigbiohub import Tasks
 
 _LOCAL = True
 _CITATION = """\
