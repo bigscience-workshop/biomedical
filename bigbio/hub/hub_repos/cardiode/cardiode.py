@@ -144,7 +144,7 @@ def _parse_tsv(path: str) -> pd.DataFrame:
         content = file.read()
 
     # separate doc into sentences
-    passages = content.split("#")
+    passages = content.split("\n#")
 
     # remove the first line (un-tabbed) of each sentence
     # split sentences into words/tokens
