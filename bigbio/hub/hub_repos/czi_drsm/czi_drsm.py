@@ -98,11 +98,12 @@ These classifications are particularly relevant in rare disease research, a fiel
 """
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/DRSM-corpus/"
-_LICENSE = "CC0 1.0"
+_LICENSE = "CC0_1p0"
 
 _LANGUAGES = ['English']
 _PUBMED = False
 _LOCAL = False
+_DISPLAYNAME = "DRSM Corpus"
 
 # For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
 # In most cases the URLs will be the same for the source and bigbio config.
