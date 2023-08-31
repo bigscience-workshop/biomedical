@@ -135,7 +135,23 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
 
-        if self.config.schema == "source":
+        if self.config.name == "med_qa_en_4options_source":
+            features = datasets.Features(
+                {
+                    "meta_info": datasets.Value("string"),
+                    "question": datasets.Value("string"),
+                    "answer_idx": datasets.Value("string"),
+                    "answer": datasets.Value("string"),
+                    "options": [
+                        {
+                            "key": datasets.Value("string"),
+                            "value": datasets.Value("string"),
+                        }
+                    ],
+                    "metamap_phrases": datasets.Sequence(datasets.Value("string")),
+                }
+            )
+        elif self.config.schema == "source":
             features = datasets.Features(
                 {
                     "meta_info": datasets.Value("string"),
