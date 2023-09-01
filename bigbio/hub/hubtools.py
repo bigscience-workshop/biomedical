@@ -3,13 +3,21 @@ https://huggingface.co/docs/huggingface_hub/how-to-manage
 """
 
 import os
+import subprocess
+
+from pathlib import Path
+
 from huggingface_hub import create_repo
 from huggingface_hub import HfApi
 
 
-HF_ORG = "bigbio"
+#HF_ORG = "bigbio"
+HF_ORG = "masaenger"
 HF_DATASETS_URL_BASE = "https://huggingface.co/datasets"
 
+
+def get_git_revision_short_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 
 def list_datasets(full=False):
     """List datasets
@@ -41,6 +49,36 @@ def create_repository(dataset_name, private=True):
     """
     repo_id = os.path.join(HF_ORG, dataset_name)
     create_repo(repo_id, repo_type="dataset", private=private)
+
+
+def update_dataset(dataset_name: str, create_repo: bool = False, dryrun: bool = True):
+    local_dir = Path(f"bigbio/hub/hub_repos/{dataset_name}")
+    if not local_dir.exists():
+        raise AssertionError(f"Local directory {local_dir} doesn't exist")
+
+    repo_id = os.path.join(HF_ORG, dataset_name)
+
+    api = HfApi()
+    if create_repo:
+        if not dryrun:
+            print(f"Creating repository {repo_id}")
+            api.create_repo(repo_id, repo_type="dataset")
+        else:
+            print(f"DRYRUN: Creating repo {repo_id}")
+
+    git_hash = get_git_revision_short_hash()
+
+    if not dryrun:
+        print(f"Uploading {local_dir} to {repo_id}")
+        api.upload_folder(
+            folder_path=str(local_dir),
+            repo_id=repo_id,
+            repo_type="dataset",
+            commit_message=f"Update {dataset_name} based on git version {git_hash}",
+            commit_description=f"Update {dataset_name} based on git version {git_hash}",
+        )
+    else:
+        print(f"DRYRUN: Uploading local folder {local_dir} to {repo_id}")
 
 
 def upload_bigbiohub(dataset_names=None, dryrun=True):
