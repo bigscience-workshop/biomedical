@@ -3,7 +3,7 @@ language:
   - en 
 bigbio_language:
   - English
-license: Creative Commons Zero v1.0 Universal
+license: cc0-1.0
 bigbio_license_shortname: cc0-1.0
 multilinguality: monolingual
 pretty_name: CZI DRSM
@@ -15,7 +15,7 @@ bigbio_tasks:
 ---
 
 # Dataset Card for CZI DRSM
-
+[README.md](..%2Fmed_qa%2FREADME.md)
 ## Dataset Description
 
 - **Homepage:** https://github.com/chanzuckerberg/DRSM-corpus

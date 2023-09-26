@@ -60,16 +60,12 @@ import datasets
 import pandas as pd
 from pathlib import Path
 
-import bigbio.utils.parsing as parse
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import text_features, BigBioConfig, Tasks
 
 #from .bigbiohub import BigBioConfig
 #from .bigbiohub import Tasks
 
-#from .bigbiohub import 
+#from .bigbiohub import
 
 _LOCAL = False
 
@@ -147,7 +143,7 @@ _URLS = {
     'nhs': "https://raw.githubusercontent.com/chanzuckerberg/DRSM-corpus/main/v2/nhs_all_2023_03_31.tsv"
 }
 
-_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]  
+_SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
@@ -295,7 +291,7 @@ class DRSMBaseDataset(datasets.GeneratorBasedBuilder):
 
         # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+            features = text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
