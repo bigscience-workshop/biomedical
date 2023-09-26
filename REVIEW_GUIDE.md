@@ -17,6 +17,7 @@ To ensure the highest possible standard and uniformity of the data set implement
 files `<dataset>.py`, `bigbiohub.py` and `README.md`.
 - Check whether all data set meta-data are given in `<dataset>.py` and `README.md`. Refer to 
 [BC5CDR](bigbio/hub/hub_repos/bc5cdr/) for an example of a complete set of information.
+- The dataset should **not** import `bigbio` but instead use `.bigbiohub`. 
 
 
 ## Run unit tests
