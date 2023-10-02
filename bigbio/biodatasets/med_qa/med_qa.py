@@ -111,12 +111,47 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
                 subset_id=f"med_qa_{subset}",
             )
         )
+        if subset == "en" or subset == "zh":
+            BUILDER_CONFIGS.append(
+                BigBioConfig(
+                    name=f"med_qa_{subset}_4options_source",
+                    version=SOURCE_VERSION,
+                    description=f"MedQA {_SUBSET2NAME.get(subset)} source schema (4 options)",
+                    schema="source",
+                    subset_id=f"med_qa_{subset}_4options",
+                )
+            )
+            BUILDER_CONFIGS.append(
+                BigBioConfig(
+                    name=f"med_qa_{subset}_4options_bigbio_qa",
+                    version=BIGBIO_VERSION,
+                    description=f"MedQA {_SUBSET2NAME.get(subset)} BigBio schema (4 options)",
+                    schema="bigbio_qa",
+                    subset_id=f"med_qa_{subset}_4options",
+                )
+            )
 
     DEFAULT_CONFIG_NAME = "med_qa_en_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
-        if self.config.schema == "source":
+        if self.config.name == "med_qa_en_4options_source":
+            features = datasets.Features(
+                {
+                    "meta_info": datasets.Value("string"),
+                    "question": datasets.Value("string"),
+                    "answer_idx": datasets.Value("string"),
+                    "answer": datasets.Value("string"),
+                    "options": [
+                        {
+                            "key": datasets.Value("string"),
+                            "value": datasets.Value("string"),
+                        }
+                    ],
+                    "metamap_phrases": datasets.Sequence(datasets.Value("string")),
+                }
+            )
+        elif self.config.schema == "source":
             features = datasets.Features(
                 {
                     "meta_info": datasets.Value("string"),
@@ -178,6 +213,30 @@ class MedQADataset(datasets.GeneratorBasedBuilder):
                 ),
                 "valid": os.path.join(
                     base_dir, "Taiwan", "tw_translated_jsonl", "zh", "dev-2zh.jsonl"
+                ),
+            }
+        elif self.config.subset_id == "med_qa_en_4options":
+            paths = {
+                "train": os.path.join(
+                    base_dir, "US", "4_options", "phrases_no_exclude_train.jsonl"
+                ),
+                "test": os.path.join(
+                    base_dir, "US", "4_options", "phrases_no_exclude_test.jsonl"
+                ),
+                "valid": os.path.join(
+                    base_dir, "US", "4_options", "phrases_no_exclude_dev.jsonl"
+                ),
+            }
+        elif self.config.subset_id == "med_qa_zh_4options":
+            paths = {
+                "train": os.path.join(
+                    base_dir, "Mainland", "4_options", "train.jsonl"
+                ),
+                "test": os.path.join(
+                    base_dir, "Mainland", "4_options", "test.jsonl"
+                ),
+                "valid": os.path.join(
+                    base_dir, "Mainland", "4_options", "dev.jsonl"
                 ),
             }
 

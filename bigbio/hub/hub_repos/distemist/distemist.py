@@ -47,12 +47,12 @@ The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotat
 All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.
 """
 
-_HOMEPAGE = "https://zenodo.org/record/6671292"
+_HOMEPAGE = "https://zenodo.org/record/7614764"
 
-_LICENSE = 'Creative Commons Attribution 4.0 International'
+_LICENSE = 'CC_BY_4p0'
 
 _URLS = {
-    _DATASETNAME: "https://zenodo.org/record/6671292/files/distemist.zip?download=1",
+    _DATASETNAME: "https://zenodo.org/record/7614764/files/distemist_zenodo.zip?download=1",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
@@ -145,38 +145,65 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
-        base_bath = Path(data_dir) / "distemist" / "training"
-        if self.config.subset_id == "distemist_entities":
-            entity_mapping_files = [base_bath / "subtrack1_entities" / "distemist_subtrack1_training_mentions.tsv"]
-        else:
-            entity_mapping_files = [
-                base_bath / "subtrack2_linking" / "distemist_subtrack2_training1_linking.tsv",
-                base_bath / "subtrack2_linking" / "distemist_subtrack2_training2_linking.tsv",
-            ]
+        base_bath = Path(data_dir) / "distemist_zenodo"
+        track = self.config.subset_id.split('_')[1]
+                
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "entity_mapping_files": entity_mapping_files,
-                    "text_files_dir": base_bath / "text_files",
+                    "split": "train",
+                    "track": track,
+                    "base_bath": base_bath,
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "split": "test",
+                    "track": track,
+                    "base_bath": base_bath,
                 },
             ),
         ]
 
     def _generate_examples(
         self,
-        entity_mapping_files: List[Path],
-        text_files_dir: Path,
+        split: str, 
+        track: str,
+        base_bath: Path,
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-
+        
+        tsv_files = {
+            ('entities', 'train'): [
+                base_bath / "training" / "subtrack1_entities" / "distemist_subtrack1_training_mentions.tsv"
+            ],
+            ('entities', 'test'): [
+                base_bath / "test_annotated" / "subtrack1_entities" / "distemist_subtrack1_test_mentions.tsv"
+            ],
+            ('linking', 'train'): [
+                base_bath / "training" / "subtrack2_linking" / "distemist_subtrack2_training1_linking.tsv",
+                base_bath / "training" / "subtrack2_linking" / "distemist_subtrack2_training2_linking.tsv",
+            ],
+            ('linking', 'test'): [
+                base_bath / "test_annotated" / "subtrack2_linking" / "distemist_subtrack2_test_linking.tsv"
+            ],       
+        }       
+        entity_mapping_files = tsv_files[(track, split)]
+        
+        if split == "train":
+            text_files_dir = base_bath / "training" / "text_files"
+        elif split == "test":
+            text_files_dir = base_bath / "test_annotated" / "text_files"
+        
         entities_mapping = pd.concat([pd.read_csv(file, sep="\t") for file in entity_mapping_files])
         entity_file_names = entities_mapping["filename"].unique()
 
         for uid, filename in enumerate(entity_file_names):
             text_file = text_files_dir / f"{filename}.txt"
 
-            doc_text = text_file.read_text()
+            doc_text = text_file.read_text(encoding='utf8')
             # doc_text = doc_text.replace("\n", "")
 
             entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]

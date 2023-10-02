@@ -5,22 +5,31 @@ NOTE: If bypass keys/splits present, statistics are STILL printed.
 """
 import argparse
 import importlib
+# Check languages + licenses match appropriate keys'
+import json
 import logging
 import re
-import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, Iterable, Iterator, List, Optional, Union
+from typing import Dict, Iterable, Iterator, List, Optional
 
 import datasets
 from datasets import DatasetDict, Features
 from huggingface_hub import HfApi
 
-#from bigbio.utils.constants import METADATA
+# from bigbio.utils.constants import METADATA
 from bigbio.hub import bigbiohub
+from bigbio.utils.license import Licenses
+from bigbio.utils.constants import Lang
 
+
+# we can use value or name here. I think most loaders use value
+lang_keys = set([el.value for el in Lang])
+
+# we can use short_name or name here. I think most loaders use short_name
+license_keys = set([getattr(Licenses, key).short_name for key in Licenses.__dict__])
 
 
 logger = logging.getLogger(__name__)
@@ -46,7 +55,7 @@ def _get_example_text(example: dict) -> str:
     """
     Concatenate all text from passages in an example of a KB schema
     :param example: An instance of the KB schema
-    """
+    """  # noqa
     return " ".join([t for p in example["passages"] for t in p["text"]])
 
 
@@ -63,7 +72,7 @@ _CONNECTORS = re.compile(r"\+|\,|\||\;")
 class TestDataLoader(unittest.TestCase):
     """
     Test a single config from a dataloader script.
-    """
+    """  # noqa
 
     DATASET_NAME: str
     CONFIG_NAME: str
@@ -92,13 +101,9 @@ class TestDataLoader(unittest.TestCase):
         valid_tasks = set([mem.name for mem in bigbiohub.Tasks])
         invalid_tasks = set(self._SUPPORTED_TASKS) - valid_tasks
         if len(invalid_tasks) > 0:
-            raise ValueError(
-                f"Found invalid supported tasks {invalid_tasks}. Must be one of {bigbiohub.VALID_TASKS}"
-            )
+            raise ValueError(f"Found invalid supported tasks {invalid_tasks}. Must be one of {bigbiohub.VALID_TASKS}")
 
-        self._MAPPED_SCHEMAS = set(
-            [bigbiohub.TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS]
-        )
+        self._MAPPED_SCHEMAS = set([bigbiohub.TASK_TO_SCHEMA[task] for task in self._SUPPORTED_TASKS])
         logger.info(f"_SUPPORTED_TASKS implies _MAPPED_SCHEMAS={self._MAPPED_SCHEMAS}")
 
         logger.info(f"Checking load_dataset with config name {config_name}")
@@ -145,14 +150,13 @@ class TestDataLoader(unittest.TestCase):
 
     def test_metadata(self, module: ModuleType):
         """
-        Check if all metadata for a dataloader are present
-        """
+        Check if all metadata for a dataloader are present.
+        Checks if languages + licenses are appropriately named.
+        """  # noqa
 
         for metadata_name, metadata_type in METADATA.items():
             if not hasattr(module, metadata_name):
-                raise AssertionError(
-                    f"Required dataloader attribute '{metadata_name}' is not defined!"
-                )
+                raise AssertionError(f"Required dataloader attribute '{metadata_name}' is not defined!")
 
             metadata_attr = getattr(module, metadata_name)
 
@@ -173,11 +177,19 @@ class TestDataLoader(unittest.TestCase):
                         raise AssertionError(
                             f"Dataloader attribute '{metadata_name}' must be a list of `{metadata_type}`! Found `{type(elem)}`!"
                         )
+
+                    if elem not in lang_keys:
+                        print(elem)
+                        raise AssertionError(f"Dataloader attribute '{elem}' not valid for {metadata_name} must be one of {lang_keys}")
             else:
                 if not isinstance(metadata_attr, metadata_type):
                     raise AssertionError(
                         f"Dataloader attribute '{metadata_name}' must be of type `{metadata_type}`! Found `{type(metadata_attr)}`!"
                     )
+
+            if metadata_name == "_LICENSE":
+                if metadata_attr not in license_keys:
+                    raise AssertionError(f"Dataloader attribute '{metadata_attr}' not valid for {metadata_name} must be one of {license_keys}")
 
     def get_feature_statistics(self, features: Features) -> Dict:
         """
@@ -243,7 +255,7 @@ class TestDataLoader(unittest.TestCase):
     def test_are_ids_globally_unique(self, dataset_bigbio: DatasetDict):
         """
         Tests each example in a split has a unique ID.
-        """
+        """  # noqa
         logger.info("Checking global ID uniqueness")
         for split_name, split in dataset_bigbio.items():
 
@@ -292,7 +304,7 @@ class TestDataLoader(unittest.TestCase):
     def test_do_all_referenced_ids_exist(self, dataset_bigbio: DatasetDict):
         """
         Checks if referenced IDs are correctly labeled.
-        """
+        """  # noqa
         logger.info("Checking if referenced IDs are properly mapped")
         for split_name, split in dataset_bigbio.items():
 
@@ -316,10 +328,7 @@ class TestDataLoader(unittest.TestCase):
                         continue
 
                     if ref_type == "event":
-                        if not (
-                            (ref_id, "entity") in existing_ids
-                            or (ref_id, "event") in existing_ids
-                        ):
+                        if not ((ref_id, "entity") in existing_ids or (ref_id, "event") in existing_ids):
                             logger.warning(
                                 f"Referenced element ({ref_id}, entity/event) could not be "
                                 f"found in existing ids {existing_ids}. Please make sure that "
@@ -363,9 +372,7 @@ class TestDataLoader(unittest.TestCase):
                         text = passage["text"]
                         offsets = passage["offsets"]
 
-                        self._test_is_list(
-                            msg="Text in passages must be a list", field=text
-                        )
+                        self._test_is_list(msg="Text in passages must be a list", field=text)
 
                         self._test_is_list(
                             msg="Offsets in passages must be a list",
@@ -422,10 +429,7 @@ class TestDataLoader(unittest.TestCase):
         )
 
         with self.subTest(
-            (
-                f"Split:{split} - Example:{example_id} - "
-                f"All offsets must be in the form [(lo1, hi1), ...]"
-            ),
+            (f"Split:{split} - Example:{example_id} - " f"All offsets must be in the form [(lo1, hi1), ...]"),
             offsets=offsets,
         ):
             self.assertTrue(all(len(o) == 2 for o in offsets))
@@ -479,9 +483,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             entity_id = entity["id"]
-                            errors.append(
-                                f"Example:{example_id} - entity:{entity_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - entity:{entity_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -490,7 +492,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Verify that the events' trigger offsets are correct,
         i.e.: trigger text == text extracted via the trigger offsets
-        """
+        """  # noqa
         logger.info("KB ONLY: Checking event offsets")
         errors = []
 
@@ -523,9 +525,7 @@ class TestDataLoader(unittest.TestCase):
                         ):
 
                             event_id = event["id"]
-                            errors.append(
-                                f"Example:{example_id} - event:{event_id} " + msg
-                            )
+                            errors.append(f"Example:{example_id} - event:{event_id} " + msg)
 
         if len(errors) > 0:
             logger.warning(msg="\n".join(errors) + OFFSET_ERROR_MSG)
@@ -564,7 +564,7 @@ class TestDataLoader(unittest.TestCase):
     def test_multiple_choice(self, dataset_bigbio: DatasetDict):
         """
         Verify that each answer in a multiple choice Q/A task is in choices.
-        """
+        """  # noqa
         logger.info("QA ONLY: Checking multiple choice")
         for split in dataset_bigbio:
 
@@ -576,9 +576,7 @@ class TestDataLoader(unittest.TestCase):
             for example in dataset_bigbio[split]:
 
                 if self._skipkey_or_keysplit("choices", split):
-                    logger.warning(
-                        "Skipping multiple choice for key=choices, split='{split}'"
-                    )
+                    logger.warning("Skipping multiple choice for key=choices, split='{split}'")
                     continue
 
                 else:
@@ -596,22 +594,18 @@ class TestDataLoader(unittest.TestCase):
                         ), f"type is 'multiple_choice' or 'yesno' but no values in 'choices' {example}"
 
                         if self._skipkey_or_keysplit("answer", split):
-                            logger.warning(
-                                "Skipping multiple choice for key=answer, split='{split}'"
-                            )
+                            logger.warning("Skipping multiple choice for key=answer, split='{split}'")
                             continue
 
                         else:
                             for answer in example["answer"]:
-                                assert (
-                                    answer in example["choices"]
-                                ), f"answer is not present in 'choices' {example}"
+                                assert answer in example["choices"], f"answer is not present in 'choices' {example}"
 
     def test_entities_multilabel_db(self, dataset_bigbio: DatasetDict):
         """
         Check if `db_name` or `db_id` of `normalized` field in entities have multiple values joined with common connectors.
         Raises a warning ONLY ONCE per connector type.
-        """
+        """  # noqa
         logger.info("KB ONLY: multi-label `db_id`")
 
         warning_raised = {}
@@ -669,7 +663,7 @@ class TestDataLoader(unittest.TestCase):
         """
         Check if features with `type` field contain multilabel values
         and raise a warning ONLY ONCE for feature type (e.g. passages)
-        """
+        """  # noqa
 
         logger.info("KB ONLY: multi-label `type` fields")
 
@@ -687,15 +681,10 @@ class TestDataLoader(unittest.TestCase):
             for feature_name in features_with_type:
 
                 if self._skipkey_or_keysplit(feature_name, split):
-                    logger.warning(
-                        f"Skipping multilabel type for splitkey = '{(split, feature_name)}'"
-                    )
+                    logger.warning(f"Skipping multilabel type for splitkey = '{(split, feature_name)}'")
                     continue
 
-                if (
-                    feature_name not in dataset_bigbio[split].features
-                    or warning_raised[feature_name]
-                ):
+                if feature_name not in dataset_bigbio[split].features or warning_raised[feature_name]:
                     continue
 
                 for example_index, example in enumerate(dataset_bigbio[split]):
@@ -732,7 +721,7 @@ class TestDataLoader(unittest.TestCase):
                             break
 
     def test_schema(self, schema: str):
-        """Search supported tasks within a dataset and verify big-bio schema"""
+        """Search supported tasks within a dataset and verify big-bio schema"""  # noqa
 
         non_empty_features = set()
         if schema == "KB":
@@ -765,15 +754,11 @@ class TestDataLoader(unittest.TestCase):
             for non_empty_feature in non_empty_features:
 
                 if self._skipkey_or_keysplit(non_empty_feature, split_name):
-                    logger.warning(
-                        f"Skipping schema for split, key = '{(split_name, non_empty_feature)}'"
-                    )
+                    logger.warning(f"Skipping schema for split, key = '{(split_name, non_empty_feature)}'")
                     continue
 
                 if split_to_feature_counts[split_name][non_empty_feature] == 0:
-                    raise AssertionError(
-                        f"Required key '{non_empty_feature}' does not have any instances"
-                    )
+                    raise AssertionError(f"Required key '{non_empty_feature}' does not have any instances")
 
             for feature, count in split_to_feature_counts[split_name].items():
                 if (
@@ -810,12 +795,8 @@ class TestDataLoader(unittest.TestCase):
             logger.warning(f"Keys ignored = '{self.BYPASS_KEYS}'")
 
         if len(self.BYPASS_SPLIT_KEY_PAIRS) > 0:
-            logger.warning(
-                f"Split and key pairs ignored ='{self.BYPASS_SPLIT_KEY_PAIRS}'"
-            )
-            self.BYPASS_SPLIT_KEY_PAIRS = [
-                i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS
-            ]
+            logger.warning(f"Split and key pairs ignored ='{self.BYPASS_SPLIT_KEY_PAIRS}'")
+            self.BYPASS_SPLIT_KEY_PAIRS = [i.split(",") for i in self.BYPASS_SPLIT_KEY_PAIRS]
 
     def _skipkey_or_keysplit(self, key: str, split: str):
         """Check if key or (split, key) pair should be omitted"""
@@ -874,22 +855,42 @@ if __name__ == "__main__":
         help="Skip a key in a data split (e.g. skip 'entities' in 'test'). List all key-pairs comma separated. (ex: --bypass_split_key_pairs test,entities train, events)",
     )
 
+    # If specified as `True`, bypass hub download and check local script.
+    parser.add_argument(
+        "--test_local",
+        action="store_true",
+        help="Unit testing on local script instead of hub (ONLY USE FOR PRs)",
+    )
+
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
-    org_and_dataset_name = f"bigbio/{args.dataset_name}"
+    if not args.test_local:
+        logger.info("Running Hub Unit Test")
+        org_and_dataset_name = f"bigbio/{args.dataset_name}"
 
-    api = HfApi()
-    ds_info = api.dataset_info(org_and_dataset_name)
-    print(ds_info)
+        api = HfApi()
+        ds_info = api.dataset_info(org_and_dataset_name)
+        print(ds_info)
 
-    dataset_module = datasets.load.dataset_module_factory(org_and_dataset_name)
-    print(dataset_module)
+        dataset_module = datasets.load.dataset_module_factory(org_and_dataset_name)
+        print(dataset_module)
 
-    builder_cls = datasets.load.import_main_class(dataset_module.module_path)
-    all_config_names = [el.name for el in builder_cls.BUILDER_CONFIGS]
-    logger.info(f"all_config_names: {all_config_names}")
+        builder_cls = datasets.load.import_main_class(dataset_module.module_path)
+        all_config_names = [el.name for el in builder_cls.BUILDER_CONFIGS]
+        logger.info(f"all_config_names: {all_config_names}")
 
+    else:
+        logger.info("Running (Local) Unit Test")
+        org_and_dataset_name = f"bigbio/hub/hub_repos/{args.dataset_name}/{args.dataset_name}.py"
+        print("Dataset = ", args.dataset_name)
+
+        module = datasets.load.dataset_module_factory(org_and_dataset_name)
+        print(module)
+
+        builder_cls = datasets.load.import_main_class(module.module_path)
+        all_config_names = [el.name for el in builder_cls.BUILDER_CONFIGS]
+        logger.info(f"all_config_names: {all_config_names}")
 
     if args.config_name is not None:
         run_config_names = [args.config_name]

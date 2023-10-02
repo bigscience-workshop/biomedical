@@ -84,22 +84,23 @@ pip install -r dev-requirements.txt # Install this while in the datasets folder
 ```
 Make sure your `pip` package points to your environment's source.
 
-### 3. Prepare the folder in `biodatasets` for your dataloader
+### 3. Prepare the folder in `hub_repos` for your dataloader
 
-Make a new directory within the `biomedical/bigbio/biodatasets` directory:
+Make a new directory within the `biomedical/bigbio/hub/hub_repos/` directory:
 
-    mkdir bigbio/biodatasets/<dataset_name>
+    mkdir bigbio/hub/hub_repos/<dataset_name>
 
 **NOTE**: Please use lowercase letters and underscores when choosing a `<dataset_name>`.
 
 Add an `__init__.py` file to this directory:
 
-    touch bigbio/biodatasets/<dataset_name>/__init__.py
+    touch bigbio/hub/hub_repos/<dataset_name>/__init__.py
 
-Next, copy the contents of `template` into your dataset folder. This contains 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script.
+Next, copy the contents of `template` into your dataset folder. This contains a `README.md` file and 2 scripts: `bigbiohub.py` that contains all data structures/classes for your dataloader, and `template.py` which has "TODOs" to fill in for your dataloading script. The `README.md` is from the `scitail` dataset and you will need to edit it for your dataset. Remove the text between square brackets before you make your PR. This file will determine what the landing page for the dataset on the hub looks like.
 
-    cp templates/*.py bigbio/biodatasets/<dataset_name>/<dataset_name>.py
-
+    cp templates/template.py bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
+    cp templates/bigbiohub.py bigbio/hub/hub_repos/<dataset_name>/
+    cp templates/README.md bigbio/hub/hub_repos/<dataset_name>/
 
 ### 4. Implement your dataset
 
@@ -156,7 +157,7 @@ Make sure your dataset is implemented correctly by checking in python the follow
 ```python
 from datasets import load_dataset
 
-data = load_dataset("bigbio/biodatasets/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
+data = load_dataset("bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py", name="<dataset_name>_bigbio_<schema>")
 ```
 
 Run these commands from the top level of the `biomedical` repo (i.e. the same directory that contains the `requirements.txt` file).
@@ -164,21 +165,30 @@ Run these commands from the top level of the `biomedical` repo (i.e. the same di
 Once this is done, please also check if your dataloader satisfies our unit tests as follows by using this command in the terminal:
 
 ```bash
-python -m tests.test_bigbio bigbio/biodatasets/<dataset_name>/<dataset_name>.py [--data_dir /path/to/local/data]
+python -m tests.test_bigbio_hub <dataset_name> [--data_dir /path/to/local/data] --test_local
 ```
 
-Your particular dataset may require use of some of the other command line args in the test script.
-To view full usage instructions you can use the `--help` command,
+You MUST include the `--test_local` flag to specifically test the script for your PR, otherwise the script will default to downloading a dataloader script from the Hub. Your particular dataset may require use of some of the other command line args in the test script (ex: `--data_dir` for dataloaders that read local files).
+<br>
+To view full usage instructions you can use the `--help` command:
 
 ```bash
 python -m tests.test_bigbio --help
 ```
+This will explain the types of arguments you may need to test for. A brief annotation is as such:
+
+- `dataset_name`: Name of the dataset you want to test
+- `data_dir`: The location of the data for datasets where `LOCAL_ = True`
+- `config_name`: Name of the configuration you want to test. By default, the script will test all configs, but if you can use this to debug a specific split, or if your data is prohibitively large.
+- `ishub`: Use this when unit testing scripts that are not yet uploaded to the hub (this is True for most cases)
+
+If you need advanced arguments (i.e. skipping a key from a specific data split), please contact admins. You are welcome to make a PR and ask admin for help if your code does not pass the unit tests.
 
 ### 5. Format your code
 
 From the main directory, run the Makefile via the following command:
 
-    make check_file=bigbio/biodatasets/<dataset_name>/<dataset_name>.py
+    make check_file=bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
 
 This runs the black formatter, isort, and lints to ensure that the code is readable and looks nice. Flake8 linting errors may require manual changes.
 
@@ -186,7 +196,9 @@ This runs the black formatter, isort, and lints to ensure that the code is reada
 
 First, commit your changes to the branch to "add" the work:
 
-    git add bigbio/biodatasets/<dataset_name>/<dataset_name>.py
+    git add bigbio/hub/hub_repos/<dataset_name>/<dataset_name>.py
+    git add bigbio/hub/hub_repos/<dataset_name>/bigbiohub.py
+    git add bigbio/hub/hub_repos/<dataset_name>/README.md
     git commit -m "A message describing your commits"
 
 Then, run the following commands to incorporate any new changes in the master branch of datasets as follows:
@@ -204,4 +216,4 @@ Push these changes to **your fork** with the following command:
 
 Make a Pull Request to implement your changes on the main repository [here](https://github.com/bigscience-workshop/biomedical/pulls). To do so, click "New Pull Request". Then, choose your branch from your fork to push into "base:master".
 
-When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description, e.g. `resolves #17`.
+When opening a PR, please link the [issue](https://github.com/bigscience-workshop/biomedical/issues) corresponding to your dataset using [closing keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) in the PR's description (not the PR title), e.g. `resolves #17`.

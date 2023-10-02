@@ -70,7 +70,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
             config_meta = {
                 "config_name": helper.config.name,
                 "bigbio_schema": helper.config.schema,
-                "tasks": [el.name for el in helper.tasks],
+                "tasks": list(helper.tasks),
                 "splits": split_metas,
                 "splits_count": len(split_metas),
             }
@@ -81,13 +81,13 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
             "display_name": helper.display_name,
             "is_pubmed": helper.is_pubmed,
             "is_local": helper.is_local,
-            "languages": [el.name for el in helper.languages],
+            "languages": helper.languages,
             "bigbio_version": helper.bigbio_version,
             "source_version": helper.source_version,
             "citation": helper.citation,
             "description": json.dumps(helper.description),
             "homepage": helper.homepage,
-            "license": jsonify_license(helper.license),
+            "license": helper.license,
             "config_metas": config_metas,
             "configs_count": len(config_metas),
         }
@@ -158,11 +158,35 @@ def flatten_metadatas(dataset_metas):
 
 if __name__ == "__main__":
 
+    SKIP_CONFIG_NAMES = set(
+        [
+            "biomrc_large_A_bigbio_qa",
+            "biomrc_large_B_bigbio_qa",
+            "medal_bigbio_kb",
+            "meddialog_zh_bigbio_text",
+            "pubtator_central_bigbio_kb",
+        ]
+    )
+
+    SKIP_DATASET_NAMES = set(
+        [
+            "bioscope", # connection error
+            "meqsum",  # an error occurred while generating this dataset
+            "pdr", # connection error
+            "pmc_patients", # file not found error
+            "ntcir_13_medweb", # an error occurred while generating this dataset
+            "psytar", # an error occurred while generating this dataset
+        ]
+    )
+
+
     # create a BigBioConfigHelpers
     # ==========================================================
     conhelps = BigBioConfigHelpers()
-    conhelps = conhelps.filtered(lambda x: x.dataset_name != "pubtator_central")
     conhelps = conhelps.filtered(lambda x: x.is_bigbio_schema)
+    conhelps = conhelps.filtered(lambda x: x.dataset_name not in SKIP_DATASET_NAMES)
+    conhelps = conhelps.filtered(lambda x: x.config.name not in SKIP_CONFIG_NAMES)
+
 
     print(
         "loaded {} configs from {} datasets".format(
@@ -171,7 +195,7 @@ if __name__ == "__main__":
         )
     )
 
-    do_public = True
+    do_public = False
     do_private = False
 
 
