@@ -15,7 +15,7 @@ bigbio_tasks:
 ---
 
 # Dataset Card for CZI DRSM
-[README.md](..%2Fmed_qa%2FREADME.md)
+
 ## Dataset Description
 
 - **Homepage:** https://github.com/chanzuckerberg/DRSM-corpus
