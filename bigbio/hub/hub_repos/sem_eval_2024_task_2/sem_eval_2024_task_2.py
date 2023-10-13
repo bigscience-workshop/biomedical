@@ -56,7 +56,7 @@ For this task, each CTR may contain 1-2 patient groups, called cohorts or arms. 
 
 _HOMEPAGE = "https://sites.google.com/view/nli4ct/semeval-2024?authuser=0"
 
-_LICENSE = ""
+_LICENSE = 'UNKNOWN'
 
 
 _URLS = {
@@ -68,6 +68,12 @@ _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]  # example: [Tasks.TRANSLATION, Ta
 _SOURCE_VERSION = "1.0.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
+_LANGUAGES = ["English"]
+_PUBMED = False
+
+_DISPLAYNAME = "SemEval 2024 Task 2"
+
 
 
 def _get_text(raw_ct_data, section):
