@@ -77,7 +77,20 @@ _DISPLAYNAME = "SemEval 2024 Task 2"
 
 
 def _get_text(raw_ct_data, section):
-    return "".join(raw_ct_data[section])
+    """
+    Get the concatenated text from the given section of the raw CT data.
+
+    Args:
+        raw_ct_data (dict): The raw CT (clinical trials) data.
+        section (str): The section to retrieve the text from.
+
+    Returns:
+        str: The concatenated text from the specified section.
+    """
+    text_concat = " ".join(raw_ct_data[section])
+    # remove repeated spaces
+    text = " ".join(text_concat.split())
+    return text
 
 
 
