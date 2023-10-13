@@ -98,10 +98,6 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
 
     BUILDER_CONFIGS = [
         BigBioConfig(
@@ -259,7 +255,10 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 else:
                     text_secondary = ""
 
-                premise = f"Primary: {text_primary}\n\nSecondary: {text_secondary}"
+                if text_secondary:
+                    premise = f"Primary: {text_primary}\n\nSecondary: {text_secondary}"
+                else:
+                    premise = f" Primary: {text_primary}"
 
                 yield id_, {"id": id_, "premise": premise, "hypothesis": raw_label_data[id_]["Statement"], "label": raw_label_data[id_]["Label"]}
         else:
