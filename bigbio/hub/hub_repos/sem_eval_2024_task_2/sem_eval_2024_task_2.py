@@ -131,6 +131,7 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
 
             features = datasets.Features(
                 {
+                    "id": datasets.Value("string"),
                     "type": datasets.Value("string"),
                     "section_id": datasets.Value("string"),
                     "primary_id": datasets.Value("string"),
@@ -222,6 +223,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
 
                 if "secondary_evidence_index" not in data_dict:
                     data_dict["secondary_evidence_index"] = []
+
+                data_dict["id"] = id_
 
                 yield id_, data_dict
 
