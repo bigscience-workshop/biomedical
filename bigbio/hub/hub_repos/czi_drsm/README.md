@@ -38,11 +38,6 @@ Research Article document classification dataset based on aspects of disease res
         Text describing how treatments work in the clinic (but not in a clinical trial).
 
     - Disease mechanism: 
-        Text that describes either (A) mechanistic involvement of specific genes in disease 
-        (deletions, gain of function, etc); (B) how molecular signalling or metabolism 
-        binding, activating, phosphorylation, concentration increase, etc.) 
-        are involved in the mechanism of a disease; or (C) the physiological 
-        mechanism of disease at the level of tissues, organs, and body systems.
 
     - Patient-Based Therapeutics: 
         Text describing (i) Clinical trials (studies of therapeutic measures being 
