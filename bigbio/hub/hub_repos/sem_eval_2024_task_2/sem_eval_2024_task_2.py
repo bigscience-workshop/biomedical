@@ -138,8 +138,6 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                     "secondary_id": datasets.Value("string"),
                     "statement": datasets.Value("string"),
                     "label": datasets.Value("string"),
-                    "primary_evidence_index": [datasets.Value("int64")],
-                    "secondary_evidence_index": [datasets.Value("int64")],
                 }
             )
         elif self.config.schema == "ct":
@@ -212,7 +210,7 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, data_dir: Path, split: str, config) -> Tuple[int, Dict]:
         """Yields examples as (id, example) tuples."""
         if self.config.schema == "source":
-            with open(data_dir / f"training_data/{split}.json", "r") as f:
+            with open(data_dir / f"{split}.json", "r") as f:
                 raw_data = json.load(f)
             for id_ in sorted(raw_data):
                 data_dict = {k.lower().replace(" ", "_"): v for k, v in raw_data[id_].items()} # make keys align with schema
@@ -221,15 +219,12 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 if "secondary_id" not in data_dict:
                     data_dict["secondary_id"] = ""
 
-                if "secondary_evidence_index" not in data_dict:
-                    data_dict["secondary_evidence_index"] = []
-
                 data_dict["id"] = id_
 
                 yield id_, data_dict
 
         elif self.config.schema == "ct": # yield only raw clinical trial data
-            ct_files = sorted((data_dir / "training_data" / "CT json").glob("*.json"))
+            ct_files = sorted((data_dir / "CT json").glob("*.json"))
             for ct_file in ct_files:
                 with open(ct_file, "r") as f:
                     raw_data = json.load(f)
@@ -239,20 +234,20 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                     yield id_, data_dict
 
         elif self.config.schema == "bigbio_TE": # combine labels and clinical trial text data here
-            with open(data_dir / f"training_data/{split}.json", "r") as f:
+            with open(data_dir / f"{split}.json", "r") as f:
                 raw_label_data = json.load(f)
 
             for id_ in sorted(raw_label_data):
                 primary_id = raw_label_data[id_]["Primary_id"]
                 secondary_id = raw_label_data[id_].get("Secondary_id")
 
-                with open(data_dir / f"training_data/CT json" / f"{primary_id}.json", "r") as f:
+                with open(data_dir / f"CT json" / f"{primary_id}.json", "r") as f:
                     raw_ct_data = json.load(f)
 
                 text_primary = _get_text(raw_ct_data, section=raw_label_data[id_]["Section_id"])
 
                 if secondary_id:
-                    with open(data_dir / f"training_data/CT json" / f"{secondary_id}.json", "r") as f:
+                    with open(data_dir / f"CT json" / f"{secondary_id}.json", "r") as f:
                         raw_ct_data = json.load(f)
                     text_secondary = _get_text(raw_ct_data, section=raw_label_data[id_]["Section_id"])
                 else:
