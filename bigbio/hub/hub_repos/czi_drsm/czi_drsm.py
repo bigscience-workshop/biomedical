@@ -126,7 +126,7 @@ These classifications are particularly relevant in rare disease research, a fiel
 """
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/DRSM-corpus/"
-_LICENSE = 'Creative Commons Zero v1.0 Universal'
+_LICENSE = 'CC0_1p0'
 
 _LANGUAGES = ['English']
 _PUBMED = False
