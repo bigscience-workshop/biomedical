@@ -3,8 +3,8 @@ language:
   - en 
 bigbio_language:
   - English
-license: Creative Commons Zero v1.0 Universal
-bigbio_license_shortname: cc0-1.0
+license: cc0-1.0
+bigbio_license_shortname: CC0_1p0
 multilinguality: monolingual
 pretty_name: CZI DRSM
 homepage: https://github.com/chanzuckerberg/DRSM-corpus

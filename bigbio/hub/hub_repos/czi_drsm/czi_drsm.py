@@ -60,15 +60,9 @@ import datasets
 import pandas as pd
 from pathlib import Path
 
-import bigbio.utils.parsing as parse
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
-
-#from .bigbiohub import BigBioConfig
-#from .bigbiohub import Tasks
-#from .bigbiohub import 
+from .bigbiohub import text_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
 _LOCAL = False
 
@@ -92,6 +86,7 @@ _DESCRIPTION = """\
 Research Article document classification dataset based on aspects of disease research. Currently, the dataset consists of three subsets: 
 
 (A) classifies title/abstracts of papers into most popular subtypes of clinical, basic, and translational papers (~20k papers); 
+
     - Clinical Characteristics, Disease Pathology, and Diagnosis - 
         Text that describes (A) symptoms, signs, or ‘phenotype’ of a disease; 
         (B) the effects of the disease on patient organs, tissues, or cells; 
@@ -114,13 +109,15 @@ Research Article document classification dataset based on aspects of disease res
         approved for one use is being applied to a new disease).
 
 (B) identifies whether a title/abstract of a paper describes substantive research into Quality of Life (~10k papers); 
+    
     - -1 - the paper is not a primary experimental study in rare disease
     - 0 - the study does not directly investigate quality of life
     - 1 - the study investigates qol but not as its primary contribution
     - 2 - the study's primary contribution centers on quality of life measures
 
 (C) identifies if a paper is a natural history study (~10k papers). 
-`   - -1 - the paper is not a primary experimental study in rare disease
+`   
+    - -1 - the paper is not a primary experimental study in rare disease
     - 0 - the study is not directly investigating the natural history of a disease
     - 1 - the study includes some elements a natural history but not as its primary contribution
     - 2 - the study's primary contribution centers on observing the time course of a rare disease
@@ -129,7 +126,7 @@ These classifications are particularly relevant in rare disease research, a fiel
 """
 
 _HOMEPAGE = "https://github.com/chanzuckerberg/DRSM-corpus/"
-_LICENSE = "CC0_1p0"
+_LICENSE = 'Creative Commons Zero v1.0 Universal'
 
 _LANGUAGES = ['English']
 _PUBMED = False
@@ -294,7 +291,7 @@ class DRSMBaseDataset(datasets.GeneratorBasedBuilder):
 
         # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+            features = text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
