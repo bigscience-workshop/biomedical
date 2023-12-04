@@ -72,13 +72,13 @@ text corpus of human annotations of all chemicals, diseases and their \
 interactions in 1,500 PubMed articles.
 """
 
-_HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
+_HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-v/track-3-cdr/"
 
 _LICENSE = 'Public Domain Mark 1.0'
 
 _URLs = {
-    "source": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
-    "bigbio_kb": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
+    "source": "https://github.com/JHnlp/BioCreative-V-CDR-Corpus/raw/master/CDR_Data.zip",
+    "bigbio_kb": "https://github.com/JHnlp/BioCreative-V-CDR-Corpus/raw/master/CDR_Data.zip",
 }
 
 _SUPPORTED_TASKS = [
