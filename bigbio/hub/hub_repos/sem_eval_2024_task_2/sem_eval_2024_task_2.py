@@ -61,6 +61,8 @@ _LICENSE = 'UNKNOWN'
 
 _URLS = {
     "train": "https://github.com/ai-systems/Task-2-SemEval-2024/raw/main/training_data.zip",
+    "practice_test": "https://raw.githubusercontent.com/ai-systems/Task-2-SemEval-2024/main/practice_test.json",
+    "test": "https://raw.githubusercontent.com/ai-systems/Task-2-SemEval-2024/main/test.json",
 }
 
 _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
@@ -169,8 +171,9 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        urls = _URLS["train"]
-        data_dir = Path(dl_manager.download_and_extract(urls))
+        train_dev_dir = Path(dl_manager.download_and_extract(_URLS["train"]))
+        practice_test_path = Path(dl_manager.download_and_extract(_URLS["practice_test"]))
+        test_path = Path(dl_manager.download_and_extract(_URLS["test"]))
 
         if self.config.subset_id in {"sem_eval_2024_task_2", "sem_eval_2024_task_2_bigbio_entailment"}: # versions with train/dev split
             return [
@@ -178,7 +181,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split.TRAIN,
                     # Whatever you put in gen_kwargs will be passed to _generate_examples
                     gen_kwargs={
-                        "data_dir": data_dir,
+                        "data_dir_or_path": train_dev_dir,
+                        "raw_text_dir": train_dev_dir / "CT json",
                         "split": "train",
                         "config": self.config
                     },
@@ -186,18 +190,39 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.VALIDATION,
                     gen_kwargs={
-                        "data_dir": data_dir,
+                        "data_dir_or_path": train_dev_dir,
+                        "raw_text_dir": train_dev_dir / "CT json",
                         "split": "dev",
                         "config": self.config
                     },
                 ),
+                datasets.SplitGenerator(
+                    name="practice_test",
+                    gen_kwargs={
+                        "data_dir_or_path": practice_test_path,
+                        "raw_text_dir": train_dev_dir / "CT json",
+                        "split": "practice_test",
+                        "config": self.config
+                    },
+                ),
+                datasets.SplitGenerator(
+                    name=datasets.Split.TEST,
+                    gen_kwargs={
+                        "data_dir_or_path": test_path,
+                        "raw_text_dir": train_dev_dir / "CT json",
+                        "split": "test",
+                        "config": self.config
+                    },
+                ),
+
             ]
         elif self.config.subset_id == "sem_eval_2024_task_2_ct":
             return [
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "data_dir": data_dir,
+                        "data_dir_or_path": train_dev_dir,
+                        "raw_text_dir": train_dev_dir / "CT json",
                         "split": "train",
                         "config": self.config
                     },
@@ -207,11 +232,10 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
             raise ValueError(f"Unknown subset_id {self.config.subset_id}")
 
 
-    def _generate_examples(self, data_dir: Path, split: str, config) -> Tuple[int, Dict]:
+    def _generate_examples(self, data_dir_or_path: Path, raw_text_dir: Path, split: str, config) -> Tuple[int, Dict]:
         """Yields examples as (id, example) tuples."""
         if self.config.schema == "source":
-            with open(data_dir / f"{split}.json", "r") as f:
-                raw_data = json.load(f)
+            raw_data = self._load_split_file(data_dir_or_path, split)
             for id_ in sorted(raw_data):
                 data_dict = {k.lower().replace(" ", "_"): v for k, v in raw_data[id_].items()} # make keys align with schema
 
@@ -219,12 +243,15 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 if "secondary_id" not in data_dict:
                     data_dict["secondary_id"] = ""
 
+                if "label" not in data_dict:
+                    data_dict["label"] = ""
+
                 data_dict["id"] = id_
 
                 yield id_, data_dict
 
         elif self.config.schema == "ct": # yield only raw clinical trial data
-            ct_files = sorted((data_dir / "CT json").glob("*.json"))
+            ct_files = sorted(raw_text_dir.glob("*.json"))
             for ct_file in ct_files:
                 with open(ct_file, "r") as f:
                     raw_data = json.load(f)
@@ -234,20 +261,19 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                     yield id_, data_dict
 
         elif self.config.schema == "bigbio_TE": # combine labels and clinical trial text data here
-            with open(data_dir / f"{split}.json", "r") as f:
-                raw_label_data = json.load(f)
+            raw_label_data = self._load_split_file(data_dir_or_path, split)
 
             for id_ in sorted(raw_label_data):
                 primary_id = raw_label_data[id_]["Primary_id"]
                 secondary_id = raw_label_data[id_].get("Secondary_id")
 
-                with open(data_dir / f"CT json" / f"{primary_id}.json", "r") as f:
+                with open(raw_text_dir / f"{primary_id}.json", "r") as f:
                     raw_ct_data = json.load(f)
 
                 text_primary = _get_text(raw_ct_data, section=raw_label_data[id_]["Section_id"])
 
                 if secondary_id:
-                    with open(data_dir / f"CT json" / f"{secondary_id}.json", "r") as f:
+                    with open(raw_text_dir / f"{secondary_id}.json", "r") as f:
                         raw_ct_data = json.load(f)
                     text_secondary = _get_text(raw_ct_data, section=raw_label_data[id_]["Section_id"])
                 else:
@@ -258,6 +284,16 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 else:
                     premise = f" Primary: {text_primary}"
 
-                yield id_, {"id": id_, "premise": premise, "hypothesis": raw_label_data[id_]["Statement"], "label": raw_label_data[id_]["Label"]}
+                yield id_, {"id": id_, "premise": premise, "hypothesis": raw_label_data[id_]["Statement"], "label": raw_label_data[id_].get("Label")}
         else:
             raise ValueError(f"Unknown schema {self.config.schema}")
+
+    def _load_split_file(self, data_dir_or_path, split):
+        if data_dir_or_path.is_dir():
+            with open(data_dir_or_path / f"{split}.json", "r") as f:
+                raw_data = json.load(f)
+        else:
+            with open(data_dir_or_path, "r") as f:
+                raw_data = json.load(f)
+        return raw_data
+
