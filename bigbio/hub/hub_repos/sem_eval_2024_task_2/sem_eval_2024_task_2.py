@@ -171,9 +171,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-        train_dev_dir = Path(dl_manager.download_and_extract(_URLS["train"]))
-        practice_test_path = Path(dl_manager.download_and_extract(_URLS["practice_test"]))
-        test_path = Path(dl_manager.download_and_extract(_URLS["test"]))
+        paths = {split: Path(dl_manager.download_and_extract(url)) for split, url in _URLS.items()}
+
 
         if self.config.subset_id in {"sem_eval_2024_task_2", "sem_eval_2024_task_2_bigbio_entailment"}: # versions with train/dev split
             return [
@@ -181,8 +180,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split.TRAIN,
                     # Whatever you put in gen_kwargs will be passed to _generate_examples
                     gen_kwargs={
-                        "data_dir_or_path": train_dev_dir,
-                        "raw_text_dir": train_dev_dir / "CT json",
+                        "data_dir_or_path": paths['train'],
+                        "raw_text_dir": paths['train'] / "CT json",
                         "split": "train",
                         "config": self.config
                     },
@@ -190,8 +189,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.VALIDATION,
                     gen_kwargs={
-                        "data_dir_or_path": train_dev_dir,
-                        "raw_text_dir": train_dev_dir / "CT json",
+                        "data_dir_or_path": paths['train'],
+                        "raw_text_dir": paths['train'] / "CT json",
                         "split": "dev",
                         "config": self.config
                     },
@@ -199,8 +198,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name="practice_test",
                     gen_kwargs={
-                        "data_dir_or_path": practice_test_path,
-                        "raw_text_dir": train_dev_dir / "CT json",
+                        "data_dir_or_path": paths['practice_test'],
+                        "raw_text_dir": paths['train'] / "CT json",
                         "split": "practice_test",
                         "config": self.config
                     },
@@ -208,8 +207,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.TEST,
                     gen_kwargs={
-                        "data_dir_or_path": test_path,
-                        "raw_text_dir": train_dev_dir / "CT json",
+                        "data_dir_or_path": paths['test'],
+                        "raw_text_dir": paths['train'] / "CT json",
                         "split": "test",
                         "config": self.config
                     },
@@ -221,8 +220,8 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
                 datasets.SplitGenerator(
                     name=datasets.Split.TRAIN,
                     gen_kwargs={
-                        "data_dir_or_path": train_dev_dir,
-                        "raw_text_dir": train_dev_dir / "CT json",
+                        "data_dir_or_path": paths['train'],
+                        "raw_text_dir": paths['train'] / "CT json",
                         "split": "train",
                         "config": self.config
                     },
@@ -288,7 +287,17 @@ class SemEval2024Task2Dataset(datasets.GeneratorBasedBuilder):
         else:
             raise ValueError(f"Unknown schema {self.config.schema}")
 
-    def _load_split_file(self, data_dir_or_path, split):
+    def _load_split_file(self, data_dir_or_path: Path, split: str) -> Dict:
+        """
+        Load the data from the given split file.
+
+        Args:
+            data_dir_or_path (Path): The directory or path to the data.
+            split (str): The split to load the data from.
+
+        Returns:
+            Dict: The loaded data.
+        """
         if data_dir_or_path.is_dir():
             with open(data_dir_or_path / f"{split}.json", "r") as f:
                 raw_data = json.load(f)
