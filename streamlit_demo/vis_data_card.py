@@ -235,7 +235,7 @@ def gen_latex(dataset_name, helper, splits, schemas, fig_path):
         r"Token frequency distribution by split (top) and frequency of different kind of instances (bottom).}"
         + "\n"
     )
-    latex_bod += r"\end{figure}" + "\n" + r"\textbf{Dataset Description} "
+    latex_bod += r"\end{figure}" + "\n" + r"\textbf{Dataset Description:} "
     latex_bod += (
         fr"{descriptions}"
         + "\n"
@@ -403,4 +403,3 @@ if __name__ == "__main__":
         latex_name = f"{data_name}_{config_name}.tex"
         write_latex(latex_bod, latex_name)
         print(latex_bod)
-
