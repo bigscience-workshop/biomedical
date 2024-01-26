@@ -52,7 +52,7 @@ _CITATION = """\
 _DATASETNAME = "sourcedata_nlp"
 
 _DESCRIPTION = """\
-SourceData is an NER/NED dataset of manual, expert annotations of nine
+SourceData is an NER/NED dataset of expert annotations of nine
 entity types in figure captions from biomedical research papers.
 """
 

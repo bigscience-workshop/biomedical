@@ -27,7 +27,7 @@ paperswithcode_id: sourcedata-nlp
 - **Tasks:** NER,NED
 
 
-The SourceData-NLP is a named entity recognition and entity linking/disambiguation dataset produced through the routine curation of papers during the publication process. All annotations are in figure legends from published papers in molecular and cell biologyThe dataset consists of eight classes of biomedical entities (small molecules, gene products, subcellular components, cell lines, cell types, tissues, organisms, and diseases), their role in the experimental design, and the nature of the experimental method as an additional class. SourceData-NLP contains more than 620,000 annotated biomedical entities, curated from 18,689 figures in 3,223 papers in molecular and cell biology.
+SourceData-NLP is a named entity recognition and entity linking/disambiguation dataset produced through the routine curation of papers during the publication process. All annotations are in figure legends from published papers in molecular and cell biologyThe dataset consists of eight classes of biomedical entities (small molecules, gene products, subcellular components, cell lines, cell types, tissues, organisms, and diseases), their role in the experimental design, and the nature of the experimental method as an additional class. SourceData-NLP contains more than 620,000 annotated biomedical entities, curated from 18,689 figures in 3,223 papers in molecular and cell biology.
 
 
 ## Citation Information
