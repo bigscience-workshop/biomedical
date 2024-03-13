@@ -27,6 +27,12 @@ _LANGUAGES = ["Spanish"]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
+@inproceedings{lima2023overview,
+  title={Overview of SympTEMIST at BioCreative VIII: corpus, guidelines and evaluation of systems for the detection and normalization of symptoms, signs and findings from text},
+  author={Lima-L{\'o}pez, Salvador and Farr{\'e}-Maduell, Eul{\`a}lia and Gasco-S{\'a}nchez, Luis and Rodr{\'\i}guez-Miret, Jan and Krallinger, Martin},
+  booktitle={Proceedings of the BioCreative VIII Challenge and Workshop: Curation and Evaluation in the era of Generative Models},
+  year={2023}
+}
 """
 
 _DATASETNAME = "symptemist"

@@ -1,40 +1,39 @@
 ---
 language:
-  - en [This needs to be a supported huggingface language code]
+  - es
 bigbio_language:
-  - English
-license: apache-2.0 [this shoudl be a supported huggingface license]
-bigbio_license_shortname: APACHE_2p0
+  - Spanish
+license: Creative Commons Attribution 4.0 International License
+bigbio_license_shortname: CC_BY_4p0
 multilinguality: monolingual
-pretty_name: SciTail
-homepage: https://allenai.org/data/scitail
+pretty_name: SympTEMIST
+homepage: https://temu.bsc.es/symptemist/
 bigbio_pubmed: false
 bigbio_public: true
 bigbio_tasks:
-  - TEXTUAL_ENTAILMENT
-paperswithcode_id: scitail
+  - NAMED_ENTITY_RECOGNITION
+  - NAMED_ENTITY_DISAMBIGUATION
 ---
 
 
-# Dataset Card for SciTail
+# Dataset Card for SympTEMIST
 
 ## Dataset Description
 
-- **Homepage:** https://allenai.org/data/scitail
+- **Homepage:** https://temu.bsc.es/symptemist/
 - **Pubmed:** False
 - **Public:** True
-- **Tasks:** TE [This needs to be a comma delimitted string of task short names]
+- **Tasks:** NER,NED
 
-
-[This can be equal to the `_DESCRIPTION` attribute of the dataset you are implementing] The SciTail dataset is an entailment dataset created from multiple-choice science exams and web sentences. Each question and the correct answer choice are converted into an assertive statement to form the hypothesis. We use information retrieval to obtain relevant text from a large text corpus of web sentences, and use these sentences as a premise P. We crowd source the annotation of such premise-hypothesis pair as supports (entails) or not (neutral), in order to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 examples with entails label and 16,925 examples with neutral label.
-
+The SympTEMIST corpus is a collection of 1,000 clinical case reports in Spanish annotated with symptoms, signs and findings mentions and normalized to SNOMED CT.
 
 ## Citation Information
 
 ```
-@inproceedings{scitail,
-    author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
-    booktitle = {AAAI}
-    title = {SciTail: A Textual Entailment Dataset from Science Question Answering},
-    year = {2018}
+@inproceedings{lima2023overview,
+  title={Overview of SympTEMIST at BioCreative VIII: corpus, guidelines and evaluation of systems for the detection and normalization of symptoms, signs and findings from text},
+  author={Lima-L{\'o}pez, Salvador and Farr{\'e}-Maduell, Eul{\`a}lia and Gasco-S{\'a}nchez, Luis and Rodr{\'\i}guez-Miret, Jan and Krallinger, Martin},
+  booktitle={Proceedings of the BioCreative VIII Challenge and Workshop: Curation and Evaluation in the era of Generative Models},
+  year={2023}
+}
 ```
