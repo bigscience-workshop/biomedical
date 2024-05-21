@@ -47,16 +47,13 @@ _LOCAL = False
 
 # TODO: Add BibTeX citation
 _CITATION = """\
-@article{,
-  author    = {},
-  title     = {},
-  journal   = {},
-  volume    = {},
-  year      = {},
-  url       = {},
-  doi       = {},
-  biburl    = {},
-  bibsource = {}
+@inproceedings{,
+  author    = {Dannenfelser, Ruth and Zhong, Jeffrey and Zhang, Ran and Yao, Vicky},
+  title     = {Into the Single Cell Multiverse: an End-to-End Dataset for Procedural Knowledge Extraction in Biomedical Texts},
+  publisher   = {Advances in Neural Information Processing Systems},
+  volume    = {36},
+  year      = {2024},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/file/23e3d86c9a19d0caf2ec997e73dfcfbd-Paper-Datasets_and_Benchmarks.pdf},
 }
 """
 
@@ -67,7 +64,13 @@ _DATASETNAME = "flambe"
 # TODO: Add description of the dataset here
 # You can copy an official description
 _DESCRIPTION = """\
-This dataset is designed for XXX NLP task.
+FlaMBe is a dataset aimed at procedural knowledge extraction from biomedical texts, 
+particularly focusing on single cell research methodologies described in academic papers. It includes 
+annotations from 55 full-text articles and 1,195 abstracts, covering nearly 710,000 tokens, and is 
+distinguished by its comprehensive named entity recognition (NER) and disambiguation (NED) for 
+tissue/cell types, software tools, and computational methods. This dataset, to our knowledge, is 
+the largest of its kind for tissue/cell types, links entities to identifiers in relevant knowledge 
+bases and annotates nearly 400 workflow relations between tool-context pairs. 
 """
 
 # TODO: Add a link to an official homepage for the dataset here (if possible)
@@ -77,7 +80,7 @@ _HOMEPAGE = "https://github.com/ylaboratory/flambe"
 # Note that this doesn't have to be a common open source license.
 # Some datasets have custom licenses. In this case, simply put the full license terms
 # into `_LICENSE`
-_LICENSE = ""
+_LICENSE = "Creative Commons Attribution 4.0 International"
 
 # TODO: Add links to the urls needed to download your dataset files.
 #  For local datasets, this variable can be an empty dictionary.
@@ -87,17 +90,25 @@ _LICENSE = ""
 # However, if you need to access different files for each config you can have multiple entries in this dict.
 # This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
-    _DATASETNAME: "https://zenodo.org/records/10050681/files/data.zip?download ",
+    _DATASETNAME: "https://zenodo.org/records/10050681/files/data.zip?download",
+    "ned": {"tissue_test": "https://zenodo.org/records/11218662/files/tissue_ned_test.csv?download",
+            "tissue_train": "https://zenodo.org/records/11218662/files/tissue_ned_train.csv?download",
+            "tissue_val": "https://zenodo.org/records/11218662/files/tissue_ned_val.csv?download",
+            "tool_test": "https://zenodo.org/records/11218662/files/tool_ned_test.csv?download",
+            "tool_train": "https://zenodo.org/records/11218662/files/tool_ned_train.csv?download", 
+            "tool_val" : "https://zenodo.org/records/11218662/files/tool_ned_val.csv?download"
+            }, 
 }
 
 # TODO: add supported task by dataset. One dataset may support multiple tasks
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION,
+                    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+                    ]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
 # TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
 #  This version doesn't have to be consistent with semantic versioning. Anything that is
 #  provided by the original dataset as a version goes.
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -132,7 +143,7 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="fulltext_tools",
             version=SOURCE_VERSION,
-            description="...",
+            description="fulltext_tools",
             schema="source",
             subset_id="fulltext_tools",
         ),
@@ -146,9 +157,23 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         BigBioConfig(
             name="abstract_tissues",
             version=SOURCE_VERSION,
-            description="fulltext_tissues",
+            description="abstract_tissues",
             schema="source",
             subset_id="abstract_tissues",
+        ),
+        BigBioConfig(
+            name="ned_tissues",
+            version=SOURCE_VERSION,
+            description="ned_fulltext_tissues",
+            schema="source_ned_tissue",
+            subset_id="ned_tissues",
+        ),
+        BigBioConfig(
+            name="ned_tools",
+            version=SOURCE_VERSION,
+            description="ned_fulltext_tools",
+            schema="source_ned_tool",
+            subset_id="ned_tools",
         ),
     ]
 
@@ -171,6 +196,24 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                     "id": datasets.Value("string"),
                     "tokens": datasets.Sequence(datasets.Value("string")),
                     "tags": datasets.Sequence(datasets.Value("string")),
+                }
+            )
+        
+        elif self.config.schema == "source_ned_tissue":
+            features = datasets.Features(
+                {
+                    "orginal_text": datasets.Value("string"),
+                    "mapped_NCIT": datasets.Value("string"),
+                    "NCIT_name": datasets.Value("string"),
+                }
+            )
+        
+        elif self.config.schema == "source_ned_tool":
+            features = datasets.Features(
+                {
+                    "orginal_text": datasets.Value("string"),
+                    "standardized_name": datasets.Value("string"),
+                    "url": datasets.Value("string"),
                 }
             )
 
@@ -235,6 +278,17 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                 "test": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_validation.iob"),
             },
+            "ned_tissues" : {
+                "train": dl_manager.download_and_extract(_URLS["ned"]["tissue_train"]),
+                "test": dl_manager.download_and_extract(_URLS["ned"]["tissue_test"]),
+                "dev":  dl_manager.download_and_extract(_URLS["ned"]["tissue_val"]),
+
+            }, 
+            "ned_tools" : {
+                "train": dl_manager.download_and_extract(_URLS["ned"]["tool_train"]),
+                "test": dl_manager.download_and_extract(_URLS["ned"]["tool_test"]),
+                "dev":  dl_manager.download_and_extract(_URLS["ned"]["tool_val"]),
+            }
         }
 
         return [
@@ -275,36 +329,51 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
         # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
 
-        with open(filepath, "r") as f:
-            id_value = None
-            tokens = []
-            tags = []
-            key = 0
-            for line in f:
-                line = line.strip()
-                if line:
-                    parts = line.split()
-                    if parts[1] == "begin":
-                        if id_value is not None:
+        if self.config.schema == 'source':
+            with open(filepath, "r") as f:
+                id_value = None
+                tokens = []
+                tags = []
+                key = 0
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        parts = line.split()
+                        if parts[1] == "begin":
+                            if id_value is not None:
+                                yield key, {"id": id_value, "tokens": tokens, "tags": tags}
+                                key += 1 
+                                tokens = []
+                                tags = []
+                            id_value = parts[0]
+                        elif parts[1] == "end":
                             yield key, {"id": id_value, "tokens": tokens, "tags": tags}
                             key += 1 
+                            id_value = None
                             tokens = []
                             tags = []
-                        id_value = parts[0]
-                    elif parts[1] == "end":
-                        yield key, {"id": id_value, "tokens": tokens, "tags": tags}
-                        key += 1 
-                        id_value = None
-                        tokens = []
-                        tags = []
-                    else:
-                        tokens.append(parts[0])
-                        tags.append(parts[1])
-            if id_value is not None:
-                yield key, {"id": id_value, "tokens": tokens, "tags": tags}
-                key += 1
+                        else:
+                            tokens.append(parts[0])
+                            tags.append(parts[1])
+                if id_value is not None:
+                    yield key, {"id": id_value, "tokens": tokens, "tags": tags}
+                    key += 1
 
+        elif self.config.schema == "source_ned_tissue":
+           key = 0
+           for line in open(filepath):
+                csv_row = line.strip('\n').split(",")
+                if csv_row is not None:
+                    yield key, { "orginal_text": csv_row[0], "mapped_NCIT": csv_row[1], "NCIT_name": csv_row[2]}
+                    key += 1
 
+        elif self.config.schema == "source_ned_tool":
+            key = 0
+            for line in open(filepath):
+                csv_row = line.strip('\n').split(",")
+                if csv_row is not None:
+                    yield key, { "orginal_text": csv_row[0], "standardized_name": csv_row[1], "url": csv_row[2]}
+                    key += 1
 
 
 # This template is based on the following template from the datasets package:

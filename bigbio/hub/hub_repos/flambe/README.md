@@ -1,18 +1,18 @@
 ---
 language:
-  - en [This needs to be a supported huggingface language code]
+  - en 
 bigbio_language:
   - English
-license: apache-2.0 [this shoudl be a supported huggingface license]
+license: cc-by-4.0
 bigbio_license_shortname: APACHE_2p0
 multilinguality: monolingual
-pretty_name: SciTail
-homepage: https://allenai.org/data/scitail
+pretty_name: FlaMBe
+homepage: https://github.com/ylaboratory/flambe
 bigbio_pubmed: false
 bigbio_public: true
 bigbio_tasks:
-  - TEXTUAL_ENTAILMENT
-paperswithcode_id: scitail
+  - NAMED_ENTITY_RECOGNITION
+  - NAMED_ENTITY_DISAMBIGUATION 
 ---
 
 
@@ -20,21 +20,24 @@ paperswithcode_id: scitail
 
 ## Dataset Description
 
-- **Homepage:** https://allenai.org/data/scitail
+- **Homepage:** https://github.com/ylaboratory/flambe
 - **Pubmed:** False
 - **Public:** True
 - **Tasks:** TE [This needs to be a comma delimitted string of task short names]
 
 
-[This can be equal to the `_DESCRIPTION` attribute of the dataset you are implementing] The SciTail dataset is an entailment dataset created from multiple-choice science exams and web sentences. Each question and the correct answer choice are converted into an assertive statement to form the hypothesis. We use information retrieval to obtain relevant text from a large text corpus of web sentences, and use these sentences as a premise P. We crowd source the annotation of such premise-hypothesis pair as supports (entails) or not (neutral), in order to create the SciTail dataset. The dataset contains 27,026 examples with 10,101 examples with entails label and 16,925 examples with neutral label.
+FlaMBe is a dataset aimed at procedural knowledge extraction from biomedical texts, particularly focusing on single cell research methodologies described in academic papers. It includes annotations from 55 full-text articles and 1,195 abstracts, covering nearly 710,000 tokens, and is  distinguished by its comprehensive named entity recognition (NER) and disambiguation (NED) for  tissue/cell types, software tools, and computational methods. This dataset, to our knowledge, is the largest of its kind for tissue/cell types, links entities to identifiers in relevant knowledge  bases and annotates nearly 400 workflow relations between tool-context pairs. 
 
 
 ## Citation Information
 
 ```
-@inproceedings{scitail,
-    author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
-    booktitle = {AAAI}
-    title = {SciTail: A Textual Entailment Dataset from Science Question Answering},
-    year = {2018}
+@inproceedings{,
+  author    = {Dannenfelser, Ruth and Zhong, Jeffrey and Zhang, Ran and Yao, Vicky},
+  title     = {Into the Single Cell Multiverse: an End-to-End Dataset for Procedural Knowledge Extraction in Biomedical Texts},
+  publisher   = {Advances in Neural Information Processing Systems},
+  volume    = {36},
+  year      = {2024},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/file/23e3d86c9a19d0caf2ec997e73dfcfbd-Paper-Datasets_and_Benchmarks.pdf},
+}
 ```
