@@ -20,9 +20,13 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from .bigbiohub import BigBioConfig, Tasks, kb_features
+from bigbio.utils import schemas
+
+from .bigbiohub import BigBioConfig, Tasks
 
 _LOCAL = False
+_LANGUAGES = ["English"]
+_PUBMED = False
 
 _CITATION = """\
 @inproceedings{,
@@ -50,7 +54,7 @@ bases and annotates nearly 400 workflow relations between tool-context pairs.
 
 _HOMEPAGE = "https://github.com/ylaboratory/flambe"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = "CC_BY_4p0"
 
 _URLS = {
     _DATASETNAME: "https://zenodo.org/records/10050681/files/data.zip?download",
@@ -115,6 +119,20 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
             schema="source_ned_tool",
             subset_id="flambe_ned_tools",
         ),
+        BigBioConfig(
+            name="flambe_fulltext_tools_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="Flambe Tissues BigBio schema",
+            schema="bigbio_text",
+            subset_id="flambe_tool_bigbio",
+        ),
+        BigBioConfig(
+            name="flambe_fulltext_tissues_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="Flambe Tool BigBio schema",
+            schema="bigbio_text",
+            subset_id="flambe_tissue_bigbio",
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "flambe_ner_fulltext_tools_source"
@@ -147,8 +165,8 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        elif self.config.schema == "bigbio_kb":
-            features = kb_features
+        elif self.config.schema == "bigbio_text":
+            features = schemas.text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -192,6 +210,16 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                 "train": dl_manager.download_and_extract(_URLS["ned"]["tool_train"]),
                 "test": dl_manager.download_and_extract(_URLS["ned"]["tool_test"]),
                 "dev": dl_manager.download_and_extract(_URLS["ned"]["tool_val"]),
+            },
+            "flambe_fulltext_tools_bigbio_text": {
+                "train": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_train.iob"),
+                "test": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_test.iob"),
+                "dev": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_validation.iob"),
+            },
+            "flambe_fulltext_tissues_bigbio_text": {
+                "train": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_train.iob"),
+                "test": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_test.iob"),
+                "dev": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_validation.iob"),
             },
         }
 
@@ -250,6 +278,50 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                             tags.append(parts[1])
                 if id_value is not None:
                     yield key, {"id": id_value, "tokens": tokens, "tags": tags}
+                    key += 1
+        elif self.config.schema == "bigbio_text":
+            with open(filepath, "r") as f:
+                id_value = None
+                tokens = []
+                tags = []
+                key = 0
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        parts = line.split()
+                        if parts[1] == "begin":
+                            if id_value is not None:
+                                yield key, {
+                                    "id": key,
+                                    "document_id": id_value,
+                                    "text": " ".join(tokens),
+                                    "labels": tags,
+                                }
+                                key += 1
+                                tokens = []
+                                tags = []
+                            id_value = parts[0]
+                        elif parts[1] == "end":
+                            yield key, {
+                                "id": key,
+                                "document_id": id_value,
+                                "text": " ".join(tokens),
+                                "labels": tags,
+                            }
+                            key += 1
+                            id_value = None
+                            tokens = []
+                            tags = []
+                        else:
+                            tokens.append(parts[0])
+                            tags.append(parts[1])
+                if id_value is not None:
+                    yield key, {
+                        "id": key,
+                        "document_id": id_value,
+                        "text": " ".join(tokens),
+                        "labels": tags,
+                    }
                     key += 1
 
         elif self.config.schema == "source_ned_tissue":
