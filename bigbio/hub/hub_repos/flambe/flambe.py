@@ -15,14 +15,12 @@
 
 
 import os
-from typing import List, Tuple, Dict
 import re
+from typing import Dict, List, Tuple
 
 import datasets
-from .bigbiohub import BigBioConfig
-from .bigbiohub import Tasks
 
-from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _LOCAL = False
 
@@ -56,18 +54,20 @@ _LICENSE = "Creative Commons Attribution 4.0 International"
 
 _URLS = {
     _DATASETNAME: "https://zenodo.org/records/10050681/files/data.zip?download",
-    "ned": {"tissue_test": "https://zenodo.org/records/11218662/files/tissue_ned_test.csv?download",
-            "tissue_train": "https://zenodo.org/records/11218662/files/tissue_ned_train.csv?download",
-            "tissue_val": "https://zenodo.org/records/11218662/files/tissue_ned_val.csv?download",
-            "tool_test": "https://zenodo.org/records/11218662/files/tool_ned_test.csv?download",
-            "tool_train": "https://zenodo.org/records/11218662/files/tool_ned_train.csv?download", 
-            "tool_val" : "https://zenodo.org/records/11218662/files/tool_ned_val.csv?download"
-            }, 
+    "ned": {
+        "tissue_test": "https://zenodo.org/records/11218662/files/tissue_ned_test.csv?download",
+        "tissue_train": "https://zenodo.org/records/11218662/files/tissue_ned_train.csv?download",
+        "tissue_val": "https://zenodo.org/records/11218662/files/tissue_ned_val.csv?download",
+        "tool_test": "https://zenodo.org/records/11218662/files/tool_ned_test.csv?download",
+        "tool_train": "https://zenodo.org/records/11218662/files/tool_ned_train.csv?download",
+        "tool_val": "https://zenodo.org/records/11218662/files/tool_ned_val.csv?download",
+    },
 }
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION,
-                    Tasks.NAMED_ENTITY_DISAMBIGUATION,
-                    ]  
+_SUPPORTED_TASKS = [
+    Tasks.NAMED_ENTITY_RECOGNITION,
+    Tasks.NAMED_ENTITY_DISAMBIGUATION,
+]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
@@ -120,10 +120,7 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "flambe_ner_fulltext_tools_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-
         if self.config.schema == "source":
-
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -131,7 +128,7 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                     "tags": datasets.Sequence(datasets.Value("string")),
                 }
             )
-        
+
         elif self.config.schema == "source_ned_tissue":
             features = datasets.Features(
                 {
@@ -140,7 +137,7 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                     "NCIT_name": datasets.Value("string"),
                 }
             )
-        
+
         elif self.config.schema == "source_ned_tool":
             features = datasets.Features(
                 {
@@ -152,7 +149,7 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
 
         elif self.config.schema == "bigbio_kb":
             features = kb_features
-            
+
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -164,9 +161,8 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
 
-
         # TODO: KEEP if your dataset is PUBLIC; remove if not
-        
+
         # TODO: KEEP if your dataset is PUBLIC; remove if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
@@ -187,17 +183,16 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                 "test": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_validation.iob"),
             },
-            "flambe_ned_tissues" : {
+            "flambe_ned_tissues": {
                 "train": dl_manager.download_and_extract(_URLS["ned"]["tissue_train"]),
                 "test": dl_manager.download_and_extract(_URLS["ned"]["tissue_test"]),
-                "dev":  dl_manager.download_and_extract(_URLS["ned"]["tissue_val"]),
-
-            }, 
-            "flambe_ned_tools" : {
+                "dev": dl_manager.download_and_extract(_URLS["ned"]["tissue_val"]),
+            },
+            "flambe_ned_tools": {
                 "train": dl_manager.download_and_extract(_URLS["ned"]["tool_train"]),
                 "test": dl_manager.download_and_extract(_URLS["ned"]["tool_test"]),
-                "dev":  dl_manager.download_and_extract(_URLS["ned"]["tool_val"]),
-            }
+                "dev": dl_manager.download_and_extract(_URLS["ned"]["tool_val"]),
+            },
         }
 
         return [
@@ -224,11 +219,10 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-       
-        if self.config.schema == 'source':
+
+        if self.config.schema == "source":
             with open(filepath, "r") as f:
                 id_value = None
                 tokens = []
@@ -241,13 +235,13 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                         if parts[1] == "begin":
                             if id_value is not None:
                                 yield key, {"id": id_value, "tokens": tokens, "tags": tags}
-                                key += 1 
+                                key += 1
                                 tokens = []
                                 tags = []
                             id_value = parts[0]
                         elif parts[1] == "end":
                             yield key, {"id": id_value, "tokens": tokens, "tags": tags}
-                            key += 1 
+                            key += 1
                             id_value = None
                             tokens = []
                             tags = []
@@ -259,19 +253,19 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                     key += 1
 
         elif self.config.schema == "source_ned_tissue":
-           key = 0
-           for line in open(filepath):
-                csv_row = line.strip('\n').split(",")
+            key = 0
+            for line in open(filepath):
+                csv_row = line.strip("\n").split(",")
                 if csv_row is not None:
-                    yield key, { "orginal_text": csv_row[0], "mapped_NCIT": csv_row[1], "NCIT_name": csv_row[2]}
+                    yield key, {"orginal_text": csv_row[0], "mapped_NCIT": csv_row[1], "NCIT_name": csv_row[2]}
                     key += 1
 
         elif self.config.schema == "source_ned_tool":
             key = 0
             for line in open(filepath):
-                csv_row = line.strip('\n').split(",")
+                csv_row = line.strip("\n").split(",")
                 if csv_row is not None:
-                    yield key, { "orginal_text": csv_row[0], "standardized_name": csv_row[1], "url": csv_row[2]}
+                    yield key, {"orginal_text": csv_row[0], "standardized_name": csv_row[1], "url": csv_row[2]}
                     key += 1
 
 
