@@ -16,14 +16,14 @@ bigbio_tasks:
 ---
 
 
-# Dataset Card for SciTail
+# Dataset Card for Flambe
 
 ## Dataset Description
 
 - **Homepage:** https://github.com/ylaboratory/flambe
 - **Pubmed:** False
 - **Public:** True
-- **Tasks:** TE [This needs to be a comma delimitted string of task short names]
+- **Tasks:** NER,NED
 
 
 FlaMBe is a dataset aimed at procedural knowledge extraction from biomedical texts, particularly focusing on single cell research methodologies described in academic papers. It includes annotations from 55 full-text articles and 1,195 abstracts, covering nearly 710,000 tokens, and is  distinguished by its comprehensive named entity recognition (NER) and disambiguation (NED) for  tissue/cell types, software tools, and computational methods. This dataset, to our knowledge, is the largest of its kind for tissue/cell types, links entities to identifiers in relevant knowledge  bases and annotates nearly 400 workflow relations between tool-context pairs. 

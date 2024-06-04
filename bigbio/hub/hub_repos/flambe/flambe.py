@@ -13,23 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This template serves as a starting point for contributing a dataset to the BigScience Biomedical repo.
-
-When modifying it for your dataset, look for TODO items that offer specific instructions.
-
-Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
-
-To create a dataset loading script you will create a class and implement 3 methods:
-  * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
-  * `_split_generators`: Downloads and extracts data for each split (e.g. train/val/test) or associate local data with each split.
-  * `_generate_examples`: Creates examples from data on disk that conform to each schema defined in `_info`.
-
-TODO: Before submitting your script, delete this doc string and replace it with a description of your dataset.
-
-[bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
-"""
 
 import os
 from typing import List, Tuple, Dict
@@ -39,13 +22,10 @@ import datasets
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-# TODO: import the schema that fits your dataset:
 from .bigbiohub import kb_features
 
-# TODO: add True or False boolean value indicating if this dataset is local or not
 _LOCAL = False
 
-# TODO: Add BibTeX citation
 _CITATION = """\
 @inproceedings{,
   author    = {Dannenfelser, Ruth and Zhong, Jeffrey and Zhang, Ran and Yao, Vicky},
@@ -57,12 +37,9 @@ _CITATION = """\
 }
 """
 
-# TODO: create a module level variable with your dataset name (should match script name)
-#  E.g. Hallmarks of Cancer: flambe --> hallmarks_of_cancer
 _DATASETNAME = "flambe"
+_DISPLAYNAME = "Flambe"
 
-# TODO: Add description of the dataset here
-# You can copy an official description
 _DESCRIPTION = """\
 FlaMBe is a dataset aimed at procedural knowledge extraction from biomedical texts, 
 particularly focusing on single cell research methodologies described in academic papers. It includes 
@@ -73,22 +50,10 @@ the largest of its kind for tissue/cell types, links entities to identifiers in 
 bases and annotates nearly 400 workflow relations between tool-context pairs. 
 """
 
-# TODO: Add a link to an official homepage for the dataset here (if possible)
 _HOMEPAGE = "https://github.com/ylaboratory/flambe"
 
-# TODO: Add the licence for the dataset here (if possible)
-# Note that this doesn't have to be a common open source license.
-# Some datasets have custom licenses. In this case, simply put the full license terms
-# into `_LICENSE`
 _LICENSE = "Creative Commons Attribution 4.0 International"
 
-# TODO: Add links to the urls needed to download your dataset files.
-#  For local datasets, this variable can be an empty dictionary.
-
-# For publicly available datasets you will most likely end up passing these URLs to dl_manager in _split_generators.
-# In most cases the URLs will be the same for the source and bigbio config.
-# However, if you need to access different files for each config you can have multiple entries in this dict.
-# This can be an arbitrarily nested dict/list of URLs (see below in `_split_generators` method)
 _URLS = {
     _DATASETNAME: "https://zenodo.org/records/10050681/files/data.zip?download",
     "ned": {"tissue_test": "https://zenodo.org/records/11218662/files/tissue_ned_test.csv?download",
@@ -100,97 +65,65 @@ _URLS = {
             }, 
 }
 
-# TODO: add supported task by dataset. One dataset may support multiple tasks
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION,
                     Tasks.NAMED_ENTITY_DISAMBIGUATION,
-                    ]  # example: [Tasks.TRANSLATION, Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
+                    ]  
 
-# TODO: set this to a version that is associated with the dataset. if none exists use "1.0.0"
-#  This version doesn't have to be consistent with semantic versioning. Anything that is
-#  provided by the original dataset as a version goes.
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-# TODO: Name the dataset class to match the script name using CamelCase instead of snake_case
-#  Append "Dataset" to the class name: BioASQ --> BioasqDataset
-class NewDataset(datasets.GeneratorBasedBuilder):
+class FlambeDataset(datasets.GeneratorBasedBuilder):
     """TODO: Short description of my dataset."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # You will be able to load the "source" or "bigbio" configurations with
-    # ds_source = datasets.load_dataset('my_dataset', name='source')
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio')
-
-    # For local datasets you can make use of the `data_dir` and `data_files` kwargs
-    # https://huggingface.co/docs/datasets/add_dataset.html#downloading-data-files-and-organizing-splits
-    # ds_source = datasets.load_dataset('my_dataset', name='source', data_dir="/path/to/data/files")
-    # ds_bigbio = datasets.load_dataset('my_dataset', name='bigbio', data_dir="/path/to/data/files")
-
-    # TODO: For each dataset, implement Config for Source and BigBio;
-    #  If dataset contains more than one subset (see examples/bioasq.py) implement for EACH of them.
-    #  Each of them should contain:
-    #   - name: should be unique for each dataset config eg. bioasq10b_(source|bigbio)_[bigbio_schema_name]
-    #   - version: option = (SOURCE_VERSION|BIGBIO_VERSION)
-    #   - description: one line description for the dataset
-    #   - schema: options = (source|bigbio_[bigbio_schema_name])
-    #   - subset_id: subset id is the canonical name for the dataset (eg. bioasq10b)
-    #  where [bigbio_schema_name] = (kb, pairs, qa, text, t2t, entailment)
-
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="fulltext_tools",
+            name="flambe_ner_fulltext_tools_source",
             version=SOURCE_VERSION,
-            description="fulltext_tools",
+            description="NER dataset for tools from full papers",
             schema="source",
-            subset_id="fulltext_tools",
+            subset_id="flambe_ner_fulltext_tools_source",
         ),
         BigBioConfig(
-            name="fulltext_tissues",
+            name="flambe_ner_fulltext_tissues_source",
             version=SOURCE_VERSION,
-            description="fulltext_tissues",
+            description="NER dataset for tissues from full papers",
             schema="source",
-            subset_id="fulltext_tissues",
+            subset_id="flambe_ner_fulltext_tissues_source",
         ),
         BigBioConfig(
-            name="abstract_tissues",
+            name="flambe_ner_abstract_tissues_source",
             version=SOURCE_VERSION,
-            description="abstract_tissues",
+            description="NER dataset for tissues from abstracts",
             schema="source",
-            subset_id="abstract_tissues",
+            subset_id="flambe_ner_abstract_tissues_source",
         ),
         BigBioConfig(
-            name="ned_tissues",
+            name="flambe_ned_tissues",
             version=SOURCE_VERSION,
-            description="ned_fulltext_tissues",
+            description="NED dataset for tissues from full papers",
             schema="source_ned_tissue",
-            subset_id="ned_tissues",
+            subset_id="flambe_ned_tissues",
         ),
         BigBioConfig(
-            name="ned_tools",
+            name="flambe_ned_tools",
             version=SOURCE_VERSION,
-            description="ned_fulltext_tools",
+            description="NED dataset for tools from full papers",
             schema="source_ned_tool",
-            subset_id="ned_tools",
+            subset_id="flambe_ned_tools",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "fulltext_tools"
+    DEFAULT_CONFIG_NAME = "flambe_ner_fulltext_tools_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
 
         if self.config.schema == "source":
-            # TODO: Create your source schema here
-            #raise NotImplementedError()
 
-            # EX: Arbitrary NER type dataset
             features = datasets.Features(
                 {
                     "id": datasets.Value("string"),
@@ -217,16 +150,9 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                 }
             )
 
-        # Choose the appropriate bigbio schema for your task and copy it here. You can find information on the schemas in the CONTRIBUTING guide.
-
-        # In rare cases you may get a dataset that supports multiple tasks requiring multiple schemas. In that case you can define multiple bigbio configs with a bigbio_[bigbio_schema_name] format.
-
-        # For example bigbio_kb, bigbio_t2t
         elif self.config.schema == "bigbio_kb":
             features = kb_features
-            # TODO: Choose your big-bio schema here
-            #raise NotImplementedError()
-
+            
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -237,54 +163,37 @@ class NewDataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-        # TODO: This method is tasked with downloading/extracting the data and defining the splits depending on the configuration
 
-        # If you need to access the "source" or "bigbio" config choice, that will be in self.config.name
 
-        # LOCAL DATASETS: You do not need the dl_manager; you can ignore this argument. Make sure `gen_kwargs` in the return gets passed the right filepath
-
-        # PUBLIC DATASETS: Assign your data-dir based on the dl_manager.
-
-        # dl_manager is a datasets.download.DownloadManager that can be used to download and extract URLs; many examples use the download_and_extract method; see the DownloadManager docs here: https://huggingface.co/docs/datasets/package_reference/builder_classes.html#datasets.DownloadManager
-
-        # dl_manager can accept any type of nested list/dict and will give back the same structure with the url replaced with the path to local files.
-
+        # TODO: KEEP if your dataset is PUBLIC; remove if not
+        
         # TODO: KEEP if your dataset is PUBLIC; remove if not
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
 
-        # TODO: KEEP if your dataset is LOCAL; remove if NOT
-        # if self.config.data_dir is None:
-        #     raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
-        # else:
-        #     data_dir = self.config.data_dir
-
-        # Not all datasets have predefined canonical train/val/test splits.
-        # If your dataset has no predefined splits, use datasets.Split.TRAIN for all of the data.
-
         path = {
-            "fulltext_tools": {
+            "flambe_ner_fulltext_tools_source": {
                 "train": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_train.iob"),
                 "test": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tools_validation.iob"),
             },
-            "fulltext_tissues": {
+            "flambe_ner_fulltext_tissues_source": {
                 "train": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_train.iob"),
                 "test": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_validation.iob"),
             },
-            "abstract_tissues": {
+            "flambe_ner_abstract_tissues_source": {
                 "train": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_train.iob"),
                 "test": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_validation.iob"),
             },
-            "ned_tissues" : {
+            "flambe_ned_tissues" : {
                 "train": dl_manager.download_and_extract(_URLS["ned"]["tissue_train"]),
                 "test": dl_manager.download_and_extract(_URLS["ned"]["tissue_test"]),
                 "dev":  dl_manager.download_and_extract(_URLS["ned"]["tissue_val"]),
 
             }, 
-            "ned_tools" : {
+            "flambe_ned_tools" : {
                 "train": dl_manager.download_and_extract(_URLS["ned"]["tool_train"]),
                 "test": dl_manager.download_and_extract(_URLS["ned"]["tool_test"]),
                 "dev":  dl_manager.download_and_extract(_URLS["ned"]["tool_val"]),
@@ -294,7 +203,6 @@ class NewDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": path[self.config.name]["train"],
                     "split": "train",
@@ -316,19 +224,10 @@ class NewDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
-
-    # TODO: change the args of this function to match the keys in `gen_kwargs`. You may add any necessary kwargs.
-
 
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        # TODO: This method handles input defined in _split_generators to yield (key, example) tuples from the dataset.
-
-        # The `key` is for legacy reasons (tfds) and is not important in itself, but must be unique for each example.
-
-        # NOTE: For local datasets you will have access to self.config.data_dir and self.config.data_files
-
+       
         if self.config.schema == 'source':
             with open(filepath, "r") as f:
                 id_value = None
@@ -376,11 +275,5 @@ class NewDataset(datasets.GeneratorBasedBuilder):
                     key += 1
 
 
-# This template is based on the following template from the datasets package:
-# https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py
-
-
-# This allows you to run your dataloader with `python flambe.py` during development
-# TODO: Remove this before making your PR
 if __name__ == "__main__":
     datasets.load_dataset(__file__)
