@@ -133,6 +133,13 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_text",
             subset_id="flambe_tissue_bigbio",
         ),
+        BigBioConfig(
+            name="flambe_abstract_tissues_bigbio_text",
+            version=BIGBIO_VERSION,
+            description="Flambe Tool BigBio schema",
+            schema="bigbio_text",
+            subset_id="flambe_tissue_bigbio",
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "flambe_ner_fulltext_tools_source"
@@ -220,6 +227,11 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
                 "train": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_train.iob"),
                 "test": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_test.iob"),
                 "dev": os.path.join(data_dir, "data/tags/fulltext_iob/fulltext_tissues_validation.iob"),
+            },
+            "flambe_abstract_tissues_bigbio_text": {
+                "train": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_train.iob"),
+                "test": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_test.iob"),
+                "dev": os.path.join(data_dir, "data/tags/abstract_iob/abstract_tissues_validation.iob"),
             },
         }
 
