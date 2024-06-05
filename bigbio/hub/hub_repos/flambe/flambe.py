@@ -20,9 +20,7 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from bigbio.utils import schemas
-
-from .bigbiohub import BigBioConfig, Tasks
+from .bigbiohub import BigBioConfig, Tasks, text_features
 
 _LOCAL = False
 _LANGUAGES = ["English"]
@@ -173,7 +171,7 @@ class FlambeDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+            features = text_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
