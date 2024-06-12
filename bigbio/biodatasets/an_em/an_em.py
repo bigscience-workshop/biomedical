@@ -54,11 +54,11 @@ _DATASETNAME = "an_em"
 _DISPLAYNAME = "AnEM"
 
 _DESCRIPTION = """\
-AnEM corpus is a domain- and species-independent resource manually annotated for anatomical
-entity mentions using a fine-grained classification system. The corpus consists of 500 documents
-(over 90,000 words) selected randomly from citation abstracts and full-text papers with
-the aim of making the corpus representative of the entire available biomedical scientific
-literature. The corpus annotation covers mentions of both healthy and pathological anatomical
+AnEM corpus is a domain- and species-independent resource manually annotated for anatomical \
+entity mentions using a fine-grained classification system. The corpus consists of 500 documents \
+(over 90,000 words) selected randomly from citation abstracts and full-text papers with \
+the aim of making the corpus representative of the entire available biomedical scientific \
+literature. The corpus annotation covers mentions of both healthy and pathological anatomical \
 entities and contains over 3,000 annotated mentions.
 """
 
@@ -167,10 +167,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": data_dir
-                    / "AnEM-1.0.4"
-                    / "development"
-                    / "train-files.list",
+                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "train-files.list",
                     "split": "train",
                 },
             ),
@@ -186,10 +183,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
                     "filepath": all_data,
-                    "split_path": data_dir
-                    / "AnEM-1.0.4"
-                    / "development"
-                    / "test-files.list",
+                    "split_path": data_dir / "AnEM-1.0.4" / "development" / "test-files.list",
                     "split": "dev",
                 },
             ),
@@ -251,10 +245,7 @@ class AnEMDataset(datasets.GeneratorBasedBuilder):
             "equivalences": [
                 {
                     "entity_id": brat_entity["id"],
-                    "ref_ids": [
-                        f"{brat_example['document_id']}_{ids}"
-                        for ids in brat_entity["ref_ids"]
-                    ],
+                    "ref_ids": [f"{brat_example['document_id']}_{ids}" for ids in brat_entity["ref_ids"]],
                 }
                 for brat_entity in brat_example["equivalences"]
             ],
