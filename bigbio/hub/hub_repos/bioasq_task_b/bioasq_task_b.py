@@ -715,7 +715,7 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             "bioasq_7b": "BioASQ-training7b/trainining7b.json",
             "bioasq_8b": "training8b.json",  # HACK - this zipfile strips the dirname
             "bioasq_9b": "BioASQ-training9b/training9b.json",
-            "bioasq_10b": "BioASQ-training10b/training10b.json",
+            "bioasq_10b": "training10b.json",
             "bioasq_11b": "BioASQ-training11b/training11b.json",
         }
 
