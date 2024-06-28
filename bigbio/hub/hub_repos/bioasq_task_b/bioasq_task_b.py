@@ -767,6 +767,19 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             )
         return exact_answer
 
+    @staticmethod
+    def _normalize_yesno(yesno):
+        assert len(yesno) == 1, "There should be only one answer."
+        yesno = yesno[0]
+        # normalize answers like "Yes."
+        yesno = yesno.lower()
+        if yesno.startswith('yes'):
+            return ['yes']
+        elif yesno.startswith('no'):
+            return ['no']
+        else:
+            raise ValueError(f'Unrecognized yesno value: {yesno}')
+
     def _generate_examples(self, filepath, split):
         """Yields examples as (key, example) tuples."""
 
@@ -798,6 +811,13 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     # for questions that do not have snippets, skip
                     if "snippets" not in record:
                         continue
+
+                    choices = []
+                    answer = self._get_exact_answer(record)
+                    if record["type"] == 'yesno':
+                        choices = ['yes', 'no']
+                        answer = self._normalize_yesno(answer)
+
                     for i, snippet in enumerate(record["snippets"]):
                         key = f'{record["id"]}_{i}'
                         # ignore duplicate records
@@ -809,8 +829,8 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                                 "question_id": record["id"],
                                 "question": record["body"],
                                 "type": record["type"],
-                                "choices": [],
+                                "choices": choices,
                                 "context": snippet["text"],
-                                "answer": self._get_exact_answer(record),
+                                "answer": answer,
                             }
                             uid += 1
