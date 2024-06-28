@@ -61,6 +61,24 @@ _CITATION = """\
 _DATASETNAME = "bioasq_task_b"
 _DISPLAYNAME = "BioASQ Task B"
 
+_BIOASQ_11B_DESCRIPTION = """\
+The data are intended to be used as training and development data for BioASQ
+11, which will take place during 2023. There is one file containing the data:
+ - training11b.json
+
+The file contains the data of the first ten editions of the challenge: 4719
+questions [1] with their relevant documents, snippets, concepts and RDF
+triples, exact and ideal answers.
+
+Differences with BioASQ-training10b.json 
+	- 485 new questions added from BioASQ10
+		- The question with id 621ecf1a3a8413c653000061 had identical body with
+		5ac0a36f19833b0d7b000002. All relevant elements from both questions
+		are available in the merged question with id 5ac0a36f19833b0d7b000002.
+		
+[1] The distribution of 4719 questions : 1417 factoid, 1271 yesno, 1130 summary, 901 list
+"""
+
 _BIOASQ_10B_DESCRIPTION = """\
 The data are intended to be used as training and development data for BioASQ
 10, which will take place during 2022. There is one file containing the data:
@@ -361,6 +379,7 @@ See 'Domain-Specific Language Model Pretraining for Biomedical
 Natural Language Processing' """
 
 _DESCRIPTION = {
+    "bioasq_11b": _BIOASQ_11B_DESCRIPTION,
     "bioasq_10b": _BIOASQ_10B_DESCRIPTION,
     "bioasq_9b": _BIOASQ_9B_DESCRIPTION,
     "bioasq_8b": _BIOASQ_8B_DESCRIPTION,
@@ -380,6 +399,7 @@ _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 _LICENSE = "NLM_LICENSE"
 
 _URLs = {
+    "bioasq_11b": ["BioASQ-training11b.zip", "Task11BGoldenEnriched.zip"],
     "bioasq_10b": ["BioASQ-training10b.zip", "Task10BGoldenEnriched.zip"],
     "bioasq_9b": ["BioASQ-training9b.zip", "Task9BGoldenEnriched.zip"],
     "bioasq_8b": ["BioASQ-training8b.zip", "Task8BGoldenEnriched.zip"],
@@ -489,9 +509,9 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
-    # BioASQ2 through BioASQ10
+    # BioASQ2 through BioASQ11
     BUILDER_CONFIGS = []
-    for version in range(2, 11):
+    for version in range(2, 12):
         BUILDER_CONFIGS.append(
             BigBioConfig(
                 name=f"bioasq_{version}b_source",
@@ -695,7 +715,8 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             "bioasq_7b": "BioASQ-training7b/trainining7b.json",
             "bioasq_8b": "training8b.json",  # HACK - this zipfile strips the dirname
             "bioasq_9b": "BioASQ-training9b/training9b.json",
-            "bioasq_10b": "BioASQ-training10b/training10b.json",
+            "bioasq_10b": "training10b.json",
+            "bioasq_11b": "BioASQ-training11b/training11b.json",
         }
 
         # BLURB has custom train/dev/test splits based on Task 7B
@@ -746,6 +767,19 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             )
         return exact_answer
 
+    @staticmethod
+    def _normalize_yesno(yesno):
+        assert len(yesno) == 1, "There should be only one answer."
+        yesno = yesno[0]
+        # normalize answers like "Yes."
+        yesno = yesno.lower()
+        if yesno.startswith('yes'):
+            return ['yes']
+        elif yesno.startswith('no'):
+            return ['no']
+        else:
+            raise ValueError(f'Unrecognized yesno value: {yesno}')
+
     def _generate_examples(self, filepath, split):
         """Yields examples as (key, example) tuples."""
 
@@ -777,6 +811,13 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                     # for questions that do not have snippets, skip
                     if "snippets" not in record:
                         continue
+
+                    choices = []
+                    answer = self._get_exact_answer(record)
+                    if record["type"] == 'yesno':
+                        choices = ['yes', 'no']
+                        answer = self._normalize_yesno(answer)
+
                     for i, snippet in enumerate(record["snippets"]):
                         key = f'{record["id"]}_{i}'
                         # ignore duplicate records
@@ -788,8 +829,8 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                                 "question_id": record["id"],
                                 "question": record["body"],
                                 "type": record["type"],
-                                "choices": [],
+                                "choices": choices,
                                 "context": snippet["text"],
-                                "answer": self._get_exact_answer(record),
+                                "answer": answer,
                             }
                             uid += 1
