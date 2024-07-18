@@ -1,8 +1,16 @@
 ---
 language:
-  - en, fr, de, nl, es
+  - en
+  - fr
+  - de
+  - nl
+  - es
 bigbio_language:
-  - English, French, German, Dutch, Spanish
+  - English
+  - French
+  - German
+  - Dutch
+  - Spanish
 license: gpl-3.0
 bigbio_license_shortname: GPL_3p0_ONLY
 multilinguality: multilingual
