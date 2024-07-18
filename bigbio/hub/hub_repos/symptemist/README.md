@@ -3,7 +3,7 @@ language:
   - es
 bigbio_language:
   - Spanish
-license: Creative Commons Attribution 4.0 International License
+license: cc-by-4.0
 bigbio_license_shortname: CC_BY_4p0
 multilinguality: monolingual
 pretty_name: SympTEMIST
