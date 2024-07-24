@@ -30,7 +30,7 @@ from .bigbiohub import kb_features
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -55,9 +55,11 @@ between them corresponding to a specific set of biologically relevant relation t
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-1/"
 
-_LICENSE = 'Creative Commons Attribution 4.0 International'
+_LICENSE = "CC_BY_4p0"
 
-_URLS = {_DATASETNAME: "https://zenodo.org/record/5119892/files/drugprot-training-development-test-background.zip?download=1"}
+_URLS = {
+    _DATASETNAME: "https://zenodo.org/record/5119892/files/drugprot-training-development-test-background.zip?download=1"
+}
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
