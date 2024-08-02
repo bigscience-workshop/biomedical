@@ -48,15 +48,13 @@ This will explain the types of arguments you may need to test for. A brief annot
 
 If any (severe) errors occur, report these to the PR author.
 
-## Merge the PR
-If all previous checks could be performed successfully merge the PR into main branch:
-```
-gh pr merge PULL-REQUEST
-```
-
 ## Update hub dataset
-After updating the GitHub repository, the data set needs to be updated in the [BigBio Huggingface 
-datasets hub](https://huggingface.co/bigbio). For this, first create or retrieve an API access token
+Finally, the data set needs to be updated in the [BigBio Huggingface 
+datasets hub](https://huggingface.co/bigbio). 
+
+Note that this step should be performed just before merging the PR, as uploading to the hub might fail due to errors in the README / dataset card that the PR author can still fix.
+
+For this, first create or retrieve an API access token
 of your huggingface account:
 
 [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
@@ -85,3 +83,9 @@ HUGGING_FACE_HUB_TOKEN=<ACCESS-TOKEN>  python bigbio/hub/upload.py <dataset> -d
 After running the command, visit hub webpage of the data set and check if the model card and the data 
 viewer are displayed and the files are updated correctly, e.g. 
 [https://huggingface.co/datasets/bigbio/bc5cdr](https://huggingface.co/datasets/bigbio/bc5cdr)
+
+## Merge the PR
+If all previous checks could be performed successfully merge the PR into main branch:
+```
+gh pr merge PULL-REQUEST
+```
