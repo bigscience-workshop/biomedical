@@ -16,7 +16,9 @@
 """
 A dataset loading script for the Complex Named Entity Corpus (CoNECo.)
 
-CoNECo is an annotated corpus for NER and NEN of protein-containing complexes. CoNECo comprises 1,621 documents with 2,052 entities, 1,976 of which are normalized to Gene Ontology. We divided the corpus into training, development, and test sets.
+CoNECo is an annotated corpus for NER and NEN of protein-containing complexes. \
+CoNECo comprises 1,621 documents with 2,052 entities, 1,976 of which are normalized \
+to Gene Ontology. We divided the corpus into training, development, and test sets.
 """
 
 from pathlib import Path
@@ -26,26 +28,21 @@ import datasets
 
 from bigbio.utils.license import Licenses
 
-from .bigbiohub import (
-    BigBioConfig,
-    Tasks,
-    brat_parse_to_bigbio_kb,
-    kb_features,
-    parse_brat_file,
-)
+from .bigbiohub import (BigBioConfig, Tasks, brat_parse_to_bigbio_kb,
+                        kb_features, parse_brat_file)
 
 _LOCAL = False
 _CITATION = """\
 @article {Nastou2024.05.18.594800,
-	author = {Nastou, Katerina and Koutrouli, Mikaela and Pyysalo, Sampo and Jensen, Lars Juhl},
-	title = {CoNECo: A Corpus for Named Entity recognition and normalization of protein Complexes},
-	elocation-id = {2024.05.18.594800},
-	year = {2024},
-	doi = {10.1101/2024.05.18.594800},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2024/05/29/2024.05.18.594800},
-	eprint = {https://www.biorxiv.org/content/early/2024/05/29/2024.05.18.594800.full.pdf},
-	journal = {bioRxiv}
+    author = {Nastou, Katerina and Koutrouli, Mikaela and Pyysalo, Sampo and Jensen, Lars Juhl},
+    title = {CoNECo: A Corpus for Named Entity recognition and normalization of protein Complexes},
+    elocation-id = {2024.05.18.594800},
+    year = {2024},
+    doi = {10.1101/2024.05.18.594800},
+    publisher = {Cold Spring Harbor Laboratory},
+    URL = {https://www.biorxiv.org/content/early/2024/05/29/2024.05.18.594800},
+    eprint = {https://www.biorxiv.org/content/early/2024/05/29/2024.05.18.594800.full.pdf},
+    journal = {bioRxiv}
 }
 """
 
@@ -53,7 +50,9 @@ _DATASETNAME = "coneco"
 _DISPLAYNAME = "CoNECo"
 
 _DESCRIPTION = """\
-Complex Named Entity Corpus (CoNECo) is an annotated corpus for NER and NEN of protein-containing complexes. CoNECo comprises 1,621 documents with 2,052 entities, 1,976 of which are normalized to Gene Ontology. We divided the corpus into training, development, and test sets.
+Complex Named Entity Corpus (CoNECo) is an annotated corpus for NER and NEN of protein-containing complexes. \
+CoNECo comprises 1,621 documents with 2,052 entities, 1,976 of which are normalized to Gene Ontology. We \
+divided the corpus into training, development, and test sets.
 """
 
 _HOMEPAGE = "https://zenodo.org/records/11263147"
@@ -100,7 +99,6 @@ class ConecoDataset(datasets.GeneratorBasedBuilder):
     DEFAULT_CONFIG_NAME = "coneco_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
         if self.config.schema == "source":
             features = datasets.Features(
                 {
