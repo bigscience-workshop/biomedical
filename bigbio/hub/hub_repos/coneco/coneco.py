@@ -71,7 +71,7 @@ divided the corpus into training, development, and test sets.
 
 _HOMEPAGE = "https://zenodo.org/records/11263147"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = "CC_BY_4p0"
 
 _URLS = {
     _DATASETNAME: "https://zenodo.org/records/11263147/files/CoNECo_corpus.tar.gz?download=1",
