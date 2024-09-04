@@ -180,6 +180,11 @@ class ConecoDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _filter_oos_entities(self, brat_parse):
+        """Filter out entity annotations with out-of-scope type."""
+        brat_parse["text_bound_annotations"] = [a for a in brat_parse["text_bound_annotations"] if a["type"] != "OOS"]
+        return brat_parse
+
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
@@ -187,6 +192,7 @@ class ConecoDataset(datasets.GeneratorBasedBuilder):
                 if file.suffix != ".txt":
                     continue
                 brat_parsed = parse_brat_file(file)
+                brat_parsed = self._filter_oos_entities(brat_parsed)
                 brat_parsed["id"] = file.stem
 
                 yield brat_parsed["document_id"], brat_parsed
@@ -196,6 +202,7 @@ class ConecoDataset(datasets.GeneratorBasedBuilder):
                 if file.suffix != ".txt":
                     continue
                 brat_parsed = parse_brat_file(file)
+                brat_parsed = self._filter_oos_entities(brat_parsed)
                 bigbio_kb_example = brat_parse_to_bigbio_kb(brat_parsed)
                 bigbio_kb_example["id"] = file.stem
 
