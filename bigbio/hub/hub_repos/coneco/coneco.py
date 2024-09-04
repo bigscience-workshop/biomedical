@@ -26,12 +26,10 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from bigbio.utils.license import Licenses
-
 from .bigbiohub import (BigBioConfig, Tasks, brat_parse_to_bigbio_kb,
                         kb_features, parse_brat_file)
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
@@ -56,7 +54,8 @@ GitHub https://zenodo.org/records/10693653.}",
     issn = {2635-0041},
     doi = {10.1093/bioadv/vbae116},
     url = {https://doi.org/10.1093/bioadv/vbae116},
-    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbae116/58869902/vbae116.pdf},
+    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbae116/\
+58869902/vbae116.pdf},
 }
 """
 
