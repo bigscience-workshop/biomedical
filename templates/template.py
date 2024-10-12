@@ -19,7 +19,7 @@ This template serves as a starting point for contributing a dataset to the BigSc
 When modifying it for your dataset, look for TODO items that offer specific instructions.
 
 Full documentation on writing dataset loading scripts can be found here:
-https://huggingface.co/docs/datasets/add_dataset.html
+https://huggingface.co/docs/datasets/create_dataset
 
 To create a dataset loading script you will create a class and implement 3 methods:
   * `_info`: Establishes the schema for the dataset, and returns a datasets.DatasetInfo object.
