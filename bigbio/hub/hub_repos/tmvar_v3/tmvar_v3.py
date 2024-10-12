@@ -27,23 +27,16 @@ from bioc import pubtator
 from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _CITATION = """\
-@misc{https://doi.org/10.48550/arxiv.2204.03637,
-  title        = {tmVar 3.0: an improved variant concept recognition and normalization tool},
-  author       = {
-    Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic,
-    Aleksandar and Lu, Zhiyong
-  },
-  year         = 2022,
-  publisher    = {arXiv},
-  doi          = {10.48550/ARXIV.2204.03637},
-  url          = {https://arxiv.org/abs/2204.03637},
-  copyright    = {Creative Commons Attribution 4.0 International},
-  keywords     = {
-    Computation and Language (cs.CL), FOS: Computer and information sciences,
-    FOS: Computer and information sciences
-  }
+@article{wei2022tmvar,
+  title={tmVar 3.0: an improved variant concept recognition and normalization tool},
+  author={Wei, Chih-Hsuan and Allot, Alexis and Riehle, Kevin and Milosavljevic, Aleksandar and Lu, Zhiyong},
+  journal={Bioinformatics},
+  volume={38},
+  number={18},
+  pages={4449--4451},
+  year={2022},
+  publisher={Oxford University Press}
 }
-
 """
 _LANGUAGES = ["English"]
 _PUBMED = True
@@ -60,9 +53,9 @@ identifiers from the ClinGen Allele Registry It can be used for NER tasks and \
 NED tasks, This dataset does NOT have splits.
 """
 
-_HOMEPAGE = "https://www.ncbi.nlm.nih.gov/research/bionlp/Tools/tmvar/"
+_HOMEPAGE = "https://github.com/ncbi/tmVar3"
 
-_LICENSE = "License information unavailable"
+_LICENSE = "UNKNOWN"
 
 _URLS = {_DATASETNAME: "ftp://ftp.ncbi.nlm.nih.gov/pub/lu/tmVar3/tmVar3Corpus.txt"}
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
