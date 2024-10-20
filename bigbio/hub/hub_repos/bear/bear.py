@@ -19,9 +19,7 @@ from typing import Dict, List, Tuple, Union
 import datasets
 import jsonlines
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from .bigbiohub import kb_features, BigBioConfig, Tasks
 
 _CITATION = """\
 @InProceedings{wuehrl_klinger_2022,
@@ -36,14 +34,18 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bear"
+_DISPLAYNAME = "BEAR"
+
+_LANGUAGES = ['English']
+_PUBMED = True
+_LOCAL = False
+_LICENSE = "CC_BY_SA_4p0"
 
 _DESCRIPTION = """\
 A dataset of 2100 Twitter posts annotated with 14 different types of biomedical entities (e.g., disease, treatment,
 risk factor, etc.) and 20 relation types (including caused, treated, worsens, etc.).
 """
-
 _HOMEPAGE = "https://www.ims.uni-stuttgart.de/en/research/resources/corpora/bioclaim/"
-_LICENSE = "CC BY-SA"
 
 _URLS = {
     _DATASETNAME: "https://www.ims.uni-stuttgart.de/documents/ressourcen/korpora/bioclaim/bear-corpus-WuehrlKlinger-\
@@ -113,7 +115,7 @@ class BearDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
