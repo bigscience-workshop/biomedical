@@ -36,11 +36,13 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import CustomLicense
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{karimi2015cadec,
   title={Cadec: A corpus of adverse drug event annotations},
   author={Karimi, Sarvnaz and Metke-Jimenez, Alejandro and Kemp, Madonna and Wang, Chen},
   journal={Journal of biomedical informatics},
@@ -52,6 +54,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cadec"
+_DISPLAYNAME = "CADEC"
 
 _DESCRIPTION = """\
 The CADEC corpus (CSIRO Adverse Drug Event Corpus) is is a new rich annotated corpus of medical forum posts on patient-
@@ -68,7 +71,10 @@ normalized with meddra codes), sct (entities normalized with SNOMED CT codes).
 
 _HOMEPAGE = "https://data.gov.au/dataset/ds-dap-csiro%3A10948/details?q="
 
-_LICENSE = "https://confluence.csiro.au/display/dap/CSIRO+Data+Licence"
+_LICENSE = CustomLicense(
+    name="CSIRO Data License",
+    link="https://confluence.csiro.au/display/dap/CSIRO+Data+Licence",
+)
 
 _URLS = {
     _DATASETNAME: "https://data.csiro.au/dap/ws/v2/collections/17190/data/1904643",
@@ -141,7 +147,7 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -288,19 +294,27 @@ class CadecDataset(datasets.GeneratorBasedBuilder):
                     ann["cuid"], ann["text"] = concept.split(" ")
                 ann["id"] = f"{code_system}_{fields[0]}_{ann['cuid']}"
                 ann["cuid"] = ann["cuid"].strip()
-                assert ann["cuid"].isnumeric(), f"Error: concept {ann['cuid']} is not numeric"
+                assert ann[
+                    "cuid"
+                ].isnumeric(), f"Error: concept {ann['cuid']} is not numeric"
                 ann["text"] = ann["text"].strip()
                 ann["resource_name"] = "Snomed CT"
                 anns.append(ann)
         elif code_system == "meddra":
             # remove offsets
-            concepts = re.sub(r"\s(([0-9]+)\s([0-9]+);)*([0-9]+)\s([0-9]+)$", "", fields[1])
-            concepts = concepts.split(" + ") # multiple codes are usually split with +
+            concepts = re.sub(
+                r"\s(([0-9]+)\s([0-9]+);)*([0-9]+)\s([0-9]+)$", "", fields[1]
+            )
+            concepts = concepts.split(" + ")  # multiple codes are usually split with +
             for concept_ in concepts:
                 for concept in concept_.split("/"):  # sometimes with /
                     ann = base_ann.copy()
                     ann["cuid"] = concept
-                    assert ann["cuid"].isnumeric(), f"{fields} Error: concept {ann['cuid']} is not numeric"
+                    assert ann[
+                        "cuid"
+                    ].isnumeric(), (
+                        f"{fields} Error: concept {ann['cuid']} is not numeric"
+                    )
                     ann["text"] = ""
                     ann["id"] = f"{code_system}_{fields[0]}_{ann['cuid']}"
                     ann["resource_name"] = "Meddra"

@@ -44,8 +44,10 @@ from lxml import etree
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
 @article{DBLP:journals/jamia/StubbsFSHU19,
@@ -71,6 +73,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2018_track1"
+_DISPLAYNAME = "n2c2 2018 Selection Criteria"
 
 _DESCRIPTION = """\
 Track 1 of the 2018 National NLP Clinical Challenges shared tasks focused
@@ -116,17 +119,17 @@ For the purposes of this annotation, we define “advanced” as having 2 or mor
 The training consists of 202 patient records with document-level annotations, 10 records
 with textual spans indicating annotator’s evidence for their annotations while test set contains 86.
 
-Note: 
+Note:
 * The inter-annotator average agreement is 84.9%
-* Whereabouts of 10 records with textual spans indicating annotator’s evidence are unknown. 
-However, author did a simple script based validation to check if any of the tags contained any text 
+* Whereabouts of 10 records with textual spans indicating annotator’s evidence are unknown.
+However, author did a simple script based validation to check if any of the tags contained any text
 in any of the training set and they do not, which confirms that atleast train and test do not
  have any evidence tagged alongside corresponding tags.
 """
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = "External Data User Agreement"
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
@@ -227,7 +230,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -282,7 +285,7 @@ class N2C22018CohortSelectionDataset(datasets.GeneratorBasedBuilder):
             "labels": labels,
         }
 
-    def _generate_examples(self, file_path) -> (int, dict):
+    def _generate_examples(self, file_path):
         samples = _read_zip(file_path)
 
         _id = 0

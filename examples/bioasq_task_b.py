@@ -30,11 +30,12 @@ import re
 
 import datasets
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from .bigbiohub import qa_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
+_PUBMED = True
 _LOCAL = True
 _CITATION = """\
 @article{tsatsaronis2015overview,
@@ -57,7 +58,8 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "bioasq"
+_DATASETNAME = "bioasq_task_b"
+_DISPLAYNAME = "BioASQ Task B"
 
 _BIOASQ_10B_DESCRIPTION = """\
 The data are intended to be used as training and development data for BioASQ
@@ -347,6 +349,17 @@ _BIOASQ_3B_DESCRIPTION = """No README provided."""
 
 _BIOASQ_2B_DESCRIPTION = """No README provided."""
 
+_BIOASQ_BLURB_DESCRIPTION = """The BioASQ corpus contains multiple question
+answering tasks annotated by biomedical experts, including yes/no, factoid, list,
+and summary questions. Pertaining to our objective of comparing neural language
+models, we focus on the the yes/no questions (Task 7b), and leave the inclusion
+of other tasks to future work. Each question is paired with a reference text
+containing multiple sentences from a PubMed abstract and a yes/no answer. We use
+the official train/dev/test split of 670/75/140 questions.
+
+See 'Domain-Specific Language Model Pretraining for Biomedical
+Natural Language Processing' """
+
 _DESCRIPTION = {
     "bioasq_10b": _BIOASQ_10B_DESCRIPTION,
     "bioasq_9b": _BIOASQ_9B_DESCRIPTION,
@@ -357,13 +370,14 @@ _DESCRIPTION = {
     "bioasq_4b": _BIOASQ_4B_DESCRIPTION,
     "bioasq_3b": _BIOASQ_3B_DESCRIPTION,
     "bioasq_2b": _BIOASQ_2B_DESCRIPTION,
+    "bioasq_blurb": _BIOASQ_BLURB_DESCRIPTION,
 }
 
 _HOMEPAGE = "http://participants-area.bioasq.org/datasets/"
 
 # Data access reqires registering with BioASQ.
 # See http://participants-area.bioasq.org/accounts/register/
-_LICENSE = "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html"
+_LICENSE = 'National Library of Medicine Terms and Conditions'
 
 _URLs = {
     "bioasq_10b": ["BioASQ-training10b.zip", None],
@@ -375,6 +389,89 @@ _URLs = {
     "bioasq_4b": ["BioASQ-training4b.zip", "Task4BGoldenEnriched.zip"],
     "bioasq_3b": ["BioASQ-trainingDataset3b.zip", "Task3BGoldenEnriched.zip"],
     "bioasq_2b": ["BioASQ-trainingDataset2b.zip", "Task2BGoldenEnriched.zip"],
+    "bioasq_blurb": ["BioASQ-training7b.zip", "Task7BGoldenEnriched.zip"],
+}
+
+# BLURB train and dev contain all yesno questions from the offical training split
+# test is all yesno question from the official test split
+_BLURB_SPLITS = {
+    "dev": {
+        "5313b049e3eabad021000013",
+        "553a8d78f321868558000003",
+        "5158a5b8d24251bc05000097",
+        "571e3d42bb137a4b0c000007",
+        "5175b97a8ed59a060a00002f",
+        "56c9e9d15795f9a73e00001d",
+        "56d19ffaab2fed4a47000001",
+        "518ccac0310faafe0800000b",
+        "56f12ca92ac5ed145900000e",
+        "51680a49298dcd4e51000062",
+        "5339ed7bd6d3ac6a34000060",
+        "516e5f33298dcd4e5100007e",
+        "5327139ad6d3ac6a3400000d",
+        "54e12ae3ae9738404b000004",
+        "5321b8579b2d7acc7e000008",
+        "514a4679d24251bc0500005b",
+        "54c12fd1f693c3b16b000001",
+        "52df887498d023950500000c",
+        "52f20d802059c6d71c00000a",
+        "532f0c4ed6d3ac6a3400002e",
+        "52b2f3b74003448f5500000c",
+        "52b2f1724003448f5500000b",
+        "515d9a42298dcd4e5100000d",
+        "5159b990d24251bc050000a3",
+        "54e12c30ae9738404b000005",
+        "553a6a9fbc4f83e82800001c",
+        "5509ec41c2af5d5b70000006",
+        "56cae40b5795f9a73e000022",
+        "51680b0e298dcd4e51000065",
+        "515df89e298dcd4e5100002f",
+        "54f49e56d0d681a040000004",
+        "571e3e2abb137a4b0c000008",
+        "515debe7298dcd4e51000026",
+        "56f6ab7009dd18d46b00000d",
+        "53302bced6d3ac6a34000039",
+        "5322de919b2d7acc7e000012",
+        "5709f212cf1c325851000020",
+        "5502abd1e9bde69634000008",
+        "516c220e298dcd4e51000071",
+        "5894597e7d9090f353000004",
+        "5895ec5e7d9090f353000015",
+        "58bbb8ae22d3005309000018",
+        "58bc58c302b8c60953000001",
+        "58c276bc02b8c60953000020",
+        "58c0825502b8c6095300001b",
+        "58ab1f6c9ef3c34033000002",
+        "58adbe999ef3c34033000005",
+        "58df3e408acda3452900002d",
+        "58dfec676fddd3e83e000006",
+        "58d8d0cc8acda34529000008",
+        "58b67fae22d3005309000009",
+        "58dbbbf08acda3452900001d",
+        "58dbba438acda3452900001c",
+        "58dbbdac8acda3452900001e",
+        "58dcbb8c8acda34529000021",
+        "5a468785966455904c00000d",
+        "5a70de5199e2c3af26000005",
+        "5a67a550b750ff4455000009",
+        "5a679875b750ff4455000004",
+        "5a7a44b4faa1ab7d2e000010",
+        "5a67ade5b750ff445500000c",
+        "5a8881118cb19eca6b000006",
+        "5a67b48cb750ff4455000010",
+        "5a679be1b750ff4455000005",
+        "5a7340962dc08e987e000017",
+        "5a737e233b9d13c70800000d",
+        "5a8dc57ffcd1d6a10c000025",
+        "5a6d186db750ff4455000031",
+        "5a70d43b99e2c3af26000003",
+        "5a70ec6899e2c3af2600000c",
+        "5a9ac4161d1251d03b000010",
+        "5a733d2a2dc08e987e000015",
+        "5a74acd80384be9551000006",
+        "5aa6800ad6d6b54f79000011",
+        "5a9d9ab94e03427e73000003",
+    }
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
@@ -415,6 +512,17 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             )
         )
 
+    # BLURB Benchmark config https://microsoft.github.io/BLURB/
+    BUILDER_CONFIGS.append(
+        BigBioConfig(
+            name=f"bioasq_blurb_bigbio_qa",
+            version=BIGBIO_VERSION,
+            description=f"BLURB benchmark in simplified BigBio schema",
+            schema="bigbio_qa",
+            subset_id=f"bioasq_blurb",
+        )
+    )
+
     def _info(self):
 
         # BioASQ Task B source schema
@@ -449,14 +557,14 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             )
         # simplified schema for QA tasks
         elif self.config.schema == "bigbio_qa":
-            features = schemas.qa_features
+            features = qa_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -465,7 +573,12 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
         BioASQ test data is split into multiple records {9B1_golden.json,...,9B5_golden.json}
         We combine these files into a single test set file 9Bx_golden.json
         """
-        version = re.search(r"bioasq_([0-9]+)b", self.config.subset_id).group(1)
+        # BLURB is based on version 7
+        version = (
+            re.search(r"bioasq_([0-9]+)b", self.config.subset_id).group(1)
+            if "blurb" not in self.config.name
+            else "7"
+        )
         gold_fpath = os.path.join(
             data_dir, f"Task{version}BGoldenEnriched/bx_golden.json"
         )
@@ -483,6 +596,78 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
 
         return f"Task{version}BGoldenEnriched/bx_golden.json"
 
+    def _blurb_split_generator(self, train_dir, test_dir):
+        """
+        Create splits for BLURB Benchmark
+        """
+        gold_fpath = self._dump_gold_json(test_dir)
+
+        # create train/dev splits from yesno questions
+        train_fpath = os.path.join(train_dir, "blurb_bioasq_train.json")
+        dev_fpath = os.path.join(train_dir, "blurb_bioasq_dev.json")
+
+        blurb_splits = {
+            "train": {"questions": []},
+            "dev": {"questions": []},
+            "test": {"questions": []},
+        }
+
+        if not os.path.exists(train_fpath):
+            data_fpath = os.path.join(train_dir, "BioASQ-training7b/trainining7b.json")
+            with open(data_fpath, "rt", encoding="utf-8") as file:
+                data = json.load(file)
+
+            for record in data["questions"]:
+                if record["type"] != "yesno":
+                    continue
+                if record["id"] in _BLURB_SPLITS["dev"]:
+                    blurb_splits["dev"]["questions"].append(record)
+                else:
+                    blurb_splits["train"]["questions"].append(record)
+
+            with open(train_fpath, "wt", encoding="utf-8") as file:
+                json.dump(blurb_splits["train"], file, indent=2)
+
+            with open(dev_fpath, "wt", encoding="utf-8") as file:
+                json.dump(blurb_splits["dev"], file, indent=2)
+
+        # create test split from yesno questions
+        with open(os.path.join(test_dir, gold_fpath), "rt", encoding="utf-8") as file:
+            data = json.load(file)
+
+        for record in data["questions"]:
+            if record["type"] != "yesno":
+                continue
+            blurb_splits["test"]["questions"].append(record)
+
+        test_fpath = os.path.join(test_dir, "blurb_bioasq_test.json")
+        with open(test_fpath, "wt", encoding="utf-8") as file:
+            json.dump(blurb_splits["test"], file, indent=2)
+
+        return [
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={
+                    "filepath": train_fpath,
+                    "split": "train",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.VALIDATION,
+                gen_kwargs={
+                    "filepath": dev_fpath,
+                    "split": "dev",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "filepath": test_fpath,
+                    "split": "test",
+                },
+            ),
+        ]
+
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
 
@@ -497,6 +682,7 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
                 for _url in _URLs[self.config.subset_id]
             ]
         )
+        # create gold dump and get path
         gold_fpath = self._dump_gold_json(test_dir)
 
         # older versions of bioasq have different folder formats
@@ -511,6 +697,10 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
             "bioasq_9b": "BioASQ-training9b/training9b.json",
             "bioasq_10b": "BioASQ-training10b/training10b.json",
         }
+
+        # BLURB has custom train/dev/test splits based on Task 7B
+        if "blurb" in self.config.name:
+            return self._blurb_split_generator(train_dir, test_dir)
 
         return [
             datasets.SplitGenerator(

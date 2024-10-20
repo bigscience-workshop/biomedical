@@ -30,8 +30,10 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{marimon2019automatic,
@@ -44,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "meddocan"
+_DISPLAYNAME = "MEDDOCAN"
 
 _DESCRIPTION = """\
 MEDDOCAN: Medical Document Anonymization Track
@@ -67,7 +70,7 @@ For further information, please visit https://temu.bsc.es/meddocan/ or send an e
 
 _HOMEPAGE = "https://temu.bsc.es/meddocan/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "meddocan": "https://zenodo.org/record/4279323/files/meddocan.zip?download=1",
@@ -182,7 +185,7 @@ class MeddocanDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

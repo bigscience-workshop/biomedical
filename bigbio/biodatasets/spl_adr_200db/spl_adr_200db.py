@@ -61,14 +61,17 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import datasets
+
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{demner2018dataset,
   author    = {Demner-Fushman, Dina and Shooshan, Sonya and Rodriguez, Laritza and Aronson,
                Alan and Lang, Francois and Rogers, Willie and Roberts, Kirk and Tonning, Joseph},
   title     = {A dataset of 200 structured product labels annotated for adverse drug reactions},
@@ -85,6 +88,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "spl_adr_200db"
+_DISPLAYNAME = "SPL ADR"
 
 _DESCRIPTION = """\
 The United States Food and Drug Administration (FDA) partnered with the National Library
@@ -100,8 +104,7 @@ Dictionary for Regulatory Activities (MedDRA).
 _HOMEPAGE = "https://bionlp.nlm.nih.gov/tac2017adversereactions/"
 
 # NOTE: Source: https://osf.io/6h9q4/
-_LICENSE = "CC0 1.0 Universal "
-
+_LICENSE = Licenses.CC0_1p0
 _URLS = {
     _DATASETNAME: {
         "train": "https://bionlp.nlm.nih.gov/tac2017adversereactions/train_xml.tar.gz",
@@ -216,7 +219,7 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -273,7 +276,9 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
             "mentions": [mention.attrib for mention in mentions],
             "relations": [relation.attrib for relation in relations],
             "reactions": reactions,
-            "sections": [{**section.attrib, "text": section.text} for section in sections],
+            "sections": [
+                {**section.attrib, "text": section.text} for section in sections
+            ],
         }
 
     def _bigbio_kb_features_from_xml(self, element_tree):
@@ -285,24 +290,36 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
         for reaction in source_features["reactions"]:
             entity_name = reaction["str"]
             for normalization in reaction["normalizations"]:
-                if normalization["meddra_pt_id"]:
-                    entity_normalizations[entity_name].append(
-                        {"db_name": None, "db_id": f"pt_{normalization['meddra_pt_id']}"}
-                    )
+
+                # commenting this out for now
+                # if there is no db_name then its not a useful normalization
+                # if normalization["meddra_pt_id"]:
+                #    entity_normalizations[entity_name].append(
+                #        {"db_name": None, "db_id": f"pt_{normalization['meddra_pt_id']}"}
+                #    )
+
                 if normalization["meddra_llt_id"]:
                     entity_normalizations[entity_name].append(
-                        {"db_name": "MedDRA v18.1", "db_id": f"llt_{normalization['meddra_llt_id']}"}
+                        {
+                            "db_name": "MedDRA v18.1",
+                            "db_id": f"llt_{normalization['meddra_llt_id']}",
+                        }
                     )
 
-        section_lengths = list(accumulate(len(section["text"]) for section in source_features["sections"]))
+        section_lengths = list(
+            accumulate(len(section["text"]) for section in source_features["sections"])
+        )
 
         section_offsets = [
             (start + index, end + index)
-            for index, (start, end) in enumerate(zip([0] + section_lengths[:-1], section_lengths))
+            for index, (start, end) in enumerate(
+                zip([0] + section_lengths[:-1], section_lengths)
+            )
         ]
 
         section_start_offset_map = {
-            f"S{section_index}": offsets[0] for section_index, offsets in enumerate(section_offsets, 1)
+            f"S{section_index}": offsets[0]
+            for section_index, offsets in enumerate(section_offsets, 1)
         }
 
         entities = []
@@ -315,11 +332,17 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
 
             lens = [int(len_) for len_ in mention["len"].split(",")]
 
-            offsets = [(start_point, start_point + len_) for start_point, len_ in zip(start_points, lens)]
+            offsets = [
+                (start_point, start_point + len_)
+                for start_point, len_ in zip(start_points, lens)
+            ]
 
             text = " ".join(section["text"] for section in source_features["sections"])
 
-            entity_strings = [text[start_point: start_point + len_] for start_point, len_ in zip(start_points, lens)]
+            entity_strings = [
+                text[start_point : start_point + len_]
+                for start_point, len_ in zip(start_points, lens)
+            ]
 
             entities.append(
                 {
@@ -340,7 +363,9 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
                     "text": [section["text"]],
                     "offsets": [offsets],
                 }
-                for section, offsets in zip(source_features["sections"], section_offsets)
+                for section, offsets in zip(
+                    source_features["sections"], section_offsets
+                )
             ],
             "entities": entities,
             "relations": [
@@ -374,7 +399,8 @@ class SplAdr200DBDataset(datasets.GeneratorBasedBuilder):
                 features["id"] = file_index
             else:
                 raise ValueError(
-                    f"Unsupported schema '{self.config.schema}' requested for " f"dataset with name '{_DATASETNAME}'."
+                    f"Unsupported schema '{self.config.schema}' requested for "
+                    f"dataset with name '{_DATASETNAME}'."
                 )
 
             yield file_index, features

@@ -28,11 +28,12 @@ import os
 import datasets
 import pandas as pd
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
+from .bigbiohub import entailment_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{scitail,
@@ -44,6 +45,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scitail"
+_DISPLAYNAME = "SciTail"
 
 _DESCRIPTION = """\
 The SciTail dataset is an entailment dataset created from multiple-choice science exams and
@@ -57,7 +59,7 @@ entails label and 16,925 examples with neutral label.
 
 _HOMEPAGE = "https://allenai.org/data/scitail"
 
-_LICENSE = "Apache License 2.0"
+_LICENSE = 'Apache License 2.0'
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
@@ -68,6 +70,9 @@ _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 _SOURCE_VERSION = "1.1.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
+
+LABEL_MAP = {"entails": "entailment", "neutral": "neutral"}
 
 
 class SciTailDataset(datasets.GeneratorBasedBuilder):
@@ -108,13 +113,13 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+            features = entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -163,5 +168,7 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
                 yield row["id"], row.to_dict()
 
         elif self.config.schema == "bigbio_te":
+            # normalize labels
+            data["label"] = data["label"].apply(lambda x: LABEL_MAP[x])
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()

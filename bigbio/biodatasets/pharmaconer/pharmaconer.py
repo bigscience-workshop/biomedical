@@ -32,11 +32,13 @@ import pandas as pd
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
+@inproceedings{gonzalez2019pharmaconer,
     title = "PharmaCoNER: Pharmacological Substances, Compounds and proteins Named Entity Recognition track",
     author = "Gonzalez-Agirre, Aitor  and
       Marimon, Montserrat  and
@@ -56,6 +58,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pharmaconer"
+_DISPLAYNAME = "PharmaCoNER"
 
 _GENERAL_DESCRIPTION = """\
 PharmaCoNER: Pharmacological Substances, Compounds and Proteins Named Entity Recognition track
@@ -100,7 +103,7 @@ _DESCRIPTION = {
 
 _HOMEPAGE = "https://temu.bsc.es/pharmaconer/index.php/datasets/"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "pharmaconer": "https://zenodo.org/record/4270158/files/pharmaconer.zip?download=1",
@@ -226,7 +229,7 @@ class PharmaconerDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION[self.config.subset_id],
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

@@ -32,14 +32,15 @@ import pandas as pd
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.ES]
+_PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{
-  title={Named Entity Recognition, Concept Normalization and Clinical Coding: Overview of the \
-  Cantemist Track for Cancer Text Mining in Spanish, Corpus, Guidelines, Methods and Results.},
-  author={Miranda-Escalada, Antonio and Farre, Eulalia and Krallinger, Martin},
+@article{miranda2020named,
+  title={Named Entity Recognition, Concept Normalization and Clinical Coding: Overview of the Cantemist Track for Cancer Text Mining in Spanish, Corpus, Guidelines, Methods and Results.},
+  author={Miranda-Escalada, Antonio and Farr{\'e}, Eul{\`a}lia and Krallinger, Martin},
   journal={IberLEF@ SEPLN},
   pages={303--323},
   year={2020}
@@ -47,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cantemist"
+_DISPLAYNAME = "CANTEMIST"
 
 _DESCRIPTION = """\
 Collection of 1301 oncological clinical case reports written in Spanish, with tumor morphology mentions \
@@ -74,7 +76,7 @@ For further information, please visit https://temu.bsc.es/cantemist or send an e
 
 _HOMEPAGE = "https://temu.bsc.es/cantemist/?p=4338"
 
-_LICENSE = "Creative Commons Attribution 4.0 International"
+_LICENSE = Licenses.CC_BY_4p0
 
 _URLS = {
     "cantemist": "https://zenodo.org/record/3978041/files/cantemist.zip?download=1",
@@ -212,7 +214,7 @@ class CantemistDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

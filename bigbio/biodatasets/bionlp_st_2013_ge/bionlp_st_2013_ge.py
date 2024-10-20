@@ -21,12 +21,16 @@ import datasets
 from bigbio.utils import parsing, schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2013_ge"
+_DISPLAYNAME = "BioNLP 2013 GE"
+
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{kim-etal-2013-genia,
@@ -53,7 +57,7 @@ NFkB as a model domain of Biomedical IE
 
 _HOMEPAGE = "https://github.com/openbiocorpora/bionlp-st-2013-ge"
 
-_LICENSE = "https://creativecommons.org/licenses/by/3.0/ CC BY 3.0"
+_LICENSE = Licenses.GENIA_PROJECT_LICENSE
 
 _URLs = {
     "source": "https://github.com/openbiocorpora/bionlp-st-2013-ge/archive/refs/heads/master.zip",
@@ -185,7 +189,7 @@ class bionlp_st_2013_ge(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 

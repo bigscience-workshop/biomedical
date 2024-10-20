@@ -27,8 +27,10 @@ from bioc import pubtator
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
+from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @article{Dogan2014NCBIDC,
@@ -42,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ncbi_disease"
+_DISPLAYNAME = "NCBI Disease"
 
 _DESCRIPTION = """\
 The NCBI disease corpus is fully annotated at the mention and concept level to serve as a research
@@ -49,8 +52,7 @@ resource for the biomedical natural language processing community.
 """
 
 _HOMEPAGE = "https://www.ncbi.nlm.nih.gov/CBBresearch/Dogan/DISEASE/"
-_LICENSE = "Public Domain (CC0)"
-
+_LICENSE = Licenses.CC0_1p0
 
 _URLS = {
     _DATASETNAME: {
@@ -117,7 +119,7 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -157,7 +159,9 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, filepath: str, split: str) -> Iterator[Tuple[str, Dict]]:
+    def _generate_examples(
+        self, filepath: str, split: str
+    ) -> Iterator[Tuple[str, Dict]]:
         if self.config.schema == "source":
             for i, source_example in enumerate(self._pubtator_to_source(filepath)):
                 # Some examples are duplicated in NCBI Disease. We have to make them unique to
@@ -227,14 +231,24 @@ class NCBIDiseaseDataset(datasets.GeneratorBasedBuilder):
                     # We need a unique identifier for this entity, so build it from the document id and entity id
                     unified_entity_id = "_".join([doc.pmid, entity.id, str(i)])
                     # The user can provide a callable that returns the database name.
-                    db_name = "omim" if "OMIM" in entity.id else "mesh"
+                    db_name = "OMIM" if "OMIM" in entity.id else "MESH"
+                    normalized = []
+
+                    for x in entity.id.split("|"):
+                        if x.startswith("OMIM") or x.startswith("omim"):
+                            normalized.append(
+                                {"db_name": "OMIM", "db_id": x.strip().split(":")[-1]}
+                            )
+                        else:
+                            normalized.append({"db_name": "MESH", "db_id": x.strip()})
+
                     unified_entities.append(
                         {
                             "id": unified_entity_id,
                             "type": entity.type,
                             "text": [entity.text],
                             "offsets": [[entity.start, entity.end]],
-                            "normalized": [{"db_name": db_name, "db_id": entity.id}],
+                            "normalized": normalized,
                         }
                     )
 
