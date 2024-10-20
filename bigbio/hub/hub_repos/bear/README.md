@@ -4,7 +4,7 @@ language:
 - en
 bigbio_language: 
 - English
-license: CC_BY_SA_4p0
+license: cc-by-sa-4.0
 multilinguality: monolingual
 bigbio_license_shortname: CC_BY_SA_4p0
 pretty_name: BEAR
