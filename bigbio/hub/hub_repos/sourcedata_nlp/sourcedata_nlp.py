@@ -32,7 +32,7 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from bigbiohub import BigBioConfig, Tasks, kb_features
+from .bigbiohub import BigBioConfig, Tasks, kb_features
 
 _LANGUAGES = ["English"]
 _PUBMED = True
@@ -63,7 +63,9 @@ _LICENSE = "CC_BY_4p0"
 
 
 _URLS = {
-    _DATASETNAME: "https://huggingface.co/datasets/EMBO/SourceData/resolve/main/bigbio/source_data_json_splits_2.0.2.zip"
+    _DATASETNAME: (
+        "https://huggingface.co/datasets/EMBO/SourceData/resolve/main/bigbio/source_data_json_splits_2.0.2.zip"
+    )
 }
 
 
@@ -88,13 +90,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
             schema="source",
             subset_id="sourcedata_nlp",
         ),
-        # BigBioConfig(
-        #     name="sourcedata_nlp_roles_source",
-        #     version=SOURCE_VERSION,
-        #     description="sourcedata_nlp source schema",
-        #     schema="source",
-        #     subset_id="sourcedata_nlp",
-        # ),
         BigBioConfig(
             name="sourcedata_nlp_bigbio_kb",
             version=BIGBIO_VERSION,
@@ -102,27 +97,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
             schema="bigbio_kb",
             subset_id="sourcedata_nlp",
         ),
-        # BigBioConfig(
-        #     name="sourcedata_nlp_roles_bigbio_kb",
-        #     version=BIGBIO_VERSION,
-        #     description="sourcedata_nlp BigBio schema for role labeling",
-        #     schema="bigbio_kb",
-        #     subset_id="sourcedata_nlp",
-        # ),
-        # BigBioConfig(
-        #     name="sourcedata_nlp_gene_roles_bigbio_kb",
-        #     version=BIGBIO_VERSION,
-        #     description="sourcedata_nlp BigBio schema for role labeling",
-        #     schema="bigbio_kb",
-        #     subset_id="sourcedata_nlp",
-        # ),
-        # BigBioConfig(
-        #     name="sourcedata_nlp_sm_roles_bigbio_kb",
-        #     version=BIGBIO_VERSION,
-        #     description="sourcedata_nlp BigBio schema for role labeling",
-        #     schema="bigbio_kb",
-        #     subset_id="sourcedata_nlp",
-        # ),
     ]
 
     DEFAULT_CONFIG_NAME = "sourcedata_nlp_source"
@@ -133,7 +107,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                 {
                     "doi": datasets.Value("string"),
                     "abstract": datasets.Value("string"),
-                    # "split": datasets.Value("string"),
                     "figures": [
                         {
                             "fig_id": datasets.Value("string"),
@@ -213,14 +186,8 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
 
         if self.config.schema == "source":
             with open(filepath) as fstream:
-                no_panels = 0
-                no_entities = 0
-                has_panels = 0
-                has_entities = 0
                 for line in fstream:
                     document = self._parse_document(line)
-                    # print(document["doi"])
-                    # print(document)
                     doc_figs = document["figures"]
                     all_figures = []
                     for fig in doc_figs:
@@ -230,7 +197,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                             "label": fig["label"],
                             "fig_graphic_url": fig["fig_graphic_url"],
                         }
-                        # print(figure)
                         for p in fig["panels"]:
                             panel = {
                                 "panel_id": p["panel_id"],
@@ -253,7 +219,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                                         "ext_tax_names": t["ext_tax_names"],
                                         "ext_urls": t["ext_urls"],
                                         "offsets": t["local_offsets"],
-                                        # "document_offsets": [datasets.Value("int64")]
                                     }
                                     for t in p["tags"]
                                 ],
@@ -261,25 +226,15 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                             for e in panel["entities"]:
                                 assert type(e["offsets"]) == list
                             if len(panel["entities"]) == 0:
-                                no_entities += 1
                                 continue
-                            else:
-                                has_entities += 1
                             all_panels.append(panel)
-                            # print(panel)
 
                         figure["panels"] = all_panels
 
                         # Pass on all figures that aren't split into panels
                         if len(all_panels) == 0:
-                            # print(figure
-                            no_panels += 1
                             continue
-                        else:
-                            has_panels += 1
                         all_figures.append(figure)
-
-                    # print(figure)
 
                     output = {
                         "doi": document["doi"],
@@ -287,17 +242,9 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                         "figures": all_figures,
                     }
                     yield document["doi"], output
-            # print()
-            # print(f"{has_panels=}")
-            # print(f"{has_entities=}")
-            # print(f"{no_panels=}")
-            # print(f"{no_entities=}")
 
         elif self.config.schema == "bigbio_kb":
             uid = itertools.count(0)
-            # incorrect_length = 0
-            # untyped_ents = 0
-            # correct_length = 0
 
             with open(filepath) as fstream:
                 for line in fstream:
@@ -321,16 +268,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                                 passage_offsets[0] + passage_offsets[1],
                             ]
                         ]
-                        # if passage_offsets[1] - passage_offsets[0] != len(
-                        #     passage["text"]
-                        # ):
-                        #     incorrect_length += 1
-                        # else:
-                        #     correct_length += 1
-
-                    # print(output["passages"])
-
-                    # Parse out entities
                     entities = []
                     for fig in document["figures"]:
                         for panel in fig["panels"]:
@@ -345,12 +282,9 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                                         "offsets": [tag["document_offsets"]],
                                         "normalized": [
                                             {"db_name": db_name, "db_id": db_id}
-                                            for db_name, db_id in zip(
-                                                tag["ext_dbs"], tag["ext_ids"]
-                                            )
+                                            for db_name, db_id in zip(tag["ext_dbs"], tag["ext_ids"])
                                         ],
                                     }
-                                    # all_types.add(ent["type"])
                                     entities.append(ent)
 
                                 # When entity has a role as well, add an additional entity for this
@@ -365,32 +299,18 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                                         "offsets": [tag["document_offsets"]],
                                         "normalized": [
                                             {"db_name": db_name, "db_id": db_id}
-                                            for db_name, db_id in zip(
-                                                tag["ext_dbs"], tag["ext_ids"]
-                                            )
+                                            for db_name, db_id in zip(tag["ext_dbs"], tag["ext_ids"])
                                         ],
                                     }
                                     entities.append(role_ent)
 
-                                # if ent_type is None and role is None:
-                                #     untyped_ents += 1
-
                     output["entities"] = entities
-                    # print(output['entities'])
 
                     output["relations"] = []
                     output["events"] = []
                     output["coreferences"] = []
 
-                    # print(output)
-
                     yield output["document_id"], output
-
-            # print()
-            # print(f"{correct_length =}")
-            # print(f"{incorrect_length =}")
-            # print(f"{untyped_ents =}")
-            # elif self.config.schema
 
     def _parse_document(self, raw_document):
         doc = json.loads(raw_document.strip())
@@ -415,9 +335,6 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
             return "DISEASE"
         elif tag["entity_type"] == "cell_line":
             return "CELL_LINE"
-        # else:
-        #     if tag["role"] == "":
-        #         print(tag["text"])
 
     def _get_entity_role(self, tag):
         if tag["entity_type"] == "molecule":
@@ -430,9 +347,3 @@ class SourceDataNlpDataset(datasets.GeneratorBasedBuilder):
                 return "CONTROLLED_VAR"
             elif tag["role"] == "assayed":
                 return "MEASURED_VAR"
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__, name="sourcedata_nlp_source")
