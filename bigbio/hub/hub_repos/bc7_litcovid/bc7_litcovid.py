@@ -18,11 +18,9 @@ from typing import Dict, List, Tuple
 import datasets
 import pandas as pd
 
-from .bigbiohub import text_features
-from .bigbiohub import BigBioConfig
-from .bigbiohub import Tasks
+from .bigbiohub import BigBioConfig, Tasks, text_features
 
-_LANGUAGES = ['English']
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
@@ -53,7 +51,7 @@ manually reviewed and articles annotated by in-house models.
 
 _HOMEPAGE = "https://biocreative.bioinformatics.udel.edu/tasks/biocreative-vii/track-5/"
 
-_LICENSE = 'License information unavailable'
+_LICENSE = "UNKNOWN"
 
 _BASE = "https://ftp.ncbi.nlm.nih.gov/pub/lu/LitCovid/biocreative/BC7-LitCovid-"
 
@@ -79,6 +77,8 @@ _CLASS_NAMES = [
     "Transmission",
     "Diagnosis",
 ]
+
+logger = datasets.utils.logging.get_logger(__name__)
 
 
 class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
@@ -123,9 +123,7 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
                     "pub_type": datasets.Sequence(datasets.Value("string")),
                     "authors": datasets.Sequence(datasets.Value("string")),
                     "doi": datasets.Value("string"),
-                    "labels": datasets.Sequence(
-                        datasets.ClassLabel(names=_CLASS_NAMES)
-                    ),
+                    "labels": datasets.Sequence(datasets.ClassLabel(names=_CLASS_NAMES)),
                 }
             )
 
@@ -173,6 +171,19 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _validate_entry(self, e, index) -> bool:
+        """
+        Validates if an entry has all the required fields
+        """
+        fields_to_validate = ["pmid", "abstract", "label"]
+        for key in fields_to_validate:
+            if e[key]:
+                continue
+            else:
+                logger.warning(f"Entry {index} missing {key}")
+                return False
+        return True
+
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
@@ -182,7 +193,8 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
         df = pd.read_csv(filepath, sep=",").astype(str).replace({"nan": None})
 
         for index, e in df.iterrows():
-
+            if not self._validate_entry(e, index):
+                continue
             if self.config.schema == "source":
 
                 yield idx, {
@@ -190,15 +202,9 @@ class BC7LitCovidDataset(datasets.GeneratorBasedBuilder):
                     "journal": e["journal"],
                     "title": e["title"],
                     "abstract": e["abstract"],
-                    "keywords": e["keywords"].split(";")
-                    if e["keywords"] is not None
-                    else [],
-                    "pub_type": e["pub_type"].split(";")
-                    if e["pub_type"] is not None
-                    else [],
-                    "authors": e["authors"].split(";")
-                    if e["authors"] is not None
-                    else [],
+                    "keywords": e["keywords"].split(";") if e["keywords"] is not None else [],
+                    "pub_type": e["pub_type"].split(";") if e["pub_type"] is not None else [],
+                    "authors": e["authors"].split(";") if e["authors"] is not None else [],
                     "doi": e["doi"],
                     "labels": e["label"].split(";"),
                 }
