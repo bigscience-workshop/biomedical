@@ -16,7 +16,7 @@ paperswithcode_id: paragraph-level-simplification-of-medical
 ---
 
 
-# Dataset Card for SciTail
+# Dataset Card for Paragraph-level Simplification of Medical Texts
 
 ## Dataset Description
 

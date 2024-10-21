@@ -26,9 +26,7 @@ from typing import Dict, List, Tuple
 
 import datasets
 
-from bigbio.utils import schemas
-
-from .bigbiohub import BigBioConfig, Tasks
+from .bigbiohub import BigBioConfig, Tasks, text2text_features
 
 _LOCAL = False
 
@@ -163,7 +161,7 @@ class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_t2t":
-            features = schemas.text2text_features
+            features = text2text_features
         else:
             raise ValueError(
                 f"Invalid config.schema specified ({self.config.schema}) - must be one of (source|bigbio_t2t)"
@@ -220,30 +218,17 @@ class MedParaSimpDataset(datasets.GeneratorBasedBuilder):
         with open(target_filepath, "r") as f:
             targets: List[str] = f.read().splitlines()
 
-        if self.config.schema == "source":
-            for idx, (source, target) in enumerate(zip(sources, targets)):
-                key: int = idx
-                example: Dict = {
-                    "id": str(idx),
-                    "document_id": dois[idx],
-                    "text_1": source,
-                    "text_2": target,
-                    "text_1_name": "abstract",
-                    "text_2_name": "pls",
-                }
-                yield (key, example)
-        elif self.config.schema == "bigbio_t2t":
-            for idx, (source, target) in enumerate(zip(sources, targets)):
-                key: int = idx
-                example: Dict = {
-                    "id": str(idx),
-                    "document_id": dois[idx],
-                    "text_1": source,
-                    "text_2": target,
-                    "text_1_name": "abstract",
-                    "text_2_name": "pls",
-                }
-                yield (key, example)
+        for idx, (source, target) in enumerate(zip(sources, targets)):
+            key: int = idx
+            example: Dict = {
+                "id": str(idx),
+                "document_id": dois[idx],
+                "text_1": source,
+                "text_2": target,
+                "text_1_name": "abstract",
+                "text_2_name": "pls",
+            }
+            yield (key, example)
 
 
 if __name__ == "__main__":
