@@ -37,7 +37,6 @@ from .bigbiohub import BigBioConfig, Tasks, kb_features, logger
 
 _LOCAL = False
 
-# TODO: Add BibTeX citation
 _CITATION = """\
 @incollection{modersohn2022grascco,
   title={GRASCCO—The First Publicly Shareable, Multiply-Alienated German Clinical Text Corpus},

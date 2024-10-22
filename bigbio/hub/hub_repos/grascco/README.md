@@ -12,8 +12,6 @@ bigbio_pubmed: false
 bigbio_public: true
 bigbio_tasks:
   - NAMED_ENTITY_RECOGNITION
-  - NAMED_ENTITY_DISAMBIGUATION
-  - RELATION_EXTRACTION
 ---
 
 
@@ -24,7 +22,7 @@ bigbio_tasks:
 - **Homepage:** https://zenodo.org/records/6539131
 - **Pubmed:** False
 - **Public:** True
-- **Tasks:** NER,NED,RE
+- **Tasks:** NER
 
 GraSCCo  is a collection of artificially generated semi-structured and unstructured German-language clinical summaries. These summaries are formulated as letters from the hospital to the patient's GP after in-patient or out-patient care.
 This is common practice in Germany, Austria and Switzerland.
