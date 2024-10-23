@@ -23,48 +23,42 @@ from .bigbiohub import kb_features
 from .bigbiohub import BigBioConfig
 from .bigbiohub import Tasks
 
-_LANGUAGES = ['Spanish']
+_LANGUAGES = ["Spanish"]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{miranda2022overview,
-title={Overview of DisTEMIST at BioASQ: Automatic detection and normalization of diseases
-    from clinical texts: results, methods, evaluation and multilingual resources},
-author={Miranda-Escalada, Antonio and Gascó, Luis and Lima-López, Salvador and Farré-Maduell,
-    Eulàlia and Estrada, Darryl and Nentidis, Anastasios and Krithara, Anastasia and Katsimpras,
-    Georgios and Paliouras, Georgios and Krallinger, Martin},
-booktitle={Working Notes of Conference and Labs of the Evaluation (CLEF) Forum.
-    CEUR Workshop Proceedings},
-year={2022}
+@inproceedings{lima2023overview,
+  title={Overview of SympTEMIST at BioCreative VIII: corpus, guidelines and evaluation of systems for the detection and normalization of symptoms, signs and findings from text},
+  author={Lima-L{\'o}pez, Salvador and Farr{\'e}-Maduell, Eul{\`a}lia and Gasco-S{\'a}nchez, Luis and Rodr{\'\i}guez-Miret, Jan and Krallinger, Martin},
+  booktitle={Proceedings of the BioCreative VIII Challenge and Workshop: Curation and Evaluation in the era of Generative Models},
+  year={2023}
 }
 """
 
-_DATASETNAME = "distemist"
-_DISPLAYNAME = "DisTEMIST"
+_DATASETNAME = "symptemist"
+_DISPLAYNAME = "SympTEMIST"
 
 _DESCRIPTION = """\
-The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotations linked with Snomed-CT concepts.
-All documents are released in the context of the BioASQ DisTEMIST track for CLEF 2022.
+The SympTEMIST corpus is a collection of 1,000 clinical case reports in Spanish annotated with symptoms, signs and findings mentions and normalized to SNOMED CT. The texts belong to the SPACCC corpus and are the same ones used in SympTEMIST and MedProcNER, making the annotations complementary for medical entity recognition.
 """
 
-_HOMEPAGE = "https://zenodo.org/record/7614764"
+_HOMEPAGE = "https://temu.bsc.es/symptemist/"
 
-_LICENSE = 'CC_BY_4p0'
+_LICENSE = "CC_BY_4p0"
 
 _URLS = {
-    _DATASETNAME: "https://zenodo.org/record/7614764/files/distemist_zenodo.zip?download=1",
+    _DATASETNAME: "https://zenodo.org/records/10635215/files/symptemist-complete_240208.zip?download=1",
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
-_SOURCE_VERSION = "5.1.0"
+_SOURCE_VERSION = "4.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
 
-class DistemistDataset(datasets.GeneratorBasedBuilder):
+class SymptemistDataset(datasets.GeneratorBasedBuilder):
     """
-    The DisTEMIST corpus is a collection of 1000 clinical cases with disease annotations linked with Snomed-CT
-    concepts.
+    The SympTEMIST corpus is a collection of 1,000 clinical case reports in Spanish annotated with symptoms, signs and findings mentions and normalized to SNOMED CT.
     """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
@@ -72,36 +66,64 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="distemist_entities_source",
+            name="symptemist_entities_source",
             version=SOURCE_VERSION,
-            description="DisTEMIST (subtrack 1: entities) source schema",
+            description="SympTEMIST (subtrack 1: entities) source schema",
             schema="source",
-            subset_id="distemist_entities",
+            subset_id="symptemist_entities",
         ),
         BigBioConfig(
-            name="distemist_linking_source",
+            name="symptemist_linking_source",
             version=SOURCE_VERSION,
-            description="DisTEMIST (subtrack 2: linking) source schema",
+            description="SympTEMIST (subtrack 2: linking, original shared task) source schema",
             schema="source",
-            subset_id="distemist_linking",
+            subset_id="symptemist_linking",
         ),
         BigBioConfig(
-            name="distemist_entities_bigbio_kb",
-            version=BIGBIO_VERSION,
-            description="DisTEMIST (subtrack 1: entities) BigBio schema",
-            schema="bigbio_kb",
-            subset_id="distemist_entities",
+            name="symptemist_linking_complete_source",
+            version=SOURCE_VERSION,
+            description="SympTEMIST (subtrack 2: linking, complete) source schema",
+            schema="source",
+            subset_id="symptemist_linking_complete",
         ),
         BigBioConfig(
-            name="distemist_linking_bigbio_kb",
+            name="symptemist_linking_composite_source",
+            version=SOURCE_VERSION,
+            description="SympTEMIST (subtrack 2: linking, incl. composite mentions) source schema",
+            schema="source",
+            subset_id="symptemist_linking_composite",
+        ),
+        BigBioConfig(
+            name="symptemist_entities_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="DisTEMIST (subtrack 2: linking) BigBio schema",
+            description="SympTEMIST (subtrack 1: entities) BigBio schema",
             schema="bigbio_kb",
-            subset_id="distemist_linking",
+            subset_id="symptemist_entities",
+        ),
+        BigBioConfig(
+            name="symptemist_linking_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="SympTEMIST (subtrack 2: linking, original shared task) BigBio schema",
+            schema="bigbio_kb",
+            subset_id="symptemist_linking",
+        ),
+        BigBioConfig(
+            name="symptemist_linking_complete_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="SympTEMIST (subtrack 2: linking, complete) BigBio schema",
+            schema="bigbio_kb",
+            subset_id="symptemist_linking_complete",
+        ),
+        BigBioConfig(
+            name="symptemist_linking_composite_bigbio_kb",
+            version=BIGBIO_VERSION,
+            description="SympTEMIST (subtrack 2: linking, incl. composite mentions) BigBio schema",
+            schema="bigbio_kb",
+            subset_id="symptemist_linking_composite",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "distemist_entities_source"
+    DEFAULT_CONFIG_NAME = "symptemist_entities_source"
 
     def _info(self) -> datasets.DatasetInfo:
 
@@ -145,15 +167,14 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
-        base_bath = Path(data_dir) / "distemist_zenodo"
-        track = self.config.subset_id.split('_')[1]
-                
+        base_bath = Path(data_dir) / "symptemist-complete_240208"
+
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
                     "split": "train",
-                    "track": track,
+                    "track": self.config.subset_id,
                     "base_bath": base_bath,
                 },
             ),
@@ -161,7 +182,7 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
                 name=datasets.Split.TEST,
                 gen_kwargs={
                     "split": "test",
-                    "track": track,
+                    "track": self.config.subset_id,
                     "base_bath": base_bath,
                 },
             ),
@@ -169,41 +190,53 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
 
     def _generate_examples(
         self,
-        split: str, 
+        split: str,
         track: str,
         base_bath: Path,
     ) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
-        
+
         tsv_files = {
-            ('entities', 'train'): [
-                base_bath / "training" / "subtrack1_entities" / "distemist_subtrack1_training_mentions.tsv"
+            ("symptemist_entities", "train"): [
+                base_bath / "symptemist_train" / "subtask1-ner" / "tsv" / "symptemist_tsv_train_subtask1.tsv"
             ],
-            ('entities', 'test'): [
-                base_bath / "test_annotated" / "subtrack1_entities" / "distemist_subtrack1_test_mentions.tsv"
+            ("symptemist_entities", "test"): [
+                base_bath / "symptemist_test" / "subtask1-ner" / "tsv" / "symptemist_tsv_test_subtask1.tsv"
             ],
-            ('linking', 'train'): [
-                base_bath / "training" / "subtrack2_linking" / "distemist_subtrack2_training1_linking.tsv",
-                base_bath / "training" / "subtrack2_linking" / "distemist_subtrack2_training2_linking.tsv",
+            ("symptemist_linking", "train"): [
+                base_bath / "symptemist_train" / "subtask2-linking" / "symptemist_tsv_train_subtask2.tsv"
             ],
-            ('linking', 'test'): [
-                base_bath / "test_annotated" / "subtrack2_linking" / "distemist_subtrack2_test_linking.tsv"
-            ],       
-        }       
+            ("symptemist_linking", "test"): [
+                base_bath / "symptemist_test" / "subtask2-linking" / "symptemist_tsv_test_subtask2.tsv"
+            ],
+            ("symptemist_linking_complete", "train"): [
+                base_bath / "symptemist_train" / "subtask2-linking" / "symptemist_tsv_train_subtask2_complete.tsv"
+            ],
+            ("symptemist_linking_complete", "test"): [
+                base_bath / "symptemist_test" / "subtask2-linking" / "symptemist_tsv_test_subtask2.tsv"
+            ],
+            ("symptemist_linking_composite", "train"): [
+                base_bath
+                / "symptemist_train"
+                / "subtask2-linking"
+                / "symptemist_tsv_train_subtask2_complete+COMPOSITE.tsv"
+            ],
+            ("symptemist_linking_composite", "test"): [
+                base_bath / "symptemist_test" / "subtask2-linking" / "symptemist_tsv_test_subtask2+COMPOSITE.tsv"
+            ],
+        }
+
         entity_mapping_files = tsv_files[(track, split)]
-        
-        if split == "train":
-            text_files_dir = base_bath / "training" / "text_files"
-        elif split == "test":
-            text_files_dir = base_bath / "test_annotated" / "text_files"
-        
+        text_files_dir = base_bath / f"symptemist_{split}" / "subtask1-ner" / "txt"
+
+        # keep this in case more files are added later
         entities_mapping = pd.concat([pd.read_csv(file, sep="\t") for file in entity_mapping_files])
         entity_file_names = entities_mapping["filename"].unique()
 
         for uid, filename in enumerate(entity_file_names):
             text_file = text_files_dir / f"{filename}.txt"
 
-            doc_text = text_file.read_text(encoding='utf8')
+            doc_text = text_file.read_text(encoding="utf8")
             # doc_text = doc_text.replace("\n", "")
 
             entities_df: pd.DataFrame = entities_mapping[entities_mapping["filename"] == filename]
@@ -227,21 +260,25 @@ class DistemistDataset(datasets.GeneratorBasedBuilder):
 
             entities = []
             for row in entities_df.itertuples(name="Entity"):
+
                 entity = {
-                    "id": f"{uid}_{row.filename}_{row.Index}_entity_id_{row.mark}",
+                    "id": f"{uid}_{row.filename}_{row.Index}_entity_id",
                     "type": row.label,
-                    "text": [row.span],
-                    "offsets": [[row.off0, row.off1]],
+                    "text": [row.text],
+                    "offsets": [[row.start_span, row.end_span]]
+                    if self.config.subset_id == "symptemist_entities"
+                    else [[row.span_ini, row.span_end]],
                 }
+
                 if self.config.schema == "source":
                     entity["concept_codes"] = []
                     entity["semantic_relations"] = []
-                    if self.config.subset_id == "distemist_linking":
+                    if self.config.subset_id == "symptemist_linking":
                         entity["concept_codes"] = row.code.split("+")
-                        entity["semantic_relations"] = row.semantic_rel.split("+")
+                        entity["semantic_relations"] = row.sem_rel.split("+")
 
                 elif self.config.schema == "bigbio_kb":
-                    if self.config.subset_id == "distemist_linking":
+                    if self.config.subset_id.startswith("symptemist_linking"):
                         entity["normalized"] = [
                             {"db_id": code, "db_name": "SNOMED_CT"} for code in row.code.split("+")
                         ]

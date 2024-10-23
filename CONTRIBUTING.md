@@ -67,7 +67,7 @@ The following instructions will create an Anaconda `BigBIO` environment.
 - Run the following command while in the `biomedical` folder (you can pick your python version):
 
 ```
-conda env create -f conda.yml  # Creates a conda env
+conda env create -f conda.yaml  # Creates a conda env
 conda activate bigbio  # Activate your conda environment
 ```
 
