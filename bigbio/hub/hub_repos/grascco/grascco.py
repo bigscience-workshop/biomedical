@@ -163,22 +163,19 @@ class GraSCCoDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _parse_uima_cas_json(self, filename):
+    def _parse_uima_cas_json(self, filename) -> Dict:
+        """Parse UIMA CAS JSON file and return parsed elements as well as the raw data"""
         with open(filename, "r", encoding="utf-8") as f:
             uima_features = json.load(f)[_UIMA_FEATURES_KEY]
-            sentences = []
             phi_elements = []
             for feature in uima_features:
                 if feature["%TYPE"] == "webanno.custom.PHI":
                     phi_elements.append(feature)
-                if feature["%TYPE"] == "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence":
-                    sentences.append(feature)
                 if feature["%TYPE"] == "de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData":
                     document_title = feature["documentTitle"]
                 if feature["%TYPE"] == "uima.cas.Sofa":
                     document_text = feature["sofaString"]
             return {
-                "sentences": sentences,
                 "phi_elements": phi_elements,
                 "document_title": document_title,
                 "document_text": document_text,
@@ -193,25 +190,14 @@ class GraSCCoDataset(datasets.GeneratorBasedBuilder):
             if self.config.schema == "source":
                 yield doc_id, {"document_id": doc_id, _UIMA_FEATURES_KEY: uima_parsed["uima_features"]}
             elif self.config.schema == "bigbio_kb":
-                passages = []
+                text = uima_parsed["document_text"]
                 relations = []
                 entities = []
+                # Just as single passage; ignoring sentence boundaries from annotation tool, as these are not reliable
+                passages = [{"id": f"{file_id}-0", "type": "document", "text": [text], "offsets": [[0, len(text)]]}]
 
-                text = uima_parsed["document_text"]
-                passages.append(
-                    {"id": f"{file_id}-0", "type": "document", "text": [text], "offsets": [[0, len(text)]]}
-                )
-                # for sid, sentence in enumerate(sorted(uima_parsed['sentences'], key=lambda s: s['begin'])):
-                #    s_start = sentence['begin']
-                #    s_end = sentence['end']
-                #    passages.append({
-                #        "id": sid,
-                #        "type": "sentence",
-                #        "text": [text[s_start:s_end]],
-                #        "offsets": [[s_start, s_end]]
-                #    })
+                # Other subsets / annotation layers will be added in future GraSCCo releases
                 if self.config.subset_id == "phi":
-                    # Apending PHI elements as entities
                     for phi in sorted(uima_parsed["phi_elements"], key=lambda p: p["begin"]):
                         e_start = phi["begin"]
                         e_end = phi["end"]
