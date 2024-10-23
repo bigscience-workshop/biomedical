@@ -240,7 +240,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                                     "normalized": [
                                         {
                                             "db_name": "UMLS",
-                                            "db_id": entity["concept_id"],
+                                            "db_id": entity["concept_id"].split(':')[-1],
                                         }
                                     ],
                                 }

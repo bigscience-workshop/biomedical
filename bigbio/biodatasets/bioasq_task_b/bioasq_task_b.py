@@ -350,15 +350,15 @@ _BIOASQ_3B_DESCRIPTION = """No README provided."""
 
 _BIOASQ_2B_DESCRIPTION = """No README provided."""
 
-_BIOASQ_BLURB_DESCRIPTION = """The BioASQ corpus contains multiple question 
-answering tasks annotated by biomedical experts, including yes/no, factoid, list, 
-and summary questions. Pertaining to our objective of comparing neural language 
-models, we focus on the the yes/no questions (Task 7b), and leave the inclusion 
-of other tasks to future work. Each question is paired with a reference text 
-containing multiple sentences from a PubMed abstract and a yes/no answer. We use 
+_BIOASQ_BLURB_DESCRIPTION = """The BioASQ corpus contains multiple question
+answering tasks annotated by biomedical experts, including yes/no, factoid, list,
+and summary questions. Pertaining to our objective of comparing neural language
+models, we focus on the the yes/no questions (Task 7b), and leave the inclusion
+of other tasks to future work. Each question is paired with a reference text
+containing multiple sentences from a PubMed abstract and a yes/no answer. We use
 the official train/dev/test split of 670/75/140 questions.
 
-See 'Domain-Specific Language Model Pretraining for Biomedical 
+See 'Domain-Specific Language Model Pretraining for Biomedical
 Natural Language Processing' """
 
 _DESCRIPTION = {
@@ -607,16 +607,17 @@ class BioasqTaskBDataset(datasets.GeneratorBasedBuilder):
         train_fpath = os.path.join(train_dir, "blurb_bioasq_train.json")
         dev_fpath = os.path.join(train_dir, "blurb_bioasq_dev.json")
 
+        blurb_splits = {
+            "train": {"questions": []},
+            "dev": {"questions": []},
+            "test": {"questions": []},
+        }
+
         if not os.path.exists(train_fpath):
             data_fpath = os.path.join(train_dir, "BioASQ-training7b/trainining7b.json")
             with open(data_fpath, "rt", encoding="utf-8") as file:
                 data = json.load(file)
 
-            blurb_splits = {
-                "train": {"questions": []},
-                "dev": {"questions": []},
-                "test": {"questions": []},
-            }
             for record in data["questions"]:
                 if record["type"] != "yesno":
                     continue
