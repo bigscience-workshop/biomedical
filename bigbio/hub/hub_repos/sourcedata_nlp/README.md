@@ -3,7 +3,7 @@ language:
   - en 
 bigbio_language:
   - English
-license: "CC-BY 4.0"
+license: "cc-by-4.0"
 bigbio_license_shortname: cc-by-4.0
 multilinguality: monolingual
 pretty_name: SourceData NLP
