@@ -24,7 +24,7 @@ bigbio_tasks:
 - **Public:** True
 - **Tasks:** NER
 
-GraSCCo  is a collection of artificially generated semi-structured and unstructured German-language clinical summaries. These summaries are formulated as letters from the hospital to the patient's GP after in-patient or out-patient care.
+GraSCCo is a collection of artificially generated semi-structured and unstructured German-language clinical summaries. These summaries are formulated as letters from the hospital to the patient's GP after in-patient or out-patient care.
 This is common practice in Germany, Austria and Switzerland.
 
 The creation of the GraSCCo documents were inspired by existing clinical texts, but all names and dates are purely fictional.

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 """
-GraSCCo  is a collection of artificially generated semi-structured and unstructured German-language clinical summaries.
+GraSCCo is a collection of artificially generated semi-structured and unstructured German-language clinical summaries.
 These summaries are formulated as letters from the hospital to the patient's GP after in-patient or out-patient care.
 This is common practice in Germany, Austria and Switzerland.
 
@@ -53,7 +53,7 @@ _DATASETNAME = "grascco"
 _DISPLAYNAME = "GraSCCo"
 
 _DESCRIPTION = """\
-GraSCCo  is a collection of artificially generated semi-structured and unstructured German-language clinical summaries.
+GraSCCo is a collection of artificially generated semi-structured and unstructured German-language clinical summaries.
 These summaries are formulated as letters from the hospital to the patient's GP after in-patient or out-patient care.
 This is common practice in Germany, Austria and Switzerland.
 
