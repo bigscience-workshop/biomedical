@@ -13,32 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""\
-Here, we present the plant-phenotype relationship (PPR) corpus, 
-a resource established to support the development and evaluation 
-of various tasks and to extract new information in the biomedical domain. 
-Using the proposed guidelines, we manually annotated 600 abstracts from 
-the PubMed database. In the PPR corpus, 5668 plant and 11,282 phenotype
-mentions were annotated, and 9709 relationships between them including 
-“Increase,” “Decrease,” “Association,” and “Negative” were annotated. 
-As the PPR corpus is split into three types—train, development, and test 
-sets—we suggest that our corpus will be invaluable for advancing and 
-evaluating text-mining techniques for biomedical NLP tasks.
-
-[bigbio_schema_name] = kb
-"""
-
-import os
 import itertools as it
-from typing import List, Tuple, Dict
+from typing import Dict, Generator, List, Tuple
 
 import datasets
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
 
-_LANGUAGES = [Lang.EN]
+from .bigbiohub import BigBioConfig, Tasks, kb_features
+
+_LANGUAGES = ["English"]
 _PUBMED = True
 _LOCAL = False
 
@@ -54,21 +36,21 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "plant_phenotype"
-_DISPLAYNAME = "Plant-Phenotype"
+_DATASETNAME = "ppr"
+_DISPLAYNAME = "Plant-Phenotype-Relations"
 
 _DESCRIPTION = """\
-The Plant-Phenotype corpus is a text corpus with human annotations of plants, 
-phenotypes, and their relations on a corpus in 600 PubMed abstracts.
+The Plant-Phenotype corpus is a text corpus with human annotations of plants, phenotypes, and their relations on a \
+corpus in 600 PubMed abstracts.
 """
 
 _HOMEPAGE = "https://github.com/DMCB-GIST/PPRcorpus"
 
-_LICENSE = Licenses.UNKNOWN
+_LICENSE = "UNKNOWN"
 
 _URLS = {
     _DATASETNAME: [
-        "https://raw.githubusercontent.com/davidkartchner/PPRcorpus/main/corpus/PPR_dev_corpus.txt",
+        "https://raw.githubusercontent.com/davidkartchner/PPRcorpus/main/corpus/PPR_train_corpus.txt",
         "https://raw.githubusercontent.com/davidkartchner/PPRcorpus/main/corpus/PPR_dev_corpus.txt",
         "https://raw.githubusercontent.com/davidkartchner/PPRcorpus/main/corpus/PPR_test_corpus.txt",
     ],
@@ -76,46 +58,36 @@ _URLS = {
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 
-
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
 class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
-    """\
-    Plant-Phenotype is dataset for named-entity recognition and relation extraction of plants and their induced phenotypes
-    """
+    """Plant-Phenotype is dataset for NER and RE of plants and their induced phenotypes"""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
 
     BUILDER_CONFIGS = [
         BigBioConfig(
-            name="plant_phenotype_source",
+            name="ppr_source",
             version=SOURCE_VERSION,
-            description="Plant Phenotype source schema",
+            description="Plant Phenotype Relations source schema",
             schema="source",
             subset_id="plant_phenotype",
         ),
         BigBioConfig(
-            name="plant_phenotype_bigbio_kb",
+            name="ppr_bigbio_kb",
             version=BIGBIO_VERSION,
-            description="Plant Phenotype BigBio schema",
+            description="Plant Phenotype Relations BigBio schema",
             schema="bigbio_kb",
             subset_id="plant_phenotype",
         ),
     ]
 
-    DEFAULT_CONFIG_NAME = "plant_phenotype_source"
+    DEFAULT_CONFIG_NAME = "ppr_source"
 
     def _info(self) -> datasets.DatasetInfo:
-
-        # Create the source schema; this schema will keep all keys/information/labels as close to the original dataset as possible.
-
-        # You can arbitrarily nest lists and dictionaries.
-        # For iterables, use lists over tuples or `datasets.Sequence`
-
         if self.config.schema == "source":
 
             features = datasets.Features(
@@ -124,19 +96,11 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                     "pmid": datasets.Value("string"),
                     "section": datasets.Value("int32"),
                     "text": datasets.Value("string"),
-                    #    "passages": [
-                    #        {
-                    #            'id': datasets.Value("string"),
-                    #            'text': datasets.Value("string"),
-                    #            'offsets': datasets.sequence(datasets.Value("int32")),
-                    #        }
-                    #    ]
                     "entities": [
                         {
                             "offsets": datasets.Sequence(datasets.Value("int32")),
                             "text": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            #    "entity_id": datasets.Value("string"),
                         }
                     ],
                     "relations": [
@@ -154,13 +118,15 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=str(_LICENSE),
+            license=_LICENSE,
             citation=_CITATION,
         )
 
@@ -173,7 +139,6 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "filepath": train,
                 },
@@ -201,41 +166,47 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
         with open(filepath, "r") as f:
             chunks = f.read().strip().split("\n\n")
 
-        # EDIT
         if self.config.schema == "source":
             for id_, doc in self._generate_source_examples(chunks):
                 yield id_, doc
 
-        # EDIT
         elif self.config.schema == "bigbio_kb":
             for id_, doc in self._generate_bigbio_kb_examples(chunks):
                 yield id_, doc
 
-    def _generate_whole_documents(self, chunks):
+    def _generate_whole_documents(self, annotation_chunks: List[str]) -> Generator[Dict, None, None]:
+        """Aggregate individual sentence annotations into whole abstracts.
+
+        Args:
+            annotation_chunks (List[str]): List of annotation chunks, i.e., a sentence with its annotations.
+                For example:
+                10072339_4	OBJECTIVE: A patient with possible airborne facial dermatitis to potato is described.
+                10072339	44	61	facial dermatitis	Negative_phenotype
+                10072339	65	71	potato	Plant
+
+        Returns:
+              Generator producing a dictionary containing the pmid of an article and all document chunks.
         """
-        Collect individual sentence annotations into whole abstracts
-        """
-        prev_pmid = -1
+        prev_pmid = None
         pmid = ""
         doc_chunks = []
 
-        for c in chunks:
-            lines = c.split("\n")
-            dataset_id, passage_text = lines[0].split("\t")
-            annotations = [l.split("\t") for l in lines[1:]]
-            if len(annotations) == 0:
-                continue
+        for chunk in annotation_chunks:
+            lines = chunk.split("\n")
+
+            # The first line is the sentence (format: <pmid>_<num>\t<sentence-text>)
+            passage_info, passage_text = lines[0].split("\t")
+
+            # Then annotations in Pubtator format
+            annotations = [line.split("\t") for line in lines[1:]]
 
             # Get info on passage
-            pmid, section = dataset_id.split("_")
-            if prev_pmid == -1:
+            pmid, section = passage_info.split("_")
+            if prev_pmid is None:
                 prev_pmid = pmid
-            if prev_pmid != pmid:
-                out = {
-                    "pmid": prev_pmid,
-                    "doc_chunks": doc_chunks,
-                }
-                yield out
+
+            elif prev_pmid != pmid:
+                yield {"pmid": prev_pmid, "doc_chunks": doc_chunks}
 
                 # Reset everything for next PMID
                 prev_pmid = pmid
@@ -245,68 +216,70 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                 {
                     "passage": passage_text,
                     "annotations": annotations,
-                    "sentence_id": dataset_id,
+                    "sentence_id": passage_info,
                 }
             )
 
         # Take care of last document
-        yield {
-            "pmid": pmid,
-            "doc_chunks": doc_chunks,
-        }
+        yield {"pmid": pmid, "doc_chunks": doc_chunks}
 
-    def _generate_source_examples(self, chunks):
+    def _generate_source_examples(self, annotation_chunks: List[str]) -> Generator[Tuple[str, Dict], None, None]:
+        """Generate examples in format of source schema
+
+        Args:
+            annotation_chunks (List[str]): List of annotation chunks.
+
+        Returns:
+            Generator of instance tuples (<key>, <instance-dict>)
         """
-        Generate examples in format of source schema
-        """
-        for c in chunks:
-            lines = c.split("\n")
+        for chunk in annotation_chunks:
+            lines = chunk.split("\n")
+
             passage_id, passage_text = lines[0].split("\t")
-            annotations = [l.split("\t") for l in lines[1:]]
-            if len(annotations) == 0:
-                continue
+            annotations = [line.split("\t") for line in lines[1:]]
 
             # Get info on passage
             pmid, section = passage_id.split("_")
             section = int(section)
-            pmid = annotations[0][0]
 
             # Grab entities and relations
             entities = []
             relations = []
-            for a in annotations:
-                if len(a) == 5:
+            for annotation in annotations:
+                if len(annotation) == 5:
+                    # It's an entity annotation
                     entities.append(
                         {
-                            "offsets": (int(a[1]), int(a[2])),
-                            "text": a[3],
-                            "type": a[4],
+                            "offsets": (int(annotation[1]), int(annotation[2])),
+                            "text": annotation[3],
+                            "type": annotation[4],
                         }
                     )
 
-                elif len(a) == 10:
+                elif len(annotation) == 10:
+                    # Relation annotation
                     relations.append(
                         {
-                            "relation_type": a[1],
-                            "entity1_offsets": (int(a[2]), int(a[3])),
-                            "entity1_text": a[4],
-                            "entity1_type": a[5],
-                            "entity2_offsets": (int(a[6]), int(a[7])),
-                            "entity2_text": a[8],
-                            "entity2_type": a[9],
+                            "relation_type": annotation[1],
+                            "entity1_offsets": (int(annotation[2]), int(annotation[3])),
+                            "entity1_text": annotation[4],
+                            "entity1_type": annotation[5],
+                            "entity2_offsets": (int(annotation[6]), int(annotation[7])),
+                            "entity2_text": annotation[8],
+                            "entity2_type": annotation[9],
                         }
                     )
                 else:
                     # This is a special case that occurs for a single data point
                     relations.append(
                         {
-                            "relation_type": a[1],
-                            "entity1_offsets": (int(a[2]), int(a[3])),
-                            "entity1_text": a[4],
-                            "entity1_type": a[5],
-                            "entity2_offsets": (int(a[8]), int(a[9])),
-                            "entity2_text": a[10],
-                            "entity2_type": a[11],
+                            "relation_type": annotation[1],
+                            "entity1_offsets": (int(annotation[2]), int(annotation[3])),
+                            "entity1_text": annotation[4],
+                            "entity1_type": annotation[5],
+                            "entity2_offsets": (int(annotation[8]), int(annotation[9])),
+                            "entity2_text": annotation[10],
+                            "entity2_type": annotation[11],
                         }
                     )
 
@@ -322,12 +295,17 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
 
             yield passage_id, document
 
-    def _generate_bigbio_kb_examples(self, chunks):
-        """
-        Generator for training examples in bigbio_kb schema format
+    def _generate_bigbio_kb_examples(self, annotation_chunks: List[str]):
+        """Generator for training examples in bigbio_kb schema format.
+
+        Args:
+            annotation_chunks (List[str]): List of annotation chunks.
+
+        Returns:
+            Generator of instance tuples (<key>, <instance-dict>)
         """
         uid = it.count(1)
-        for document in self._generate_whole_documents(chunks):
+        for document in self._generate_whole_documents(annotation_chunks):
             pmid = document["pmid"]
             offset_delta = 0
             id_ = str(next(uid))
@@ -337,11 +315,9 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
             relations = []
 
             # Iterate through each section of the article
-            for c in document["doc_chunks"]:
-                passage = c["passage"]
-                annotations = c["annotations"]
-
+            for text_section in document["doc_chunks"]:
                 # Extract passages
+                passage = text_section["passage"]
                 passages.append(
                     {
                         "id": str(next(uid)),
@@ -353,14 +329,14 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
 
                 # Extract entities
                 entities_sublist = []
-                for a in annotations:
-                    if len(a) == 5:
+                for annotation in text_section["annotations"]:
+                    if len(annotation) == 5:
                         entities_sublist.append(
                             {
                                 "id": str(next(uid)),
-                                "type": a[4],
-                                "text": [a[3]],
-                                "offsets": [(int(a[1]) + offset_delta, int(a[2]) + offset_delta)],
+                                "type": annotation[4],
+                                "text": [annotation[3]],
+                                "offsets": [(int(annotation[1]) + offset_delta, int(annotation[2]) + offset_delta)],
                                 "normalized": [],
                             }
                         )
@@ -370,14 +346,14 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                 entities.extend(entities_sublist)
 
                 # Extract relations
-                for a in annotations:
-                    if len(a) == 10:
-                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
-                        e2_offsets = [(int(a[6]) + offset_delta, int(a[7]) + offset_delta)]
+                for annotation in text_section["annotations"]:
+                    if len(annotation) == 10:
+                        e1_offsets = [(int(annotation[2]) + offset_delta, int(annotation[3]) + offset_delta)]
+                        e2_offsets = [(int(annotation[6]) + offset_delta, int(annotation[7]) + offset_delta)]
                         relations.append(
                             {
                                 "id": str(next(uid)),
-                                "type": a[1],
+                                "type": annotation[1],
                                 "arg1_id": ent2id[tuple(e1_offsets)],
                                 "arg2_id": ent2id[tuple(e2_offsets)],
                                 "normalized": [],
@@ -385,15 +361,16 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
                         )
 
                     # Special case for a single annotation
-                    elif len(a) > 10:
-                        e1_offsets = [(int(a[2]) + offset_delta, int(a[3]) + offset_delta)]
-                        e2_offsets = [(int(a[8]) + offset_delta, int(a[9]) + offset_delta)]
+                    elif len(annotation) > 10:
+                        e1_offsets = [(int(annotation[2]) + offset_delta, int(annotation[3]) + offset_delta)]
+                        e2_offsets = [(int(annotation[8]) + offset_delta, int(annotation[9]) + offset_delta)]
                         relations.append(
                             {
                                 "id": str(next(uid)),
-                                "type": a[1],
+                                "type": annotation[1],
                                 "arg1_id": ent2id[tuple(e1_offsets)],
                                 "arg2_id": ent2id[tuple(e2_offsets)],
+                                "normalized": [],
                             }
                         )
 
@@ -410,14 +387,3 @@ class PlantPhenotypeDataset(datasets.GeneratorBasedBuilder):
             }
 
             yield id_, doc
-
-            passages = []
-            entities = []
-            relations = []
-            id_ = next(uid)
-
-
-# This allows you to run your dataloader with `python [dataset_name].py` during development
-# TODO: Remove this before making your PR
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
