@@ -19,28 +19,30 @@ on angiogenesis. It contains annotations for entities, relations, events and cor
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import datasets
-from utils import parsing, schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
 
-_DATASETNAME = "mlee"
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
+
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
+_LANGUAGES = ['English']
+_PUBMED = True
+_LOCAL = False
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
-  biburl    = {},
-  bibsource = {}
+@article{pyysalo2012event,
+  title={Event extraction across multiple levels of biological organization},
+  author={Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
+  journal={Bioinformatics},
+  volume={28},
+  number={18},
+  pages={i575--i581},
+  year={2012},
+  publisher={Oxford University Press}
 }
 """
 
@@ -50,10 +52,12 @@ on angiogenesis. It contains annotations for entities, relations, events and cor
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
 
+_DATASETNAME = "mlee"
+_DISPLAYNAME = "MLEE"
+
 _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 
-_LICENSE = "CC BY-NC-SA 3.0"
-
+_LICENSE = 'Creative Commons Attribution Non Commercial Share Alike 3.0 Unported'
 _URLs = {
     "source": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
     "bigbio_kb": "http://www.nactem.ac.uk/MLEE/MLEE-1.0.2-rev1.tar.gz",
@@ -94,23 +98,12 @@ class MLEE(datasets.GeneratorBasedBuilder):
 
     DEFAULT_CONFIG_NAME = "mlee_source"
 
-    _ENTITY_TYPES = {
-        "Anatomical_system",
-        "Cell",
-        "Cellular_component",
-        "DNA_domain_or_region",
-        "Developing_anatomical_structure",
-        "Drug_or_compound",
-        "Gene_or_gene_product",
-        "Immaterial_anatomical_entity",
-        "Multi-tissue_structure",
-        "Organ",
-        "Organism",
-        "Organism_subdivision",
-        "Organism_substance",
-        "Pathological_formation",
-        "Protein_domain_or_region",
-        "Tissue",
+    _ROLE_MAPPING = {
+        "Theme2": "Theme",
+        "Instrument2": "Instrument",
+        "Participant2": "Participant",
+        "Participant3": "Participant",
+        "Participant4": "Participant",
     }
 
     def _info(self):
@@ -138,7 +131,9 @@ class MLEE(datasets.GeneratorBasedBuilder):
                     ],
                     "events": [  # E line in brat
                         {
-                            "trigger": datasets.Value("string"),  # refers to the text_bound_annotation of the trigger,
+                            "trigger": datasets.Value(
+                                "string"
+                            ),  # refers to the text_bound_annotation of the trigger,
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "arguments": datasets.Sequence(
@@ -182,8 +177,12 @@ class MLEE(datasets.GeneratorBasedBuilder):
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
                             "ref_id": datasets.Value("string"),
-                            "resource_name": datasets.Value("string"),  # Name of the resource, e.g. "Wikipedia"
-                            "cuid": datasets.Value("string"),  # ID in the resource, e.g. 534366
+                            "resource_name": datasets.Value(
+                                "string"
+                            ),  # Name of the resource, e.g. "Wikipedia"
+                            "cuid": datasets.Value(
+                                "string"
+                            ),  # ID in the resource, e.g. 534366
                             "text": datasets.Value(
                                 "string"
                             ),  # Human readable description/name of the entity, e.g. "Barack Obama"
@@ -192,7 +191,7 @@ class MLEE(datasets.GeneratorBasedBuilder):
                 },
             )
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             # This is the description that will appear on the datasets page.
@@ -205,12 +204,14 @@ class MLEE(datasets.GeneratorBasedBuilder):
             # Homepage of the dataset for documentation
             homepage=_HOMEPAGE,
             # License for the dataset if available
-            license=_LICENSE,
+            license=str(_LICENSE),
             # Citation for the dataset
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """
         Create the three splits provided by MLEE: train, validation and test.
 
@@ -221,7 +222,11 @@ class MLEE(datasets.GeneratorBasedBuilder):
         my_urls = _URLs[self.config.schema]
         data_dir = Path(dl_manager.download_and_extract(my_urls))
         data_files = {
-            "train": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "train",
+            "train": data_dir
+            / "MLEE-1.0.2-rev1"
+            / "standoff"
+            / "development"
+            / "train",
             "dev": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "development" / "test",
             "test": data_dir / "MLEE-1.0.2-rev1" / "standoff" / "test" / "test",
         }
@@ -241,6 +246,15 @@ class MLEE(datasets.GeneratorBasedBuilder):
             ),
         ]
 
+    def _standardize_arguments_roles(self, kb_example: Dict) -> Dict:
+
+        for event in kb_example["events"]:
+            for argument in event["arguments"]:
+                role = argument["role"]
+                argument["role"] = self._ROLE_MAPPING.get(role, role)
+
+        return kb_example
+
     def _generate_examples(self, data_files: Path):
         """
         Yield one `(guid, example)` pair per abstract in MLEE.
@@ -256,8 +270,9 @@ class MLEE(datasets.GeneratorBasedBuilder):
             txt_files = list(data_files.glob("*txt"))
             for guid, txt_file in enumerate(txt_files):
                 example = parsing.brat_parse_to_bigbio_kb(
-                    parsing.parse_brat_file(txt_file), entity_types=self._ENTITY_TYPES
+                    parsing.parse_brat_file(txt_file)
                 )
+                example = self._standardize_arguments_roles(example)
                 example["id"] = str(guid)
                 yield guid, example
         else:

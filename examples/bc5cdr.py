@@ -26,14 +26,16 @@ import collections
 import itertools
 import os
 
-from bioc import biocxml
 import datasets
+from bioc import biocxml
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
-from utils.parsing import get_texts_and_offsets_from_bioc_ann
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
+_LANGUAGES = ['English']
+_PUBMED = True
+_LOCAL = False
 _CITATION = """\
 @article{DBLP:journals/biodb/LiSJSWLDMWL16,
   author    = {Jiao Li and
@@ -60,15 +62,17 @@ _CITATION = """\
 """
 
 _DATASETNAME = "bc5cdr"
+_DISPLAYNAME = "BC5CDR"
 
 _DESCRIPTION = """\
-The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated text corpus of
-human annotations of all chemicals, diseases and their interactions in 1,500 PubMed articles.
+The BioCreative V Chemical Disease Relation (CDR) dataset is a large annotated \
+text corpus of human annotations of all chemicals, diseases and their \
+interactions in 1,500 PubMed articles.
 """
 
 _HOMEPAGE = "http://www.biocreative.org/tasks/biocreative-v/track-3-cdr/"
 
-_LICENSE = "Public Domain Mark 1.0"
+_LICENSE = 'Public Domain Mark 1.0'
 
 _URLs = {
     "source": "http://www.biocreative.org/media/store/files/2016/CDR_Data.zip",
@@ -149,14 +153,14 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
             supervised_keys=None,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -219,11 +223,15 @@ class Bc5cdrDataset(datasets.GeneratorBasedBuilder):
         # texts = [doc_text[i:j] for i, j in offsets]
         offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
         db_ids = span.infons[db_id_key] if db_id_key else "-1"
-        normalized = [
-            # some entities are linked to multiple normalized ids
-            {"db_name": db_id_key, "db_id": db_id}
-            for db_id in db_ids.split("|")
-        ]
+
+        # some entities are not linked and
+        # some entities are linked to multiple normalized ids
+        if db_ids == "-1":
+            db_ids_list = []
+        else:
+            db_ids_list = db_ids.split("|")
+
+        normalized = [{"db_name": db_id_key, "db_id": db_id} for db_id in db_ids_list]
 
         return {
             "id": span.id,

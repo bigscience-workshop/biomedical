@@ -1,186 +1,162 @@
-# Welcome to the BigScience🌸 Biomedical NLP Hackathon!
+# BigBIO: Biomedical Dataset Library
+
+`BigBIO` (BigScience Biomedical) is an open library of biomedical dataloaders built using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/) for data-centric machine learning. 
+
+Our goals include:
+
+- Lightweight, programmatic access to biomedical datasets at scale
+- Promoting reproducibility in data processing
+- Better documentation for dataset provenance, licensing, and other key attributes
+- Easier generation of meta-datasets for natural language prompting, multi-task learning
 
+Currently `BigBIO` provides support for:
 
-![progress claimed](https://progress-bar.dev/96/?title=Datasets%20Claimed)
+- 126+ biomedical datasets
+- 10+ languages
+- 12 task categories
+- Harmonized dataset schemas by task type
+- Metadata on *licensing*, *coarse/fine-grained task types*, *domain*, and more!
 
-![tier1](https://progress-bar.dev/100/?title=Milestone%201%20(30%20Datasets%20Completed))
-![tier2](https://progress-bar.dev/100/?title=Milestone%202%20(60%20Datasets%20Completed))
-![tier3](https://progress-bar.dev/98/?title=Milestone%203%20(100%20Datasets%20Completed))
-![tier4](https://progress-bar.dev/60/?title=Milestone%204%20(All%20Datasets%20Completed))
+## How to Use `BigBIO`
 
+The preferred way to use these datasets is to access them from the [Official `BigBIO` Hub](https://huggingface.co/bigbio). 
 
-Huggingface's BigScience🌸 initative is an open scientific collaboration of nearly 600 researchers from 50 countries and 250 institutions who collaborate on various projects within the natural language processing (NLP) space to broaden accessibility of language datasets while working on challenging scientific questions around language modeling.  
-<!--- @Natasha From the Data_sourcing wiki  --->
 
-We are running a **Biomedical Datasets hackathon** to centralize many NLP datasets in the biological and medical space. Biological data is diverse, so a unified location that joins multiple sources while preserving the data closest to the original form can greatly help accessbility.
+Minimally, ensure you have the `datasets` library installed. Preferably, install the requirements as follows:
 
-## Goals of this hackathon
+`pip install -r requirements.txt`.
 
-Our goal is to **enable easy programatic access to these datasets** using Huggingface's (🤗) [`datasets` library](https://huggingface.co/docs/datasets/). To do this, we propose a unified schema for dataset extraction, with the intention of implementing as many biomedical datasets as possible to enable **reproducibility in data processing**. 
+<br>
 
-There are two broad licensing categories for biomedical datasets:
+You can access `BigBIO` datasets as follows:
 
-##### 1. Public Data (Public Domain, Creative Commons, Apache 2.0, etc.)
-##### 2. External Data Use Agreements (PhysioNet, i2b2/n2c2, etc.)
+```python
+from datasets import load_dataset
+data = load_dataset("bigbio/biosses")
+```
 
-We will accept data-loading scripts for either type; please see the [FAQs](#FAQs) for more explicit details on what we propose.
+In most cases, scripts load the original schema of the dataset by default. You can also access the `BigBIO` split that streamlines access to key information in datasets given a particular task. 
 
-### Why is this important?
+<br>
 
-Biomedical language data is highly specialized, requiring expert curation and annotation. Many great initiatives have created different language data sets across a variety of biological domains. A **centralized source that allows users to access relevant information reproducibly** greatly increases accessibility of these datasets, and promotes research.
+For example, the `biosses` dataset follows a `pairs` based schema, where text-based inputs (sentences, paragraphs) are assigned a "translated" pair. 
 
-Our unified schema allows researchers and practioners to **access the same type of information across a variety of datasets with fixed keys**. This can enable researchers to quickly iterate, and write scripts without worrying about pre-processing nuances specific to a dataset.
+```python
+from datasets import load_dataset
+data = load_dataset("bigbio/biosses", name="biosses_bigbio_pairs")
+```
 
+Generally, you can load your datasets as follows:
 
-## Contribution Guidelines
+```python
+# Load original schema
+data = load_dataset("bigbio/<your_dataset>")
 
-To be considered a contributor, participants must implement an *accepted data-loading script* to the bigscience-biomedical collection for **at least 3 datasets**. 
+# Load BigBIO schema
+data = load_dataset("bigbio/<your_dataset_here>", name="<your_dataset>_bigbio_<schema_name>")
+```
 
-Explicit instructions are found in the next section, but the steps for getting a data-loading script accepted are as follows: <br>
+Check the datacards on the Hub to see what splits are available to you. You can find more information about [schemas](task_schemas.md) in [Documentation](##Documentation) below.
 
-- Fork this repo and write a data-loading script in a new branch
-- PR your branch back to this repo and ping the admins
-- An admin will review and approve your PR or ping you for changes
+## Benchmark Support
 
-Details for contributor acknowledgements and rewards can be found [here](#Thank-you)
+`BigBIO` includes support for almost all datasets included in other popular English biomedical benchmarks.
 
-## Get started!
+| Task Type | Dataset       | [`BigBIO` (ours)](https://arxiv.org/abs/2206.15076) | [BLUE](https://arxiv.org/abs/1906.05474)  | [BLURB](https://microsoft.github.io/BLURB/) | [BoX](https://arxiv.org/abs/2204.07600) | DUA needed |
+|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
+| NER       | BC2GM         | ✓          |   | ✓  | ✓       |             |
+| NER       | BC5-chem      | ✓          | ✓  | ✓  | ✓       |          |
+| NER       | BC5-disease   | ✓          | ✓  | ✓  | ✓       |          |
+| NER       | EBM PICO      | ✓          |   | ✓  |        |             |
+| NER       | JNLPBA        | ✓          |   | ✓  | ✓       |             |
+| NER       | NCBI-disease  | ✓          |   | ✓  | ✓       |          |
+| RE        | ChemProt      | ✓          | ✓  | ✓  | ✓       |          |
+| RE        | DDI           | ✓          | ✓  | ✓  | ✓       |          |
+| RE        | GAD           | ✓          |   | ✓  |        |             |
+| QA        | PubMedQA      | ✓          |   | ✓  |    ✓    |          |
+| QA        | BioASQ        | ✓          |   | ✓  |  ✓       | ✓         |
+| DC        | HoC           | ✓          | ✓  |   ✓  | ✓       |          |
+| STS       | BIOSSES       | ✓          | ✓  |   ✓  |        |          |
+| STS       | MedSTS        | *                | ✓  |   |        |   ✓          |
+| NER       | n2c2 2010     | ✓          | ✓  |   |  ✓      | ✓         |
+| NER       | ShARe/CLEF 2013   | *          | ✓  |   |        |   ✓          |
+| NLI       | MedNLI        | ✓          | ✓  |   |        |    ✓         | 
+| NER        | n2c2 deid 2006  | ✓          |   |   | ✓       |    ✓           |
+| DC       | n2c2 RFHD 2014     | ✓       |   |   | ✓       |   ✓           |
+| NER       | AnatEM        | ✓          |   |   | ✓       |             |
+| NER       | BC4CHEMD      | ✓          |   |   | ✓       |             |
+| NER       | BioNLP09      | ✓          |   |   | ✓       |             |
+| NER       | BioNLP11EPI   | ✓          |   |   | ✓       |             |
+| NER       | BioNLP11ID    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13CG    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13GE    | ✓          |   |   | ✓       |             |
+| NER       | BioNLP13PC    | ✓          |   |   | ✓       |             |
+| NER       | CRAFT         | *                |   |   | ✓       |             |
+| NER       | Ex-PTM        | ✓          |   |   | ✓       |             |
+| NER       | Linnaeus      | ✓          |   |   | ✓       |             |
+| POS       | GENIA         | *                |   |   | ✓       |             |
+| SA        | Medical Drugs | ✓          |   |   | ✓       |  |
+| SR        | COVID         |          |   |   | private       |             |
+| SR        | Cooking       |          |   |   | private      |             |
+| SR        | HRT           |          |   |   | private      |             |
+| SR        | Accelerometer |          |   |   | private       |             |
+| SR        | Acromegaly    |          |   |   | private      |             |
 
-### 1. Choose a dataset to implement
+\* denotes dataset implementation in-progress
 
-There are two options to choose a dataset to implement; you can choose either option, but **we recommend option A**. 
+## Documentation
 
-**Option A: Assign yourself a dataset from our curated list**
-- Choose a dataset from the [list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/). 
-<p align="center">
-    <img src="./docs/_static/img/select-task.jpg" style="width: 80%;"/>
-</p>
+- [Task Schema Overview](task_schemas.md) is an indepth explanation of `BigBIO` schemas implemented.
 
-- Assign yourself an issue by clicking the dataset in the project list, and comment `#self-assign` under the issue. **Please assign yourself to issues with no other collaborators assigned**. You should see your GitHub username associated to the issue within 1-2 minutes of making a comment.
-<p align="center">
-    <img src="./docs/_static/img/self-assign.jpg" style="width: 80%;"/>
-</p>
+- [Streamlit Visualization Demo](https://github.com/bigscience-workshop/biomedical/tree/master/streamlit_demo)
 
-- Search to see if the dataset exists in the 🤗 [Hub](https://huggingface.co/datasets). If it exists, please use the current implementation as the `source` and focus on implementing the [task-specific `bigbio` schema](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md). 
+- [BigBIO Data Cards](https://github.com/bigscience-workshop/biomedical/tree/master/figures/data_card) report on statistics around each dataset in the library.
 
-**Option B: Implement a new dataset not on the list**
 
-If you have a biomedical or clinical dataset you would like to propose in this collection, you are welcome to [make a new issue](https://github.com/bigscience-workshop/biomedical/issues/new/choose). Choose `Add Dataset` and fill out relevant information. **Make sure that your dataset does not exist in the 🤗 [Hub](https://huggingface.co/datasets).**
+## Tutorials
 
-If an admin approves it, then you are welcome to implement this dataset and it will count toward contribution credit.
+TBA - Links may not be applicable yet!
 
-### 2. Implement the data-loading script for your dataset and create a PR
+- Tutorials
+  - [Materializing Meta-datasets](https://github.com/bigscience-workshop/biomedical/blob/master/notebooks/materializing_meta_datasets/materializing-meta-datasets.ipynb)   
+  - [Prompt Engineering and Evaluation](https://github.com/bigscience-workshop/biomedical/tree/master/notebooks/promptengineering)  
+  - [Prompt Engineering with BLOOM](notebooks/bloomprompting/bloompipeline.md)
 
-[Check out our step-by-step guide to implementing a dataloader with the bigbio schema](CONTRIBUTING.md).
+## Contributing
 
-**Please do not upload the data directly; if you have a specific question or request, [reach out to an admin](#Community-channels)**
+`BigBIO` is an open source project - your involvement is warmly welcome! If you're excited to join us, we recommend the following steps:
 
-As soon as you have opened a PR, the dataset will be marked as `In Progress` in the
-[list of Biomedical datasets](https://github.com/orgs/bigscience-workshop/projects/6/).
-When an admin accepts the PR and closes the corresponding issue, the dataset will be
-marked as `Done`.
+- Looking for ideas? See our [Volunteer Project Board](https://github.com/orgs/bigscience-workshop/projects/6) to see what we may need help with.
 
-## Community channels
+- Have your own idea? Contact an admin in the form of an [issue](https://github.com/bigscience-workshop/biomedical/issues/new?assignees=&labels=&template=add-dataset.md&title=).
 
-We welcome contributions from a wide variety of backgrounds; we are more than happy to guide you through the process. For instructions on how to get involved or ask for help, check out the following options:
+- Implement your idea following guidelines set by the [official contributing guide](CONTRIBUTING.md)
 
-#### Join BigScience
-Please join the BigScience initiative [here](https://bigscience.huggingface.co/); there is a [google form](https://docs.google.com/forms/d/e/1FAIpQLSdF68oPkylNhwrnyrdctdcs0831OULetgfYtr-aVxBg053zqA/viewform) to fill out to have access to the biomedical working group slack. Once you have filled out this form, you'll get access to BigScience's google drive. There is a document where you can fill your name next to a working group; be sure to fill your name on the "Biomedical" group. 
+- Wait for admin approval; approval is iterative, but if accepted will belong to the main repository.
 
-#### Join our Discord Server
-Alternatively, you can ping us on the [Biomedical Discord Server](https://discord.gg/Cwf3nT3ajP). The Discord server can be used to share information quickly or ask code-related questions.
+Currently, only admins will be merging all accepted changes to the Hub.
 
-#### Make a Github Issue
-For quick questions and clarifications, you can [make an issue via Github](https://github.com/bigscience-workshop/biomedical/issues/new/choose).
+Feel free to join our [Discord](https://discord.com/invite/Cwf3nT3ajP)!
 
-You are welcome to use any of the above resources as necessary. 
+## Citing
+If you use BigBIO in your work, please cite
 
-## FAQs
-
-#### How can I find the appropriate license for my dataset?
-
-The license for a dataset is not always obvious. Here are some strategies to try in your search,
-
-* check the `Experiment A: Annotated Datasets` tab of the [google sheet](https://docs.google.com/spreadsheets/d/1eOa9NhNmgGLByWKZ9ioKmNErq824dGA-nV5WpRWZ4a8/edit?usp=sharing) we used while planning the hackathon 
-* check for files such as README or LICENSE that may be distributed with the dataset itself
-* check the dataset webpage
-* check publications that announce the release of the dataset
-* check the website of the organization providing the dataset
-
-If no official license is listed anywhere, but you find a webpage that describes general data usage policies for the dataset, you can fall back to providing that URL in the `_LICENSE` variable. If you can't find any license information, please make a note in your PR and put `_LICENSE="Unknown"` in your dataset script.   
-
-#### What if my dataset is not publicly available?
-
-We understand that some biomedical datasets are not publicly available due to data usage agreements or licensing. For these datasets, we recommend implementing a dataloader script that references a local directory containing the dataset. You can find examples in the [n2c2_2011](examples/n2c2_2011.py) and [bioasq](examples/bioasq.py) implementations. There are also local dataset specific instructions in  [template](templates/template.py).
-
-
-#### My dataset is in a standard format (e.g. BRAT, BioC). Do I have to write my own parser?
-
-If your dataset is in a standard format, please use a recommended parser if available:
-- BioC: Use the excellent [bioc](https://github.com/bionlplab/bioc) package for parsing. Example usage can be found in [examples/bc5cdr.py](examples/bc5cdr.py)
-- BRAT: Use [our custom brat parser](utils/parsing.py). Example usage can be found in [examples/mlee.py](examples/mlee.py).
-
-If the recommended parser does not work for you dataset, please alert us in Discord, Slack or the github issue.
-
-
-
-#### What types of libraries can we import?
-
-Eventually, your dataloader script will need to run using only the packages supplied by the [datasets](https://github.com/huggingface/datasets) package. If you find a well supported package that makes your implementation easier (e.g. [bioc](https://github.com/bionlplab/bioc)), then feel free to use it. 
-
-We will address the specifics during review of your PR to the [BigScience biomedical repo](https://github.com/bigscience-workshop/biomedical) and find a way to make it usable in the final submission to [huggingface bigscience-biomedical](https://huggingface.co/bigscience-biomedical)
-
-#### Can I upload my dataset anywhere?
-
-No. Please don't upload the dataset you're working on to the huggingface hub or anywhere else.  This is not the goal of the hackathon and some datasets have licensing agreements that prevent redistribution. If the dataset is public, include a downloading component in your dataset loader script. Otherwise, include only an "extraction from local files" component in your dataset loader script. If you have a custom dataset you would like to submit, please [make an issue](https://github.com/bigscience-workshop/biomedical/issues/new) and an admin will get back to you.  
-
-#### My dataset supports multiple tasks with different bigbio schemas. What should I do? 
-
-In some cases, a single dataset will support multiple tasks with different bigbio schemas. For example, the `muchmore` dataset can be used for a translation task (supported by the `Text to Text (T2T)` schema) and a named entity recognition task (supported by the `Knowledge Base (KB)` schema). In this case, please implement one config for each supported schema and name the config `<datasetname>_bigbio_<schema>`. In the `muchmore` example, this would mean one config called `muchmore_bigbio_t2t` and one config called `muchmore_bigbio_kb`.  
-
-#### My dataset comes with multiple annotations per text and no/multiple harmonizations. How should I proceed?
-
-Please implement all different annotations and harmonizations as `source` versions (see [examples/bioasq.py](examples/bioasq.py) for an example).
-If the authors suggest a preferred harmonization, use that for the `bigbio` version.
-Otherwise use the harmonization that you think is best.
-
-#### How should I handle offsets and text in the bigbio schema?
-
-Full details on how to handle offsets and text in the bigbio kb schema can be found in the [schema documentation](https://github.com/bigscience-workshop/biomedical/blob/master/task_schemas.md).
-
-#### My dataset is complicated, can you help me?
-
-Yes! Please join the hack-a-thon [Biomedical Discord Server](https://discord.gg/Cwf3nT3ajP) and ask for help. 
-
-#### My dataset is too complicated, can I switch?
-
-Yes! Some datasets are easier to write dataloader scripts for than others. If you find yourself working on a dataset that you can not make progress on, please make a comment in the associated issue, asked to be un-assigned from the issue, and start the search for a new unclaimed dataset. 
-
-#### Can I change the Big-Bio schema?
-
-**No, please do not modify the Big-Bio Schema.** The goal of this hackathon is to enable simple, programmatic access to a large variety of biomedical datasets. Part of this requires having a dependable interface. We developed our schema to address the most salient types of questions to ask of the datasets. We would be more than happy to discuss your suggestions, and you are welcome to implement it as a new config.
-
-#### My dataset has multiple labels for a span of text - what do I do?
-
-In many of our schemas, we have a 1:1 mapping between a key and its label (i.e. in KB, entity and label). In some datasets, we've noticed that there are multiple labels assigned to a text entity. Generally speaking, if a big-bio key has multiple labels associated with it, please populate the list with multiple instances of (key, label) according to each label that correspond to it. 
-
-So for instance if the dataset has an entity "copper" with the  types "Pharmacologic Substance" and "Biologically Active", please create one entity with type "Pharmacologic Substance" and an associated unique id *and* another entity with type "Biologically Active" with a different unique id. The rest of the inputs (text, offsets, and normalization) of both entities will be identical.
-
-#### What happens after I claim a dataset?
-In order to keep turnaround time reasonable, and ensure datasets are being completed, we propose a few notes on claiming a dataset:
-
-* Please claim a dataset only if you intend to work on it. We'll try to check in within 3 days to ensure you have the help you need. Don't hesitate to contact the admins! We are ready to help 💪!
-
-* If you have already claimed a dataset prior to (2022/04/05), we will check in on Friday (2022/04/08). If we do not hear back via GitHub issues OR a message to the Discord admins on general, we will make the dataset open for other participants by **Saturday (2022/04/09)**.
-
-* If things are taking longer than expected - that is totally ok! Please let us know via GitHub issues (preferred) or by pinging the @admins channel on Discord.
-
-## Thank you!
-
-We greatly appreciate your help! 
-
-The artifacts of this hackathon will be described in a forthcoming academic paper targeting a machine learning or NLP audience. Implementing 3 or more dataset loaders will guarantee authorship. We recognize that some datasets require more effort than others, so please reach out if you have questions. Our goal is to be inclusive with credit!
+```
+@article{fries2022bigbio,
+	title = {
+		BigBIO: A Framework for Data-Centric Biomedical Natural Language
+		Processing
+	},
+	author = {
+		Fries, Jason Alan and Weber, Leon and Seelam, Natasha and Altay,
+		Gabriel and Datta, Debajyoti and Garda, Samuele and Kang, Myungsun
+		and Su, Ruisi and Kusa, Wojciech and Cahyawijaya, Samuel and others
+	},
+	journal = {arXiv preprint arXiv:2206.15076},
+	year = 2022
+}
+```
 
 ## Acknowledgements
 
-This hackathon guide was heavily inspired by [the BigScience Datasets Hackathon](https://github.com/bigscience-workshop/data_tooling/wiki/datasets-hackathon).
+`BigBIO` is a open source, community effort made possible through the efforts of many volunteers as part of BigScience and the [Biomedical Hackathon](HACKATHON.md).
