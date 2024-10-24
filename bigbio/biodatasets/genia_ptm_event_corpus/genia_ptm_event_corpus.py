@@ -33,6 +33,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = True
 _LOCAL = False
 _CITATION = """\
 @inproceedings{ohta-etal-2010-event,
@@ -53,13 +54,16 @@ _CITATION = """\
 """
 
 _DATASETNAME = "genia_ptm_event_corpus"
+_DISPLAYNAME = "PTM Events"
 
 _DESCRIPTION = """\
-Post-translational-modiﬁcations (PTM), amino acid modiﬁcations of proteins after translation, are one of the posterior
-processes of protein biosynthesis for many proteins, and they are critical for determining protein function such as its
-activity state, localization, turnover and interactions with other biomolecules. While there have been many studies of
-information extraction targeting individual PTM types, there was until recently little effort to address extraction of
-multiple PTM types at once in a unified framework.
+Post-translational-modiﬁcations (PTM), amino acid modiﬁcations of proteins \
+after translation, are one of the posterior processes of protein biosynthesis \
+for many proteins, and they are critical for determining protein function such \
+as its activity state, localization, turnover and interactions with other \
+biomolecules. While there have been many studies of information extraction \
+targeting individual PTM types, there was until recently little effort to \
+address extraction of multiple PTM types at once in a unified framework.
 """
 
 _HOMEPAGE = "http://www.geniaproject.org/other-corpora/ptm-event-corpus"

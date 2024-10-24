@@ -25,6 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _PUBMED = False
 _CITATION = """\
@@ -37,6 +38,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "medical_data"
+_DISPLAYNAME = "Medical Data"
 
 _DESCRIPTION = """\
     This dataset is designed to do multiclass classification on medical drugs

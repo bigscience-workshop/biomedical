@@ -29,19 +29,25 @@ _PUBMED = False
 _LOCAL = False
 _CITATION = """\
 @inproceedings{soares2018large,
-  title={A Large Parallel Corpus of Full-Text Scientific Articles},
-  author={Soares, Felipe and Moreira, Viviane and Becker, Karin},
-  booktitle={Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC-2018)},
-  year={2018}
+  title        = {A Large Parallel Corpus of Full-Text Scientific Articles},
+  author       = {Soares, Felipe and Moreira, Viviane and Becker, Karin},
+  year         = 2018,
+  booktitle    = {
+    Proceedings of the Eleventh International Conference on Language Resources
+    and Evaluation (LREC-2018)
+  }
 }
 """
 
 _DATASETNAME = "scielo"
+_DISPLAYNAME = "SciELO"
 
 _DESCRIPTION = """\
-A parallel corpus of full-text scientific articles collected from Scielo database in the following languages: \
-English, Portuguese and Spanish. The corpus is sentence aligned for all language pairs, \
-as well as trilingual aligned for a small subset of sentences. Alignment was carried out using the Hunalign algorithm.
+A parallel corpus of full-text scientific articles collected from Scielo \
+database in the following languages: English, Portuguese and Spanish. The corpus \
+is sentence aligned for all language pairs, as well as trilingual aligned for a \
+small subset of sentences. Alignment was carried out using the Hunalign \
+algorithm.
 """
 
 _HOMEPAGE = "https://sites.google.com/view/felipe-soares/datasets#h.p_92uSCyAjWSRB"

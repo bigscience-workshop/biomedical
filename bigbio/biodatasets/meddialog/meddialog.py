@@ -24,6 +24,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "meddialog"
+_DISPLAYNAME = "MedDialog"
 
 _LANGUAGES = [Lang.EN, Lang.ZH]
 _PUBMED = False

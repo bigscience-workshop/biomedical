@@ -37,15 +37,24 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@inproceedings{,
-  title={Discourse Complements Lexical Semantics for Non-factoid Answer Reranking},
-  author={Peter Alexander Jansen and Mihai Surdeanu and Peter Clark},
-  booktitle={ACL},
-  year={2014}
+@inproceedings{jansen-etal-2014-discourse,
+    title = "Discourse Complements Lexical Semantics for Non-factoid Answer Reranking",
+    author = "Jansen, Peter  and
+      Surdeanu, Mihai  and
+      Clark, Peter",
+    booktitle = "Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = jun,
+    year = "2014",
+    address = "Baltimore, Maryland",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P14-1092",
+    doi = "10.3115/v1/P14-1092",
+    pages = "977--986",
 }
 """
 
 _DATASETNAME = "biology_how_why_corpus"
+_DISPLAYNAME = "BiologyHowWhyCorpus"
 
 _DESCRIPTION = """\
 This dataset consists of 185 "how" and 193 "why" biology questions authored by a domain expert, with one or more gold 

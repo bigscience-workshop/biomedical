@@ -77,6 +77,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "n2c2_2018_track2"
+_DISPLAYNAME = "n2c2 2018 ADE"
 
 _DESCRIPTION = """\
 The National NLP Clinical Challenges (n2c2), organized in 2018, continued the
@@ -118,7 +119,7 @@ of the art in a particular task, learn from it, and build on it.
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = Licenses.EXTERNAL_DUA
+_LICENSE = Licenses.DUA
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.RELATION_EXTRACTION]
 

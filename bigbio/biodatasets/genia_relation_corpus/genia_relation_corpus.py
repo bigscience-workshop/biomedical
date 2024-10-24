@@ -73,6 +73,7 @@ doi = {10.1142/S0219720010005014}
 """
 
 _DATASETNAME = "genia_relation_corpus"
+_DISPLAYNAME = "GENIA Relation Corpus"
 
 _DESCRIPTION = """\
 The extraction of various relations stated to hold between biomolecular entities is one of the most frequently

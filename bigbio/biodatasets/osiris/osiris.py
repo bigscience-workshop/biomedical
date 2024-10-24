@@ -48,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "osiris"
+_DISPLAYNAME = "OSIRIS"
 
 _DESCRIPTION = """\
 The OSIRIS corpus is a set of MEDLINE abstracts manually annotated

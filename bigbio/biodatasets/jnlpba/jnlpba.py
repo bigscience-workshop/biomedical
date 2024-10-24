@@ -49,7 +49,8 @@ pages = "73--78",
 }
 """
 
-_DATASETNAME = "JNLPBA"
+_DATASETNAME = "jnlpba"
+_DISPLAYNAME = "JNLPBA"
 
 _DESCRIPTION = """\
 NER For Bio-Entities

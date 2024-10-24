@@ -70,19 +70,19 @@ from typing import Dict, List, Match, Tuple
 import datasets
 from datasets import Features, Value
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import kb_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
 _DATASETNAME = "n2c2_2011"
+_DISPLAYNAME = "n2c2 2011 Coreference"
 
 # https://academic.oup.com/jamia/article/19/5/786/716138
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ['English']
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2012evaluating,
     author = {
         Uzuner, Ozlem and
         Bodnari, Andreea and
@@ -123,7 +123,7 @@ particular attention being paid to duplicates and enforcing consistency in the a
 
 _HOMEPAGE = "https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/"
 
-_LICENSE = Licenses.DUA
+_LICENSE = 'Data User Agreement'
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
@@ -443,7 +443,7 @@ class N2C22011CorefDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,

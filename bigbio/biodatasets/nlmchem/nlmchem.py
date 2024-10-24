@@ -43,6 +43,7 @@ publisher={Nature Publishing Group}
 """
 
 _DATASETNAME = "nlmchem"
+_DISPLAYNAME = "NLM-Chem"
 
 _DESCRIPTION = """\
 NLM-Chem corpus consists of 150 full-text articles from the PubMed Central Open Access dataset,

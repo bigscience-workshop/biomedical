@@ -30,36 +30,37 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@Article{islamaj2021nlm,
-    title       =  {NLM-Gene, a richly annotated gold standard dataset for gene entities that addresses ambiguity and
-                    multi-species gene recognition},
-    author      =   {Islamaj,
-                    Rezarta and
-                    Wei, Chih-Hsuan and
-                    Cissel, David and
-                    Miliaras, Nicholas and
-                    Printseva, Olga and
-                    Rodionov, Oleg and
-                    Sekiya, Keiko and
-                    Ward, Janice and
-                    Lu, Zhiyong},
-    journal     =   {Journal of Biomedical Informatics},
-    volume      =   {118},
-    pages       =   {103779},
-    year        =   {2021},
-    publisher   =  {Elsevier}
+@article{islamaj2021nlm,
+  title        = {
+    NLM-Gene, a richly annotated gold standard dataset for gene entities that
+    addresses ambiguity and multi-species gene recognition
+  },
+  author       = {
+    Islamaj, Rezarta and Wei, Chih-Hsuan and Cissel, David and Miliaras,
+    Nicholas and Printseva, Olga and Rodionov, Oleg and Sekiya, Keiko and Ward,
+    Janice and Lu, Zhiyong
+  },
+  year         = 2021,
+  journal      = {Journal of Biomedical Informatics},
+  publisher    = {Elsevier},
+  volume       = 118,
+  pages        = 103779
 }
 """
 
 _DATASETNAME = "nlm_gene"
+_DISPLAYNAME = "NLM-Gene"
 
 _DESCRIPTION = """\
-NLM-Gene consists of 550 PubMed articles, from 156 journals, and contains more than 15 thousand unique gene names,
-corresponding to more than five thousand gene identifiers (NCBI Gene taxonomy). This corpus contains gene annotation
-data from 28 organisms. The annotated articles contain on average 29 gene names, and 10 gene identifiers per article.
-These characteristics demonstrate that this article set is an important benchmark dataset to test the accuracy of gene
-recognition algorithms both on multi-species and ambiguous data. The NLM-Gene corpus will be invaluable for advancing
-text-mining techniques for gene identification tasks in biomedical text.
+NLM-Gene consists of 550 PubMed articles, from 156 journals, and contains more \
+than 15 thousand unique gene names, corresponding to more than five thousand \
+gene identifiers (NCBI Gene taxonomy). This corpus contains gene annotation data \
+from 28 organisms. The annotated articles contain on average 29 gene names, and \
+10 gene identifiers per article. These characteristics demonstrate that this \
+article set is an important benchmark dataset to test the accuracy of gene \
+recognition algorithms both on multi-species and ambiguous data. The NLM-Gene \
+corpus will be invaluable for advancing text-mining techniques for gene \
+identification tasks in biomedical text.
 """
 
 _HOMEPAGE = "https://zenodo.org/record/5089049"
@@ -74,7 +75,6 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -182,7 +182,7 @@ class NLMGeneDataset(datasets.GeneratorBasedBuilder):
             if splitter in db_ids:
                 connector = splitter
         normalized = [
-            {"db_name": db_id_key, "db_id": db_id} for db_id in db_ids.split(connector)
+            {"db_name": "NCBIGene", "db_id": db_id} for db_id in db_ids.split(connector)
         ]
 
         return {

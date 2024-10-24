@@ -70,7 +70,7 @@ _LANGUAGES = [Lang.EN, Lang.ZH, Lang.JA]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{wakamiya2017overview,
   author    = {Shoko Wakamiya, Mizuki Morita, Yoshinobu Kano, Tomoko Ohkuma and Eiji Aramaki},
   title     = {Overview of the NTCIR-13 MedWeb Task},
   journal   = {Proceedings of the 13th NTCIR Conference on Evaluation of Information Access Technologies (NTCIR-13)},
@@ -82,6 +82,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "ntcir_13_medweb"
+_DISPLAYNAME = "NTCIR-13 MedWeb"
 
 _DESCRIPTION = """\
 NTCIR-13 MedWeb (Medical Natural Language Processing for Web Document) task requires

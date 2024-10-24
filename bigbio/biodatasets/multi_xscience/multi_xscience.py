@@ -48,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "multi_xscience"
+_DISPLAYNAME = "Multi-XScience"
 
 _DESCRIPTION = """\
 Multi-document summarization is a challenging task for which there exists little large-scale datasets. 

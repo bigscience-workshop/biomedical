@@ -25,7 +25,7 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "twadrl"
-
+_DISPLAYNAME = "TwADR-L"
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False

@@ -38,10 +38,9 @@ _LANGUAGES = [Lang.ES]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{
-  title={Named Entity Recognition, Concept Normalization and Clinical Coding: Overview of the \
-  Cantemist Track for Cancer Text Mining in Spanish, Corpus, Guidelines, Methods and Results.},
-  author={Miranda-Escalada, Antonio and Farre, Eulalia and Krallinger, Martin},
+@article{miranda2020named,
+  title={Named Entity Recognition, Concept Normalization and Clinical Coding: Overview of the Cantemist Track for Cancer Text Mining in Spanish, Corpus, Guidelines, Methods and Results.},
+  author={Miranda-Escalada, Antonio and Farr{\'e}, Eul{\`a}lia and Krallinger, Martin},
   journal={IberLEF@ SEPLN},
   pages={303--323},
   year={2020}
@@ -49,6 +48,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "cantemist"
+_DISPLAYNAME = "CANTEMIST"
 
 _DESCRIPTION = """\
 Collection of 1301 oncological clinical case reports written in Spanish, with tumor morphology mentions \
