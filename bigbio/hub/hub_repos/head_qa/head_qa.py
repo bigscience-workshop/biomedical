@@ -13,31 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-HEAD-QA is a multi-choice HEAlthcare Dataset. The questions come from exams to access a specialized position in the
-Spanish healthcare system, and are challenging even for highly specialized humans. They are designed by the Ministerio
-de Sanidad, Consumo y Bienestar Social.
-The dataset contains questions about following topics: medicine, nursing, psychology, chemistry,
-pharmacology and biology.
-
-Original code: https://huggingface.co/datasets/head_qa/blob/main/head_qa.py
-"""
-
 import json
-import os
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 import datasets
 
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from .bigbiohub import BigBioConfig, Tasks, qa_features
+
+_LANGUAGES = ["English", "Spanish"]
+_LICENSE = "MIT"
+_LOCAL = False
+_PUBMED = False
 
 _CITATION = """\
 @inproceedings{vilares-gomez-rodriguez-2019-head,
     title = "{HEAD}-{QA}: A Healthcare Dataset for Complex Reasoning",
-    author = "Vilares, David  and
-      G{\'o}mez-Rodr{\'i}guez, Carlos",
+    author = "Vilares, David  and G{\'o}mez-Rodr{\'i}guez, Carlos",
     booktitle = "Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics",
     month = jul,
     year = "2019",
@@ -45,31 +37,30 @@ _CITATION = """\
     publisher = "Association for Computational Linguistics",
     url = "https://www.aclweb.org/anthology/P19-1092",
     doi = "10.18653/v1/P19-1092",
-    pages = "960--966"}
+    pages = "960--966"
+}
 """
 
 _DATASETNAME = "head_qa"
+_DISPLAYNAME = "HEAD-QA"
 
 _DESCRIPTION = """\
-HEAD-QA is a multi-choice HEAlthcare Dataset. The questions come from exams to access a specialized position in the
-Spanish healthcare system, and are challenging even for highly specialized humans. They are designed by the Ministerio
-de Sanidad, Consumo y Bienestar Social.
-The dataset contains questions about following topics: medicine, nursing, psychology, chemistry,
-pharmacology and biology.
+HEAD-QA is a multi-choice HEAlthcare Dataset. The questions come from exams to access a specialized position in the \
+Spanish healthcare system, and are challenging even for highly specialized humans. They are designed by the \
+Ministerio de Sanidad, Consumo y Bienestar Social.The dataset contains questions about following topics: medicine, \
+nursing, psychology, chemistry, pharmacology and biology.
 """
 
 _HOMEPAGE = "https://aghie.github.io/head-qa/"
 
-_LICENSE = "MIT License"
-
 _URLS = {
-    _DATASETNAME: "https://drive.google.com/uc?export=download&confirm=t&id=1a_95N5zQQoUCq8IBNVZgziHbeM-QxG2t",
+    "HEAD": "https://drive.usercontent.google.com/u/0/uc?id=1dUIqVwvoZAtbX_-z5axCoe97XNcFo1No&export=download",
+    "HEAD_EN": "https://drive.usercontent.google.com/u/0/uc?id=1phryJg4FjCFkn0mSCqIOP2-FscAeKGV0&export=download",
 }
 
 _SUPPORTED_TASKS = [Tasks.QUESTION_ANSWERING]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -122,7 +113,6 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
                     "qid": datasets.Value("int32"),
                     "qtext": datasets.Value("string"),
                     "ra": datasets.Value("int32"),
-                    "image": datasets.Image(),
                     "answers": [
                         {
                             "aid": datasets.Value("int32"),
@@ -132,7 +122,9 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_qa":
-            features = schemas.qa_features
+            features = qa_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} is not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -144,90 +136,95 @@ class HeadQADataset(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
-
-        urls = _URLS[_DATASETNAME]
-        data_dir = dl_manager.download_and_extract(urls)
-
         if self.config.subset_id == "head_qa_en":
-            file_path = os.path.join("HEAD_EN", "train_HEAD_EN.json")
+            data_dir = Path(dl_manager.download_and_extract(_URLS["HEAD_EN"])) / "HEAD_EN"
+            subset_name = "HEAD_EN"
+
         elif self.config.subset_id == "head_qa_es":
-            file_path = os.path.join("HEAD", "train_HEAD.json")
+            data_dir = Path(dl_manager.download_and_extract(_URLS["HEAD"])) / "HEAD"
+            subset_name = "HEAD"
+
+        else:
+            raise NotImplementedError(f"Subset {self.config.subset_id} is not supported")
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "data_dir": data_dir,
-                    "file_path": os.path.join(data_dir, file_path),
-                },
-            ),
-            datasets.SplitGenerator(
-                name=datasets.Split.TEST,
-                gen_kwargs={
-                    "data_dir": data_dir,
-                    "file_path": os.path.join(data_dir, file_path),
+                    "input_json_file": data_dir / f"train_{subset_name}.json",
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "data_dir": data_dir,
-                    "file_path": os.path.join(data_dir, file_path),
+                    "input_json_file": data_dir / f"dev_{subset_name}.json",
+                },
+            ),
+            datasets.SplitGenerator(
+                name=datasets.Split.TEST,
+                gen_kwargs={
+                    "input_json_file": data_dir / f"test_{subset_name}.json",
                 },
             ),
         ]
 
-    def _generate_examples(self, data_dir, file_path) -> Tuple[int, Dict]:
+    def _generate_examples(self, input_json_file: Path) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
         if self.config.schema == "source":
-            for key, example in self._generate_source_documents(data_dir, file_path):
+            for key, example in self._generate_source_documents(input_json_file):
                 yield key, example
+
         elif self.config.schema == "bigbio_qa":
-            for key, example in self._generate_source_documents(data_dir, file_path):
-                yield key, self._source_to_qa(example)
+            for key, example in self._generate_source_documents(input_json_file):
+                yield self._source_to_qa(example)
 
-    def _generate_source_documents(self, data_dir, filepath):
+    def _generate_source_documents(self, input_json_file: Path) -> Tuple[str, Dict]:
+        """Generates source instances."""
 
-        with open(filepath, encoding="utf-8") as f:
-            head_qa = json.load(f)
+        with input_json_file.open("r", encoding="utf8") as file_stream:
+            head_qa = json.load(file_stream)
 
         for exam_id, exam in enumerate(head_qa["exams"]):
             content = head_qa["exams"][exam]
             name = content["name"].strip()
             year = content["year"].strip()
             category = content["category"].strip()
+
             for question in content["data"]:
                 qid = int(question["qid"].strip())
                 qtext = question["qtext"].strip()
                 ra = int(question["ra"].strip())
-                image_path = question["image"].strip()
 
                 aids = [answer["aid"] for answer in question["answers"]]
                 atexts = [answer["atext"].strip() for answer in question["answers"]]
                 answers = [{"aid": aid, "atext": atext} for aid, atext in zip(aids, atexts)]
 
-                id_ = f"{exam_id}_{qid}"
-                yield id_, {
+                instance_id = f"{exam_id}_{qid}"
+                instance = {
                     "name": name,
                     "year": year,
                     "category": category,
                     "qid": qid,
                     "qtext": qtext,
                     "ra": ra,
-                    "image": os.path.join(data_dir, image_path) if image_path else None,
                     "answers": answers,
                 }
 
-    def _source_to_qa(self, example):
-        example_ = {}
-        example_["id"] = example["name"] + "_qid_" + str(example["qid"])
-        example_["question_id"] = example["qid"]
-        example_["document_id"] = ""
-        example_["question"] = example["qtext"]
-        example_["type"] = "multiple_choice"
-        example_["choices"] = [answer["atext"] for answer in example["answers"]]
-        example_["context"] = ""
-        example_["answer"] = [next(filter(lambda answer: answer["aid"] == example["ra"], example["answers"]))["atext"]]
+                yield instance_id, instance
 
-        return example_
+    def _source_to_qa(self, example: Dict) -> Tuple[str, Dict]:
+        """Converts a source example to BigBio example."""
+
+        instance = {
+            "id": example["name"] + "_qid_" + str(example["qid"]),
+            "question_id": example["qid"],
+            "document_id": None,
+            "question": example["qtext"],
+            "type": "multiple_choice",
+            "choices": [answer["atext"] for answer in example["answers"]],
+            "context": None,
+            "answer": [next(filter(lambda answer: answer["aid"] == example["ra"], example["answers"]))["atext"]],
+        }
+
+        return instance["id"], instance
