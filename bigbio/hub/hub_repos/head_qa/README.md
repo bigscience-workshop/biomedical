@@ -7,7 +7,7 @@ bigbio_language:
   - Spanish
 license: mit
 bigbio_license_shortname: MIT
-multilinguality: monolingual
+multilinguality: multilingual
 pretty_name: HEAD-QA
 homepage: https://aghie.github.io/head-qa/
 bigbio_pubmed: false
@@ -28,7 +28,7 @@ bigbio_tasks:
 
 HEAD-QA is a multi-choice HEAlthcare Dataset. The questions come from exams to access a specialized position in the 
 Spanish healthcare system, and are challenging even for highly specialized humans. They are designed by the 
-Ministerio de Sanidad, Consumo y Bienestar Social.The dataset contains questions about following topics: medicine, 
+Ministerio de Sanidad, Consumo y Bienestar Social. The dataset contains questions about following topics: medicine, 
 nursing, psychology, chemistry, pharmacology and biology.
 
 
