@@ -19,14 +19,12 @@ from typing import Dict, List, Tuple
 import datasets
 import pandas as pd
 
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Lang, Tasks
-from bigbio.utils.license import Licenses
+from .bigbiohub import BigBioConfig, Tasks, pairs_features
 
-_LANGUAGES = [Lang.EN]
+_LANGUAGES = ["English"]
 _PUBMED = False
 _LOCAL = True
+
 _CITATION = """\
 @misc{ask9medicaldata,
   author    = {Khan, Arbaaz},
@@ -36,32 +34,36 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "medical_data"
-_DISPLAYNAME = "Medical Data"
+_DATASETNAME = "samd"
+_DISPLAYNAME = "Sentiment Analysis for  Medical Drugs"
 
 _DESCRIPTION = """\
-    This dataset is designed to do multiclass classification on medical drugs
+This dataset contains comments about patients and the sentiment in those comments about a specific drug that's \
+mentioned.
+
+The dataset has to be download from the Kaggle challenge:
+    https://www.kaggle.com/datasets/arbazkhan971/analyticvidhyadatasetsentiment/data
 """
 
-_HOMEPAGE = ""
-
-_LICENSE = Licenses.UNKNOWN
+_HOMEPAGE = "https://www.kaggle.com/datasets/arbazkhan971/analyticvidhyadatasetsentiment"
+_LICENSE = "UNKNOWN"
 
 _URLS = {}
 
-_SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
-
+_SUPPORTED_TASKS = [Tasks.TEXT_PAIRS_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
-class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
-    """This dataset contains comments about patients and the sentiment in those comments about a specific drug that's mentioned.
+class SentimentAnalysisMedicalDrugsDatatset(datasets.GeneratorBasedBuilder):
+    """This dataset contains comments about patients and the sentiment in those comments about
+    a specific drug that's mentioned.
+
     1 - Negative sentiment
     2 - Positive sentiment
-    0 - Neutral"""
+    0 - Neutral
+    """
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -75,10 +77,10 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
             subset_id=f"{_DATASETNAME}",
         ),
         BigBioConfig(
-            name=f"{_DATASETNAME}_bigbio_te",
+            name=f"{_DATASETNAME}_bigbio_pairs",
             version=BIGBIO_VERSION,
             description=f"{_DATASETNAME} BigBio schema",
-            schema="bigbio_te",
+            schema="bigbio_pairs",
             subset_id=f"{_DATASETNAME}",
         ),
     ]
@@ -94,12 +96,14 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
                     "hash": datasets.Value("string"),
                     "text": datasets.Value("string"),
                     "drug_name": datasets.Value("string"),
-                    "sentiment": datasets.Value("string"),
+                    "label": datasets.Value("string"),
                 }
             )
 
-        elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+        elif self.config.schema == "bigbio_pairs":
+            features = pairs_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} is not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -110,11 +114,11 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager) -> List[datasets.SplitGenerator]:
-        """Returns SplitGenerators."""
 
         if self.config.data_dir is None:
             raise ValueError(
-                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+                "This is a local dataset. Please download the data from Kaggle abd pass the directory containing "
+                "both data files via data_dir kwarg to load_dataset."
             )
         else:
             data_dir = self.config.data_dir
@@ -139,42 +143,28 @@ class MedicaldataDatatset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        if self.config.schema == "source":
-            csv_reader = pd.read_csv(filepath, dtype="object")
-            # Train and test splits handled differently as test split is missing values
-            if split == "train":
-                for _cols, line in csv_reader.iterrows():
-                    document = {}
-                    document["hash"] = line["unique_hash"]
-                    document["text"] = line["text"]
-                    document["drug_name"] = line["drug"]
-                    document["sentiment"] = line["sentiment"]
-                    yield document["hash"], document
-            else:
-                for _cols, line in csv_reader.iterrows():
-                    document = {}
-                    document["hash"] = line["unique_hash"]
-                    document["text"] = line["text"]
-                    document["drug_name"] = line["drug"]
-                    document["sentiment"] = None
-                    yield document["hash"], document
+        csv_reader = pd.read_csv(filepath, dtype="object")
+        for _cols, line in csv_reader.iterrows():
+            if self.config.schema == "source":
+                document = {
+                    "hash": line["unique_hash"],
+                    "text": line["text"],
+                    "drug_name": line["drug"],
+                    "label": line["sentiment"] if split == "train" else None,
+                }
 
-        elif self.config.schema == "bigbio_te":
-            csv_reader = pd.read_csv(filepath, dtype="object")
-            # Train and test splits handled differently as test split is missing values
-            if split == "train":
-                for _cols, line in csv_reader.iterrows():
-                    document = {}
-                    document["id"] = line["unique_hash"]
-                    document["premise"] = line["text"]
-                    document["hypothesis"] = line["drug"]
-                    document["label"] = line["sentiment"]
-                    yield document["id"], document
+                yield document["hash"], document
+
+            elif self.config.schema == "bigbio_pairs":
+                document = {
+                    "id": line["unique_hash"],
+                    "document_id": line["unique_hash"],
+                    "text_1": line["text"],
+                    "text_2": line["drug"],
+                    "label": line["sentiment"] if split == "train" else None,  # test split labels are not given
+                }
+
+                yield document["id"], document
+
             else:
-                for _cols, line in csv_reader.iterrows():
-                    document = {}
-                    document["id"] = line["unique_hash"]
-                    document["premise"] = line["text"]
-                    document["hypothesis"] = line["drug"]
-                    document["label"] = None
-                    yield document["id"], document
+                raise NotImplementedError(f"Schema {self.config.schema} is not supported")
