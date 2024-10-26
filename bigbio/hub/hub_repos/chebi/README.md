@@ -4,40 +4,52 @@ language:
 - en
 bigbio_language: 
 - English
-license: unknown
+license: CC_BY_SA_4p0
 multilinguality: monolingual
-bigbio_license_shortname: UNKNOWN
-pretty_name: PPR
-homepage: https://github.com/DMCB-GIST/PPRcorpus
-bigbio_pubmed: True
-bigbio_public: True
+bigbio_license_shortname: CC_BY_SA_4p0
+pretty_name: Chebi
+homepage: https://sourceforge.net/projects/chebi/
+bigbio_pubmed: False
+bigbio_public: False
 bigbio_tasks: 
 - NAMED_ENTITY_RECOGNITION
-- RELATION_EXTRACTION
+- NAMED_ENTITY_DISAMBIGUATION
 ---
 
 
-# Dataset Card for PPR
+# Dataset Card for Chebi
 
 ## Dataset Description
 
-- **Homepage:** https://github.com/DMCB-GIST/PPRcorpus
-- **Pubmed:** True
-- **Public:** True
-- **Tasks:** NER,RE
+- **Homepage:** https://sourceforge.net/projects/chebi/
+- **Pubmed:** False
+- **Public:** False
+- **Tasks:** NER,NED
 
-The Plant-Phenotype corpus is a text corpus with human annotations of plants, phenotypes, and their relations on a corpus in 600 PubMed abstracts.
+ChEBI Chapti contains the results of a collaboration between the European Patent Office and
+the ChEBI team. The goal of the project was to identify chemicals within patents and cross-
+reference them to ChEBI. The teams manually annotated chemicals in a set of 40 patents.
+This was used to measure the performance of the various text-mining tools. This set of
+40 patents is distributed in this directory. The results of this work can be seen on the ChEBI
+website.
 
 ## Citation Information
 
 ```
-@article{cho2022plant,
-  author    = {Cho, Hyejin and Kim, Baeksoo and Choi, Wonjun and Lee, Doheon and Lee, Hyunju},
-  title     = {Plant phenotype relationship corpus for biomedical relationships between plants and phenotypes},
-  journal   = {Scientific Data},
-  volume    = {9},
-  year      = {2022},
-  publisher = {Nature Publishing Group},
-  doi       = {https://doi.org/10.1038/s41597-022-01350-1},
+@article{,
+title = {ChEBI: a database and ontology for chemical entities of biological interest},
+author = {Degtyarenko, Kirill and de Matos, Paula and Ennis, Marcus and Hastings, Janna and Zbinden, Martin and \
+    McNaught, Alan and Alcántara, Rafael and Darsow, Michael and Guedj, Mickaël and Ashburner, Michael},
+doi = {10.1093/nar/gkm791},
+number = {Database issue},
+volume = {36},
+month = {January},
+year = {2008},
+journal = {Nucleic acids research},
+issn = {0305-1048},
+pages = {D344—50},
+url = {https://europepmc.org/articles/PMC2238832},
+biburl = {https://aclanthology.org/W19-5008.bib},
+bibsource = {https://aclanthology.org/W19-5008/}
 }
 ```

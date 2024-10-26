@@ -56,7 +56,7 @@ This was used to measure the performance of the various text-mining tools. This 
 website.
 """
 
-_HOMEPAGE = "http://chebi.cvs.sourceforge.net/viewvc/chebi/chapati/"
+_HOMEPAGE = "https://sourceforge.net/projects/chebi/"
 _LICENSE = "CC_BY_SA_4p0"
 
 DATA_URL = "https://github.com/bigscience-workshop/biomedical/files/8568960/PatentAnnotations_GoldStandard.tar.gz"
