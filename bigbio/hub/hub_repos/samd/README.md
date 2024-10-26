@@ -4,7 +4,7 @@ language:
 - en
 bigbio_language: 
 - English
-license: UNKNOWN
+license: unknown
 multilinguality: monolingual
 bigbio_license_shortname: UNKNOWN
 pretty_name: Sentiment Analysis for Medical Drugs (SAMD)
