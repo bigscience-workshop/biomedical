@@ -13,46 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-ChEBI Chapti contains the results of a collaboration between the European Patent Office and
-the ChEBI team. The goal of the project was to identify chemicals within patents and cross-
-reference them to ChEBI. The teams manually annotated chemicals in a set of 40 patents.
-This was used to measure the performance of the various text-mining tools. This set of
-40 patents is distributed in this directory. The results of this work can be seen on the ChEBI
-website.
- 
-This work is distributed under the Creative Commons license: http://creativecommons.org/licenses/by/3.0/
-"""
-
-import os
 from pathlib import Path
-from typing import Any, List, Tuple, Dict
+from typing import Any, Dict, List, Tuple
 
 import datasets
 from lxml import etree
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+
+from .bigbiohub import BigBioConfig, Tasks, kb_features
+
+_LANGUAGES = ["English"]
+_PUBMED = False
+_LOCAL = False
 
 _CITATION = """\
 @article{,
-    title = {ChEBI: a database and ontology for chemical entities of biological interest},
-	author = {Degtyarenko, Kirill and de Matos, Paula and Ennis, Marcus and Hastings, Janna and Zbinden, Martin and McNaught, Alan and Alcántara, Rafael and Darsow, Michael and Guedj, Mickaël and Ashburner, Michael},
-	doi = {10.1093/nar/gkm791},
-	number = {Database issue},
-	volume = {36},
-	month = {January},
-	year = {2008},
-	journal = {Nucleic acids research},
-	issn = {0305-1048},
-	pages = {D344—50},
-	url = {https://europepmc.org/articles/PMC2238832},
-    biburl    = {https://aclanthology.org/W19-5008.bib},
-    bibsource = {https://aclanthology.org/W19-5008/}
+title = {ChEBI: a database and ontology for chemical entities of biological interest},
+author = {Degtyarenko, Kirill and de Matos, Paula and Ennis, Marcus and Hastings, Janna and Zbinden, Martin and \
+    McNaught, Alan and Alcántara, Rafael and Darsow, Michael and Guedj, Mickaël and Ashburner, Michael},
+doi = {10.1093/nar/gkm791},
+number = {Database issue},
+volume = {36},
+month = {January},
+year = {2008},
+journal = {Nucleic acids research},
+issn = {0305-1048},
+pages = {D344—50},
+url = {https://europepmc.org/articles/PMC2238832},
+biburl = {https://aclanthology.org/W19-5008.bib},
+bibsource = {https://aclanthology.org/W19-5008/}
 }
 """
 
 _DATASETNAME = "chebi"
+_DISPLAYNAME = "Chebi"
 
 _DESCRIPTION = """\
 ChEBI Chapti contains the results of a collaboration between the European Patent Office and
@@ -64,23 +57,23 @@ website.
 """
 
 _HOMEPAGE = "http://chebi.cvs.sourceforge.net/viewvc/chebi/chapati/"
+_LICENSE = "CC_BY_SA_4p0"
 
-_LICENSE = "Creative Commons License Attribution-ShareAlike 4.0 International"
-
+DATA_URL = "https://github.com/bigscience-workshop/biomedical/files/8568960/PatentAnnotations_GoldStandard.tar.gz"
 _URLS = {
     # The original dataset is hosted on CVS on sourceforge. Hence I have downloaded and reuploded it as tar.gz format.
     # Converted via the following command:
-    # cvs -z3 -d:pserver:anonymous@a.cvs.sourceforge.net:/cvsroot/chebi co chapati/patentsGoldStandard/PatentAnnotations_GoldStandard.tgz
+    # cvs -z3 -d:pserver:anonymous@a.cvs.sourceforge.net:/cvsroot/chebi co \
+    #   chapati/patentsGoldStandard/PatentAnnotations_GoldStandard.tgz
     # mkdir -p ./MoNERo
     # pushd ./MoNERo && 7z x ../MoNERo_2019.7z && popd
     # tar -czf MoNERo.tar.gz ./MoNERo
-    _DATASETNAME: "https://github.com/bigscience-workshop/biomedical/files/8568960/PatentAnnotations_GoldStandard.tar.gz",
+    _DATASETNAME: DATA_URL,
 }
 
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
@@ -133,9 +126,10 @@ class ChebiDataset(datasets.GeneratorBasedBuilder):
                     ],
                 }
             )
-
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} is not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -150,13 +144,11 @@ class ChebiDataset(datasets.GeneratorBasedBuilder):
         urls = _URLS[_DATASETNAME]
         data_dir = dl_manager.download_and_extract(urls)
         data_dir = Path(data_dir) / "scrapbook"
-        file_paths = list(data_dir.glob("./*/source.xml"))
-        print(len(file_paths))
+        file_paths = list(sorted(data_dir.glob("./*/source.xml")))
 
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "file_paths": file_paths,
                     "split": "train",
@@ -203,14 +195,16 @@ class ChebiDataset(datasets.GeneratorBasedBuilder):
         document_text = []
         entities = []
         start = 0
+
         for para in xml.iter("P", "p"):
-            # print(para.text)
             para_text, para_entities = self._parse_paragraph(para, start=start)
             document_text.append(para_text)
             start += len(para_text)
             entities.extend(para_entities)
+
         document_text = "".join(document_text)
         example = {"doc_id": key, "text": document_text, "entities": entities}
+
         return key, example
 
     def _parse_example_to_kb_schema(self, example) -> Dict[str, Any]:
@@ -231,7 +225,9 @@ class ChebiDataset(datasets.GeneratorBasedBuilder):
                 "text": [e["phrase"]],
                 "offsets": [[e["start"], e["end"]]],
                 "type": e["attrs"]["type"],
-                "normalized": [{"db_name": "chebi", "db_id": e["attrs"]["chebi-id"]}],
+                "normalized": [
+                    {"db_name": "chebi", "db_id": chebi_id.strip()} for chebi_id in e["attrs"]["chebi-id"].split(",")
+                ],
             }
             entities.append(entity)
         data = {
@@ -249,7 +245,3 @@ class ChebiDataset(datasets.GeneratorBasedBuilder):
         key, example = self._read_example_from_file(filepath)
         example = self._parse_example_to_kb_schema(example)
         return key, example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
