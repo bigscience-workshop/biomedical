@@ -52,12 +52,12 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import CustomLicense
 
-# TODO: Add BibTeX citation
+
 _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{thomas2011challenges,
   author    = {Thomas, Philippe and Klinger, Roman and Furlong, Laura and Hofmann-Apitius, Martin and Friedrich, Christoph},
   title     = {Challenges in the association of human single nucleotide polymorphism mentions with unique database identifiers},
   journal   = {BMC Bioinformatics},
@@ -69,6 +69,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "thomas2011"
+_DISPLAYNAME = "SNP Corpus"
 
 _DESCRIPTION = """\
 SNP normalization corpus downloaded from (http://www.scai.fraunhofer.de/snp-normalization-corpus.html).
@@ -93,8 +94,6 @@ Also the additional rules are subject to these agreement.
 The annotations are published for academic use only and usage for development of commercial products is not permitted.
 """
 )
-
-#
 
 # this is a backup url in case the official one will stop working
 # _URLS = ["http://github.com/rockt/SETH/zipball/master/"]

@@ -44,6 +44,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pubmed_qa"
+_DISPLAYNAME = "PubMedQA"
 
 _DESCRIPTION = """\
 PubMedQA is a novel biomedical question answering (QA) dataset collected from PubMed abstracts.

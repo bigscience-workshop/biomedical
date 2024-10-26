@@ -85,6 +85,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "psytar"
+_DISPLAYNAME = "PsyTAR"
 
 _DESCRIPTION = """\
 The "Psychiatric Treatment Adverse Reactions" (PsyTAR) dataset contains 891 drugs

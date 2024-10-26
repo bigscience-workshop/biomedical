@@ -13,9 +13,22 @@ import pandas as pd
 
 import bigbio
 from bigbio.dataloader import BigBioConfigHelpers
+from bigbio.utils.license import Licenses
+from bigbio.utils.license import CustomLicense
 
 
 MAX_COMMON = 50
+
+
+def jsonify_license(license):
+    return {
+        "short_name": license.short_name,
+        "long_name": license.name,
+        "text": license.text,
+        "link": license.link,
+        "version": license.version,
+        "provenance": license.provenance,
+    }
 
 
 def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
@@ -57,7 +70,7 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
             config_meta = {
                 "config_name": helper.config.name,
                 "bigbio_schema": helper.config.schema,
-                "tasks": [el.name for el in helper.tasks],
+                "tasks": list(helper.tasks),
                 "splits": split_metas,
                 "splits_count": len(split_metas),
             }
@@ -65,8 +78,10 @@ def gather_metadatas_json(conhelps, data_dir_base: Optional[str] = None):
 
         dataset_meta = {
             "dataset_name": dataset_name,
+            "display_name": helper.display_name,
+            "is_pubmed": helper.is_pubmed,
             "is_local": helper.is_local,
-            "languages": [el.name for el in helper.languages],
+            "languages": helper.languages,
             "bigbio_version": helper.bigbio_version,
             "source_version": helper.source_version,
             "citation": helper.citation,
@@ -97,6 +112,7 @@ def flatten_metadatas(dataset_metas):
 
         dataset_row = {
             "dataset_name": dataset_name,
+            "is_pubmed": dataset_meta["is_pubmed"],
             "is_local": dataset_meta["is_local"],
             "languages": dataset_meta["languages"],
             "bigbio_version": dataset_meta["bigbio_version"],
@@ -142,11 +158,35 @@ def flatten_metadatas(dataset_metas):
 
 if __name__ == "__main__":
 
+    SKIP_CONFIG_NAMES = set(
+        [
+            "biomrc_large_A_bigbio_qa",
+            "biomrc_large_B_bigbio_qa",
+            "medal_bigbio_kb",
+            "meddialog_zh_bigbio_text",
+            "pubtator_central_bigbio_kb",
+        ]
+    )
+
+    SKIP_DATASET_NAMES = set(
+        [
+            "bioscope", # connection error
+            "meqsum",  # an error occurred while generating this dataset
+            "pdr", # connection error
+            "pmc_patients", # file not found error
+            "ntcir_13_medweb", # an error occurred while generating this dataset
+            "psytar", # an error occurred while generating this dataset
+        ]
+    )
+
+
     # create a BigBioConfigHelpers
     # ==========================================================
     conhelps = BigBioConfigHelpers()
-    conhelps = conhelps.filtered(lambda x: x.dataset_name != "pubtator_central")
     conhelps = conhelps.filtered(lambda x: x.is_bigbio_schema)
+    conhelps = conhelps.filtered(lambda x: x.dataset_name not in SKIP_DATASET_NAMES)
+    conhelps = conhelps.filtered(lambda x: x.config.name not in SKIP_CONFIG_NAMES)
+
 
     print(
         "loaded {} configs from {} datasets".format(
@@ -155,18 +195,9 @@ if __name__ == "__main__":
         )
     )
 
-    do_public = True
-    do_private = True
+    do_public = False
+    do_private = False
 
-    if do_public:
-        public_conhelps = conhelps.filtered(lambda x: not x.is_local)
-        public_dataset_metas = gather_metadatas_json(public_conhelps)
-        with open("bigbio-public-metadatas.json", "w") as fp:
-            json.dump(public_dataset_metas, fp, indent=4)
-        public_dfs = flatten_metadatas(public_dataset_metas)
-        for key, df in public_dfs.items():
-            df.to_parquet(f"bigbio-public-metadatas-flat-{key}.parquet")
-            df.to_csv(f"bigbio-public-metadatas-flat-{key}.csv", index=False)
 
     if do_private:
         data_dir_base = "/home/galtay/data/bigbio"
@@ -180,3 +211,14 @@ if __name__ == "__main__":
         for key, df in private_dfs.items():
             df.to_parquet(f"bigbio-private-metadatas-flat-{key}.parquet")
             df.to_csv(f"bigbio-private-metadatas-flat-{key}.csv", index=False)
+
+
+    if do_public:
+        public_conhelps = conhelps.filtered(lambda x: not x.is_local)
+        public_dataset_metas = gather_metadatas_json(public_conhelps)
+        with open("bigbio-public-metadatas.json", "w") as fp:
+            json.dump(public_dataset_metas, fp, indent=4)
+        public_dfs = flatten_metadatas(public_dataset_metas)
+        for key, df in public_dfs.items():
+            df.to_parquet(f"bigbio-public-metadatas-flat-{key}.parquet")
+            df.to_csv(f"bigbio-public-metadatas-flat-{key}.csv", index=False)

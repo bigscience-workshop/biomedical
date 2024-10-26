@@ -61,6 +61,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "medmentions"
+_DISPLAYNAME = "MedMentions"
 
 _DESCRIPTION = """\
 MedMentions is a new manually annotated resource for the recognition of biomedical concepts.
@@ -239,7 +240,7 @@ class MedMentionsDataset(datasets.GeneratorBasedBuilder):
                                     "normalized": [
                                         {
                                             "db_name": "UMLS",
-                                            "db_id": entity["concept_id"],
+                                            "db_id": entity["concept_id"].split(':')[-1],
                                         }
                                     ],
                                 }

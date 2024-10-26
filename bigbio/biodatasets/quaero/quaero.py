@@ -1,13 +1,13 @@
-import os
+import re
+from pathlib import Path
 
-import bioc
 import datasets
 
 from bigbio.utils import schemas
 from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
-from bigbio.utils.parsing import get_texts_and_offsets_from_bioc_ann
+from bigbio.utils.parsing import brat_parse_to_bigbio_kb, parse_brat_file
 
 _LANGUAGES = [Lang.FR]
 _PUBMED = True
@@ -69,11 +69,12 @@ _HOMEPAGE = "https://quaerofrenchmed.limsi.fr/"
 
 _LICENSE = Licenses.GFDL_1p3
 
-_URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_BioC.zip"
+_URL = "https://quaerofrenchmed.limsi.fr/QUAERO_FrenchMed_brat.zip"
 
-_DATASET_NAME = "QUAERO French Medical Corpus"
+_DATASET_NAME = "quaero"
+_DISPLAYNAME = "QUAERO"
 
-_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
+_SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION, Tasks.NAMED_ENTITY_DISAMBIGUATION]
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"
 
@@ -120,26 +121,21 @@ class QUAERO(datasets.GeneratorBasedBuilder):
                 {
                     "id": datasets.Value("string"),
                     "document_id": datasets.Value("string"),
-                    "entities": [
+                    "text": datasets.Value("string"),
+                    "text_bound_annotations": [  # T line in brat, e.g. type or event trigger
                         {
-                            "id": datasets.Value("string"),
-                            "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
                             "offsets": datasets.Sequence([datasets.Value("int32")]),
-                            "normalized": [
-                                {
-                                    "db_name": datasets.Value("string"),
-                                    "db_id": datasets.Value("string"),
-                                }
-                            ],
+                            "text": datasets.Sequence(datasets.Value("string")),
+                            "type": datasets.Value("string"),
+                            "id": datasets.Value("string"),
                         }
                     ],
-                    "passages": [
+                    "notes": [  # # lines in brat
                         {
                             "id": datasets.Value("string"),
                             "type": datasets.Value("string"),
-                            "text": datasets.Sequence(datasets.Value("string")),
-                            "offsets": datasets.Sequence([datasets.Value("int32")]),
+                            "ref_id": datasets.Value("string"),
+                            "text": datasets.Value("string"),
                         }
                     ],
                 }
@@ -155,45 +151,6 @@ class QUAERO(datasets.GeneratorBasedBuilder):
             license=str(_LICENSE),
             citation=_CITATION,
         )
-
-    def _get_bioc_entity(self, span, doc_text, db_id_key=None):
-        """Parse BioC entity annotation.
-        Parameters
-        ----------
-        span : BioCAnnotation
-            BioC entity annotation
-        doc_text : string
-            document text, required to construct text spans
-        db_id_key : str, optional
-            database name used for normalization, by default "MESH"
-        Returns
-        -------
-        dict
-            entity information
-        """
-        offsets, texts = get_texts_and_offsets_from_bioc_ann(span)
-        # db_ids = span.infons[db_id_key] if db_id_key else "-1"
-        # normalized = [
-        # some entities are linked to multiple normalized ids
-        #   {"db_name": db_id_key, "db_id": db_id}
-        #  for db_id in db_ids.split("|")
-        # ]
-
-        return {
-            "id": span.id,
-            "offsets": offsets,
-            "text": texts,
-            "type": span.infons["type"],
-            "normalized": [],
-        }
-
-    def _get_document_text(self, xdoc):
-        """Build document text for unit testing entity span offsets."""
-        text = ""
-        for passage in xdoc.passages:
-            pad = passage.offset - len(text)
-            text += (" " * pad) + passage.text
-        return text
 
     def _split_generators(self, dl_manager):
         urls = _URL
@@ -224,86 +181,40 @@ class QUAERO(datasets.GeneratorBasedBuilder):
 
     # method parameters are unpacked from `gen_kwargs` as given in `_split_generators`
     def _generate_examples(self, filepath, split):
-
         if self.config.subset_id == "quaero_emea":
             subset = "EMEA"
         elif self.config.subset_id == "quaero_medline":
             subset = "MEDLINE"
 
-        key = 0
+        folder = Path(filepath) / "QUAERO_FrenchMed" / "corpus" / split / subset
+
         if self.config.schema == "source":
-            file = f"{subset}_{split}_bioc"
-            f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-            reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
-
-            for xdoc in reader:
-                doc_text = self._get_document_text(xdoc)
-                yield (
-                    key,
-                    {
-                        "id": xdoc.id,
-                        "document_id": xdoc.id,
-                        "entities": [
-                            self._get_bioc_entity(span, doc_text)
-                            for passage in xdoc.passages
-                            for span in passage.annotations
-                        ],
-                        "passages": [
-                            {
-                                "id": xdoc.id,
-                                "type": passage.infons,
-                                "text": [passage.text],
-                                "offsets": [
-                                    self._get_bioc_entity(span, doc_text)["offsets"][0]
-                                    for span in passage.annotations
-                                ],
-                            }
-                            for passage in xdoc.passages
-                        ],
-                    },
-                )
-                key += 1
+            for guid, txt_file in enumerate(sorted(folder.glob("*.txt"))):
+                example = parse_brat_file(txt_file, parse_notes=True)
+                example["id"] = guid
+                # Remove unused items from BRAT
+                del example["events"]
+                del example["relations"]
+                del example["equivalences"]
+                del example["attributes"]
+                del example["normalizations"]
+                yield guid, example
         elif self.config.schema == "bigbio_kb":
-            i = 0  # unique key for each data sample, needed for datasets
-            uid = 0  # unique identifier needed for the schema
-            file = f"{subset}_{split}_bioc"
-            f = os.path.join(filepath, "QUAERO_BioC", "corpus", split, file)
-            reader = bioc.biocxml.BioCXMLDocumentReader(str(f))
-            for xdoc in reader:
-                data = {
-                    "id": uid,
-                    "document_id": xdoc.id,
-                    "passages": [],
-                    "entities": [],
-                    "relations": [],
-                    "events": [],
-                    "coreferences": [],
-                }
-                uid += 1
-                doc_text = self._get_document_text(xdoc)
+            for guid, txt_file in enumerate(sorted(folder.glob("*.txt"))):
+                example = parse_brat_file(txt_file, parse_notes=True)
+                annotator_notes = example["notes"]
+                document_id = example["document_id"]
 
-                char_start = 0
-                # passages must not overlap and spans must cover the entire document
-                for passage in xdoc.passages:
-                    offsets = [[char_start, char_start + len(passage.text)]]
-                    char_start = char_start + len(passage.text) + 1
-                    data["passages"].append(
-                        {
-                            "id": uid,
-                            "type": "sentence",
-                            "text": [passage.text],
-                            "offsets": offsets,
-                        }
-                    )
-                    uid += 1
+                example = brat_parse_to_bigbio_kb(example)
+                example["id"] = guid
 
-                # entities
-                for passage in xdoc.passages:
-                    for span in passage.annotations:
-                        ent = self._get_bioc_entity(span, doc_text)
-                        ent["id"] = uid  # override BioC default id
-                        data["entities"].append(ent)
-                        uid += 1
-
-                yield i, data
-                i += 1
+                for note in annotator_notes:
+                    entity_id = f'{document_id}_{note["ref_id"]}'
+                    for e in example["entities"]:
+                        if e["id"] == entity_id:
+                            for cui in re.split("[\s\+,]", note["text"].strip()):
+                                if cui:
+                                    e["normalized"].append({"db_id": cui, "db_name": "UMLS"})
+                yield guid, example
+        else:
+            raise ValueError(f"Invalid config: {self.config.name}")

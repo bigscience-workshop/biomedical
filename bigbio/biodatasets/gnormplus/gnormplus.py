@@ -48,6 +48,7 @@ url={https://doi.org/10.1155/2015/918710}
 """
 
 _DATASETNAME = "gnormplus"
+_DISPLAYNAME = "GNormPlus"
 
 _DESCRIPTION = """\
 We re-annotated two existing gene corpora. The BioCreative II GN corpus is a widely used data set for benchmarking GN
@@ -171,7 +172,7 @@ class GnormplusDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBI", insert_tax_id=False):
+    def _parse_bioc_entity(self, uid, bioc_ann, db_id_key="NCBIGene", insert_tax_id=False):
         offsets, texts = get_texts_and_offsets_from_bioc_ann(bioc_ann)
         _type = bioc_ann.infons["type"]
 

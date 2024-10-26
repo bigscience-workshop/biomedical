@@ -71,7 +71,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{demner2018dataset,
   author    = {Demner-Fushman, Dina and Shooshan, Sonya and Rodriguez, Laritza and Aronson,
                Alan and Lang, Francois and Rogers, Willie and Roberts, Kirk and Tonning, Joseph},
   title     = {A dataset of 200 structured product labels annotated for adverse drug reactions},
@@ -88,6 +88,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "spl_adr_200db"
+_DISPLAYNAME = "SPL ADR"
 
 _DESCRIPTION = """\
 The United States Food and Drug Administration (FDA) partnered with the National Library

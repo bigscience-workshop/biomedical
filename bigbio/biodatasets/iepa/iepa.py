@@ -14,8 +14,9 @@
 # limitations under the License.
 
 """
-The IEPA benchmark PPI corpus is designed for relation extraction. It was created from 303 PubMed abstracts,
-each of which contains a specific pair of co-occurring chemicals.
+The IEPA benchmark PPI corpus is designed for relation extraction. It was
+created from 303 PubMed abstracts, each of which contains a specific pair of
+co-occurring chemicals.
 """
 
 # Comment from Author
@@ -37,7 +38,7 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@ARTICLE{,
+@ARTICLE{ding2001mining,
   title    = "Mining {MEDLINE}: abstracts, sentences, or phrases?",
   author   = "Ding, J and Berleant, D and Nettleton, D and Wurtele, E",
   journal  = "Pac Symp Biocomput",
@@ -49,10 +50,12 @@ _CITATION = """\
 """
 
 _DATASETNAME = "iepa"
+_DISPLAYNAME = "IEPA"
 
 _DESCRIPTION = """\
-The IEPA benchmark PPI corpus is designed for relation extraction. It was created from 303 PubMed abstracts,
-each of which contains a specific pair of co-occurring chemicals.
+The IEPA benchmark PPI corpus is designed for relation extraction. It was \
+created from 303 PubMed abstracts, each of which contains a specific pair of \
+co-occurring chemicals.
 """
 
 _HOMEPAGE = "http://psb.stanford.edu/psb-online/proceedings/psb02/abstracts/p326.html"

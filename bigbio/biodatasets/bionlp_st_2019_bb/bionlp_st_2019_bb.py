@@ -24,6 +24,8 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "bionlp_st_2019_bb"
+_DISPLAYNAME = "BioNLP 2019 BB"
+
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 

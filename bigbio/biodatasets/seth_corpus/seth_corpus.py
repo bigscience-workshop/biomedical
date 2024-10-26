@@ -50,6 +50,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "seth_corpus"
+_DISPLAYNAME = "SETH Corpus"
 
 _DESCRIPTION = (
     """SNP named entity recognition corpus consisting of 630 PubMed citations."""

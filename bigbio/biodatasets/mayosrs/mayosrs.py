@@ -45,9 +45,10 @@ _CITATION = """\
 """
 
 _DATASETNAME = "mayosrs"
+_DISPLAYNAME = "MayoSRS"
 
 _DESCRIPTION = """\
-MayoSRS consists of 101 clinical term pairs whose relatedness was determined by
+MayoSRS consists of 101 clinical term pairs whose relatedness was determined by \
 nine medical coders and three physicians from the Mayo Clinic.
 """
 
@@ -62,7 +63,6 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 

@@ -2,7 +2,7 @@
 Utility for filtering and loading BigBio datasets.
 """
 from collections import Counter
-from importlib.machinery import SourceFileLoader
+from importlib import import_module
 import logging
 import os
 import pathlib
@@ -70,11 +70,11 @@ _BLURB_CONFIG_NAMES = set(
         "gnormplus_bigbio_kb",  # BC2GM
         "jnlpba_bigbio_kb",  # JNLPBA
         "ncbi_disease_bigbio_kb",  # NCBI-disease
-        "bioasq_7b_bigbio_qa",  # BioASQ
+        "bioasq_blurb_bigbio_qa",  # BioASQ
         "chemprot_bigbio_kb",  # ChemProt
         "ddi_corpus_bigbio_kb",  # DDI
         "hallmarks_of_cancer_bigbio_text",  # HOC
-        "gad_fold0_bigbio_text",  #  Gene-Disease Associations (GAD)
+        "gad_blurb_bigbio_text",  #  Gene-Disease Associations (GAD)
         "pubmed_qa_labeled_fold0_bigbio_qa",  # PubMedQA
     ]
 )
@@ -93,6 +93,7 @@ class BigBioKbMetadata:
     passages_type_counter: Dict[str, int]
 
     entities_count: int
+    entities_normalized_count: int
     entities_type_counter: Dict[str, int]
     entities_db_name_counter: Dict[str, int]
     entities_unique_db_ids_count: int
@@ -117,6 +118,7 @@ class BigBioKbMetadata:
         passages_type_counter = Counter()
 
         entities_count = 0
+        entities_normalized_count = 0
         entities_type_counter = Counter()
         entities_db_name_counter = Counter()
         entities_unique_db_ids = set()
@@ -143,6 +145,7 @@ class BigBioKbMetadata:
                 entities_count += 1
                 entities_type_counter[entity["type"]] += 1
                 for norm in entity["normalized"]:
+                    entities_normalized_count += 1
                     entities_db_name_counter[norm["db_name"]] += 1
                     entities_unique_db_ids.add(norm["db_id"])
 
@@ -179,6 +182,7 @@ class BigBioKbMetadata:
             passages_type_counter=dict(passages_type_counter.most_common(max_common)),
             passages_char_count=passages_char_count,
             entities_count=entities_count,
+            entities_normalized_count=entities_normalized_count,
             entities_type_counter=dict(entities_type_counter.most_common(max_common)),
             entities_db_name_counter=dict(
                 entities_db_name_counter.most_common(max_common)
@@ -387,10 +391,11 @@ class BigBioConfigHelper:
 
     script: pathlib.Path
     dataset_name: str
-    tasks: List[Tasks]
-    languages: List[Lang]
+    tasks: List[str]
+    languages: List[str]
     config: BigBioConfig
     is_local: bool
+    is_pubmed: bool
     is_bigbio_schema: bool
     bigbio_schema_caps: Optional[str]
     is_large: bool
@@ -402,6 +407,7 @@ class BigBioConfigHelper:
     citation: str
     description: str
     homepage: str
+    display_name: str
     license: str
 
     _ds_module: datasets.load.DatasetModule = field(repr=False)
@@ -410,21 +416,27 @@ class BigBioConfigHelper:
 
     def get_load_dataset_kwargs(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        if from_hub:
+            path = f"bigbio/{self.dataset_name}"
+        else:
+            path = self.script
         return {
-            "path": self.script,
+            "path": path,
             "name": self.config.name,
             **extra_load_dataset_kwargs,
         }
 
     def load_dataset(
         self,
+        from_hub=True,
         **extra_load_dataset_kwargs,
     ):
+        load_dataset_kwargs = self.get_load_dataset_kwargs(from_hub=from_hub)
         return load_dataset(
-            path=self.script,
-            name=self.config.name,
+            **load_dataset_kwargs,
             **extra_load_dataset_kwargs,
         )
 
@@ -455,12 +467,14 @@ class BigBioConfigHelpers:
     ):
 
         path_to_here = pathlib.Path(__file__).parent.absolute()
-        self.path_to_biodatasets = (path_to_here / "biodatasets").resolve()
-        self.dataloader_scripts = sorted(
-            self.path_to_biodatasets.glob(os.path.join("*", "*.py"))
-        )
+        self.path_to_biodatasets = (path_to_here / "hub" / "hub_repos").resolve()
+        self.dataloader_directories = sorted([
+            path for path in self.path_to_biodatasets.glob("*")
+            if path.name != "__init__.py"
+        ])
         self.dataloader_scripts = [
-            el for el in self.dataloader_scripts if el.name != "__init__.py"
+            dpath / f"{dpath.name}.py"
+            for dpath in self.dataloader_directories
         ]
 
         # if helpers are passed in, just attach and go
@@ -471,13 +485,12 @@ class BigBioConfigHelpers:
                 self._helpers = [helper for helper in helpers if not helper.is_broken]
             return
 
+
         # otherwise, create all helpers available in package
         helpers = []
         for dataloader_script in self.dataloader_scripts:
             dataset_name = dataloader_script.stem
-            py_module = SourceFileLoader(
-                dataset_name, dataloader_script.as_posix()
-            ).load_module()
+            py_module = import_module(f"bigbio.hub.hub_repos.{dataset_name}.{dataset_name}")
             ds_module = datasets.load.dataset_module_factory(
                 dataloader_script.as_posix()
             )
@@ -487,12 +500,19 @@ class BigBioConfigHelpers:
 
                 is_bigbio_schema = config.schema.startswith("bigbio")
                 if is_bigbio_schema:
+                    # some bigbio datasets support tasks from multiple schemas
+                    # here we just choose the tasks for the schema of this config
                     bigbio_schema_caps = config.schema.split("_")[1].upper()
-                    tasks = SCHEMA_TO_TASKS[bigbio_schema_caps] & set(
-                        py_module._SUPPORTED_TASKS
-                    )
+                    schema_tasks = set([
+                        task.name for task in SCHEMA_TO_TASKS[bigbio_schema_caps]
+                    ])
+                    config_tasks = set([
+                        task.name for task in py_module._SUPPORTED_TASKS
+                    ])
+                    tasks = schema_tasks & config_tasks
+
                 else:
-                    tasks = py_module._SUPPORTED_TASKS
+                    tasks = set([task.name for task in py_module._SUPPORTED_TASKS])
                     bigbio_schema_caps = None
 
                 helpers.append(
@@ -503,6 +523,7 @@ class BigBioConfigHelpers:
                         languages=py_module._LANGUAGES,
                         config=config,
                         is_local=py_module._LOCAL,
+                        is_pubmed=py_module._PUBMED,
                         is_bigbio_schema=is_bigbio_schema,
                         bigbio_schema_caps=bigbio_schema_caps,
                         is_large=config.name in _LARGE_CONFIG_NAMES,
@@ -514,6 +535,7 @@ class BigBioConfigHelpers:
                         citation=py_module._CITATION,
                         description=py_module._DESCRIPTION,
                         homepage=py_module._HOMEPAGE,
+                        display_name=py_module._DISPLAYNAME,
                         license=py_module._LICENSE,
                         _ds_module=ds_module,
                         _py_module=py_module,

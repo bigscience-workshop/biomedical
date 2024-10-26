@@ -43,6 +43,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "tmvar_v1"
+_DISPLAYNAME = "tmVar v1"
 
 _DESCRIPTION = """This dataset contains 500 PubMed articles manually annotated with mutation mentions of various kinds. It can be used for NER tasks only.
 The dataset is split into train(334) and test(166) splits"""

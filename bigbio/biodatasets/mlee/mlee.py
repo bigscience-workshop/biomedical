@@ -28,7 +28,6 @@ from bigbio.utils.configs import BigBioConfig
 from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
-_DATASETNAME = "mlee"
 _SOURCE_VIEW_NAME = "source"
 _UNIFIED_VIEW_NAME = "bigbio"
 
@@ -36,16 +35,15 @@ _LANGUAGES = [Lang.EN]
 _PUBMED = True
 _LOCAL = False
 _CITATION = """\
-@article{,
-  author = {Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
-  title = "{Event extraction across multiple levels of biological organization}",
-  journal   = {Bioinformatics},
-  volume    = {28},
-  year      = {2012},
-  url       = {https://doi.org/10.1093/bioinformatics/bts407},
-  doi       = {10.1093/bioinformatics/bts407},
-  biburl    = {},
-  bibsource = {}
+@article{pyysalo2012event,
+  title={Event extraction across multiple levels of biological organization},
+  author={Pyysalo, Sampo and Ohta, Tomoko and Miwa, Makoto and Cho, Han-Cheol and Tsujii, Jun'ichi and Ananiadou, Sophia},
+  journal={Bioinformatics},
+  volume={28},
+  number={18},
+  pages={i575--i581},
+  year={2012},
+  publisher={Oxford University Press}
 }
 """
 
@@ -54,6 +52,9 @@ MLEE is an event extraction corpus consisting of manually annotated abstracts of
 on angiogenesis. It contains annotations for entities, relations, events and coreferences
 The annotations span molecular, cellular, tissue, and organ-level processes.
 """
+
+_DATASETNAME = "mlee"
+_DISPLAYNAME = "MLEE"
 
 _HOMEPAGE = "http://www.nactem.ac.uk/MLEE/"
 

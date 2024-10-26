@@ -46,6 +46,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scitail"
+_DISPLAYNAME = "SciTail"
 
 _DESCRIPTION = """\
 The SciTail dataset is an entailment dataset created from multiple-choice science exams and

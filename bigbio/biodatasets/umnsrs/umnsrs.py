@@ -49,6 +49,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "umnsrs"
+_DISPLAYNAME = "UMNSRS"
 
 _DESCRIPTION = """\
 UMNSRS, developed by Pakhomov, et al., consists of 725 clinical term pairs whose semantic similarity and relatedness.

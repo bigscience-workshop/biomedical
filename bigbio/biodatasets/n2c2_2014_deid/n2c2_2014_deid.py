@@ -63,9 +63,10 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _LANGUAGES = [Lang.EN]
+_PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{
+@article{stubbs2015automated,
 title = {Automated systems for the de-identification of longitudinal
 clinical narratives: Overview of 2014 i2b2/UTHealth shared task Track 1},
 journal = {Journal of Biomedical Informatics},
@@ -80,11 +81,12 @@ author = {Amber Stubbs and Christopher Kotfila and Özlem Uzuner}
 """
 
 _DATASETNAME = "n2c2_2014_deid"
+_DISPLAYNAME = "n2c2 2014 De-identification"
 
 _DESCRIPTION = """\
 The 2014 i2b2/UTHealth Natural Language Processing (NLP) shared task featured two tracks.
 The first of these was the de-identification track focused on identifying protected health
-information (PHI) in longitudinal clinical narratives. 
+information (PHI) in longitudinal clinical narratives.
 
 TRACK 1: NER PHI\n
 HIPAA requires that patient medical records have all identifying information removed in order to
@@ -126,7 +128,7 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
             description="n2c2_2014 BigBio schema",
             schema="bigbio_kb",
             subset_id="n2c2_2014_deid",
-        )
+        ),
     ]
 
     DEFAULT_CONFIG_NAME = "n2c2_2014_deid_source"
@@ -154,7 +156,6 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
         elif self.config.schema == "bigbio_kb":
             features = schemas.kb_features
 
-
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
@@ -163,10 +164,14 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
             citation=_CITATION,
         )
 
-    def _split_generators(self, dl_manager: datasets.DownloadManager) -> List[datasets.SplitGenerator]:
+    def _split_generators(
+        self, dl_manager: datasets.DownloadManager
+    ) -> List[datasets.SplitGenerator]:
         """Returns SplitGenerators."""
         if self.config.data_dir is None:
-            raise ValueError("This is a local dataset. Please pass the data_dir kwarg to load_dataset.")
+            raise ValueError(
+                "This is a local dataset. Please pass the data_dir kwarg to load_dataset."
+            )
         else:
             data_dir = self.config.data_dir
         return [
@@ -201,7 +206,9 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
                 for x in self._read_tar_gz(full_path):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
-                        document = self._read_task1_file(file_object=x["file_object"], file_name=x["file_name"])
+                        document = self._read_task1_file(
+                            file_object=x["file_object"], file_name=x["file_name"]
+                        )
                         document["id"] = next(uid)
 
         elif self.config.schema == "bigbio_kb":
@@ -211,31 +218,33 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
                 for x in self._read_tar_gz(full_path):
                     xml_flag = x["xml_flag"]
                     if xml_flag:
-                        document = self._read_task1_file(file_object=x["file_object"], file_name=x["file_name"])
+                        document = self._read_task1_file(
+                            file_object=x["file_object"], file_name=x["file_name"]
+                        )
                         document["id"] = next(uid)
                         entity_list = document.pop("phi")
                         full_text = document.pop("text")
                         entities_ = []
                         for entity in entity_list:
                             entities_.append(
-                                    {
-                                        "id": next(uid),
-                                        "type": entity["type"],
-                                        "text": entity["text"],
-                                        "offsets": entity["offsets"],
-                                        "normalized": entity["normalized"],
-                                    }
-                                )
+                                {
+                                    "id": next(uid),
+                                    "type": entity["type"],
+                                    "text": entity["text"],
+                                    "offsets": entity["offsets"],
+                                    "normalized": entity["normalized"],
+                                }
+                            )
                         document["entities"] = entities_
 
                         document["passages"] = [
-                                {
-                                    "id": next(uid),
-                                    "type": "full_text",
-                                    "text": [full_text],
-                                    "offsets": [[0, len(full_text)]],
-                                },
-                            ]
+                            {
+                                "id": next(uid),
+                                "type": "full_text",
+                                "text": [full_text],
+                                "offsets": [[0, len(full_text)]],
+                            },
+                        ]
 
                         # additional fields required that can be empty
                         document["relations"] = []
@@ -260,7 +269,11 @@ class N2C22014DeidDataset(datasets.GeneratorBasedBuilder):
                 xml_flag = True
             else:
                 xml_flag = False
-            yield {"file_object": file_object, "file_name": file_name, "xml_flag": xml_flag}
+            yield {
+                "file_object": file_object,
+                "file_name": file_name,
+                "xml_flag": xml_flag,
+            }
 
     def _read_task1_file(self, file_object, file_name):
         xmldoc = et.parse(file_object).getroot()

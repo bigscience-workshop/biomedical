@@ -36,7 +36,7 @@ _LANGUAGES = [Lang.EN, Lang.ZH]
 _PUBMED = False
 _LOCAL = False
 _CITATION = """\
-@article{,
+@article{liu2021paramed,
   author    = {Liu, Boxiang and Huang, Liang},
   title     = {ParaMed: a parallel corpus for English–Chinese translation in the biomedical domain},
   journal   = {BMC Medical Informatics and Decision Making},
@@ -47,6 +47,7 @@ _CITATION = """\
 }
 """
 _DATASETNAME = "paramed"
+_DISPLAYNAME = "ParaMed"
 
 _DESCRIPTION = """\
 NEJM is a Chinese-English parallel corpus crawled from the New England Journal of Medicine website. 
