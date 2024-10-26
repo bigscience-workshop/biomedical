@@ -35,7 +35,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "samd"
-_DISPLAYNAME = "Sentitment Analyis for  Medical Drugs"
+_DISPLAYNAME = "Sentiment Analysis for  Medical Drugs"
 
 _DESCRIPTION = """\
 This dataset contains comments about patients and the sentiment in those comments about a specific drug that's \
@@ -50,7 +50,7 @@ _LICENSE = "UNKNOWN"
 
 _URLS = {}
 
-_SUPPORTED_TASKS = [Tasks.SEMANTIC_SIMILARITY]
+_SUPPORTED_TASKS = [Tasks.TEXT_PAIRS_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
 _BIGBIO_VERSION = "1.0.0"

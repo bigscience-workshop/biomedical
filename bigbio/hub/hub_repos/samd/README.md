@@ -12,7 +12,7 @@ homepage: https://www.kaggle.com/datasets/arbazkhan971/analyticvidhyadatasetsent
 bigbio_pubmed: False
 bigbio_public: False
 bigbio_tasks: 
-- SEMANTIC_SIMILARITY
+- TEXT_PAIRS_CLASSIFICATION
 ---
 
 
@@ -23,7 +23,7 @@ bigbio_tasks:
 - **Homepage:** https://www.kaggle.com/datasets/arbazkhan971/analyticvidhyadatasetsentiment
 - **Pubmed:** False
 - **Public:** False
-- **Tasks:** STS
+- **Tasks:** TXT2CLASS
 
 ## Citation Information
 
