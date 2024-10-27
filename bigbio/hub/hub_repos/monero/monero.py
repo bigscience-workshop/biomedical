@@ -13,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-MoNERo: a Biomedical Gold Standard Corpus for the Romanian Language for part of speech tagging and named entity recognition.
-"""
-
 import os
 from pathlib import Path
 from typing import Any, List, Tuple, Dict
 
 import datasets
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
+from .bigbiohub import BigBioConfig, Tasks, kb_features
+
+_LANGUAGES = ['Romanian']
+_PUBMED = False
+_LOCAL = False
 
 _CITATION = """\
 @inproceedings{,
@@ -44,14 +42,15 @@ _CITATION = """\
 """
 
 _DATASETNAME = "monero"
+_DISPLAYNAME = "MoNERo"
 
 _DESCRIPTION = """\
-MoNERo: a Biomedical Gold Standard Corpus for the Romanian Language for part of speech tagging and named entity recognition.
+MoNERo: a Biomedical Gold Standard Corpus for the Romanian Language for part of speech tagging and named \
+entity recognition.
 """
 
 _HOMEPAGE = "https://www.racai.ro/en/tools/text/"
-
-_LICENSE = "Creative Commons License Attribution-ShareAlike 4.0 International"
+_LICENSE = "CC_BY_SA_4p0"
 
 _URLS = {
     # The original dataset is in 7z format hence I have downloaded and reuploded it as tar.gz format.
@@ -66,12 +65,12 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.NAMED_ENTITY_RECOGNITION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
 
 class MoneroDataset(datasets.GeneratorBasedBuilder):
-    """MoNERo: a Biomedical Gold Standard Corpus for the Romanian Language for part of speech tagging and named entity recognition."""
+    """MoNERo: a Biomedical Gold Standard Corpus for the Romanian Language for part of speech tagging
+    and named entity recognition."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -108,7 +107,9 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_kb":
-            features = schemas.kb_features
+            features = kb_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -126,25 +127,23 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "MoNERo", "MoNERo.txt"),
+                    "filepath": Path(os.path.join(data_dir, "MoNERo", "MoNERo.txt")),
                     "split": "train",
                 },
             ),
         ] + [
             datasets.SplitGenerator(
                 name=split,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "MoNERo", f"MoNERo_{split}.txt"),
+                    "filepath": Path(os.path.join(data_dir, "MoNERo", f"MoNERo_{split}.txt")),
                     "split": split,
                 },
             )
             for split in ["cardiology", "endocrinology", "diabetes"]
         ]
 
-    def _generate_examples(self, filepath, split: str) -> Tuple[int, Dict]:
+    def _generate_examples(self, filepath: Path, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
         if self.config.schema == "source":
             for key, example in self._read_example_from_file(filepath):
@@ -155,11 +154,14 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
                 yield key, example
 
     def _read_example_from_file(self, filepath: Path) -> Tuple[str, Dict]:
-        with open(filepath, encoding="utf-8") as fp:
+        """ Read examples from the given file in source schema """
+        with filepath.open("r", encoding="utf8") as fp:
             sequences = fp.read().split("\n\n")
+
         for i, seq in enumerate(sequences):
             key = f"docid-{i}"
             seq = [line.rstrip().split("\t") for line in seq.rstrip().splitlines()]
+
             # There are few lines which only have two columns. Skipping those.
             seq = [line for line in seq if len(line) == 4]
             tokens, lemmas, ner_tags, pos_tags = zip(*seq)
@@ -173,39 +175,79 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
             yield key, example
 
     @staticmethod
-    def _assign_offsets(tokens):
+    def _assign_offsets(tokens: List[str]) -> List[Tuple[int, int]]:
+        """ Compute token offsets from list of tokens """
+
         offsets = []
         start = 0
         for t in tokens:
             s = start
             e = s + len(t)
-            offsets.append([s, e])
+            offsets.append((s, e))
             start = e + 1  # Add one to include space.
+
         return offsets
 
     @staticmethod
-    def _extract_entities(ner_tags):
+    def _extract_entities(ner_tags: List[str]) -> List[Dict]:
+        """ Extract the entity token offsets / indices given the NER tags.
+
+        Note: The dataset contains discontinuous entities, unfortunately, in some cases it's not transparent to
+        which entity a part (i.e., an I-Tag without having a B-Tag before) should be linked. In this implementation
+        we append the entity part to previous entity of that type. If there is no previous entity we construct
+        a new entity from the part.
+        """
         ner_tags = tuple(ner_tags) + ("O",)
         entities = []
         stack = []
-        for i, t in enumerate(ner_tags):
-            if stack and (t == "O" or t.startswith("B-")):
-                l, s = stack[0]
-                l, e = stack[-1]
-                entity = (l, s, e)
-                entities.append(entity)
-                stack = []
+        is_discontinuation = False
 
-            if t.startswith(("B-", "I-")):
-                _, l = t.split("-", 1)
-                stack.append((l, i))
+        for index, ner_tag in enumerate(ner_tags):
+            if stack and (ner_tag == "O" or ner_tag.startswith("B-")):
+                entity_type, start_index = stack[0]
+                entity_type, end_index = stack[-1]
+
+                if not is_discontinuation:
+                    # Standard case - create a new entity
+                    entities.append({
+                        "type": entity_type,
+                        "offsets": [(start_index, end_index)]
+                    })
+                else:
+                    # Try to append the offsets to the previous entity of the same type
+                    prev_entity = None
+                    for i in range(len(entities)-1, 0, -1):
+                        if entities[i]["type"] == entity_type:
+                            prev_entity = entities[i]
+                            break
+
+                    if prev_entity:
+                        prev_entity["offsets"].append((start_index, end_index))
+                    else:
+                        # If can't find a previous entity - create a new one
+                        entities.append({
+                            "type": entity_type,
+                            "offsets": [(start_index, end_index)]
+                        })
+
+                stack = []
+                is_discontinuation = False
+
+            if ner_tag.startswith("I-") and len(stack) == 0 and len(entities) > 0:
+                # The corpus contains some discontinuous entities
+                is_discontinuation = True
+
+            if ner_tag.startswith(("B-", "I-")):
+                _, entity_type = ner_tag.split("-", 1)
+                stack.append((entity_type, index))
+
         return entities
 
-    def _parse_example_to_kb_schema(self, example) -> Dict[str, Any]:
+    def _parse_example_to_kb_schema(self, example: Dict) -> Dict[str, Any]:
+        """ Maps a source example to BigBio kb schema """
+
         text = " ".join(example["tokens"])
         doc_id = example["doc_id"]
-        offsets = self._assign_offsets(example["tokens"])
-        entities_with_token_offsets = self._extract_entities(example["ner_tags"])
         passages = [
             {
                 "id": f"{doc_id}-P0",
@@ -214,17 +256,29 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
                 "offsets": [[0, len(text)]],
             }
         ]
+
+        offsets = self._assign_offsets(example["tokens"])
+        entities_with_token_indices = self._extract_entities(example["ner_tags"])
+
         entities = []
-        for i, (l, s, e) in enumerate(entities_with_token_offsets):
-            cs, ce = offsets[s][0], offsets[e][1]
+        for i, entity_type_and_token_indices in enumerate(entities_with_token_indices):
+            entity_texts = []
+            entity_offsets = []
+
+            for start_token, end_token in entity_type_and_token_indices["offsets"]:
+                start_offset, end_offset = offsets[start_token][0], offsets[end_token][1]
+                entity_offsets.append((start_offset, end_offset))
+                entity_texts.append(text[start_offset:end_offset])
+
             entity = {
                 "id": f"{doc_id}-E{i}",
-                "text": [text[cs:ce]],
-                "offsets": [[cs, ce]],
-                "type": l,
+                "text": entity_texts,
+                "offsets": entity_offsets,
+                "type": entity_type_and_token_indices["type"],
                 "normalized": [],
             }
             entities.append(entity)
+
         data = {
             "id": doc_id,
             "document_id": doc_id,
