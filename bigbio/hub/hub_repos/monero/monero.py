@@ -15,12 +15,13 @@
 
 import os
 from pathlib import Path
-from typing import Any, List, Tuple, Dict
+from typing import Any, Dict, List, Tuple
 
 import datasets
+
 from .bigbiohub import BigBioConfig, Tasks, kb_features
 
-_LANGUAGES = ['Romanian']
+_LANGUAGES = ["Romanian"]
 _PUBMED = False
 _LOCAL = False
 
@@ -154,7 +155,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
                 yield key, example
 
     def _read_example_from_file(self, filepath: Path) -> Tuple[str, Dict]:
-        """ Read examples from the given file in source schema """
+        """Read examples from the given file in source schema"""
         with filepath.open("r", encoding="utf8") as fp:
             sequences = fp.read().split("\n\n")
 
@@ -176,7 +177,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _assign_offsets(tokens: List[str]) -> List[Tuple[int, int]]:
-        """ Compute token offsets from list of tokens """
+        """Compute token offsets from list of tokens"""
 
         offsets = []
         start = 0
@@ -190,7 +191,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
 
     @staticmethod
     def _extract_entities(ner_tags: List[str]) -> List[Dict]:
-        """ Extract the entity token offsets / indices given the NER tags.
+        """Extract the entity token offsets / indices given the NER tags.
 
         Note: The dataset contains discontinuous entities, unfortunately, in some cases it's not transparent to
         which entity a part (i.e., an I-Tag without having a B-Tag before) should be linked. In this implementation
@@ -209,14 +210,11 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
 
                 if not is_discontinuation:
                     # Standard case - create a new entity
-                    entities.append({
-                        "type": entity_type,
-                        "offsets": [(start_index, end_index)]
-                    })
+                    entities.append({"type": entity_type, "offsets": [(start_index, end_index)]})
                 else:
                     # Try to append the offsets to the previous entity of the same type
                     prev_entity = None
-                    for i in range(len(entities)-1, 0, -1):
+                    for i in range(len(entities) - 1, 0, -1):
                         if entities[i]["type"] == entity_type:
                             prev_entity = entities[i]
                             break
@@ -225,10 +223,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
                         prev_entity["offsets"].append((start_index, end_index))
                     else:
                         # If can't find a previous entity - create a new one
-                        entities.append({
-                            "type": entity_type,
-                            "offsets": [(start_index, end_index)]
-                        })
+                        entities.append({"type": entity_type, "offsets": [(start_index, end_index)]})
 
                 stack = []
                 is_discontinuation = False
@@ -244,7 +239,7 @@ class MoneroDataset(datasets.GeneratorBasedBuilder):
         return entities
 
     def _parse_example_to_kb_schema(self, example: Dict) -> Dict[str, Any]:
-        """ Maps a source example to BigBio kb schema """
+        """Maps a source example to BigBio kb schema"""
 
         text = " ".join(example["tokens"])
         doc_id = example["doc_id"]
