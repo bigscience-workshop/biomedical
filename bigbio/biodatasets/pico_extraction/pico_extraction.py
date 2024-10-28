@@ -52,6 +52,8 @@ _CITATION = """\
 """
 
 _DATASETNAME = "pico_extraction"
+_DISPLAYNAME = "PICO Annotation"
+
 
 _DESCRIPTION = """\
 This dataset contains annotations for Participants, Interventions, and Outcomes (referred to as PICO task).
@@ -220,7 +222,7 @@ class PicoExtractionDataset(datasets.GeneratorBasedBuilder):
             ),
         ]
 
-    def _generate_examples(self, split, sentence_file, annotation_files) -> (int, dict):
+    def _generate_examples(self, split, sentence_file, annotation_files):
         """Yields examples as (key, example) tuples."""
 
         sentences, annotation_dict = _pico_extraction_data_loader(

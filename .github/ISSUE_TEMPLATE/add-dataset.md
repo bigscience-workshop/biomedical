@@ -1,8 +1,8 @@
 ---
-name: "Add Dataset"
+name: Add Dataset
 about: Request to add a biomedical NLP dataset to the library
 title: ''
-labels: 'dataset request'
+labels: ''
 assignees: ''
 
 ---
@@ -15,4 +15,3 @@ assignees: ''
 - **Data:** *link to the Github repository or current dataset location*
 - **License:** *Type of license; please provide public for new datasets*
 - **Motivation:** *what are some good reasons to have this dataset*
-

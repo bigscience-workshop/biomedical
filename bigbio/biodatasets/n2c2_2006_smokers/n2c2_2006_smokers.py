@@ -67,13 +67,14 @@ from bigbio.utils.constants import Lang, Tasks
 from bigbio.utils.license import Licenses
 
 _DATASETNAME = "n2c2_2006"
+_DISPLAYNAME = "n2c2 2006 Smoking Status"
 
 # https://academic.oup.com/jamia/article/15/1/14/779738
 _LANGUAGES = [Lang.EN]
 _PUBMED = False
 _LOCAL = True
 _CITATION = """\
-@article{,
+@article{uzuner2008identifying,
     author = {
         Uzuner, Ozlem and
         Goldstein, Ira and

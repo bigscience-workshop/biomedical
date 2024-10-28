@@ -48,7 +48,8 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "PROGENE"
+_DATASETNAME = "progene"
+_DISPLAYNAME = "ProGene"
 
 _DESCRIPTION = """\
 The Protein/Gene corpus was developed at the JULIE Lab Jena under supervision of Prof. Udo Hahn.

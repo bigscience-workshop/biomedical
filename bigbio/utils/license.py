@@ -7,7 +7,7 @@ License objects.
 import importlib.resources as pkg_resources
 import json
 from dataclasses import dataclass
-from enum import Enum
+from types import SimpleNamespace
 from typing import Dict, Optional
 
 from bigbio.utils import resources
@@ -27,6 +27,7 @@ class License:
     """
 
     name: Optional[str] = None
+    short_name: Optional[str] = None
     text: Optional[str] = None
     link: Optional[str] = None
     version: Optional[str] = None
@@ -305,9 +306,7 @@ def load_licenses() -> Dict[str, License]:
 
     json_licenses = load_json_licenses()
 
-    json_licenses.update(
-        {"DUA": "Data User Agreement"}
-    )
+    json_licenses.update({"DUA": "Data User Agreement"})
 
     licenses_kwargs = {k: {"name": v} for k, v in json_licenses.items()}
 
@@ -323,9 +322,11 @@ def load_licenses() -> Dict[str, License]:
     }
 
     licenses.update(custom_licenses)
+    for k, v in licenses.items():
+        v.short_name = k
 
     return licenses
 
 
 _LICENSES = load_licenses()
-Licenses = Enum("Licenses", _LICENSES)
+Licenses = SimpleNamespace(**_LICENSES)

@@ -52,6 +52,7 @@ publisher={BioMed Central}
 """
 
 _DATASETNAME = "linnaeus"
+_DISPLAYNAME = "LINNAEUS"
 
 _DESCRIPTION = """\
 Linnaeus is a novel corpus of full-text documents manually annotated for species mentions.

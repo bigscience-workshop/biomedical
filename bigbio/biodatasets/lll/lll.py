@@ -55,6 +55,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "lll"
+_DISPLAYNAME = "LLL05"
 
 _DESCRIPTION = """\
 The LLL05 challenge task is to learn rules to extract protein/gene interactions from biology abstracts from the Medline
