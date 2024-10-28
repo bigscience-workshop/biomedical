@@ -13,26 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-The Chemical Exposure Information (CEI) Corpus consists of 3661 PubMed publication abstracts manually annotated by experts according to a taxonomy.
-The taxonomy consists of 32 classes in a hierarchy. Zero or more class labels are assigned to each sentence in the corpus.
-The labels are found under the "labels" directory, while the tokenized text can be found under "text" directory.
-The filenames are the corresponding PubMed IDs (PMID).
-"""
-
-from pathlib import Path
 import re
-from typing import List, Tuple, Dict
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 import datasets
-from utils import schemas
-from utils.configs import BigBioConfig
-from utils.constants import Tasks
 
+from .bigbiohub import BigBioConfig, Tasks, text_features
+
+_DATASETNAME = "cei"
+_DISPLAYNAME = "CEI"
+
+_LANGUAGES = ["English"]
+_LOCAL = False
+_PUBMED = True
 
 _CITATION = """\
 @article{,
-  author    = {Larsson, Kristin and Baker, Simon and Silins, Ilona and Guo, Yufan and Stenius, Ulla and Korhonen, Anna and Berglund, Marika},
+  author    = {Larsson, Kristin and Baker, Simon and Silins, Ilona and Guo, Yufan and Stenius, Ulla and Korhonen, \
+    Anna and Berglund, Marika},
   title     = {Text mining for improved exposure assessment},
   journal   = {PloS one},
   volume    = {12},
@@ -44,18 +43,14 @@ _CITATION = """\
 }
 """
 
-_DATASETNAME = "cei"
-
 _DESCRIPTION = """\
-The Chemical Exposure Information (CEI) Corpus consists of 3661 PubMed publication abstracts manually annotated by experts according to a taxonomy.
-The taxonomy consists of 32 classes in a hierarchy. Zero or more class labels are assigned to each sentence in the corpus.
-The labels are found under the "labels" directory, while the tokenized text can be found under "text" directory.
-The filenames are the corresponding PubMed IDs (PMID).
+The Chemical Exposure Information (CEI) Corpus consists of 3661 PubMed publication abstracts manually annotated by \
+experts according to a taxonomy. The taxonomy consists of 32 classes in a hierarchy. Zero or more class labels are \
+assigned to each sentence in the corpus.
 """
 
 _HOMEPAGE = "https://github.com/sb895/chemical-exposure-information-corpus"
-
-_LICENSE = "GPL-3.0 License"
+_LICENSE = "GPL_3p0"
 
 _URLS = {
     _DATASETNAME: "https://github.com/sb895/chemical-exposure-information-corpus/archive/refs/heads/master.zip",
@@ -64,17 +59,16 @@ _URLS = {
 _SUPPORTED_TASKS = [Tasks.TEXT_CLASSIFICATION]
 
 _SOURCE_VERSION = "1.0.0"
-
 _BIGBIO_VERSION = "1.0.0"
 
-LABEL_REGEX = re.compile(r"[BE][a-z\-\ ]+")
+LABEL_REGEX = re.compile(r"[Be][a-z\-\ ]+")
 
 
 class CieDataset(datasets.GeneratorBasedBuilder):
-    """The Chemical Exposure Information (CEI) Corpus consists of 3661 PubMed publication abstracts manually annotated by experts according to a taxonomy.
-    The taxonomy consists of 32 classes in a hierarchy. Zero or more class labels are assigned to each sentence in the corpus.
-    The labels are found under the "labels" directory, while the tokenized text can be found under "text" directory.
-    The filenames are the corresponding PubMed IDs (PMID)."""
+    """The Chemical Exposure Information (CEI) Corpus consists of 3661 PubMed publication abstracts manually annotated
+    by experts according to a taxonomy. The taxonomy consists of 32 classes in a hierarchy. Zero or more class labels
+    are assigned to each sentence in the corpus. The labels are found under the "labels" directory, while the tokenized
+    text can be found under "text" directory. The filenames are the corresponding PubMed IDs (PMID)."""
 
     SOURCE_VERSION = datasets.Version(_SOURCE_VERSION)
     BIGBIO_VERSION = datasets.Version(_BIGBIO_VERSION)
@@ -111,7 +105,9 @@ class CieDataset(datasets.GeneratorBasedBuilder):
                 }
             )
         elif self.config.schema == "bigbio_text":
-            features = schemas.text_features
+            features = text_features
+        else:
+            raise NotImplementedError(f"Schema {self.config.schema} not supported")
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
@@ -129,11 +125,8 @@ class CieDataset(datasets.GeneratorBasedBuilder):
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                # Whatever you put in gen_kwargs will be passed to _generate_examples
                 gen_kwargs={
-                    "base_dir": (
-                        Path(data_dir) / "chemical-exposure-information-corpus-master"
-                    ),
+                    "base_dir": (Path(data_dir) / "chemical-exposure-information-corpus-master"),
                     "split": "train",
                 },
             )
@@ -142,7 +135,7 @@ class CieDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, base_dir: Path, split: str) -> Tuple[int, Dict]:
         """Yields examples as (key, example) tuples."""
 
-        text_files = list(base_dir.glob("./text/*.txt"))
+        text_files = sorted(list(base_dir.glob("./text/*.txt")))
 
         if self.config.schema == "source":
             # TODO: yield (key, example) tuples in the original dataset schema
@@ -150,19 +143,21 @@ class CieDataset(datasets.GeneratorBasedBuilder):
                 key, example = self._read_example_from_file(text_file)
                 yield key, example
 
-        elif self.config.schema == "bigbio_[bigbio_schema_name]":
+        elif self.config.schema == "bigbio_text":
             # TODO: yield (key, example) tuples in the bigbio schema
             for text_file in text_files:
                 key, example = self._read_example_from_file_in_kb_schema(text_file)
                 yield key, example
 
     def _read_example_from_file(self, text_file: Path) -> Tuple[str, Dict]:
-        label_file = text_file.parent.parent / "labels" / text_file.name
         with open(text_file, encoding="utf-8") as fp:
             text = fp.read().rstrip()
+
+        label_file = text_file.parent.parent / "labels" / text_file.name
         with open(label_file, encoding="utf-8") as fp:
             label_text = fp.read()
-        labels = [l.strip(" -") for l in LABEL_REGEX.findall(label_text)]
+
+        labels = [line.strip(" -") for line in LABEL_REGEX.findall(label_text)]
         key = text_file.name.rsplit(".", 1)[0]
         example = {
             "id": key,
@@ -175,13 +170,5 @@ class CieDataset(datasets.GeneratorBasedBuilder):
 
     def _read_example_from_file_in_kb_schema(self, text_file: Path) -> Tuple[str, Dict]:
         key, example = self._read_example_from_file(text_file)
-        example = {
-            k: v
-            for k, v in example.items()
-            if k in {"id", "document_id", "text", "labels"}
-        }
+        example = {k: v for k, v in example.items() if k in {"id", "document_id", "text", "labels"}}
         return key, example
-
-
-if __name__ == "__main__":
-    datasets.load_dataset(__file__)
