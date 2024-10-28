@@ -1,5 +1,8 @@
+# temporary dump of conhelpers
+conhelpers.md
+
 # Ignore temp testing files
-biomeddatasets/testdata/testdata.py
+#bigbio/hub/hub_repos/test_scitail/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
