@@ -4,7 +4,7 @@ language:
 - en
 bigbio_language: 
 - English
-license: CC_BY_3p0_US
+license: cc-by-3.0
 multilinguality: monolingual
 bigbio_license_shortname: CC_BY_3p0_US
 pretty_name: CRAFT
