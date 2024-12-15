@@ -25,13 +25,16 @@ entails label and 16,925 examples with neutral label.
 
 import os
 
+import datasets
 import pandas as pd
 
-import datasets
-from bigbio.utils import schemas
-from bigbio.utils.configs import BigBioConfig
-from bigbio.utils.constants import Tasks
+from .bigbiohub import entailment_features
+from .bigbiohub import BigBioConfig
+from .bigbiohub import Tasks
 
+_LANGUAGES = ['English']
+_PUBMED = False
+_LOCAL = False
 _CITATION = """\
 @inproceedings{scitail,
     author = {Tushar Khot and Ashish Sabharwal and Peter Clark},
@@ -42,6 +45,7 @@ _CITATION = """\
 """
 
 _DATASETNAME = "scitail"
+_DISPLAYNAME = "SciTail"
 
 _DESCRIPTION = """\
 The SciTail dataset is an entailment dataset created from multiple-choice science exams and
@@ -55,7 +59,7 @@ entails label and 16,925 examples with neutral label.
 
 _HOMEPAGE = "https://allenai.org/data/scitail"
 
-_LICENSE = "Apache License 2.0"
+_LICENSE = 'Apache License 2.0'
 
 _URLS = {
     _DATASETNAME: "https://ai2-public-datasets.s3.amazonaws.com/scitail/SciTailV1.1.zip",
@@ -66,6 +70,9 @@ _SUPPORTED_TASKS = [Tasks.TEXTUAL_ENTAILMENT]
 _SOURCE_VERSION = "1.1.0"
 
 _BIGBIO_VERSION = "1.0.0"
+
+
+LABEL_MAP = {"entails": "entailment", "neutral": "neutral"}
 
 
 class SciTailDataset(datasets.GeneratorBasedBuilder):
@@ -106,13 +113,13 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
             )
 
         elif self.config.schema == "bigbio_te":
-            features = schemas.entailment_features
+            features = entailment_features
 
         return datasets.DatasetInfo(
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
-            license=_LICENSE,
+            license=str(_LICENSE),
             citation=_CITATION,
         )
 
@@ -125,19 +132,25 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_train.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_train.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_test.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_test.tsv"
+                    ),
                 },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.VALIDATION,
                 gen_kwargs={
-                    "filepath": os.path.join(data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_dev.tsv"),
+                    "filepath": os.path.join(
+                        data_dir, "SciTailV1.1", "tsv_format", "scitail_1.0_dev.tsv"
+                    ),
                 },
             ),
         ]
@@ -145,7 +158,9 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
     def _generate_examples(self, filepath):
         # since examples can contain quotes mid text set quoting to QUOTE_NONE (3) when reading tsv
         # e.g.: ... and apply specific "tools" to examples and ...
-        data = pd.read_csv(filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3)
+        data = pd.read_csv(
+            filepath, sep="\t", names=["premise", "hypothesis", "label"], quoting=3
+        )
         data["id"] = data.index
 
         if self.config.schema == "source":
@@ -153,5 +168,7 @@ class SciTailDataset(datasets.GeneratorBasedBuilder):
                 yield row["id"], row.to_dict()
 
         elif self.config.schema == "bigbio_te":
+            # normalize labels
+            data["label"] = data["label"].apply(lambda x: LABEL_MAP[x])
             for _, row in data.iterrows():
                 yield row["id"], row.to_dict()
