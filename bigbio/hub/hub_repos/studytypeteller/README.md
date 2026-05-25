@@ -1,9 +1,9 @@
 ---
 language:
-  - en [This needs to be a supported huggingface language code]
+  - en
 bigbio_language:
   - English
-license: apache-2.0 [this shoudl be a supported huggingface license]
+license: apache-2.0
 bigbio_license_shortname: APACHE_2p0
 multilinguality: monolingual
 pretty_name: StudyTypeTeller
